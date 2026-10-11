@@ -97,6 +97,12 @@ function novaPartida(modo, opcoes) {
   }
   // modo rivais: a 1ª rodada é na casa do rival
   const rival = modo === "bot" && opcoes.rival !== undefined && opcoes.rival !== null ? RIVAIS[opcoes.rival] : null;
+  // v16: na liga Bronze os mapas cruéis só aparecem como casa de rival (1ª rodada). No v15 quem chegava longe — a turma
+  // que mais joga — perdia 86% no vulcão, 83% no espaço, 75% no dojô, 50% na cidade e 44% na lua (nos outros: 8–16%).
+  if (rival && !treino && !(opcoes.liga > 0)) {
+    const crueis = ["dojo", "castelo", "cidade", "lua", "vulcao", "espaco", "oceano"];
+    ordem = ordem.filter(function(id) { return crueis.indexOf(id) < 0 || id === rival.casa; });
+  }
   if (rival && !treino) ordem = [rival.casa].concat(ordem.filter(function(id) { return id !== rival.casa; }));
   jogo = {
     modo: modo,
@@ -487,7 +493,9 @@ function fecharRodada(j) {
 // enquanto o anúncio estiver na tela.
 function proximaRodadaComIntervalo(j) {
   const novato = save.partidas <= 2;
-  if (novato || j.esperandoAnuncio) { iniciarRodada(); return; }
+  // v16: no meio da partida não pede anúncio (rodadas de ~25 s: cortar a luta no meio espanta); o pedido fica antes de
+  // cada partida (telas.js). Na sobrevivência a pausa entre ondas é a única: lá continua.
+  if (novato || j.esperandoAnuncio || j.modo !== "sobrevivencia") { iniciarRodada(); return; }
   j.esperandoAnuncio = true;
   j.fase = "intervalo";
   Poki.jogando(false);

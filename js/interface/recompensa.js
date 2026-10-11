@@ -8,6 +8,7 @@
 //    O baú abre sozinho e, contra o bot, "▶ PRÓXIMO RIVAL" conta 3 s e começa a próxima partida sozinho
 //    (no Poki v9 ~30% de quem terminava a 1ª partida não começava a 2ª). Clicar em outro botão cancela a contagem.
 //    O baú da 1ª partida da vida sempre traz um acessório, que já vem equipado.
+//    v16: no modo rivais, vitória sem nada para decidir NÃO abre esta tela (fluxo contínuo, telas.js fluxoDireto).
 //    v13: ao lado do baú, o painel de PODER (Força, Vida, Velocidade; interface/poder.js). Dá para comprar ->
 //    a contagem espera 5 s (8 s na 1ª vez) e cada compra devolve pelo menos 4 s.
 //    Modo rivais: a fileira dos 10 rivais (vencidos com ✓, o próximo em destaque), o nome do próximo e o prêmio;
@@ -43,6 +44,9 @@ function abrirRecompensa(j, titulo, sub) {
   painel.classList.toggle("escondido", !rec.poder);
   el("telaRecompensa").classList.toggle("comPoder", rec.poder);
   if (rec.poder) {
+    // v16: lembra que a pessoa já viu as melhorias e zera a conta das vitórias sem tela (telas.js fluxoDireto)
+    save.stats.viuPoder = 1;
+    save.stats.semTela = 0;
     if (!painel.firstChild) montarPainelPoder(painel, poderComprouNaRecompensa);
     painel.dataset.perdeu = rec.venceu ? "0" : "1";
     atualizarPainelPoder(painel);
@@ -161,6 +165,7 @@ function contagemRecompensa(tempo) {
 
 // comprou uma melhoria na tela de fim: a contagem para a próxima partida volta a ter pelo menos 4 s
 function poderComprouNaRecompensa() {
+  if (rec) rec.comprou = true;
   if (!rec || !rec.fimBaus) return;
   const agora = performance.now() / 1000;
   if (rec.espera - (agora - rec.fimBaus - 0.4) < 4) { rec.espera = 4; rec.fimBaus = agora - 0.4; rec.n = 4; textoRevanche(rec.cancelou ? 0 : 4); }
@@ -187,6 +192,7 @@ function outroBau() {
 // baús que ficaram sem abrir quando a pessoa sai: o prêmio vem do mesmo jeito
 function fecharRecompensa() {
   if (!rec) return;
+  if (rec.poder) { save.stats.comprouUltima = rec.comprou ? 1 : 0; salvar(); }
   while (rec.i < rec.baus.length) { Progresso.abrirBau(rec.baus[rec.i], rec.primeira && rec.i === 0); rec.i++; }
   rec = null;
 }

@@ -122,8 +122,9 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
 - Duração: luta de ~20 s por rodada bot x bot (CONFIG.multDano 0,85). Medir com a simulação ao mexer em dano.
 - Game Events de diagnóstico nas 2 primeiras partidas: round/m1-r1... (start/complete/fail) e
   player/r1-tiros-* e r1-acertos-* (o jogador atira? acerta?).
-- Anúncio comum: antes de cada partida (menos a 1ª e logo depois de um premiado) E entre as rodadas (pausa natural;
-  o Poki decide se mostra; nas 2 primeiras partidas não pede entre as rodadas — no playtest, gente saía nessa hora). Premiados (opcionais): "Partida Lendária"
+- Anúncio comum: antes de cada partida a partir da 3ª (nunca antes da 1ª e da 2ª, nem logo depois de um premiado; o Poki
+  decide se mostra). Desde a v16 NÃO pede entre as rodadas (rodadas de ~25 s: cortar a luta espanta); só na
+  sobrevivência, entre as ondas (a única pausa de lá). Premiados (opcionais): "Partida Lendária"
   (só armas raras para os dois), "Continuar" (perdeu para o bot: o bot perde o último ponto) e "Dobrar moedas" (menu).
 - Plataformas: andares a cada <= 120 px (o pulo normal alcança ~143 px). Conferir com a simulação de alcance ao mudar mapa.
 - Controles (PC): ESPAÇO pula (W também), mouse mira o tempo todo, CLIQUE ESQUERDO atira (F também); teclas trocáveis
@@ -174,6 +175,17 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
   conquista 3 – 0 não conta a partida treino (no v14 243 pessoas ganharam de graça); a diária mede quem pega
   (reward/daily interact); sem pedir anúncio antes da 2ª partida (a passagem 1ª->2ª perdia 24–35%);
   evento engaged/3m-xx e engaged/5m-xx (xx = idioma) para saber qual público joga mais.
+- v16 — FLUXO CONTÍNUO (telas.js `fluxoDireto`/`entregarSemTela`): nos testes as passagens entre partidas perdiam bem
+  mais gente que as rodadas (1ª->2ª 25–35%, depois de vencer ~20%, rodada->rodada ~13%). Venceu no modo rivais e não há
+  nada para decidir: os prêmios (moedas, baús, acessório do rival, nível) são entregues sem a tela de fim e o próximo
+  rival começa direto, com uma faixa "+N 🪙 / ✨ ... / ⭐ nível" na abertura (`faixaPremio`, desenho.js). A tela de fim
+  continua: na derrota, rival 5 e 10, campeão, na 1ª vez que as melhorias aparecem (com a grátis), sempre para quem
+  comprou melhoria na última tela (save.stats.comprouUltima) e, para quem não compra, a cada 3 vitórias (stats.semTela).
+  A 1ª partida (treino) vai sempre direto para o rival 2. Evento milestone/next-rival-direct.
+  Liga Bronze: mapas cruéis (dojô, castelo, cidade, lua, vulcão, espaço, oceano) só como casa de rival; no v15 quem
+  chegava longe perdia 86% no vulcão, 83% no espaço, 75% no dojô. "⚡ VS ⚡" na abertura só quando alguém passa de 100.
+- Poki v15 (11 out 08:24, manhã): 2m22, Engaged 22% (v14 de manhã 2m12/20%). Escada: chegam ao rival 4 8,1% e ao 5
+  4,8% (v13 à noite 5,6% e 2,3%).
 - HORÁRIO DO TESTE pesa ~20 s: a mesma v10 fez 2m47 às 20:46 e 2m25 às 16:56. Noite (20–22h de Brasília) = Américas
   depois da escola (muito espanhol); manhã/tarde = Europa e horário de aula nos EUA (sessões curtas). Comparar versões
   só no mesmo horário; para passar, começar o teste à noite.

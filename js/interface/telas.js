@@ -213,7 +213,49 @@ function finalizarPartida(j) {
     texto = t("jogador_venceu", j.vencedorPartida) + "  " + j.pontos[0] + " – " + j.pontos[1];
   }
   el("menuResultado").textContent = texto;
+  if (fluxoDireto(j)) { entregarSemTela(j, ganho); return; }
   abrirRecompensa(j, texto, "+" + ganho + " 🪙" + (extra ? "   ·   " + extra : ""));
+}
+
+// ---------- v16: FLUXO CONTÍNUO entre partidas do modo rivais ----------
+// Nos testes, as passagens entre partidas perdiam bem mais gente que as rodadas (1ª->2ª: 25–35%; depois de cada
+// vitória ~20%; rodada->rodada ~13%): a tela de fim é uma "parada" onde a pessoa decide sair. Então, quando venceu e
+// não há nada para decidir, os prêmios são entregues sem a tela e o próximo rival começa direto; eles aparecem numa
+// faixa na abertura (faixaPremio, desenho.js). A tela continua em: derrota (revanche), rival 5 e 10 (baú especial),
+// campeão, a 1ª vez que as melhorias aparecem (com a grátis), sempre para quem comprou melhoria na última tela e,
+// para quem não compra, a cada 3 vitórias.
+let faixaPremio = null;   // { linhas: [...], t0 } mostrada no começo da próxima partida
+
+function fluxoDireto(j) {
+  const rr = j.resultadoRival;
+  if (!rr || !rr.venceu || rr.campeao || rr.i === 4) return false;
+  if (j.treino) return true;                         // 1ª partida da vida: direto para o rival 2
+  if (!save.stats.viuPoder) return false;            // a 1ª tela com as melhorias (e a grátis) sempre aparece
+  if (save.stats.comprouUltima) return false;        // quem compra melhoria sempre vê a tela
+  return (save.stats.semTela || 0) < 2;              // quem não compra: tela a cada 3 vitórias
+}
+
+function entregarSemTela(j, ganho) {
+  const rr = j.resultadoRival;
+  const xp = Progresso.ganharXP(Progresso.xpDaPartida(j));
+  let moedas = ganho + (rr.moedas || 0);
+  const linhas = [];
+  const baus = ["normal"];
+  for (let i = 0; i < xp.subiu; i++) baus.push("nivel");
+  baus.forEach(function(tipo) {
+    const p = Progresso.abrirBau(tipo, false);
+    moedas += p.moedas;
+    if (p.skin) linhas.push("✨ " + t("premio_skin", t("sk_" + p.skin)));
+  });
+  linhas.unshift("+" + moedas + " 🪙");
+  if (rr.acessorio) linhas.push("✨ " + t("premio_equipado", t("sk_" + rr.acessorio)));
+  if (xp.subiu) { linhas.push("⭐ " + t("subiu_nivel", xp.nivel)); Eventos.marco("player-level-" + xp.nivel); }
+  save.stats.semTela = (save.stats.semTela || 0) + 1;
+  salvar();
+  faixaPremio = { linhas: linhas, t0: 0, velho: j };   // o relógio da faixa começa quando a próxima partida aparece
+  Eventos.marco("next-rival-direct");
+  atualizarMenuProgresso();
+  comecarPartida("rivais");
 }
 
 function continuarPartida() {

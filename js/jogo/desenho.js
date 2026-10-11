@@ -618,7 +618,8 @@ function desenharHud(ctx, j, M, L) {
       textoContorno(ctx, t("r_" + M.cen.id), cx, meio + 76, 26, "#fff");
       textoContorno(ctx, textoPremioRival(j.rival.i, j.rival.liga), cx, meio + 112, 26, "#ffd43b");
       // poder dos dois (v13): o número que as melhorias fazem subir (na partida treino os dois são iguais: não mostra)
-      if (!j.treino && typeof Poder !== "undefined") {
+      const pJ = typeof Poder !== "undefined" ? Poder.valor(Poder.doJogador()) : 100, pR = typeof Poder !== "undefined" ? Poder.valor(Poder.doRival(j.rival.i, j.rival.liga)) : 100;
+      if (!j.treino && typeof Poder !== "undefined" && (pJ > 100 || pR > 100)) {   // v16: 100 x 100 não diz nada
         textoContorno(ctx, "⚡" + Poder.valor(Poder.doJogador()), cx - 120, meio - 132, 34, j.cores[0]);
         textoContorno(ctx, "VS", cx, meio - 132, 26, "#fff");
         textoContorno(ctx, "⚡" + Poder.valor(Poder.doRival(j.rival.i, j.rival.liga)), cx + 120, meio - 132, 34, j.cores[1]);
@@ -680,6 +681,33 @@ function desenharHud(ctx, j, M, L) {
     ctx.globalAlpha = j.fase === "luta" ? Math.min(1, (7 - j.tempoFase) / 1.5) : 1;
     linhas.forEach(function(l, i) { textoContorno(ctx, l, cx, base + i * tam * 1.25, tam, "#fff"); });
     ctx.globalAlpha = 1;
+  }
+  // v16: prêmios da partida anterior (fluxo contínuo, sem a tela de fim): faixa que pula e some em ~4 s
+  if (typeof faixaPremio !== "undefined" && faixaPremio && j !== faixaPremio.velho && estado === "jogo") {
+    if (!faixaPremio.t0) faixaPremio.t0 = performance.now() / 1000;
+    const tf = performance.now() / 1000 - faixaPremio.t0;
+    if (tf > 4.2) faixaPremio = null;
+    else {
+      // 1ª linha: as moedas, grande; 2ª: o resto (skin, acessório, nível), diminuindo a letra se não couber
+      const l1 = faixaPremio.linhas[0], l2 = faixaPremio.linhas.slice(1).join("   ");
+      const pop = tf < 0.15 ? 0.5 + tf / 0.15 * 0.65 : tf < 0.3 ? 1.15 - (tf - 0.15) / 0.15 * 0.15 : 1;
+      const yf = mundoParaTela(0, FIS.altura).y - (em ? 205 : 215);
+      ctx.save();
+      ctx.font = "900 26px Nunito, system-ui, sans-serif";
+      const t2 = l2 ? Math.min(26, 26 * (em ? 820 : 1080) / Math.max(1, ctx.measureText(l2).width)) : 0;
+      if (l2) ctx.font = "900 " + t2 + "px Nunito, system-ui, sans-serif";
+      const w = Math.max(260, (l2 ? ctx.measureText(l2).width : 0) + 60), h = l2 ? 92 : 56;
+      ctx.globalAlpha = tf > 3.6 ? Math.max(0, (4.2 - tf) / 0.6) : 1;
+      escalaEm(ctx, cx, yf + h / 2, pop * (em ? 1.35 : 1), function() {
+        ctx.fillStyle = "rgba(20,14,50,0.86)";
+        retRedondo(ctx, cx - w / 2, yf, w, h, 24); ctx.fill();
+        ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,212,59,0.85)";
+        retRedondo(ctx, cx - w / 2, yf, w, h, 24); ctx.stroke();
+        textoContorno(ctx, l1, cx, yf + 42, 38, "#ffe066");
+        if (l2) textoContorno(ctx, l2, cx, yf + 78, Math.round(t2), "#ffffff");
+      });
+      ctx.restore();
+    }
   }
   // missão / desafio / conquista completada durante a partida
   const yAvisos = mundoParaTela(0, FIS.altura).y - 70;
