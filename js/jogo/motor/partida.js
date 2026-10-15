@@ -101,6 +101,9 @@ function novaPartida(modo, opcoes) {
   // que mais joga — perdia 86% no vulcão, 83% no espaço, 75% no dojô, 50% na cidade e 44% na lua (nos outros: 8–16%).
   if (rival && !treino && !(opcoes.liga > 0)) {
     const crueis = ["dojo", "castelo", "cidade", "lua", "vulcao", "espaco", "oceano"];
+    // v17: até o rival 3 também sem deserto (vento), gelo (escorrega) e laboratório (gravidade vira) — no v16 o jogador
+    // perdia 41%, 42% e 35% das rodadas neles, contra 16–27% nos outros. Sobram campo, fábrica, floresta, fliperama, templo.
+    if (opcoes.rival <= 2) crueis.push("deserto", "gelo", "laboratorio");
     ordem = ordem.filter(function(id) { return crueis.indexOf(id) < 0 || id === rival.casa; });
   }
   if (rival && !treino) ordem = [rival.casa].concat(ordem.filter(function(id) { return id !== rival.casa; }));
@@ -194,7 +197,8 @@ function iniciarRodada() {
     if (j.rodada === 1) { b1.municao = Infinity; M.proxCaixa = Infinity; M.proxCarta = Infinity; }
     else if (j.rodada === 2) { M.proxCarta = Infinity; M.novoCaixa = true; }
     else if (j.rodada === 3) { M.novoCarta = true; M.proxCarta = 2.5; }
-  } else if (j.modo === "bot" && (save.partidas === 2 || j.rival && j.rival.liga === 0 && j.rival.i <= 2)) M.multJogador = CONFIG.multSegunda;
+  } else if (j.modo === "bot" && j.rival && j.rival.liga === 0 && j.rival.i < CONFIG.multRivais.length) M.multJogador = CONFIG.multRivais[j.rival.i];
+  else if (j.modo === "bot" && save.partidas === 2) M.multJogador = CONFIG.multSegunda;
   if (j.tuto && j.rodada > 3) j.tuto = null;
   // perdeu a rodada sem acertar nada: a dica desenhada de mirar e atirar volta nesta rodada
   if (j.modo === "bot" && j.dicaRodada === j.rodada && !j.tuto) j.tuto = { passo: null, tempo: 0, andou: 1, pulou: true, so: true };
@@ -581,5 +585,10 @@ function nivelBotTexto(nivel) { return Math.round(nivel * 9) + 1; }   // 1 a 10,
 function terminarPartida() {
   const j = jogo;
   if (j.demo) { novaPartida("demo"); return; }
+  // uma vez só por fim de partida. Enquanto a próxima não começa (o pedido de anúncio, ou mais passos no mesmo
+  // quadro — o loop faz até 5), o passo continua chamando aqui: no fluxo direto da v16 os prêmios e os eventos
+  // rival/... complete vinham 2–3 vezes e a tela de fim chegava a abrir por baixo (v17)
+  if (j.terminou) return;
+  j.terminou = true;
   aoTerminarPartida(j);   // telas.js
 }

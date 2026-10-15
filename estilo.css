@@ -529,6 +529,6 @@ button.poderCarta.gratis .pcPreco { background: linear-gradient(180deg, #8ce99a,
   display: none; position: absolute; left: 50%; top: 88%; z-index: 4; font-size: 46px; line-height: 1; pointer-events: none;
   filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.45)); animation: maoToca 1s ease-in-out infinite;
 }
-.poderPainel.comGratis .maoPoder { display: block; }
+.poderPainel.comGratis .maoPoder, .poderPainel.comMao .maoPoder { display: block; }
 @keyframes maoToca { 0%, 100% { transform: translate(-50%, 10px); } 45% { transform: translate(-50%, -14px) scale(0.92); } }
 body.retrato .maoPoder { font-size: 70px; }

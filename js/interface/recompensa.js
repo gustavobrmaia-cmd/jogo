@@ -9,6 +9,7 @@
 //    (no Poki v9 ~30% de quem terminava a 1ª partida não começava a 2ª). Clicar em outro botão cancela a contagem.
 //    O baú da 1ª partida da vida sempre traz um acessório, que já vem equipado.
 //    v16: no modo rivais, vitória sem nada para decidir NÃO abre esta tela (fluxo contínuo, telas.js fluxoDireto).
+//    v17: a melhoria grátis vem sozinha depois do rival 2; a 1ª vez que esta tela aparece vencendo é depois do rival 3.
 //    v13: ao lado do baú, o painel de PODER (Força, Vida, Velocidade; interface/poder.js). Dá para comprar ->
 //    a contagem espera 5 s (8 s na 1ª vez) e cada compra devolve pelo menos 4 s.
 //    Modo rivais: a fileira dos 10 rivais (vencidos com ✓, o próximo em destaque), o nome do próximo e o prêmio;
@@ -154,8 +155,9 @@ function contagemRecompensa(tempo) {
   if ((rec.modo !== "bot" && rec.modo !== "rivais") || rec.cancelou || rec.i < rec.baus.length || rec.fase !== "aberto") return;
   if (!rec.fimBaus) {
     rec.fimBaus = tempo;
-    // dá para melhorar: mais tempo (bem mais na 1ª vez, quando a pessoa ainda não sabe o que é)
-    if (rec.poder && Poder.algumaPossivel()) rec.espera = (save.stats.melhorias || 0) ? 5 : 8;
+    // dá para melhorar: mais tempo (bem mais na 1ª vez, quando a pessoa ainda não sabe o que é;
+    // v17: a grátis automática não conta, então a 1ª compra com moedas também tem 8 s)
+    if (rec.poder && Poder.algumaPossivel()) rec.espera = (save.stats.melhorias || 0) >= 2 ? 5 : 8;
   }
   const falta = rec.espera - (tempo - rec.fimBaus - 0.4);
   if (falta <= 0) { Eventos.marco("next-rival-auto"); revanche(); return; }

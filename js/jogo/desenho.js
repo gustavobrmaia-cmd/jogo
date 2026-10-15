@@ -683,34 +683,50 @@ function desenharHud(ctx, j, M, L) {
     ctx.globalAlpha = 1;
   }
   // v16: prêmios da partida anterior (fluxo contínuo, sem a tela de fim): faixa que pula e some em ~4 s
+  let topoFaixa = null;   // v17: os avisos de conquista sobem para cima da faixa (antes ficavam por cima dela)
   if (typeof faixaPremio !== "undefined" && faixaPremio && j !== faixaPremio.velho && estado === "jogo") {
     if (!faixaPremio.t0) faixaPremio.t0 = performance.now() / 1000;
     const tf = performance.now() / 1000 - faixaPremio.t0;
-    if (tf > 4.2) faixaPremio = null;
+    // v17: com a melhoria grátis (destaque) a faixa fica mais tempo
+    const ld = faixaPremio.destaque, dur = ld ? 5.5 : 4.2;
+    if (tf > dur) faixaPremio = null;
     else {
-      // 1ª linha: as moedas, grande; 2ª: o resto (skin, acessório, nível), diminuindo a letra se não couber
+      // 1ª linha: as moedas, grande; depois a melhoria grátis (v17) e o resto (skin, acessório, nível),
+      // diminuindo a letra se não couber
       const l1 = faixaPremio.linhas[0], l2 = faixaPremio.linhas.slice(1).join("   ");
       const pop = tf < 0.15 ? 0.5 + tf / 0.15 * 0.65 : tf < 0.3 ? 1.15 - (tf - 0.15) / 0.15 * 0.15 : 1;
-      const yf = mundoParaTela(0, FIS.altura).y - (em ? 205 : 215);
       ctx.save();
-      ctx.font = "900 26px Nunito, system-ui, sans-serif";
-      const t2 = l2 ? Math.min(26, 26 * (em ? 820 : 1080) / Math.max(1, ctx.measureText(l2).width)) : 0;
-      if (l2) ctx.font = "900 " + t2 + "px Nunito, system-ui, sans-serif";
-      const w = Math.max(260, (l2 ? ctx.measureText(l2).width : 0) + 60), h = l2 ? 92 : 56;
-      ctx.globalAlpha = tf > 3.6 ? Math.max(0, (4.2 - tf) / 0.6) : 1;
-      escalaEm(ctx, cx, yf + h / 2, pop * (em ? 1.35 : 1), function() {
+      const caber = function(txt, max) {
+        ctx.font = "900 " + max + "px Nunito, system-ui, sans-serif";
+        return Math.min(max, max * (em ? 820 : 1080) / Math.max(1, ctx.measureText(txt).width));
+      };
+      const largura = function(txt, tam) { ctx.font = "900 " + tam + "px Nunito, system-ui, sans-serif"; return ctx.measureText(txt).width; };
+      const t2 = l2 ? caber(l2, 26) : 0, td = ld ? caber(ld, 32) : 0;
+      const w = Math.max(260, (l2 ? largura(l2, t2) : 0) + 60, (ld ? largura(ld, td) : 0) + 60);
+      // a parte de baixo fica acima das bolinhas, que começam no chão (v17: a faixa mais alta cobria as duas);
+      // em pé a câmera aproxima e as bolinhas ficam maiores: mais folga
+      const h = 56 + (ld ? 42 : 0) + (l2 ? 36 : 0), esc = em ? 1.35 : 1;
+      const yf = mundoParaTela(0, FIS.altura).y - (em ? 185 : 110) - h * (esc + 1) / 2;
+      const yd = yf + 84, y2 = yf + (ld ? 120 : 78);
+      ctx.globalAlpha = tf > dur - 0.6 ? Math.max(0, (dur - tf) / 0.6) : 1;
+      topoFaixa = yf + h / 2 - h / 2 * esc;
+      escalaEm(ctx, cx, yf + h / 2, pop * esc, function() {
         ctx.fillStyle = "rgba(20,14,50,0.86)";
         retRedondo(ctx, cx - w / 2, yf, w, h, 24); ctx.fill();
         ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,212,59,0.85)";
         retRedondo(ctx, cx - w / 2, yf, w, h, 24); ctx.stroke();
         textoContorno(ctx, l1, cx, yf + 42, 38, "#ffe066");
-        if (l2) textoContorno(ctx, l2, cx, yf + 78, Math.round(t2), "#ffffff");
+        // a melhoria grátis pulsa (entra um pouco depois das moedas)
+        if (ld) escalaEm(ctx, cx, yd - td * 0.35, tf < 0.45 ? Math.max(0.01, (tf - 0.15) / 0.3) * 1.2 : 1 + 0.06 * Math.sin(tf * 9), function() {
+          textoContorno(ctx, ld, cx, yd, Math.round(td), "#ff8787");
+        });
+        if (l2) textoContorno(ctx, l2, cx, y2, Math.round(t2), "#ffffff");
       });
       ctx.restore();
     }
   }
   // missão / desafio / conquista completada durante a partida
-  const yAvisos = mundoParaTela(0, FIS.altura).y - 70;
+  const yAvisos = topoFaixa !== null ? topoFaixa - 14 : mundoParaTela(0, FIS.altura).y - 70;
   if (typeof Progresso !== "undefined") Progresso.avisos.forEach(function(a, i) {
     const k = Math.min(1, a.t * 5) * Math.min(1, (3 - a.t) * 3);
     ctx.globalAlpha = Math.max(0, k);

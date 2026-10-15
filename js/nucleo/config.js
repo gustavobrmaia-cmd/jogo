@@ -16,6 +16,9 @@ const CONFIG = {
   multDano: 0.85,           // multiplicador geral de dano (rodada de ~20 s bot x bot; bot consertado na v7)
   pontosPrimeira: 3,        // a 1ª partida da vida é mais curta (até 3): a pessoa chega rápido ao fim e à recompensa
   multTreino: 1.8,          // 1ª partida da vida: o tiro do jogador tira mais vida (rodada de ~15 s em vez de ~30 s)
-  multSegunda: 1.25,        // 2ª partida e rivais 2 e 3 da liga Bronze: um pouco mais (rodada curta enquanto a pessoa aprende)
+  multSegunda: 1.25,        // 2ª partida no "Contra o bot": um pouco mais (rodada curta enquanto a pessoa aprende)
+  // tiro do jogador nos rivais 1–4 da liga Bronze (v17: no v16 o jogador perdia 31–32% das rodadas no rival 2 e só 41%
+  // o venciam — era ali que a turma de 1m30–3m saía; o 4 fica no meio para a subida não virar um muro)
+  multRivais: [1.25, 1.5, 1.5, 1.25],
   leve: false               // modo leve (celular/computador fraco): menos partículas e fundo dos menus a 30 qps
 };

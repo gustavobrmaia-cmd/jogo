@@ -41,7 +41,8 @@ function montarPainelPoder(alvo, aoComprar) {
     });
     cartas.appendChild(b);
   });
-  // v15: mão apontando para o 1º cartão enquanto a 1ª melhoria é grátis (igual à mão do tutorial da luta)
+  // v15: mão apontando para o 1º cartão enquanto a 1ª melhoria é grátis (igual à mão do tutorial da luta);
+  // v17: também na 1ª compra com moedas (classe comMao)
   const mao = document.createElement("span");
   mao.className = "maoPoder"; mao.textContent = "👆";
   cartas.firstChild.appendChild(mao);
@@ -61,6 +62,8 @@ function atualizarPainelPoder(alvo) {
   if (!alvo || !alvo.firstChild) return;
   const pode = Poder.algumaPossivel();
   alvo.classList.toggle("comGratis", Poder.gratis());
+  // v17: a grátis vem sozinha depois do rival 2; a mão continua apontando até a pessoa comprar a 1ª com moedas
+  alvo.classList.toggle("comMao", !Poder.gratis() && (save.stats.melhorias || 0) < 2 && Poder.podeComprar("forca"));
   alvo.querySelector(".poderValor").textContent = t("poder_n", Poder.valor(Poder.doJogador()));
   alvo.querySelector(".poderMoedas").textContent = "🪙 " + save.moedas;
   // dica curta: depois de perder ("melhore e volte mais forte") ou para quem ainda não comprou quase nada

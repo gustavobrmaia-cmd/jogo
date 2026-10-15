@@ -222,17 +222,18 @@ function finalizarPartida(j) {
 // vitória ~20%; rodada->rodada ~13%): a tela de fim é uma "parada" onde a pessoa decide sair. Então, quando venceu e
 // não há nada para decidir, os prêmios são entregues sem a tela e o próximo rival começa direto; eles aparecem numa
 // faixa na abertura (faixaPremio, desenho.js). A tela continua em: derrota (revanche), rival 5 e 10 (baú especial),
-// campeão, a 1ª vez que as melhorias aparecem (com a grátis), sempre para quem comprou melhoria na última tela e,
-// para quem não compra, a cada 3 vitórias.
-let faixaPremio = null;   // { linhas: [...], t0 } mostrada no começo da próxima partida
+// campeão, sempre para quem comprou melhoria na última tela e, para quem não compra, a cada 3 vitórias.
+// v17: a 1ª tela das melhorias (depois do rival 2) perdia 32% de quem vencia (nas outras passagens seguiam 86–96%).
+// Agora a melhoria grátis (Força +1) vem sozinha na faixa e a 1ª tela fica para depois do rival 3, com moedas para
+// gastar antes do rival 4 (o 1º mais duro da escada).
+let faixaPremio = null;   // { linhas: [...], destaque, t0 } mostrada no começo da próxima partida
 
 function fluxoDireto(j) {
   const rr = j.resultadoRival;
   if (!rr || !rr.venceu || rr.campeao || rr.i === 4) return false;
   if (j.treino) return true;                         // 1ª partida da vida: direto para o rival 2
-  if (!save.stats.viuPoder) return false;            // a 1ª tela com as melhorias (e a grátis) sempre aparece
   if (save.stats.comprouUltima) return false;        // quem compra melhoria sempre vê a tela
-  return (save.stats.semTela || 0) < 2;              // quem não compra: tela a cada 3 vitórias
+  return (save.stats.semTela || 0) < 2;              // quem não compra: tela a cada 3 vitórias (1ª: depois do rival 3)
 }
 
 function entregarSemTela(j, ganho) {
@@ -250,9 +251,12 @@ function entregarSemTela(j, ganho) {
   linhas.unshift("+" + moedas + " 🪙");
   if (rr.acessorio) linhas.push("✨ " + t("premio_equipado", t("sk_" + rr.acessorio)));
   if (xp.subiu) { linhas.push("⭐ " + t("subiu_nivel", xp.nivel)); Eventos.marco("player-level-" + xp.nivel); }
+  // v17: a melhoria grátis vem sozinha (Força: a rodada fica mais curta e a abertura mostra "⚡110 VS ⚡100")
+  let destaque = null;
+  if (!j.treino && Poder.gratis() && Poder.comprar("forca", true)) destaque = "💥 " + t("mel_forca") + " +1   " + t("gratis");
   save.stats.semTela = (save.stats.semTela || 0) + 1;
   salvar();
-  faixaPremio = { linhas: linhas, t0: 0, velho: j };   // o relógio da faixa começa quando a próxima partida aparece
+  faixaPremio = { linhas: linhas, destaque: destaque, t0: 0, velho: j };   // o relógio da faixa começa quando a próxima partida aparece
   Eventos.marco("next-rival-direct");
   atualizarMenuProgresso();
   comecarPartida("rivais");
@@ -269,6 +273,7 @@ function continuarPartida() {
     // o bot perde o último ponto e a partida continua (na sobrevivência: volta na mesma onda com vida cheia)
     pendente = null;
     j.continuou = true;
+    j.terminou = false;   // a partida volta: o próximo fim conta de novo (partida.js terminarPartida)
     if (j.modo === "sobrevivencia") j.vidaJogador = 100;
     else j.pontos[1] = j.alvo - 1;
     j.vencedorPartida = 0;

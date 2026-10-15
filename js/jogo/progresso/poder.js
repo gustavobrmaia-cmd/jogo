@@ -25,13 +25,15 @@ const Poder = (function() {
   function noMax(id) { return nivel(id) >= info(id).max; }
 
   // 40, 50, 65, 85, 105, 135, 175, 225, 290, 370... (a 1ª partida já paga umas 4 ou 5)
-  // v15: a 1ª melhoria da vida é GRÁTIS (com a mão apontando): no v14 só 28% de quem podia comprar comprava
+  // v15: a 1ª melhoria da vida é GRÁTIS (com a mão apontando): no v14 só 28% de quem podia comprar comprava.
+  // v17: se a pessoa vence o rival 2 sem ter usado, ela vem sozinha (Força +1, telas.js entregarSemTela)
   function gratis() { return !(save.stats && save.stats.melhorias); }
   function custo(id) { return gratis() ? 0 : Math.round(40 * Math.pow(1.28, nivel(id)) / 5) * 5; }
   function podeComprar(id) { return !noMax(id) && save.moedas >= custo(id); }
   function algumaPossivel() { return MELHORIAS.some(function(m) { return podeComprar(m.id); }); }
 
-  function comprar(id) {
+  // auto (v17): a grátis entregue sozinha depois do rival 2 (evento upgrade/auto-free-forca, "reached")
+  function comprar(id, auto) {
     if (!podeComprar(id)) return false;
     save.moedas -= custo(id);
     if (!save.poder) save.poder = { forca: 0, vida: 0, veloc: 0 };
@@ -40,7 +42,7 @@ const Poder = (function() {
     save.stats.melhorias = (save.stats.melhorias || 0) + 1;
     salvar();
     const tot = total(doJogador());
-    Poki.medir("upgrade", eraGratis ? "free-" + id : id, "interact");
+    Poki.medir("upgrade", (auto ? "auto-" : "") + (eraGratis ? "free-" : "") + id, auto ? "reached" : "interact");
     if (tot <= 30) Poki.medir("power", "level-" + tot, "reached");
     return true;
   }

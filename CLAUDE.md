@@ -150,7 +150,7 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
   contagem. Eventos: rival/r1..r10 (ligas seguintes: rival/l2-r1...) start/complete/fail; match/rivals; champion-N.
 - v12: vencer um rival dá o ACESSÓRIO dele (se ainda não tiver; já vem equipado) além das moedas; a abertura da
   partida e o menu mostram "Vença e ganhe: 🎁 X + moedas". Sem rival "cauteloso" na escada (rodada arrastava).
-  Rivais 2 e 3 da liga Bronze com tiro x`multSegunda`. Baú abre em 0,5 s e PRÓXIMO RIVAL conta 3 s.
+  Rivais 2 e 3 da liga Bronze com tiro x`multSegunda` (v17: x1,5 em `multRivais`). Baú abre em 0,5 s e PRÓXIMO RIVAL conta 3 s.
   Contra bot (`M.contraBot`): a 1ª queda da rodada não mata (volta ao ponto de partida com -25, "SALVO!"), a pessoa
   leva 40% do empurrão extra do mapa e os meteoros do castelo miram o bot 70% das vezes (e avisam a pessoa com 1,8 s).
   Simulação (bot 0,3): dojô 8% -> 27% de vitória do jogador, castelo 23% -> 30%, campo ~45%.
@@ -184,6 +184,29 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
   A 1ª partida (treino) vai sempre direto para o rival 2. Evento milestone/next-rival-direct.
   Liga Bronze: mapas cruéis (dojô, castelo, cidade, lua, vulcão, espaço, oceano) só como casa de rival; no v15 quem
   chegava longe perdia 86% no vulcão, 83% no espaço, 75% no dojô. "⚡ VS ⚡" na abertura só quando alguém passa de 100.
+- Poki v16 (4 testes): 11 out 10:18 2m29/23%, 13 out 11:14 2m30 (manhã); 12 out 18:51 2m40, 13 out 19:59 2m39/26% (noite).
+  Repetiu igual no mesmo horário (ruído menor que se achava). À noite passa no Engaged, falta ~20 s na média.
+  O vazamento ficou no rival 2: rodadas 2 e 3 da 2ª partida com 31–32% de derrota (1ª partida 7–8%), só 41% venciam
+  o rival 2 e, dos que venciam, só 66% começavam o rival 3 (a 1ª tela das melhorias; depois dos rivais 3 e 4 seguiam
+  86% e 96%). Mapas comuns duros: deserto 41%, gelo 42%, laboratório 35% de derrota (outros 16–27%).
+- v17 (dados v16):
+  - Rivais 2 e 3 da Bronze mais fracos: nível 0,04 e 0,08 (eram 0,08 e 0,15) e tiro do jogador x1,5
+    (`CONFIG.multRivais` [1,25; 1,5; 1,5; 1,25] para os rivais 1–4; o 4 ganhou x1,25 para a subida não virar muro).
+    multSegunda (1,25) ficou só para a 2ª partida do "Contra o bot".
+  - Até o rival 3 sem deserto, gelo e laboratório (sobram campo, fábrica, floresta, fliperama, templo).
+    Simulação do novato (scratchpad/sim/rival2.js, que reproduziu o v16: r1 13%, r2 37%, r3 29% x real 13/32/31):
+    rival 2 de 25% para 13% das rodadas perdidas (partida 106 s -> 82 s), rival 3 de 23% para 10% (80 s -> 62 s),
+    rival 4 de 49% para 35%.
+  - Melhoria grátis AUTOMÁTICA: venceu o rival 2 sem ter usado a grátis -> Força +1 sozinha, mostrada na faixa
+    ("💥 Força +1  GRÁTIS!", faixa fica 5,5 s) e o rival 3 começa direto. A 1ª tela de fim vencendo passa a ser depois do
+    rival 3 (regra das 3 vitórias), antes do rival 4, com moedas para gastar: mão 👆 no cartão de Força até a 1ª compra
+    com moedas (classe comMao) e contagem de 8 s. Evento upgrade/auto-free-forca (reached).
+  - BUG (vinha da v16): no fluxo direto o fim da partida rodava 2–3 vezes (o loop faz até 5 passos por quadro e,
+    esperando o anúncio, a partida velha seguia em "fimPartida"): prêmios em dobro, eventos rival/... complete
+    contados 2–3 vezes (os números de vitória por rival da v16 podem estar inflados) e às vezes a tela de fim abria
+    por baixo. Agora `j.terminou` (partida.js terminarPartida) deixa uma vez só; o "Continuar" zera.
+  - Faixa de prêmios: a parte de baixo fica acima das bolinhas (110 px deitado, 185 em pé) e os avisos de
+    conquista sobem para cima dela (antes ficavam por cima da faixa).
 - Poki v15 (11 out 08:24, manhã): 2m22, Engaged 22% (v14 de manhã 2m12/20%). Escada: chegam ao rival 4 8,1% e ao 5
   4,8% (v13 à noite 5,6% e 2,3%).
 - HORÁRIO DO TESTE pesa ~20 s: a mesma v10 fez 2m47 às 20:46 e 2m25 às 16:56. Noite (20–22h de Brasília) = Américas

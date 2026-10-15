@@ -27,9 +27,12 @@ const RIVAIS = [
 ];
 
 // força do bot: sobe devagar ao longo da escada (rival 1 = nível mais baixo, rival 10 ≈ 0,6) e 0,12 por liga;
-// cada derrota contra o mesmo rival tira até 0,3 (save.rivalAjuste)
+// cada derrota contra o mesmo rival tira até 0,3 (save.rivalAjuste).
+// v17: na Bronze os rivais 2 e 3 ficam em 0,04 e 0,08 (eram 0,08 e 0,15). Na simulação do novato, junto com o tiro
+// x1,5 (CONFIG.multRivais) e sem os mapas difíceis: rival 2 de 25% para 12% das rodadas perdidas, rival 3 de 23% para 9%.
 function nivelRival(i, liga, ajuste) {
-  return limitar(0.02 + 0.58 * i / (RIVAIS.length - 1) + 0.12 * (liga || 0) + (ajuste || 0), 0.02, 1);
+  const base = !liga && i >= 1 && i <= 2 ? [0.04, 0.08][i - 1] : 0.02 + 0.58 * i / (RIVAIS.length - 1);
+  return limitar(base + 0.12 * (liga || 0) + (ajuste || 0), 0.02, 1);
 }
 
 // moedas por vencer o rival i (o 5º e o 10º também dão baú)
