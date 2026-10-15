@@ -12,7 +12,7 @@
 // Modos: "bot" (jogador 1 contra o bot), "2p" (dois no mesmo aparelho), "demo" (bot contra bot no fundo do menu)
 // =========================
 
-const RODADA = { intro: 1.3, introPrimeira: 1.7, luta: 45, fim: 2.1, quedaIntro: 1.1, quedaMax: 6, quedaFim: 1.6, fimPartida: 2.6, danoDobro: 10 };
+const RODADA = { intro: 1.0, introPrimeira: 1.7, luta: 45, fim: 2.1, quedaIntro: 1.1, quedaMax: 6, quedaFim: 1.6, fimPartida: 2.6, danoDobro: 10 };
 
 let jogo = null;   // a partida atual (de verdade ou a de demonstração)
 
@@ -84,7 +84,8 @@ function novaPartida(modo, opcoes) {
   // ficam por último — no Poki v8 o jogador perdia 58-65% das rodadas neles
   // (e, no v9, espaço/oceano/vulcão também espantavam: sem gravidade, água e lava confundem quem está começando).
   // v11: nas 6 primeiras partidas (no v10 o jogador perdia 67–85% no dojô, cidade, lua e castelo)
-  if (modo === "bot" && save.partidas <= 6) {
+  // v18: no "Contra o bot" e na sobrevivência os cruéis ficam sempre por último (no v17.5: oceano 80% de derrota, dojô 63%)
+  if (modo === "bot" || modo === "sobrevivencia") {
     const dificeis = ["dojo", "castelo", "cidade", "lua"], medios = ["espaco", "oceano", "vulcao"];
     ordem = ordem.filter(function(id) { return dificeis.indexOf(id) < 0 && medios.indexOf(id) < 0; })
       .concat(embaralhar(medios), embaralhar(dificeis.slice()));

@@ -38,7 +38,7 @@ function layoutTela(j) {
     const base = H - 760, topo = 150;
     const zMax = Math.min(1.8, (base - topo - 250) / FIS.altura);
     if (zMax >= 1.1) {
-      L.cam = true; L.base = base; L.zMax = zMax; L.zMin = Math.min(1.15, zMax);
+      L.cam = true; L.base = base; L.zMax = zMax; L.zMin = Math.min(1.3, zMax);   // v18: era 1,15 (bolinhas com 16–25 px no celular)
       L.hudTopo = topo;
       L.yPulo = H - 640;
       L.limitePulo = (H - 470) / H;

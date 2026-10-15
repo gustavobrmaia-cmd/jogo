@@ -438,7 +438,7 @@ function causarDano(M, b, dano, atacante, nx, ny, empurra, fx, fy) {
   if (!b.viva || dano <= 0 && !empurra) return;
   if (atacante && atacante !== b && atacante.efeitos.furia > 0) dano *= 2;
   if (atacante && atacante !== b && M.multDano) dano *= M.multDano;
-  if (atacante && atacante.lado === 2 && M.multBot) dano *= M.multBot;
+  if (atacante && atacante.lado === 2 && M.multBot) dano *= M.multBot * tensao(M, b);
   if (atacante && atacante !== b && atacante.lado === 1 && M.multJogador) dano *= M.multJogador;
   // poder (melhorias compradas; rivais também têm): força de quem bate e vida de quem apanha
   if (atacante && atacante !== b && atacante.forca) dano *= atacante.forca;
@@ -724,7 +724,8 @@ function pegarCarta(M, b, id) {
 // ---------- caixas de arma e cartas no mapa ----------
 function sortearArma(M, inicio) {
   // pesos por raridade; a "Partida Lendária" só tem raras e lendárias
-  const pesos = M.lendaria ? [0, 0, 60, 40] : inicio ? [0, 85, 15, 0] : [0, 66, 29, 5];
+  // v18: nas 3 primeiras partidas a arma da rodada é mais "maluca" (raras e lendárias)
+  const pesos = M.lendaria ? [0, 0, 60, 40] : inicio ? (save.partidas <= 3 ? [0, 55, 35, 10] : [0, 85, 15, 0]) : [0, 66, 29, 5];
   const lista = ARMAS.filter(function(a) {
     if (!pesos[a.raridade]) return false;
     if (inicio && (a.tipo === "mina" || a.tipo === "ceu")) return false;
@@ -735,6 +736,29 @@ function sortearArma(M, inicio) {
   let r = Math.random() * soma;
   for (let i = 0; i < lista.length; i++) { r -= pesos[lista[i].raridade]; if (r <= 0) return lista[i].id; }
   return lista[0].id;
+}
+
+// v18: final apertado sem mudar muito quem vence (contra a máquina, fora da sobrevivência): o bot bate mais quando a pessoa
+// está com folga e ele quase morto, e menos quando ela está quase morta (no v17.5 os rivais 1–3 acabavam com 65–82% de vida)
+function tensao(M, b) {
+  if (!M.contraBot || !b.humano || (jogo && jogo.modo === "sobrevivencia")) return 1;
+  const bot = M.bolinhas[1];
+  if (b.vida > 55 && bot.vida < 50) return 1.6;
+  if (b.vida < 25) return 0.65;
+  return 1;
+}
+function semArma(M) { const b = M.bolinhas[0]; return M.contraBot && b.humano && b.viva && b.arma === "estilingue"; }
+// v18: ponto numa plataforma perto da bolinha (para a caixa de quem ficou sem arma)
+function pontoPerto(M, b) {
+  let melhor = null, dm = Infinity;
+  M.plats.forEach(function(p) {
+    if (p.w < 60 || p.y <= 90 || p.move) return;
+    const x = limitar(b.x, p.x + 30, p.x + p.w - 30), d = Math.abs(x - b.x) + Math.abs(p.y - b.y) * 1.5;
+    if (d < dm) { dm = d; melhor = { x: x, p: p }; }
+  });
+  if (!melhor) return pontoSobrePlataforma(M, 20);
+  const lado = Math.random() < 0.5 ? -1 : 1, p = melhor.p;
+  return { x: limitar(melhor.x + lado * (50 + Math.random() * 60), p.x + 30, p.x + p.w - 30), y: p.y - 20, plat: p };
 }
 
 // Um ponto em cima de alguma plataforma (onde dá para chegar)
@@ -749,11 +773,15 @@ function atualizarItens(M) {
   if (M.t >= M.proxCaixa) {
     M.proxCaixa = M.t + 3.2 + Math.random() * 1.5;
     if (M.caixas.length < 2) {
-      const p = pontoSobrePlataforma(M, 20);
+      // v18: jogador no estilingue contra a máquina: a caixa cai perto dele e de mais baixo
+      const perto = semArma(M);
+      const p = perto ? pontoPerto(M, M.bolinhas[0]) : pontoSobrePlataforma(M, 20);
       const id = sortearArma(M, false);
-      M.caixas.push({ x: p.x, y: -30, vy: 1.7, idArma: id, raridade: ARMA[id].raridade, t: 0, paraquedas: true, vida: 11 });
+      M.caixas.push({ x: p.x, y: perto ? Math.max(-30, p.y - 280) : -30, vy: 1.7, idArma: id, raridade: ARMA[id].raridade, t: 0, paraquedas: true, vida: 11 });
     }
   }
+  // v18: ficou no estilingue -> a próxima caixa vem em até 1,2 s (no v17.5 o jogador passava ~70% da luta nele)
+  if (semArma(M) && M.proxCaixa !== Infinity && M.proxCaixa > M.t + 1.2 && M.caixas.length < 2) M.proxCaixa = M.t + 1.2;
   for (let i = M.caixas.length - 1; i >= 0; i--) {
     const c = M.caixas[i];
     c.t += FIS.dt;
@@ -773,7 +801,8 @@ function atualizarItens(M) {
       const b = M.bolinhas[k];
       if (!b.viva) continue;
       const dx = b.x - c.x, dy = b.y - c.y;
-      if (dx * dx + dy * dy < (b.r + 24) * (b.r + 24)) {
+      const alc = b.r + (b.humano && M.contraBot ? 46 : 24);   // v18: ímã maior para a pessoa contra a máquina
+      if (dx * dx + dy * dy < alc * alc) {
         equipar(b, c.idArma);
         M.caixas.splice(i, 1);
         M.pegou = M.pegou || [];

@@ -209,6 +209,18 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     redesenhado, balas com traçante, feixes com brilho, caixa com visor aceso, cartas com borda de carta colecionável,
     floresta mais clara com musgo luminoso nas plataformas, templo com plataformas douradas (armas.js, cartas.js,
     cenarios.js; `pontaDoCano` idêntica, conferida em 51 armas x 11 ângulos x 3 raios).
+- v18.1 (resto do relatório do jogador de teste):
+  - Jogador no estilingue contra a máquina: a próxima caixa vem em até 1,2 s e cai perto dele (`semArma`, `pontoPerto`,
+    combate.js); ímã de caixa maior para a pessoa (raio +46 em vez de +24); nas 3 primeiras partidas a arma da rodada
+    sorteia mais raras/lendárias ([0,55,35,10]).
+  - Final apertado (`tensao`, combate.js; não vale na sobrevivência): o bot bate x1,6 quando a pessoa tem >55 de vida e
+    ele <50, e x0,65 quando ela tem <25. Simulação: vida ao vencer 61 -> 54 no rival 2, derrotas iguais (10%, rival 5 50%);
+    estilingue do jogador 18%/10%/28% nos rivais 2/3/5.
+  - Abertura da rodada 1,3 -> 1,0 s. Em pé, zoom mínimo da câmera 1,15 -> 1,3.
+  - Quem nunca abriu Missões (`save.stats.viuMissoes`) recebe missões, desafios e conquistas sem skin na hora, com aviso
+    "+N 🪙" (antes esperavam num menu que o novato não conhecia).
+  - "Contra o bot" e sobrevivência: mapas cruéis sempre por último (não só nas 6 primeiras partidas).
+  - Ficou para depois: escolha 1 de 3 na abertura (textos novos), tela de campeão, truques na Prata, 2 jogadores em pé.
 - Poki v16 (4 testes): 11 out 10:18 2m29/23%, 13 out 11:14 2m30 (manhã); 12 out 18:51 2m40, 13 out 19:59 2m39/26% (noite).
   Repetiu igual no mesmo horário (ruído menor que se achava). À noite passa no Engaged, falta ~20 s na média.
   O vazamento ficou no rival 2: rodadas 2 e 3 da 2ª partida com 31–32% de derrota (1ª partida 7–8%), só 41% venciam

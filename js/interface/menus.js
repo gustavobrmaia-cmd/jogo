@@ -86,6 +86,7 @@ function teclasDeFabrica() {
 
 // ---------- missões, semana e conquistas ----------
 function abrirMissoes(aba) {
+  save.stats.viuMissoes = 1;   // v18: daqui em diante os prêmios esperam o resgate no menu (progresso.js)
   estado = "missoes";
   abaMissoes = aba || abaMissoes;
   Progresso.preparar();

@@ -81,17 +81,20 @@ const Progresso = (function() {
       if (save.semana.cenarios.indexOf(extra.cenario) < 0) { save.semana.cenarios.push(extra.cenario); registrar("cenarioNovoSemana", 1); }
       registrar("rodadaCenario", 1, { cenario: extra.cenario, interno: true });
     }
-    // missões e desafios
-    save.missoes.forEach(function(m) {
+    // missões e desafios. v18: quem nunca abriu o menu de Missões (o novato) recebe na hora e vê só "+N 🪙"
+    // (antes os prêmios ficavam esperando num menu que ele não conhecia e o aviso falava de algo que ele nunca viu)
+    const auto = !save.stats.viuMissoes, prontas = [];
+    save.missoes.forEach(function(m, i) {
       if (m.feito || m.chave !== chave) return;
       if (m.cenario && m.cenario !== extra.cenario) return;
       m.prog = Math.min(m.meta, m.prog + n);
-      if (m.prog >= m.meta) { m.feito = true; avisar(t("aviso_missao"), "#69db7c"); Poki.medir("mission", m.id, "complete"); }
+      if (m.prog >= m.meta) { m.feito = true; Poki.medir("mission", m.id, "complete"); if (auto) prontas.push(i); else avisar(t("aviso_missao"), "#69db7c"); }
     });
-    save.semana.desafios.forEach(function(d) {
+    prontas.reverse().forEach(function(i) { avisar("+" + resgatarMissao(i) + " 🪙", "#69db7c"); });
+    save.semana.desafios.forEach(function(d, i) {
       if (d.feito || d.chave !== chave) return;
       d.prog = Math.min(d.meta, d.prog + n);
-      if (d.prog >= d.meta) { d.feito = true; avisar(t("aviso_desafio"), "#ffd43b"); Poki.medir("weekly", d.id, "complete"); }
+      if (d.prog >= d.meta) { d.feito = true; Poki.medir("weekly", d.id, "complete"); if (auto) avisar("+" + resgatarDesafio(i) + " 🪙", "#ffd43b"); else avisar(t("aviso_desafio"), "#ffd43b"); }
     });
     conferirConquistas();
   }
@@ -101,7 +104,8 @@ const Progresso = (function() {
       if (save.conquistas[c.id]) return;
       if (valorStat(c.stat) >= c.meta) {
         save.conquistas[c.id] = "feita";
-        avisar(t("aviso_conquista", t("co_" + c.id)), "#b197fc");
+        if (!save.stats.viuMissoes && !c.skin && resgatarConquista(c.id)) avisar("+" + c.moedas + " 🪙", "#b197fc");
+        else avisar(t("aviso_conquista", t("co_" + c.id)), "#b197fc");
         Poki.medir("achievement", c.id, "complete");
       }
     });
