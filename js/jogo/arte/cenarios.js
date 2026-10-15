@@ -1109,7 +1109,7 @@ const ArteCenarios = (function() {
       // Escuridão com buracos de luz, sem escala e sem gradiente grande:
       //  - fora das luzes: retângulos chapados;  - luz isolada: sprite "escuro com buraco" (1 cópia);
       //  - luzes que se sobrepõem: máscara em tamanho real, furada com sprites (destination-out), só na área delas.
-      const H = est.altura, dy = est.deslocY, DK = "rgba(4,10,24,.84)", ls = est.luzes || [], n = Math.min(ls.length, 20), bx = [];
+      const H = est.altura, dy = est.deslocY, DK = "rgba(4,12,26,.68)", ls = est.luzes || [], n = Math.min(ls.length, 20), bx = [];
       for (let i = 0; i < n; i++) { const l = ls[i], d = Math.round(l.r * 2 / 4) * 4; bx.push({ x0: Math.round(l.x - d / 2), y0: Math.round(l.y - d / 2), x1: Math.round(l.x + d / 2), y1: Math.round(l.y + d / 2), d: d, c: -1 }); }
       // componentes conexos (caixas que se tocam)
       let nc = 0; for (let i = 0; i < n; i++) { if (bx[i].c < 0) { bx[i].c = nc++; } for (let k = i + 1; k < n; k++) if (bx[i].x0 < bx[k].x1 && bx[k].x0 < bx[i].x1 && bx[i].y0 < bx[k].y1 && bx[k].y0 < bx[i].y1) { const o = bx[k].c, c = bx[i].c; if (o < 0) bx[k].c = c; else if (o !== c) for (let m = 0; m < n; m++) if (bx[m].c === o) bx[m].c = c; } }
@@ -1126,7 +1126,7 @@ const ArteCenarios = (function() {
         }
         return gap.length || gaps ? { cov: cov, gap: gap } : { cov: cov, gap: gap };
       }
-      const mk = d => spr("luzNeg" + d, d, d, c => { c.fillStyle = rad(c, d / 2, d / 2, d / 2, [[0, "rgba(4,10,24,0)"], [.5, "rgba(4,10,24,.06)"], [.8, "rgba(4,10,24,.5)"], [1, "rgba(4,10,24,.84)"]]); c.fillRect(0, 0, d, d); });
+      const mk = d => spr("luzNeg" + d, d, d, c => { c.fillStyle = rad(c, d / 2, d / 2, d / 2, [[0, "rgba(4,12,26,0)"], [.55, "rgba(4,12,26,.04)"], [.82, "rgba(4,12,26,.38)"], [1, "rgba(4,12,26,.68)"]]); c.fillRect(0, 0, d, d); });
       g.fillStyle = DK; faixas(bx).gap.forEach(r => g.fillRect(r[0], r[1], r[2], r[3]));
       for (let c = 0; c < nc; c++) {
         const grp = bx.filter(b => b.c === c); if (!grp.length) continue;
@@ -1137,8 +1137,18 @@ const ArteCenarios = (function() {
         mc.globalCompositeOperation = "destination-out"; grp.forEach(b => mc.drawImage(mk2(b.d), b.x0, b.y0 + dy)); mc.globalCompositeOperation = "source-over";
         cov.forEach(r => g.drawImage(m, r[0], r[1] + dy, r[2], r[3], r[0], r[1], r[2], r[3]));
       }
-      function mk2(d) { return spr("luzFuro" + d, d, d, c => { c.fillStyle = rad(c, d / 2, d / 2, d / 2, [[0, "rgba(0,0,0,1)"], [.5, "rgba(0,0,0,.93)"], [.8, "rgba(0,0,0,.4)"], [1, "rgba(0,0,0,0)"]]); c.fillRect(0, 0, d, d); }); }
+      function mk2(d) { return spr("luzFuro" + d, d, d, c => { c.fillStyle = rad(c, d / 2, d / 2, d / 2, [[0, "rgba(0,0,0,1)"], [.55, "rgba(0,0,0,.94)"], [.82, "rgba(0,0,0,.44)"], [1, "rgba(0,0,0,0)"]]); c.fillRect(0, 0, d, d); }); }
       for (let i = 0; i < Math.min(n, 2); i++) { const d = Math.round(ls[i].r * 1.3 / 4) * 4, q = spr("calor" + d, d, d, c => { c.globalAlpha = .12; c.drawImage(glowSpr("#ffe39a", d), 0, 0); }); g.drawImage(q, Math.round(ls[i].x - d / 2), Math.round(ls[i].y - d / 2)); }   // calor suave da luz
+      // musgo luminoso na borda de cima de cada plataforma (por cima do escuro): o caminho fica legível no mapa todo
+      // (uma faixa pronta por largura: desenhada sem escala)
+      const pl = S.plats || S.cen.plataformas, ms = w => spr("musgoLuz" + w, w, 16, c => {
+        const gy = c.createLinearGradient(0, 0, 0, 16); gy.addColorStop(0, "rgba(110,255,190,0)"); gy.addColorStop(.42, "rgba(150,255,210,.55)"); gy.addColorStop(.5, "rgba(225,255,240,1)"); gy.addColorStop(.62, "rgba(110,255,190,.4)"); gy.addColorStop(1, "rgba(110,255,190,0)");
+        c.fillStyle = gy; c.fillRect(0, 0, w, 16); c.globalCompositeOperation = "destination-in";
+        const gx = c.createLinearGradient(0, 0, w, 0); gx.addColorStop(0, "rgba(0,0,0,0)"); gx.addColorStop(10 / w, "rgba(0,0,0,1)"); gx.addColorStop(1 - 10 / w, "rgba(0,0,0,1)"); gx.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = gx; c.fillRect(0, 0, w, 16);
+      });
+      g.globalAlpha = .72 + .12 * Math.sin(t * 1.7);
+      for (let i = 0; i < pl.length; i++) { const p = pl[i]; if (p.h > 40) continue; g.drawImage(ms(Math.round(p.w + 12)), Math.round(p.x - 6), Math.round(p.y - 8)); }
+      g.globalAlpha = .4; g.drawImage(ms(L + 80), -40, 652); g.globalAlpha = 1;
     }
   };
 
@@ -1464,7 +1474,7 @@ const ArteCenarios = (function() {
       estrelas(g, 50, 17, T, 200, "#e8f6ff");
       for (let i = 0; i < 5; i++) { g.globalAlpha = .45; nuvem(g, 100 + i * 260 + r() * 60, 130 + r() * 120, 240 + r() * 100, "#ffeccc", "#e8b888", "#6a6a80"); } g.globalAlpha = 1;
       montanhas(g, { y: 580, alt: 150, passo: 200, seed: 6, c0: "#4a7a82", c1: "#8aa890", sh: "#2a4a5a", shA: .35, luz: "#ffe8b0", luzA: .2, bot: 660 });
-      piramide(g, 640, 600, 600, 6, 52, "#6c8484", "rgba(77,224,192,.9)");
+      piramide(g, 640, 600, 600, 6, 52, "#5e787e", "rgba(77,224,192,.9)");
       // santuário no topo com porta luminosa
       const ty = 600 - 6 * 52; g.fillStyle = "#5c7474"; g.fillRect(612, ty - 38, 56, 38); g.fillStyle = "#8aa4a0"; g.fillRect(606, ty - 44, 68, 8); g.fillStyle = "#4a6262"; g.fillRect(622, ty - 52, 36, 8);
       halo(g, 640, ty - 16, 60, "#4de0c0", .8); g.fillStyle = "#c8fff0"; rr(g, 632, ty - 30, 16, 30, 6); g.fill();
@@ -1493,9 +1503,11 @@ const ArteCenarios = (function() {
         return;
       }
       g.fillStyle = "rgba(10,30,30,.2)"; g.beginPath(); g.ellipse(w / 2, h + 22, w * .42, 4, 0, 0, TAU); g.fill();
-      pedra(g, 0, 0, w, h, { c: "#9aa08c", seed: 180 + i, rach: 1, facetas: 3, raio: 5, jag: 2, topo: 5 });
+      // arenito dourado (destaca da pirâmide cinza-azulada atrás) com faixa de jade embaixo
+      pedra(g, 0, 0, w, h, { c: "#d2a866", seed: 180 + i, rach: 1, facetas: 3, raio: 5, jag: 2, topo: 5, luzTopo: .7 });
+      g.fillStyle = "rgba(40,170,140,.55)"; g.fillRect(4, h - 4, w - 8, 2);
       // friso grego em baixo-relevo + runas luminosas
-      g.strokeStyle = "rgba(40,50,50,.5)"; g.lineWidth = 2; g.beginPath(); for (let x = 12; x < w - 20; x += 18) { g.moveTo(x, h - 5); g.lineTo(x, 10); g.lineTo(x + 10, 10); g.lineTo(x + 10, 15); g.lineTo(x + 5, 15); } g.stroke();
+      g.strokeStyle = "rgba(96,58,24,.55)"; g.lineWidth = 2; g.beginPath(); for (let x = 12; x < w - 20; x += 18) { g.moveTo(x, h - 5); g.lineTo(x, 10); g.lineTo(x + 10, 10); g.lineTo(x + 10, 15); g.lineTo(x + 5, 15); } g.stroke();
       g.fillStyle = "#4de0c0"; for (let k = 0; k < 3; k++) { const x = w * (.22 + k * .28); halo(g, x, h / 2, 12, "#4de0c0", .6); g.fillRect(x - 3, h / 2 - 3, 6, 6); }
       g.fillStyle = "rgba(60,160,110,.85)"; for (let x = 4; x < w - 4; x += 6) g.fillRect(x, -2 + (Math.sin(x * .9 + i) > .2 ? -2 : 0), 6, 4);
       g.strokeStyle = "#2f7a50"; g.lineWidth = 2.4; g.lineCap = "round"; for (let k = 0; k < Math.round(w / 90); k++) { const x = 14 + r() * (w - 28); g.beginPath(); g.moveTo(x, h - 2); g.bezierCurveTo(x + 6, h + 6, x - 6, h + 12, x + 2, h + 18 + r() * 6); g.stroke(); }
@@ -1652,7 +1664,7 @@ const ArteCenarios = (function() {
   }
   function desenharFundoAnimado(ctx, cen, est, t) { iniciar(cen, est.altura); const d = CEN[cen.id]; if (d.fundo) d.fundo(ctx, est, t); }
   function desenharPlataformas(ctx, cen, plataformas, est, t) {
-    iniciar(cen, est.altura); const d = CEN[cen.id];
+    iniciar(cen, est.altura); const d = CEN[cen.id]; S.plats = plataformas;
     for (let i = 0; i < plataformas.length; i++) {
       const p = plataformas[i], e = spritePlat(p, i, d);
       ctx.drawImage(e.c, Math.round(p.x - e.l), Math.round(p.y - e.t));

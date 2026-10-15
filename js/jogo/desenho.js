@@ -267,16 +267,18 @@ function desenharBolinhaNoMundo(ctx, j, M, b, o, tm) {
   if (!j.demo && (j.modo === "2p" || b.lado === 1) && (fantasma === 0 || j.modo === "2p")) {
     // v17.5: etiqueta na cor da bolinha com uma setinha apontando para ela
     const txt = j.modo === "2p" ? "P" + b.lado : t("voce_curto");
+    // v18: em pé a tela tem 1280 px lógicos em ~400 px de celular: a etiqueta tinha ~5 px de verdade
+    const ke = layoutTela.L && layoutTela.L.emPe ? 1.6 : 1;
     const inv = gravSinal(M.cen, tm) < 0, s = inv ? -1 : 1;
-    const yy = inv ? b.y + b.r + 30 : b.y - b.r - 30;
-    ctx.font = "900 16" + FONTE;
-    const w = ctx.measureText(txt).width + 16;
+    const yy = inv ? b.y + b.r + 30 * ke : b.y - b.r - 30 * ke;
+    ctx.font = "900 " + Math.round(16 * ke) + FONTE;
+    const w = ctx.measureText(txt).width + 16 * ke;
     ctx.lineJoin = "round";
-    retRedondo(ctx, b.x - w / 2, yy - 11, w, 22, 11);
-    ctx.moveTo(b.x - 6, yy + s * 9); ctx.lineTo(b.x + 6, yy + s * 9); ctx.lineTo(b.x, yy + s * 17); ctx.closePath();
+    retRedondo(ctx, b.x - w / 2, yy - 11 * ke, w, 22 * ke, 11 * ke);
+    ctx.moveTo(b.x - 6 * ke, yy + s * 9 * ke); ctx.lineTo(b.x + 6 * ke, yy + s * 9 * ke); ctx.lineTo(b.x, yy + s * 17 * ke); ctx.closePath();
     ctx.lineWidth = 4; ctx.strokeStyle = "rgba(12,8,30,0.85)"; ctx.stroke();
     ctx.fillStyle = b.cor; ctx.fill();
-    textoContorno(ctx, txt, b.x, yy + 6, 16, "#fff", "center", 3.5);
+    textoContorno(ctx, txt, b.x, yy + 6 * ke, Math.round(16 * ke), "#fff", "center", 3.5);
   }
 }
 
@@ -588,6 +590,9 @@ function nomeJogador(j, lado) {
   return t("jogador_n", lado);
 }
 
+// v18: no modo rivais quem vence a rodada é o rival pelo nome (antes aparecia "O BOT VENCEU A RODADA")
+function textoBotVenceuRodada(j) { return j.rival ? t("rival_venceu_rodada", j.rival.d.nome.toUpperCase()) : t("bot_venceu_rodada"); }
+
 function desenharHud(ctx, j, M, L) {
   // em pé: o HUD fica acima da arena e maior (a tela do celular é estreita)
   const em = L.emPe;
@@ -638,7 +643,7 @@ function desenharHud(ctx, j, M, L) {
     const v = j.vencedorRodada;
     const surv = j.modo === "sobrevivencia";
     const txt = surv ? (v === 1 ? t("onda_concluida", j.onda) : t("bot_venceu_rodada")) :
-      !v ? t("empate") : j.modo === "bot" ? (v === 1 ? t("voce_venceu_rodada") : t("bot_venceu_rodada")) : t("jogador_venceu_rodada", v);
+      !v ? t("empate") : j.modo === "bot" ? (v === 1 ? t("voce_venceu_rodada") : textoBotVenceuRodada(j)) : t("jogador_venceu_rodada", v);
     const tA = j.tempoFase - (M.ko && M.ko.humano ? 1.0 : 0.4);
     const pop = tA < 0.12 ? 0.4 + tA / 0.12 * 0.85 : tA < 0.26 ? 1.25 - (tA - 0.12) / 0.14 * 0.25 : 1;
     // quem joga venceu a rodada: raios girando atrás (contra o bot só quando é a pessoa; 2 jogadores: qualquer um)
@@ -648,7 +653,7 @@ function desenharHud(ctx, j, M, L) {
   } else if (j.fase === "fimPartida" && estado !== "continuar") {
     const v = j.vencedorPartida;
     const surv = j.modo === "sobrevivencia";
-    const txt = surv ? t("fim_sobrevivencia", j.onda) : j.modo === "bot" ? (v === 1 ? t("voce_venceu") : t("bot_venceu")) : t("jogador_venceu", v);
+    const txt = surv ? t("fim_sobrevivencia", j.onda) : j.modo === "bot" ? (v === 1 ? t("voce_venceu") : j.rival ? t("rival_venceu", j.rival.d.nome.toUpperCase()) : t("bot_venceu")) : t("jogador_venceu", v);
     const esc = 1 + 0.06 * Math.sin(j.tempoFase * 6);
     const festa = v && (v === 1 || j.modo === "2p") && !surv;
     const cor = v ? j.cores[v - 1] : "#ffd43b";
@@ -695,7 +700,9 @@ function desenharHud(ctx, j, M, L) {
     else {
       // 1ª linha: as moedas, grande; depois a melhoria grátis (v17) e o resto (skin, acessório, nível),
       // diminuindo a letra se não couber
-      const l1 = faixaPremio.linhas[0], l2 = faixaPremio.linhas.slice(1).join("   ");
+      // v18: em pé o resto vai em 2 linhas e com letra maior (numa linha só ficava com ~6 px de verdade)
+      const resto = faixaPremio.linhas.slice(1), metade = em && resto.length > 1 ? Math.ceil(resto.length / 2) : resto.length;
+      const l1 = faixaPremio.linhas[0], l2 = resto.slice(0, metade).join("   "), l3 = resto.slice(metade).join("   ");
       const pop = tf < 0.15 ? 0.5 + tf / 0.15 * 0.65 : tf < 0.3 ? 1.15 - (tf - 0.15) / 0.15 * 0.15 : 1;
       ctx.save();
       const caber = function(txt, max) {
@@ -703,11 +710,11 @@ function desenharHud(ctx, j, M, L) {
         return Math.min(max, max * (em ? 760 : 1040) / Math.max(1, ctx.measureText(txt).width));   // folga: emoji mede diferente em cada aparelho
       };
       const largura = function(txt, tam) { ctx.font = "900 " + tam + FONTE; return ctx.measureText(txt).width; };
-      const t2 = l2 ? caber(l2, 26) : 0, td = ld ? caber(ld, 32) : 0;
-      const w = Math.max(280, (l2 ? largura(l2, t2) : 0) + 90, (ld ? largura(ld, td) : 0) + 80);
+      const t2 = l2 ? Math.min(caber(l2, em ? 30 : 26), l3 ? caber(l3, em ? 30 : 26) : 99) : 0, td = ld ? caber(ld, 32) : 0;
+      const w = Math.max(280, (l2 ? largura(l2, t2) : 0) + 90, (l3 ? largura(l3, t2) : 0) + 90, (ld ? largura(ld, td) : 0) + 80);
       // a parte de baixo fica acima das bolinhas, que começam no chão (v17: a faixa mais alta cobria as duas);
       // em pé a câmera aproxima e as bolinhas ficam maiores: mais folga
-      const h = 58 + (ld ? 42 : 0) + (l2 ? 36 : 0), esc = em ? 1.35 : 1;
+      const h = 58 + (ld ? 42 : 0) + (l2 ? 36 : 0) + (l3 ? 36 : 0), esc = em ? 1.35 : 1;
       const yf = mundoParaTela(0, FIS.altura).y - (em ? 205 : 110) - h * (esc + 1) / 2;
       const yd = yf + 86, y2 = yf + (ld ? 122 : 80);
       ctx.globalAlpha = tf > dur - 0.6 ? Math.max(0, (dur - tf) / 0.6) : 1;
@@ -720,21 +727,24 @@ function desenharHud(ctx, j, M, L) {
           letreiro(ctx, ld, cx, yd, Math.round(td), "#ff8787");
         });
         if (l2) textoContorno(ctx, l2, cx, y2, Math.round(t2), "#ffffff");
+        if (l3) textoContorno(ctx, l3, cx, y2 + 36, Math.round(t2), "#ffffff");
       });
       ctx.restore();
     }
   }
   // missão / desafio / conquista completada durante a partida (v17.5: numa pílula escura, legível em qualquer mapa)
-  const yAvisos = topoFaixa !== null ? topoFaixa - 14 : mundoParaTela(0, FIS.altura).y - 70;
-  if (typeof Progresso !== "undefined") Progresso.avisos.forEach(function(a, i) {
-    const k = Math.min(1, a.t * 5) * Math.min(1, (3 - a.t) * 3);
+  // v18: um aviso por vez (antes até 3 empilhados por cima da luta), maior em pé, e só depois que a faixa de prêmios
+  // some (a fila espera: Progresso.atualizarAvisos)
+  const yAvisos = mundoParaTela(0, FIS.altura).y - (em ? 160 : 70);
+  if (typeof Progresso !== "undefined" && topoFaixa === null) Progresso.avisos.slice(0, 1).forEach(function(a) {
+    const k = Math.min(1, a.t * 5) * Math.min(1, (2.6 - a.t) * 3);
     if (k <= 0) return;
-    const y = yAvisos - i * 42;
+    const ta = em ? 40 : 26, y = yAvisos;
     ctx.globalAlpha = k;
-    ctx.font = "900 26" + FONTE;
+    ctx.font = "900 " + ta + FONTE;
     const tw = ctx.measureText(a.texto).width;
-    ctx.fillStyle = "rgba(12,8,30,0.72)"; retRedondo(ctx, cx - tw / 2 - 20, y - 28, tw + 40, 38, 19); ctx.fill();
-    textoContorno(ctx, a.texto, cx, y, 26, a.cor);
+    ctx.fillStyle = "rgba(12,8,30,0.72)"; retRedondo(ctx, cx - tw / 2 - 20, y - ta * 1.08, tw + 40, ta * 1.46, ta * 0.73); ctx.fill();
+    textoContorno(ctx, a.texto, cx, y, ta, a.cor);
     ctx.globalAlpha = 1;
   });
   // carta que alguém acabou de pegar: logo abaixo do HUD (v17.5: antes ficava por cima do "dano em dobro")
@@ -1232,7 +1242,7 @@ function desenharQueda(ctx, j, H) {
   } else if (!q.vencedor) {
     textoContorno(ctx, Math.max(0, Math.ceil(RODADA.quedaMax - q.t)).toString(), cx, H * 0.2, 54, "#fff");
   } else {
-    const txt = j.modo === "bot" ? (q.vencedor === 1 ? t("voce_venceu_rodada") : t("bot_venceu_rodada")) : t("jogador_venceu_rodada", q.vencedor);
+    const txt = j.modo === "bot" ? (q.vencedor === 1 ? t("voce_venceu_rodada") : textoBotVenceuRodada(j)) : t("jogador_venceu_rodada", q.vencedor);
     textoContorno(ctx, txt, cx, H * 0.2, 54, j.cores[q.vencedor - 1]);
   }
 }

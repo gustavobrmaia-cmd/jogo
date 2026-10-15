@@ -24,7 +24,8 @@ function emote(b, s, dur) {
 function equipar(b, id) {
   const a = ARMA[id];
   b.arma = id;
-  b.municao = a.municao;
+  // v18: contra a máquina a munição é multiplicada (b.multMunicao, partida.js iniciarRodada)
+  b.municao = a.municao === Infinity ? Infinity : Math.ceil(a.municao * (b.multMunicao || 1));
   b.cad = 0.15;
   b.carga = 0;
   b.golpe = 0;

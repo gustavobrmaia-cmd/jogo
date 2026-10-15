@@ -190,8 +190,25 @@ const ArteArmas = (function() {
       R(17, 3, 14, 7, 3, K.mad, 1); R(45, -9, 3, 7, 1, K.fe, 0.5); R(45, -3, 3, 7, 1, K.fe, 0.5);
     } },
     rifle: { m: [55, -1], h: [-3, 12], h2: [28, 6], d: function() {
-      P([-30, -4, -9, -6, -9, 5, -24, 10, -31, 3], K.pr); R(-9, -7, 26, 12, 3, K.fe); R(15, -6, 22, 10, 3, K.mad2); R(36, -3.5, 17, 5, 1.5, K.ac);
-      R(51, -5, 5, 8, 1.5, K.fe, 0.8); R(-4, -11, 22, 5, 2, K.ac2); R(40, -8, 3, 4, 1, K.fe, 0.4); P([8, 5, 17, 5, 18, 21, 9, 23], K.fe); P([-9, 5, -2, 5, -4, 18, -11, 18], K.pr);
+      // coronha de madeira com soleira de borracha e faixa laranja
+      P([-29, -5, -8, -6.5, -8, 6, -21, 11, -30, 6], K.mad, 2, function() { ln(-26, -1, -11, -2, 1.3, K.mad2, 0.7); ln(-24, 4, -12, 3, 1.1, K.mad2, 0.5); });
+      P([-34, -5.5, -29, -5, -30, 6, -35, 7], K.pr, 0.8);
+      // carregador curvo (banana) com faixa amarela
+      cel(function(g) { g.beginPath(); g.moveTo(8, 4); g.lineTo(17, 4); g.quadraticCurveTo(18, 14, 21, 22); g.lineTo(12, 25); g.quadraticCurveTo(9, 15, 8, 4); g.closePath(); }, "#4c5577", 1.6, function() { ln(10.5, 15, 19, 13, 2, K.am, 0.95); });
+      // corpo com janela de ejeção e ferrolho
+      R(-9, -7, 26, 12, 3, "#6a7499", 2, function() { fl(pR(2, -4.5, 9, 3.4, 1.2), K.pr, 0.9); ln(-6, 2.5, 14, 2.5, 1.2, "#4c5577", 0.8); });
+      C(-4, -1.5, 1.8, K.ou, 0.5);
+      // guarda-mão de madeira com furos de ventilação
+      R(15, -6, 22, 10, 3, K.mad, 1.8, function() { for (let i = 0; i < 3; i++) fl(pR(19 + i * 5.6, -3, 3, 4, 1.4), "#7a4a2a", 0.95); });
+      // cano + freio de boca com fendas
+      R(36, -3.5, 16, 5, 1.5, K.ac); R(40, -8, 3, 4.5, 1, K.fe, 0.4);
+      R(50, -5.2, 6, 8.4, 1.8, K.fe, 0.8, function() { ln(52, -3.5, 52, 1.5, 1, K.pr, 0.9); ln(54, -3.5, 54, 1.5, 1, K.pr, 0.9); });
+      // trilho e mira de ponto vermelho (lente brilhando)
+      R(-4, -11, 20, 4.5, 1.5, K.ac2, 0.6); R(1, -17.5, 12, 7.5, 2.6, K.pr, 1);
+      fl(pC(10.5, -13.8, 2.4), "#ff4a5a"); fl(pC(10, -14.4, 0.9), "#ffd0d6");
+      // punho
+      P([-9, 5, -2, 5, -4, 18, -11, 18], K.pr, 1.4, function() { ln(-8.5, 9, -3.5, 9, 1, K.fe, 0.8); ln(-9, 13, -4, 13, 1, K.fe, 0.8); });
+      trc(function(g) { g.beginPath(); g.moveTo(-1, 5); g.quadraticCurveTo(6, 6, 4, 11); }, 1.8, K.fe);
     } },
     sniper: { m: [67, -1], h: [-3, 11], h2: [30, 7], d: function() {
       P([-33, -4, -10, -6, -10, 5, -26, 11, -34, 4], K.ol2); R(-10, -7, 28, 12, 3, K.fe); R(16, -4.5, 51, 5, 1.8, K.ac); R(48, -6.5, 18, 9, 2.5, K.pr);
@@ -409,18 +426,44 @@ const ArteArmas = (function() {
 
   // ---------- sprites das armas (caixa justa medida em pixels) ----------
   const bruto = cv(320 * E, 240 * E), bg = bruto.getContext("2d", { willReadFrequently: true });
+  const RCOR = { 2: "#b46bff", 3: "#ffc83a" };                     // brilho de raridade (rara roxa, lendária dourada)
+  function rarid(id) { return typeof ARMA !== "undefined" && ARMA[id] ? ARMA[id].raridade : 1; }
+  // silhueta de a dilatada em n direções com raio o, pintada de cor, no contexto gb
+  function silhueta(gb, a, o, n, cor) {
+    gb.globalCompositeOperation = "source-over"; gb.clearRect(0, 0, a.width, a.height);
+    for (let i = 0; i < n; i++) { const t = i * TAU / n; gb.drawImage(a, Math.cos(t) * o, Math.sin(t) * o); }
+    gb.globalCompositeOperation = "source-in"; gb.fillStyle = cor; gb.fillRect(0, 0, a.width, a.height); gb.globalCompositeOperation = "source-over";
+  }
+  // acabamento (uma vez por arma, só na caixa recortada): brilho da raridade, contorno escuro em volta
+  // (silhueta clara em qualquer fundo) e luz fina na borda de cima (cara de brinquedo envernizado)
+  function acabamento(c, r) {
+    const w = c.width, h = c.height, g = c.getContext("2d"), a = cv(w, h), b = cv(w, h), gb = b.getContext("2d");
+    a.getContext("2d").drawImage(c, 0, 0); g.clearRect(0, 0, w, h);
+    if (r >= 2) {
+      silhueta(gb, a, 4.6 * E, 16, RCOR[r]); g.globalAlpha = r === 3 ? 0.42 : 0.34; g.drawImage(b, 0, 0);
+      silhueta(gb, a, 2.9 * E, 16, RCOR[r]); g.globalAlpha = r === 3 ? 0.75 : 0.6; g.drawImage(b, 0, 0); g.globalAlpha = 1;
+    }
+    silhueta(gb, a, 1.25 * E, 12, "#1a1238"); g.drawImage(b, 0, 0);
+    g.drawImage(a, 0, 0);
+    // luz de borda: o que é arma mas não é arma 2 px abaixo = borda de cima
+    gb.clearRect(0, 0, w, h); gb.drawImage(a, 0, 0); gb.globalCompositeOperation = "destination-out"; gb.drawImage(a, 0, 2.2 * E);
+    gb.globalCompositeOperation = "source-in"; gb.fillStyle = "#ffffff"; gb.fillRect(0, 0, w, h); gb.globalCompositeOperation = "source-over";
+    g.globalAlpha = 0.32; g.drawImage(b, 0, 1.1 * E); g.globalAlpha = 1;
+  }
   function spriteArma(id) {
     if (cache["w" + id]) return cache["w" + id];
     bg.setTransform(1, 0, 0, 1, 0, 0); bg.clearRect(0, 0, bruto.width, bruto.height);
     bg.setTransform(E, 0, 0, E, 100 * E, 120 * E);
     const ant = G; G = bg; W[id].d(); G = ant;
-    const w = bruto.width, h = bruto.height, d = bg.getImageData(0, 0, w, h).data;
+    const w = bruto.width, h = bruto.height, d = bg.getImageData(0, 0, w, h).data, r = rarid(id), mg = Math.ceil((r >= 2 ? 5 : 1.6) * E) + 2;
     let x0 = w, y0 = h, x1 = 0, y1 = 0;
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 12) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
-    x0 = Math.max(0, x0 - 2); y0 = Math.max(0, y0 - 2); x1 = Math.min(w - 1, x1 + 2); y1 = Math.min(h - 1, y1 + 2);
+    x0 = Math.max(0, x0 - mg); y0 = Math.max(0, y0 - mg); x1 = Math.min(w - 1, x1 + mg); y1 = Math.min(h - 1, y1 + mg);
     const c = cv(x1 - x0 + 1, y1 - y0 + 1); c.getContext("2d").drawImage(bruto, -x0, -y0);
+    acabamento(c, r);
     return (cache["w" + id] = { c: c, x: x0 / E - 100, y: y0 / E - 120, w: (x1 - x0 + 1) / E, h: (y1 - y0 + 1) / E });
   }
+  function brSpr() { return sp("br", -6, -6, 6, 6, function() { faisca(0, 0, 5.6, "#ffffff"); }); }
   // mãozinha: luva branca redonda
   const HR = 7.6;
   function maoSpr() {
@@ -461,6 +504,10 @@ const ArteArmas = (function() {
     if (recuo > 0) { ctx.translate(-recuo * 9, 0); ctx.rotate(-recuo * 0.1); }
     if (w.mel) { if (golpe > 0) golpeMelee(ctx, w.mel, golpe); else if (w.mel !== "luva") ctx.rotate(MEL[w.mel][0]); }
     ctx.drawImage(s.c, s.x, s.y, s.w, s.h);
+    if (rarid(id) === 3) {                          // lendária: brilho que corre pela arma de tempos em tempos
+      const k = (agora() * 0.85 + x * 0.003) % 1.5;
+      if (k < 1) blit(ctx, brSpr(), s.x + s.w * (0.18 + 0.64 * k), s.y + s.h * 0.32, k * 2, 0.3 + Math.sin(k * Math.PI) * 0.75);
+    }
     if (w.n) { const p = 0.5 + 0.5 * Math.sin(agora() * 9); aura(ctx, w.n[3], w.n[0], w.n[1], w.n[2] * (0.85 + 0.2 * p + recuo * 0.3), Math.min(1, 0.45 + 0.3 * p + recuo * 0.25)); }
     if (!w.sh) {
       const m = maoSpr(); ctx.drawImage(m.c, w.h[0] - HR, w.h[1] - HR, HR * 2, HR * 2);
@@ -517,11 +564,21 @@ const ArteArmas = (function() {
   function rotp(a, lx, ly) { const ca = Math.cos(a), sa = Math.sin(a); RX = lx * ca - ly * sa; RY = lx * sa + ly * ca; }
 
   function rastro(len, h, col, al) { fl(pP([0, -h / 2, -len, 0, 0, h / 2]), col, al); }
+  function hex6(c) { return /^#[0-9a-f]{6}$/i.test(c || "") ? c : "#ffffff"; }
+  // rastro em degradê (forte junto do projétil, some na cauda); x0 = onde começa, len = comprimento
+  function rastroG(x0, len, h, col, al) {
+    const g = G, q = rgb(hex6(col)), gr = g.createLinearGradient(x0 - len, 0, x0, 0);
+    gr.addColorStop(0, "rgba(" + q + ",0)"); gr.addColorStop(0.6, "rgba(" + q + "," + al * 0.55 + ")"); gr.addColorStop(1, "rgba(" + q + "," + al + ")");
+    g.fillStyle = gr; pP([x0, -h / 2, x0 - len, 0, x0, h / 2])(g); g.fill();
+  }
+  // bala: brilho na ponta, rastro de traçante na cor de quem atirou e reflexo (o corpo continua do tamanho da colisão)
   function bala(key, L, h, corpo, cor, tl) {
-    return ps(key, -L / 2 - tl, -h / 2 - 1, L / 2 + 2, h / 2 + 1, function() {
-      G.translate(-L / 2, 0); rastro(tl, h * 0.9, cor, 0.5); rastro(tl * 0.7, h * 0.4, "#ffffff", 0.75); G.translate(L / 2, 0);
+    return ps(key, -L / 2 - tl, -h * 1.4, L / 2 + h * 0.8, h * 1.4, function() {
+      G.globalAlpha = 0.5; G.drawImage(brilho(corpo), L / 2 - h * 2.2, -h * 1.35, h * 2.7, h * 2.7); G.globalAlpha = 1;
+      rastroG(-L / 2 + 2, tl + 2, h * 1.05, cor, 0.85); rastroG(-L / 2 + 2, tl * 0.75, h * 0.45, "#ffffff", 0.95);
       P([-L / 2, -h / 2, L / 2 - h * 0.8, -h / 2, L / 2, 0, L / 2 - h * 0.8, h / 2, -L / 2, h / 2], corpo, Math.max(0.8, h / 4));
       ln(-L / 2 + 2, h * 0.28, L / 2 - h, h * 0.28, 0.9, pal(corpo).s, 0.7);
+      fl(pE(L / 2 - h * 1.1, -h * 0.17, h * 0.55, h * 0.12, 0), "#ffffff", 0.85);
     });
   }
   function missilSpr(key, L, h, corpo, nariz, faixa) {
@@ -559,11 +616,14 @@ const ArteArmas = (function() {
       });
       blitR(c, s, p.x, p.y, p.t * 6);
     },
-    bala: function(c, p) { const r = p.raio; blitR(c, bala("bala" + r + p.cor, r * 3.2 + 4, r * 1.6, "#ffe27a", p.cor, 11), p.x, p.y, ang(p)); },
-    bala_grande: function(c, p) { const r = p.raio; blitR(c, bala("bg" + r + p.cor, r * 3.4 + 6, r * 1.8, "#ff9f43", p.cor, 13), p.x, p.y, ang(p)); },
-    bala_rastro: function(c, p) { const r = p.raio; blitR(c, bala("br" + r, r * 4 + 6, r * 1.4, "#f4fbff", K.ci, 30), p.x, p.y, ang(p)); },
+    bala: function(c, p) { const r = p.raio; blitR(c, bala("bala" + r + p.cor, r * 3.2 + 4, r * 1.6, "#ffe27a", p.cor, 16), p.x, p.y, ang(p)); },
+    bala_grande: function(c, p) { const r = p.raio; blitR(c, bala("bg" + r + p.cor, r * 3.4 + 6, r * 1.8, "#ff9f43", p.cor, 18), p.x, p.y, ang(p)); },
+    bala_rastro: function(c, p) { const r = p.raio; blitR(c, bala("br" + r, r * 4 + 6, r * 1.4, "#f4fbff", K.ci, 38), p.x, p.y, ang(p)); },
     chumbo: function(c, p) {
-      const r = p.raio, s = ps("ch" + r, -r * 3, -r * 1.5, r * 1.5, r * 1.5, function() { rastro(r * 2.2, r * 1.2, "#ffd36b", 0.45); C(0, 0, r * 0.95 + 0.4, "#ffd36b", 0.8); });
+      const r = p.raio, s = ps("ch" + r, -r * 3.4, -r * 1.9, r * 1.9, r * 1.9, function() {
+        G.globalAlpha = 0.45; G.drawImage(brilho("#ffb03a"), -r * 1.9, -r * 1.9, r * 3.8, r * 3.8); G.globalAlpha = 1;
+        rastroG(0, r * 3.2, r * 1.5, "#ffd36b", 0.8); C(0, 0, r * 0.95 + 0.4, "#ffd36b", 0.8); fl(pC(-r * 0.25, -r * 0.3, r * 0.32), "#fff8d8", 0.95);
+      });
       blitR(c, s, p.x, p.y, ang(p));
     },
     plasma: function(c, p) {
@@ -797,10 +857,10 @@ const ArteArmas = (function() {
     const t = agora(), z = pts[pts.length - 1], tr = function() { tracar(ctx, pts); };
     ctx.save(); ctx.lineJoin = "bevel";
     if (visual === "laser") {
-      camadas(ctx, tr, [[9 * v + 2.6, "#ff3b52", 1], [2.8 * v + 0.9, "#ffffff", 1]]);
+      camadas(ctx, tr, [[24 * v + 5, "#ff3b52", 0.2], [9 * v + 2.6, "#ff3b52", 1], [2.8 * v + 0.9, "#ffffff", 1]]);
       clarao(ctx, z.x, z.y, 16 * v + 6, "#ff4a5a", t * 3);
     } else if (visual === "railgun") {
-      camadas(ctx, tr, [[12 * v + 3, "#2fcbe2", 1], [3.6 * v + 1, "#ffffff", 1]]);
+      camadas(ctx, tr, [[30 * v + 6, "#2fcbe2", 0.2], [12 * v + 3, "#2fcbe2", 1], [3.6 * v + 1, "#ffffff", 1]]);
       ctx.lineCap = "butt"; ctx.setLineDash([4, 60]); ctx.lineDashOffset = -t * 300; ctx.lineWidth = 20 * v + 3; ctx.strokeStyle = "#e8fdff"; ctx.globalAlpha = 0.85; tr(); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
       clarao(ctx, z.x, z.y, 26 * v + 8, "#3edbe8", t * 2); clarao(ctx, pts[0].x, pts[0].y, 16 * v + 4, "#3edbe8", 0);
     } else if (visual === "arco_iris") {
@@ -818,7 +878,7 @@ const ArteArmas = (function() {
       clarao(ctx, z.x, z.y, 18 * v + 6, "#ffffff", t * 2);
     } else if (visual === "feixe") {
       const n = amostrar(pts, 18, function(i, d, ponta) { return ponta ? 0 : Math.sin(d * 0.16 - t * 22) * 5; });
-      camadas(ctx, function() { tracarBuf(ctx, n); }, [[9, "#a24dff", 0.6], [3.4, "#f6d9ff", 1]]);
+      camadas(ctx, function() { tracarBuf(ctx, n); }, [[20, "#c86bff", 0.18], [9, "#a24dff", 0.6], [3.4, "#f6d9ff", 1]]);
       clarao(ctx, z.x, z.y, 14, "#ff7ad0", t * 5);
     } else if (visual === "relampago") {
       const n = amostrar(pts, 30, function(j, d, ponta) { return ponta ? 0 : (Math.random() - 0.5) * 36; });
@@ -826,7 +886,7 @@ const ArteArmas = (function() {
       clarao(ctx, z.x, z.y, 34 * v + 8, "#ffe14d", 0);
     } else { // raio (tesla) e padrão
       const n = amostrar(pts, 40, function(j, d, ponta) { return ponta ? 0 : (Math.random() - 0.5) * 30; });
-      camadas(ctx, function() { tracarBuf(ctx, n); }, [[8 * v + 2, "#3fa7e6", 0.5], [3 * v + 1, "#e4f9ff", 1]]);
+      camadas(ctx, function() { tracarBuf(ctx, n); }, [[18 * v + 4, "#7ee8ff", 0.16], [8 * v + 2, "#3fa7e6", 0.5], [3 * v + 1, "#e4f9ff", 1]]);
       clarao(ctx, z.x, z.y, 14 * v + 4, "#7ee8ff", t * 7);
     }
     ctx.restore();
@@ -878,11 +938,29 @@ const ArteArmas = (function() {
         P([-21, -12, -29, -20, -27, -6], K.ou, 0.8); P([21, -12, 29, -20, 27, -6], K.ou, 0.8);
         P([-14, -20, -10, -30, -4, -22, 0, -33, 4, -22, 10, -30, 14, -20], K.ou, 1.2);
       }
-      R(-19, -16, 38, 35, 6, cor, 2.6, function(g) { g.fillStyle = luz2; g.globalAlpha = 0.9; g.fillRect(-4, -20, 8, 44); g.globalAlpha = 1; });
-      R(-21, -21, 42, 13, 5, mix(cor, "#ffffff", 0.28), 2, function() { ln(-18, -14, 18, -14, 1.2, pal(cor).s, 0.8); });
-      for (const sx of [-1, 1]) for (const sy of [0, 1]) C(sx * 15, sy ? 14 : -15, 2.3, r === 3 ? "#fff6c9" : "#eef3ff", 0.6);
-      R(-13.5, -8, 27, 22, 5, "#1c2142", 1.2); trc(pR(-12.2, -6.7, 24.4, 19.4, 4.2), 1, cor, 0.9);
-      if (r === 2) P([0, -29, 6, -24, 0, -18, -6, -24], "#e6d8ff", 1);
+      // corpo com faixa de baixo mais escura e cantoneiras de metal
+      R(-20, -15, 40, 34, 6, cor, 2.6, function(g) { g.fillStyle = pal(cor).s; g.globalAlpha = 0.55; g.fillRect(-22, 12, 44, 10); g.globalAlpha = 1; });
+      for (const sx of [-1, 1]) P([sx * 20, 11, sx * 20, 19, sx * 12, 19], r === 3 ? "#fff1b8" : "#e9eefb", 0.6);
+      // tampa com alça e listra clara
+      R(-22, -21, 44, 12, 5, mix(cor, "#ffffff", 0.3), 2, function(g) { g.fillStyle = luz2; g.globalAlpha = 0.95; g.fillRect(-4.5, -24, 9, 16); g.globalAlpha = 1; ln(-19, -11.5, 19, -11.5, 1.2, pal(cor).s, 0.8); });
+      for (const sx of [-1, 1]) C(sx * 16.5, -15, 2.2, r === 3 ? "#fff6c9" : "#eef3ff", 0.6);
+      // visor iluminado na cor da raridade (a arma aparece bem em cima dele)
+      const vis = pR(-15.5, -6.5, 31, 22.5, 4.6);
+      vis(G); G.fillStyle = mix(cor, "#14102e", 0.55); G.fill();
+      G.save(); vis(G); G.clip();
+      const gr = G.createRadialGradient(0, 4, 1, 0, 4, 19); gr.addColorStop(0, mix(cor, "#ffffff", 0.75)); gr.addColorStop(0.55, mix(cor, "#ffffff", 0.2)); gr.addColorStop(1, mix(cor, "#14102e", 0.35));
+      G.fillStyle = gr; G.fillRect(-16, -7, 32, 24);
+      fl(pP([-16, -7, -4, -7, -14, 16, -16, 16]), "#ffffff", 0.16);           // reflexo do vidro
+      G.restore();
+      trc(vis, 2, mix(cor, "#14102e", 0.6)); trc(pR(-14.2, -5.2, 28.4, 19.9, 3.6), 1, "#ffffff", 0.45);
+      if (r === 2) P([0, -30, 6, -25, 0, -19, -6, -25], "#e6d8ff", 1);
+    }, CE, 1);
+  }
+  // reflexo diagonal que passa pela caixa (quadros guardados, recortados no formato dela)
+  function caixaBrilho(i) {
+    return sp("cxb" + i, -24, -24, 24, 22, function() {
+      G.save(); pR(-22, -21, 44, 40, 6)(G); G.clip(); G.translate(-34 + i * 12, 0); G.rotate(0.45);
+      fl(pR(0, -40, 8, 80, 0), "#ffffff", 0.45); fl(pR(11, -40, 3, 80, 0), "#ffffff", 0.3); G.restore();
     }, CE, 1);
   }
   function paraSpr(r) {
@@ -892,6 +970,8 @@ const ArteArmas = (function() {
       ln(-24, -42, -12, 0, 1.1, "#c8d0e8"); ln(24, -42, 12, 0, 1.1, "#c8d0e8");
       P([-32, -42, -30, -52, -20, -61, 0, -65, 20, -61, 30, -52, 32, -42, 21, -46, 11, -42, 0, -46, -11, -42, -21, -46], "#ffffff", 2.4, function(g) {
         g.fillStyle = cor; for (let i = 0; i < 4; i += 2) { g.beginPath(); g.moveTo(0, -70); g.lineTo(-32 + i * 16, -40); g.lineTo(-32 + (i + 1) * 16, -40); g.closePath(); g.fill(); }
+        g.fillStyle = "rgba(30,20,80,.2)"; g.fillRect(-34, -50, 68, 12);              // sombra da borda do pano
+        fl(pE(-13, -58, 10, 2.6, -0.3), "#ffffff", 0.6);                               // reflexo no alto
       });
     }, CE, 1);
   }
@@ -904,17 +984,21 @@ const ArteArmas = (function() {
       ctx.drawImage(rios.c, -40, -40);
     }
     if (c.paraquedas) { ctx.save(); ctx.translate(Math.sin(t * 2) * 2, -17); const p = paraSpr(r); ctx.drawImage(p.c, p.x, p.y, p.w, p.h); ctx.restore(); }
+    if (r > 1) aura(ctx, RAR[r][0], 0, 0, 40 + bob * 3, 0.32);          // rara/lendária: brilho pulsando
     const s = caixaSpr(r, !c.paraquedas); ctx.drawImage(s.c, s.x, s.y, s.w, s.h);
-    icone(ctx, c.idArma, 0, Math.round(3 + bob * 1.5), 24);
+    icone(ctx, c.idArma, 0, Math.round(4.5 + bob * 1.2), 29);
+    const ph = (t * 0.55 + (r - 1) * 0.3) % 1.6;                       // reflexo passando a cada ~3 s
+    if (ph < 0.6) { const f = caixaBrilho(Math.min(5, (ph / 0.6 * 6) | 0)); ctx.drawImage(f.c, f.x, f.y, f.w, f.h); }
     if (r > 1) {
-      const e = sp("br", -6, -6, 6, 6, function() { faisca(0, 0, 5.6, "#ffffff"); }), k = Math.abs(Math.sin(t * 4));
+      const e = brSpr(), k = Math.abs(Math.sin(t * 4));
       blit(ctx, e, -17, -18, 0, 0.4 + k * 0.9); blit(ctx, e, 18, 12, 0, 0.4 + Math.abs(Math.sin(t * 4 + 2)) * 0.9);
     }
     ctx.restore();
   }
 
   function aquecer() {
-    Object.keys(W).forEach(spriteArma); maoSpr(); [1, 2, 3].forEach(function(r) { caixaSpr(r); paraSpr(r); });
+    Object.keys(W).forEach(spriteArma); maoSpr(); brSpr(); [1, 2, 3].forEach(function(r) { caixaSpr(r); caixaSpr(r, true); paraSpr(r); });
+    for (let i = 0; i < 6; i++) caixaBrilho(i);
     if (typeof ARMAS !== "undefined") ARMAS.forEach(function(a) { if (PR[a.visual]) PR[a.visual](ctxAq(), { x: -999, y: -999, vx: 1, vy: 0, raio: a.raio || 4, t: 0, cor: "#ff5d73", timer01: 0 }); });
   }
   let _aq = null;

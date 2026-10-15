@@ -363,5 +363,6 @@ TEXTOS.tr = {
   mel_d_vida: "Daha dayanıklı ol",
   mel_d_veloc: "Daha hızlı koş",
   gratis: "BEDAVA!",
-  escolha_gratis: "1 tanesini bedava seç!"
+  escolha_gratis: "1 tanesini bedava seç!",
+  rival_venceu_rodada: "RAUNDU {0} KAZANDI"
 };

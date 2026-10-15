@@ -363,5 +363,6 @@ TEXTOS.pt = {
   mel_d_vida: "Aguenta mais",
   mel_d_veloc: "Corre mais",
   gratis: "GRÁTIS!",
-  escolha_gratis: "Escolha 1 de graça!"
+  escolha_gratis: "Escolha 1 de graça!",
+  rival_venceu_rodada: "{0} VENCEU A RODADA"
 };

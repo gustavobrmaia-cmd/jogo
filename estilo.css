@@ -318,6 +318,7 @@ button.poderCarta.sem { animation: semMoedas 0.35s; }
 button.botaoPoder { position: relative; background: linear-gradient(#ff922b, #e8590c); border-bottom-color: #8a3407; }
 body.retrato .recMeio { flex-direction: column; gap: 16px; }
 body.retrato .poderValor, body.retrato .poderMoedas { font-size: 32px; padding: 6px 20px; }
+body.retrato .poderTopo { gap: 28px; }   /* v18: o PODER pula (x1,3) ao comprar e cobria as moedas */
 body.retrato .poderDica { font-size: 26px; max-width: 360px; }
 body.retrato button.poderCarta { width: 260px; min-width: 0; padding: 18px 10px 12px; font-size: 26px; }
 body.retrato .pcNivel { font-size: 20px; }

@@ -363,5 +363,6 @@ TEXTOS.ru = {
   mel_d_vida: "Держись дольше",
   mel_d_veloc: "Беги быстрее",
   gratis: "БЕСПЛАТНО!",
-  escolha_gratis: "Выбери 1 бесплатно!"
+  escolha_gratis: "Выбери 1 бесплатно!",
+  rival_venceu_rodada: "{0} ВЫИГРЫВАЕТ РАУНД"
 };

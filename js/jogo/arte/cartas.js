@@ -138,8 +138,11 @@ const ArteCartas = (function() {
   // CARTA: moldura elegante + painel escuro + pictograma
   // =========================================================
   function cartaSpr(id) {
-    const cor = CARTA[id].cor, clara = mix(cor, "#ffffff", 0.78);
+    const cor = CARTA[id].cor, clara = mix(cor, "#ffffff", 0.7);
     return sp("cd" + id, -26, -35, 26, 35, function() {
+      // borda branca grossa com contorno escuro (cara de carta colecionável; destaca em qualquer mapa)
+      const borda = pR(-25.2, -34.2, 50.4, 68.4, 9);
+      trc(borda, 2.6, "#1a1238"); fl(borda, "#ffffff"); fl(pR(-25.2, 10, 50.4, 24.2, 9), mix(cor, "#c9d2ee", 0.75), 0.6);
       cel(pR(-23, -32, 46, 64, 7), cor, 2.4, function() { fl(pR(-23, -32, 46, 18, 0), mix(cor, "#ffffff", 0.2), 0.5); });
       const painel = pR(-18.5, -27.5, 37, 55, 4.5);
       fl(painel, mix(cor, "#14102e", 0.82));

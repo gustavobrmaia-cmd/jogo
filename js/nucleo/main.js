@@ -52,7 +52,7 @@ function passo(dt) {
     if (entrada.pausa()) { pausar(); return; }
     atualizarJogo(dt);
     Eventos.passoDeJogo(dt);
-    Progresso.atualizarAvisos(dt / 1000);
+    Progresso.atualizarAvisos(dt / 1000, typeof faixaPremio !== "undefined" && !!faixaPremio);
   } else if (estado === "pausa") {
     if (entrada.pausa()) continuar();
   } else if (jogo && jogo.demo) {

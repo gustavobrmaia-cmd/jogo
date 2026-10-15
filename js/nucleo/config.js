@@ -20,5 +20,8 @@ const CONFIG = {
   // tiro do jogador nos rivais 1–4 da liga Bronze (v17: no v16 o jogador perdia 31–32% das rodadas no rival 2 e só 41%
   // o venciam — era ali que a turma de 1m30–3m saía; o 4 fica no meio para a subida não virar um muro)
   multRivais: [1.25, 1.5, 1.5, 1.25],
+  // munição contra a máquina (v18): x do jogador e do bot (o estilingue aparece bem menos)
+  municaoJogador: 3,
+  municaoBot: 1.5,
   leve: false               // modo leve (celular/computador fraco): menos partículas e fundo dos menus a 30 qps
 };

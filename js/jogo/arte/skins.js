@@ -1,15 +1,15 @@
 "use strict";
 
 // =========================
-// ARTE DAS SKINS (v2)
+// ARTE DAS SKINS (v3, v18: mesmo acabamento "bala de goma" do corpo clássico e sprites em 2x com a câmera em pé)
 // CORPO: material/estampa da esfera (sprite em cache por skin + cor + raio, mesma âncora do corpo clássico do ArteBolinha).
 // ACESSÓRIO: sprite em cache (um por id + raio) desenhado por cima do rosto, com leve balanço por quadro.
 // Tudo é pré-renderizado; por quadro só drawImage + poucos traços. Luz sempre de cima-esquerda.
-//   ArteSkins.corpo(id, cor, r)            -> { c: canvas, m: âncora }   (mesmo tamanho do corpo clássico)
+//   ArteSkins.corpo(id, cor, r, q)         -> { c: canvas, m: âncora }   (mesmo tamanho do corpo clássico; q = resolução, opcional)
 //   ArteSkins.rosto(id, cor)               -> paleta do rosto (pálpebra, anel do olho, tinta da boca) para essa skin
-//   ArteSkins.acessorio(ctx, id, x, y, r, olharX, escalaX, escalaY, t)
+//   ArteSkins.acessorio(ctx, id, x, y, r, olharX, escalaX, escalaY, t, q)   (q = resolução do sprite, opcional)
 //   ArteSkins.miniatura(ctx, idCorpo, idAcessorio, cor, x, y, r, t)
-// Depende de ArteBolinha só em tempo de chamada (paleta, desenhar), então carrega antes dele.
+// Depende de ArteBolinha só em tempo de chamada (paleta, desenhar, brilhoEsfera, espQ), então carrega antes dele.
 // =========================
 
 const ArteSkins = (function() {
@@ -37,11 +37,12 @@ const ArteSkins = (function() {
   function fbm(x, y, z) { return vn(x, y, z) * 0.56 + vn(x * 2.1, y * 2.1, z * 2.1) * 0.29 + vn(x * 4.3, y * 4.3, z * 4.3) * 0.15; }
   function zonaRosto(x, y) { return 1 - sm(0.5, 0.95, Math.hypot(x / 0.78, (y - 0.06) / 0.62)); }   // 1 no rosto, 0 fora (padrões se acalmam aqui)
   function pal(cor) { return ArteBolinha.paleta(cor); }
-  function lw(R) { return Math.max(1.5, Math.min(2.6, R * 0.07)); }
+  var QS = 1;   // resolução do sprite sendo criado (1 ou 2): o traço fica igual na tela em qualquer resolução
+  function lw(R) { return ArteBolinha.espQ(R, QS); }
 
   // pixel a pixel numa esfera: fn(x, y, z, o) preenche o = [r,g,b,a]; x,y,z = normal (y para baixo)
   function px(R, fn) {
-    var S = (R + 4) * 2, c = cv(S, S), g = c.getContext("2d"), im = g.createImageData(S, S), d = im.data, m = S / 2, o = [0, 0, 0, 255], n = 0, i, j, x, y, q, z, l;
+    var S = (R + Math.ceil(4 * QS)) * 2, c = cv(S, S), g = c.getContext("2d"), im = g.createImageData(S, S), d = im.data, m = S / 2, o = [0, 0, 0, 255], n = 0, i, j, x, y, q, z, l;
     for (j = 0; j < S; j++) for (i = 0; i < S; i++, n += 4) {
       x = (i + 0.5 - m) / R; y = (j + 0.5 - m) / R; q = x * x + y * y;
       if (q > 1.1) continue;
@@ -84,24 +85,31 @@ const ArteSkins = (function() {
     var w = lw(R);
     g.save(); g.beginPath(); g.arc(0, 0, R, 0, PI2); g.clip();
     if (o.alb) o.alb(g);
-    if (o.sh) {
+    if (o.sh) {   // meio-tom (crescente larga, metade da força) + sombra
+      g.beginPath(); g.rect(-R - 2, -R - 2, 2 * R + 4, 2 * R + 4); g.moveTo(-R * 0.07 + R * 0.97, -R * 0.09); g.arc(-R * 0.07, -R * 0.09, R * 0.97, 0, PI2);
+      g.fillStyle = o.sh; g.globalAlpha = 0.5; g.fill("evenodd"); g.globalAlpha = 1;
       g.beginPath(); g.rect(-R - 2, -R - 2, 2 * R + 4, 2 * R + 4); g.moveTo(-R * 0.11 + R * 0.93, -R * 0.13); g.arc(-R * 0.11, -R * 0.13, R * 0.93, 0, PI2);
       g.fillStyle = o.sh; g.fill("evenodd");
     }
-    if (o.lt) { g.beginPath(); g.arc(-R * 0.22, -R * 0.27, R * 0.62, 0, PI2); g.fillStyle = o.lt; g.fill(); }
+    if (o.lt) {   // luz suave em degradê (em cima à esquerda)
+      var gl = g.createRadialGradient(-R * 0.32, -R * 0.38, 0, -R * 0.26, -R * 0.3, R * 0.78);
+      gl.addColorStop(0, o.lt); gl.addColorStop(0.45, o.lt); gl.addColorStop(1, "rgba(255,255,255,0)");
+      g.beginPath(); g.arc(0, 0, R, 0, PI2); g.fillStyle = gl; g.fill();
+    }
+    var gb = g.createLinearGradient(0, R * 0.64, 0, R * 1.02);                       // luz rebatida do chão
+    gb.addColorStop(0, "rgba(255,255,255,0)"); gb.addColorStop(1, o.rim);
+    g.globalAlpha = 0.45; g.beginPath(); g.ellipse(R * 0.1, R * 0.98, R * 0.78, R * 0.34, 0, 0, PI2); g.fillStyle = gb; g.fill(); g.globalAlpha = 1;
     if (o.mid) o.mid(g);
     g.restore();
-    g.beginPath(); g.arc(0, 0, R - w - R * 0.035, PI * 0.06, PI * 0.44);
-    g.strokeStyle = o.rim; g.lineWidth = Math.max(1.2, R * 0.055); g.lineCap = "round"; g.globalAlpha = 0.9; g.stroke(); g.globalAlpha = 1;
+    g.lineCap = "round";
+    g.beginPath(); g.arc(0, 0, R - w - R * 0.04, PI * 0.08, PI * 0.46);
+    g.strokeStyle = o.rim; g.lineWidth = Math.max(1.2 * QS, R * 0.06); g.globalAlpha = 0.95; g.stroke();
+    g.beginPath(); g.arc(0, 0, R - w - R * 0.04, PI * 0.5, PI * 0.62); g.lineWidth = Math.max(QS, R * 0.04); g.globalAlpha = 0.5; g.stroke(); g.globalAlpha = 1;
     var sp = o.sp === undefined ? 0.9 : o.sp;
-    if (sp > 0) {
-      g.save(); g.translate(-R * 0.42, -R * 0.5); g.rotate(-0.72);
-      g.beginPath(); g.ellipse(0, 0, R * 0.26, R * 0.105, 0, 0, PI2); g.fillStyle = "#fff"; g.globalAlpha = sp; g.fill(); g.restore();
-      g.beginPath(); g.arc(-R * 0.69, -R * 0.2, R * 0.065, 0, PI2); g.fillStyle = "#fff"; g.globalAlpha = sp * 0.95; g.fill(); g.globalAlpha = 1;
-    }
+    if (sp > 0) ArteBolinha.brilhoEsfera(g, R, sp);
     g.beginPath(); g.arc(0, 0, R - w / 2, 0, PI2); g.strokeStyle = o.ct; g.lineWidth = w; g.stroke();
   }
-  var SOMBRA = "rgba(48,28,120,0.40)", LUZ = "rgba(255,255,255,0.2)";
+  var SOMBRA = "rgba(48,28,120,0.40)", LUZ = "rgba(255,255,255,0.3)";
   function estrela4(g, x, y, a, b, rot) {   // brilho de 4 pontas
     g.beginPath();
     for (var i = 0; i < 8; i++) { var an = rot + i * PI / 4, rr = i % 2 ? b : a; g.lineTo(x + Math.cos(an) * rr, y + Math.sin(an) * rr); }
@@ -112,27 +120,34 @@ const ArteSkins = (function() {
   // ---------- corpos ----------
   var MAT = {};
 
+  // listras: 4 faixas claras bem marcadas (fio escuro na borda), o rosto fica liso
   MAT.listras = function(g, R, P) {
-    var c = P.rgb, claro = mx(c, BR, 0.62);
+    var c = P.rgb, claro = mx(c, BR, 0.74), fio = mx(c, AZ, 0.32);
     esfera(g, R, { sh: SOMBRA, lt: LUZ, rim: P.rim, ct: P.contorno, alb: function(g) {
-      g.fillStyle = P.base; g.fillRect(-R, -R, 2 * R, 2 * R); g.fillStyle = claro;
-      [[50, 74], [-14, -34], [-47, -68]].forEach(function(b) { if (retalho(g, R, -100, 100, b[0], b[1], 18)) g.fill(); });
+      g.fillStyle = P.base; g.fillRect(-R, -R, 2 * R, 2 * R);
+      g.lineWidth = Math.max(QS, R * 0.035); g.lineJoin = "round";
+      [[62, 79], [33, 49], [-22, -38], [-51, -67]].forEach(function(b) {
+        if (retalho(g, R, -100, 100, b[0], b[1], 18)) { g.fillStyle = claro; g.fill(); g.strokeStyle = fio; g.globalAlpha = 0.55; g.stroke(); g.globalAlpha = 1; }
+      });
     } });
   };
 
+  // pintas: bolinhas claras com fio escuro na testa, nos lados e embaixo (posição na tela, longe dos olhos, boca e bochechas)
+  var PINTAS = [[0.06, -0.68, 0.14], [0.5, -0.56, 0.13], [-0.8, 0.06, 0.12], [0.84, -0.02, 0.11], [-0.38, 0.74, 0.14], [0.3, 0.76, 0.13],
+    [0.72, 0.56, 0.1], [-0.76, 0.5, 0.1], [-0.24, -0.9, 0.08]];
   MAT.pintas = function(g, R, P) {
-    var c = P.rgb, claro = mx(c, BR, 0.66), sombra = mx(c, AZ, 0.18);
+    var c = P.rgb, claro = mx(c, BR, 0.72), sombra = mx(c, AZ, 0.42);
     esfera(g, R, { sh: SOMBRA, lt: LUZ, rim: P.rim, ct: P.contorno, alb: function(g) {
       g.fillStyle = P.base; g.fillRect(-R, -R, 2 * R, 2 * R);
-      for (var la = -70, k = 0; la <= 75; la += 27, k++) for (var lo = (k % 2) * 20 - 100; lo <= 100; lo += 40) {
-        var p = ll(lo * PI / 180, la * PI / 180);
-        if (p[2] < 0.1 || (Math.abs(p[0]) < 0.7 && p[1] > -0.52 && p[1] < 0.46)) continue;     // rosto livre
-        var rd = 0.15, a = Math.atan2(p[1], p[0]);
-        g.save(); g.translate(p[0] * R, p[1] * R); g.rotate(a);
-        g.beginPath(); g.ellipse(0, R * 0.012, R * rd * p[2], R * rd, 0, 0, PI2); g.fillStyle = sombra; g.fill();
-        g.beginPath(); g.ellipse(0, 0, R * rd * p[2], R * rd, 0, 0, PI2); g.fillStyle = claro; g.fill();
+      g.lineWidth = Math.max(QS, R * 0.03);
+      PINTAS.forEach(function(q) {
+        var x = q[0], y = q[1], d = Math.hypot(x, y), z = Math.sqrt(Math.max(0, 1 - d * d)), rd = q[2], k = 0.4 + 0.6 * z;   // achata perto da borda
+        g.save(); g.translate(x * R, y * R); g.rotate(Math.atan2(y, x));
+        g.beginPath(); g.ellipse(R * 0.012, R * 0.018, R * rd * k, R * rd, 0, 0, PI2); g.fillStyle = sombra; g.globalAlpha = 0.45; g.fill(); g.globalAlpha = 1;
+        g.beginPath(); g.ellipse(0, 0, R * rd * k, R * rd, 0, 0, PI2); g.fillStyle = claro; g.fill();
+        g.strokeStyle = sombra; g.globalAlpha = 0.5; g.stroke(); g.globalAlpha = 1;
         g.restore();
-      }
+      });
     } });
   };
 
@@ -146,13 +161,15 @@ const ArteSkins = (function() {
     } });
   };
 
+  // camuflado: manchas grandes e nítidas em 3 tons (verde escuro, marrom, cáqui); o rosto fica mais limpo
+  function fbm2(x, y, z) { return vn(x, y, z) * 0.72 + vn(x * 2.3, y * 2.3, z * 2.3) * 0.28; }
   MAT.camuflado = function(g, R, P) {
-    var c = P.rgb, A = mxA(c, ESC, 0.16), B = mxA(c, [34, 44, 28], 0.55), C = mxA(c, [226, 206, 150], 0.45), D = mxA(c, ESC, 0.7);
+    var c = P.rgb, A = mxA(c, ESC, 0.06), B = mxA(mxA(c, [28, 72, 26], 0.62), ESC, 0.12), C = mxA(c, [112, 76, 38], 0.62), D = mxA(c, [236, 226, 166], 0.5);
     var img = px(R, function(x, y, z, o) {
-      var f = zonaRosto(x, y), n = fbm(x * 2.5 + 3, y * 2.5 + 1, z * 2.5 + 5), n2 = fbm(x * 2.9 + 9, y * 2.9 + 2, z * 2.9 + 7), q = A;
-      var t1 = 0.52 + f * 0.14, t2 = 0.55 + f * 0.12;
-      q = mxA(q, B, sm(t1 - 0.02, t1 + 0.02, n)); q = mxA(q, C, sm(t2 - 0.02, t2 + 0.02, n2) * (1 - sm(t1 - 0.02, t1 + 0.02, n) * 0.0));
-      q = mxA(q, D, sm(0.62, 0.66, vn(x * 5 + 4, y * 5 + 6, z * 5 + 1)) * (1 - f * 0.8));
+      var f = zonaRosto(x, y), q = A;
+      q = mxA(q, B, sm(0.5, 0.53, fbm2(x * 1.8 + 3, y * 1.8 + 1, z * 1.8 + 5) - f * 0.12));
+      q = mxA(q, C, sm(0.57, 0.6, fbm2(x * 2 + 9, y * 2 + 2, z * 2 + 7) - f * 0.14));
+      q = mxA(q, D, sm(0.66, 0.69, fbm2(x * 2.4 + 4, y * 2.4 + 6, z * 2.4 + 1) - f * 0.2));
       o[0] = q[0]; o[1] = q[1]; o[2] = q[2];
     });
     esfera(g, R, { sh: SOMBRA, lt: LUZ, rim: P.rim, ct: P.contorno, alb: function(g) { g.drawImage(img, -img.width / 2, -img.height / 2); } });
@@ -445,30 +462,33 @@ const ArteSkins = (function() {
   };
 
   var cache = {};
-  function criar(id, cor, R) {
-    var S = (R + 4) * 2, c = cv(S, S), g = c.getContext("2d");
+  function criar(id, cor, R, q) {
+    var pd = Math.ceil(4 * q), S = (R + pd) * 2, c = cv(S, S), g = c.getContext("2d");
     g.translate(S / 2, S / 2);
-    MAT[id](g, R, pal(cor));
+    QS = q; MAT[id](g, R, pal(cor)); QS = 1;
     return { c: c, m: S / 2 };
   }
-  function corpo(id, cor, r) {
+  // r = raio do sprite em pixels (já multiplicado por q)
+  function corpo(id, cor, r, q) {
     var R = Math.max(8, Math.round(r)), fx = FIXA[id], k;
-    if (id === "classico" || !MAT[id]) return ArteBolinha.corpoBase(cor || "#4dabf7", R);
-    cor = fx || cor || "#4dabf7"; k = id + "|" + cor + "|" + R;
-    return cache[k] || (cache[k] = criar(id, cor, R));
+    q = q || 1;
+    if (id === "classico" || !MAT[id]) return ArteBolinha.corpoBase(cor || "#4dabf7", R, q);
+    cor = fx || cor || "#4dabf7"; k = id + "|" + cor + "|" + R + "|" + q;
+    return cache[k] || (cache[k] = criar(id, cor, R, q));
   }
 
   // paleta do rosto por skin: lid = cor da pálpebra (igual ao corpo ali), contorno = linha da pálpebra, anel = contorno fino do olho, tinta = boca
+  // iris = reflexo colorido na pupila; bochecha = cor do rubor (null = sem)
   var ROSTOS = {
-    futebol: { lid: "#e9ebf1", contorno: "#585d7e", anel: "#585d7e" },
-    melancia: { lid: "#4fb552", contorno: "#154a27", anel: "#154a27" },
-    robo: { lid: "#232c52", contorno: "#0d1228" },
-    doce: { lid: "#f98fb7", contorno: "#a62d66", anel: "#a62d66" },
-    gelo: { lid: "#cfeaff", contorno: "#3f7fb8", anel: "#3f7fb8" },
-    lava: { lid: "#3a2230", contorno: "#14090f", tinta: "#ffd9a0" },
-    diamante: { lid: "#c8f5fa", contorno: "#2b8da0", anel: "#2b8da0" },
-    galaxia: { lid: "#3b238a", contorno: "#150a38", tinta: "#f1e9ff" },
-    ouro: { lid: "#fcc419", contorno: "#8a5207", anel: "#8a5207" }
+    futebol: { lid: "#e9ebf1", contorno: "#585d7e", anel: "#585d7e", iris: "#4a5378", bochecha: "rgb(255,122,150)" },
+    melancia: { lid: "#4fb552", contorno: "#154a27", anel: "#154a27", iris: "#2f7a3d", bochecha: "rgb(255,96,120)" },
+    robo: { lid: "#232c52", contorno: "#0d1228", anel: "#0d1228", iris: "#2a8f9a", bochecha: null },
+    doce: { lid: "#f98fb7", contorno: "#a62d66", anel: "#a62d66", iris: "#a62d66", bochecha: "rgb(232,40,110)" },
+    gelo: { lid: "#cfeaff", contorno: "#3f7fb8", anel: "#3f7fb8", iris: "#3a6fb0", bochecha: "rgb(255,140,190)" },
+    lava: { lid: "#3a2230", contorno: "#14090f", anel: "#14090f", tinta: "#ffd9a0", iris: "#a8401c", bochecha: "rgb(255,110,40)" },
+    diamante: { lid: "#c8f5fa", contorno: "#2b8da0", anel: "#2b8da0", iris: "#2b8da0", bochecha: "rgb(255,140,190)" },
+    galaxia: { lid: "#3b238a", contorno: "#150a38", anel: "#150a38", tinta: "#f1e9ff", iris: "#6b4fd8", bochecha: "rgb(240,90,200)" },
+    ouro: { lid: "#fcc419", contorno: "#8a5207", anel: "#8a5207", iris: "#8a5207", bochecha: "rgb(255,120,80)" }
   };
   var rostos = {};
   function rosto(id, cor) {
@@ -477,10 +497,10 @@ const ArteSkins = (function() {
     var P = pal(cor || "#4dabf7"), c = P.rgb;
     r = ROSTOS[id];
     if (!r) {
-      if (id === "cromado") r = { lid: mx(c, BR, 0.5), contorno: mx(c, ESC, 0.74), anel: mx(c, ESC, 0.74) };
-      else if (id === "neon") r = { lid: mx(c, ESC, 0.86), contorno: mx(c, BR, 0.2), tinta: mx(c, BR, 0.62) };
-      else if (id === "camuflado") r = { lid: mx(c, ESC, 0.16), contorno: P.contorno, anel: P.contorno };
-      else r = { lid: P.lid, contorno: P.contorno, anel: P.contorno };
+      if (id === "cromado") r = { lid: mx(c, BR, 0.5), contorno: mx(c, ESC, 0.74), anel: mx(c, ESC, 0.74), iris: P.iris };
+      else if (id === "neon") r = { lid: mx(c, ESC, 0.86), contorno: mx(c, BR, 0.2), anel: mx(c, ESC, 0.7), tinta: mx(c, BR, 0.62), iris: P.iris, bochecha: mx(c, BR, 0.25) };
+      else if (id === "camuflado") r = { lid: mx(c, ESC, 0.16), contorno: P.contorno, anel: P.contorno, iris: P.iris };
+      else r = { lid: P.lid, contorno: P.contorno, anel: P.contorno, iris: P.iris };
     }
     return (rostos[k] = r);
   }
@@ -731,14 +751,14 @@ const ArteSkins = (function() {
   };
 
   var spr = {};
-  function sprite(id, R) {
-    var k = id + "|" + R, s = spr[k];
+  function sprite(id, R, q) {
+    var k = id + "|" + R + "|" + q, s = spr[k];
     if (s) return s;
     var W = 2 * Math.ceil(1.7 * R + 4), top = Math.ceil(2.0 * R + 4), bot = Math.ceil(1.1 * R + 4);
     var c = cv(W, top + bot), g = c.getContext("2d", { willReadFrequently: true });
     s = { c: c, ox: W / 2, oy: top };
     g.translate(W / 2, top); g.scale(R, R);
-    AC[id](g, lw(R) / R, R, s);
+    QS = q; AC[id](g, lw(R) / R, R, s); QS = 1;
     // recorta para a caixa do desenho (menos pixels por quadro)
     var d = g.getImageData(0, 0, W, top + bot).data, x0 = W, x1 = -1, y0 = top + bot, y1 = -1, i, j, w2 = W, h2 = top + bot;
     for (j = 0; j < h2; j++) for (i = 0; i < w2; i++) if (d[(j * w2 + i) * 4 + 3] > 3) { if (i < x0) x0 = i; if (i > x1) x1 = i; if (j < y0) y0 = j; if (j > y1) y1 = j; }
@@ -748,9 +768,10 @@ const ArteSkins = (function() {
     }
     return (spr[k] = s);
   }
-  function acessorio(ctx, id, x, y, r, olharX, escX, escY, t) {
+  function acessorio(ctx, id, x, y, r, olharX, escX, escY, t, q) {
     if (!AC[id]) return;
-    var R = Math.max(8, Math.round(r)), s = sprite(id, R), sc = r / R, ox = olharX || 0;
+    q = q || 1;
+    var R = Math.max(8, Math.round(r * q)), s = sprite(id, R, q), sc = r / R, ox = olharX || 0;
     ox = ox > 1.5 ? 1.5 : ox < -1.5 ? -1.5 : ox;
     ctx.save();
     ctx.translate(x + ox * r * (CARA[id] ? 0.07 : 0.045), y);
@@ -772,7 +793,7 @@ const ArteSkins = (function() {
   function aquecer(r, cor) {
     r = r || 28;
     for (var id in MAT) corpo(id, cor || "#4dabf7", r);
-    for (var a in AC) sprite(a, Math.max(8, Math.round(r)));
+    for (var a in AC) sprite(a, Math.max(8, Math.round(r)), 1);
   }
 
   return { corpo: corpo, rosto: rosto, acessorio: acessorio, miniatura: miniatura, aquecer: aquecer };

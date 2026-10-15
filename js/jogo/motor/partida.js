@@ -99,11 +99,13 @@ function novaPartida(modo, opcoes) {
   const rival = modo === "bot" && opcoes.rival !== undefined && opcoes.rival !== null ? RIVAIS[opcoes.rival] : null;
   // v16: na liga Bronze os mapas cruéis só aparecem como casa de rival (1ª rodada). No v15 quem chegava longe — a turma
   // que mais joga — perdia 86% no vulcão, 83% no espaço, 75% no dojô, 50% na cidade e 44% na lua (nos outros: 8–16%).
-  if (rival && !treino && !(opcoes.liga > 0)) {
+  // v18: em todas as ligas (no v17.5, na Prata, o jogador perdia 80% no oceano e 63% no dojô e na cidade — e quem chega
+  // na Prata é justamente quem joga 5 min ou mais)
+  if (rival && !treino) {
     const crueis = ["dojo", "castelo", "cidade", "lua", "vulcao", "espaco", "oceano"];
     // v17: até o rival 3 também sem deserto (vento), gelo (escorrega) e laboratório (gravidade vira) — no v16 o jogador
     // perdia 41%, 42% e 35% das rodadas neles, contra 16–27% nos outros. Sobram campo, fábrica, floresta, fliperama, templo.
-    if (opcoes.rival <= 2) crueis.push("deserto", "gelo", "laboratorio");
+    if (opcoes.rival <= 2 && !(opcoes.liga > 0)) crueis.push("deserto", "gelo", "laboratorio");
     ordem = ordem.filter(function(id) { return crueis.indexOf(id) < 0 || id === rival.casa; });
   }
   if (rival && !treino) ordem = [rival.casa].concat(ordem.filter(function(id) { return id !== rival.casa; }));
@@ -185,6 +187,10 @@ function iniciarRodada() {
     Poder.aplicar(b1, Poder.doJogador());
     if (j.rival) Poder.aplicar(b2, Poder.doRival(j.rival.i, j.rival.liga));
   }
+  // v18: munição maior contra a máquina. No v17.5 o jogador passava ~70% da luta no estilingue (a arma da rodada
+  // acabava em 3–5 s de tiro segurado — no celular a pessoa segura o botão) e o bot, que só atira quando acerta, ~40%:
+  // as armas malucas, que são a graça do jogo, quase não ficavam na mão de quem joga
+  if (M.contraBot) { b1.multMunicao = CONFIG.municaoJogador; b2.multMunicao = CONFIG.municaoBot; }
   // os dois começam com a mesma arma (justo) e ela muda a cada rodada
   const arma = j.treino && j.rodada === 1 ? "rifle" : sortearArma(M, true);
   equipar(b1, arma); equipar(b2, arma);
@@ -498,8 +504,9 @@ function fecharRodada(j) {
 function proximaRodadaComIntervalo(j) {
   const novato = save.partidas <= 2;
   // v16: no meio da partida não pede anúncio (rodadas de ~25 s: cortar a luta no meio espanta); o pedido fica antes de
-  // cada partida (telas.js). Na sobrevivência a pausa entre ondas é a única: lá continua.
-  if (novato || j.esperandoAnuncio || j.modo !== "sobrevivencia") { iniciarRodada(); return; }
+  // cada partida (telas.js). Na sobrevivência a pausa entre ondas é a única: lá continua, mas a cada 3 ondas
+  // (v18: antes pedia em toda onda, a cada 6–30 s)
+  if (novato || j.esperandoAnuncio || j.modo !== "sobrevivencia" || j.onda % 3 !== 1) { iniciarRodada(); return; }
   j.esperandoAnuncio = true;
   j.fase = "intervalo";
   Poki.jogando(false);

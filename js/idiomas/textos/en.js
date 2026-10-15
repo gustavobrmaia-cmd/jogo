@@ -363,5 +363,6 @@ TEXTOS.en = {
   mel_d_vida: "Last longer",
   mel_d_veloc: "Move faster",
   gratis: "FREE!",
-  escolha_gratis: "Pick 1 for free!"
+  escolha_gratis: "Pick 1 for free!",
+  rival_venceu_rodada: "{0} WINS THE ROUND"
 };

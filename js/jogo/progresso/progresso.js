@@ -278,8 +278,11 @@ const Progresso = (function() {
     return premio;
   }
 
-  function atualizarAvisos(dt) {
-    for (let i = avisos.length - 1; i >= 0; i--) { avisos[i].t += dt; if (avisos[i].t > 3) avisos.splice(i, 1); }
+  // v18: um aviso por vez (fila); esperar = a faixa de prêmios está na tela (desenho.js mostra depois dela)
+  function atualizarAvisos(dt, esperar) {
+    if (!avisos.length || esperar) return;
+    avisos[0].t += dt;
+    if (avisos[0].t > 2.6) avisos.shift();
   }
 
   return {

@@ -184,6 +184,31 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
   A 1ª partida (treino) vai sempre direto para o rival 2. Evento milestone/next-rival-direct.
   Liga Bronze: mapas cruéis (dojô, castelo, cidade, lua, vulcão, espaço, oceano) só como casa de rival; no v15 quem
   chegava longe perdia 86% no vulcão, 83% no espaço, 75% no dojô. "⚡ VS ⚡" na abertura só quando alguém passa de 100.
+- Poki v17.5 (15 out 12:50, meio-dia): 2m26, Engaged 24% (v16 no mesmo horário 2m29–2m30/23%). A v17 mexeu no caminho,
+  não no tempo: chegam ao rival 3 23% (v16 12%), ao 4 10% (6,9%); rodadas 2/3 do rival 2 com 13%/22% de derrota (v16
+  32%/31%); ~100% de quem vence o rival 2 começa o 3 (melhoria grátis automática). Mas as partidas ficaram mais curtas e as
+  pessoas saem ~17–20% por rodada MESMO GANHANDO (rival 2: 1,7% perdem a partida, 54% não terminam). A 1ª partida (sem
+  como perder) ainda perde 47%; a tela depois do rival 3 perde 31%.
+- JOGADOR DE TESTE (agente, v17.5, ~55 min de jogo real com toque/mouse; relatório em scratchpad/v18/jogador/relatorio.md):
+  a saída é por TEMPO (~30–38% por minuto do 1º ao 10º), não por rodada nem dificuldade. Achados: (1) o jogador passava
+  ~70% da luta no ESTILINGUE (a arma da rodada acaba em 3–5 s de tiro segurado; o bot, que só atira quando acerta, ~40%);
+  (2) em pé o canvas tem 1280 px lógicos em ~400 px de tela: textos de 16–26 px viravam 4–8 px de verdade; (3) nenhuma
+  decisão até o 3º minuto; (4) rivais 1–3 sem tensão; (5) na Prata os mapas cruéis voltavam (oceano 80%, dojô 63%).
+- v18:
+  - Munição contra a máquina: jogador x3, bot x1,5 (`CONFIG.municaoJogador`/`municaoBot`, `b.multMunicao` em equipar).
+    Simulação (scratchpad/sim/estilingue.js): estilingue do jogador 70%/60%/80% -> 19%/9%/39% da luta nos rivais 2/3/5,
+    bot ~40% -> 20–29%; derrotas iguais (rival 2 9->11%, rival 5 51->49%), partidas ~10% mais curtas.
+  - Em pé: etiqueta "VOCÊ" x1,6; avisos de conquista/missão 40 px, UM POR VEZ (fila em Progresso.atualizarAvisos) e só
+    depois que a faixa de prêmios some; faixa com o resto em 2 linhas e letra maior; PODER com mais espaço das moedas.
+  - Modo rivais: "{RIVAL} VENCEU A RODADA" (chave nova rival_venceu_rodada) e "{RIVAL} venceu!" no lugar do "bot".
+  - Mapas cruéis só como casa de rival em TODAS as ligas; deserto/gelo/laboratório fora só nos rivais 1–3 da Bronze.
+  - Sobrevivência: anúncio a cada 3 ondas (pedia em toda onda).
+  - SPRITES (2 agentes): bolinhas com volume, bochechas, olhos com brilho, dor "> <", feliz com língua; sprites 2x em pé
+    (antes borravam com o zoom da câmera); listras/pintas/camuflado bem marcados (bolinhas.js, skins.js; criar o 2x de
+    camuflado/galáxia/lava custa ~25 ms uma vez, na abertura). Armas com contorno, fio de luz e brilho de raridade, rifle
+    redesenhado, balas com traçante, feixes com brilho, caixa com visor aceso, cartas com borda de carta colecionável,
+    floresta mais clara com musgo luminoso nas plataformas, templo com plataformas douradas (armas.js, cartas.js,
+    cenarios.js; `pontaDoCano` idêntica, conferida em 51 armas x 11 ângulos x 3 raios).
 - Poki v16 (4 testes): 11 out 10:18 2m29/23%, 13 out 11:14 2m30 (manhã); 12 out 18:51 2m40, 13 out 19:59 2m39/26% (noite).
   Repetiu igual no mesmo horário (ruído menor que se achava). À noite passa no Engaged, falta ~20 s na média.
   O vazamento ficou no rival 2: rodadas 2 e 3 da 2ª partida com 31–32% de derrota (1ª partida 7–8%), só 41% venciam

@@ -363,5 +363,6 @@ TEXTOS.pl = {
   mel_d_vida: "Więcej wytrzymasz",
   mel_d_veloc: "Szybszy ruch",
   gratis: "ZA DARMO!",
-  escolha_gratis: "Wybierz 1 za darmo!"
+  escolha_gratis: "Wybierz 1 za darmo!",
+  rival_venceu_rodada: "{0} WYGRYWA RUNDĘ"
 };

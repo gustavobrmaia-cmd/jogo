@@ -363,5 +363,6 @@ TEXTOS.id = {
   mel_d_vida: "Lebih tahan lama",
   mel_d_veloc: "Lari lebih cepat",
   gratis: "GRATIS!",
-  escolha_gratis: "Pilih 1 gratis!"
+  escolha_gratis: "Pilih 1 gratis!",
+  rival_venceu_rodada: "{0} MENANG RONDE"
 };

@@ -363,5 +363,6 @@ TEXTOS.nl = {
   mel_d_vida: "Langer volhouden",
   mel_d_veloc: "Sneller rennen",
   gratis: "GRATIS!",
-  escolha_gratis: "Kies er 1 gratis!"
+  escolha_gratis: "Kies er 1 gratis!",
+  rival_venceu_rodada: "{0} WINT DE RONDE"
 };
