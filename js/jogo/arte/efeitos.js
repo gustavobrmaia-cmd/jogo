@@ -233,30 +233,61 @@ const Efeitos = (function() {
   function deslocamento() { return desloc; }
 
   // ---------- textos (sprite em cache por texto+cor, 1:1) ----------
-  var NT = 24, textos = [], proxT = 0, cacheTxt = {}, nCacheTxt = 0;
-  for (var ti = 0; ti < NT; ti++) textos.push({ vivo: false, s: null, x: 0, y: 0, vida: 0, vy: 0, esc: 1, idade: 0 });
-  function spriteTexto(txt, cor) {
-    var k = txt + "|" + cor, s = cacheTxt[k];
+  // v17.5: números de dano ("-12") têm letra mais grossa, "espessura" embaixo e degradê, e saltam num arco para o
+  // lado (o tamanho cresce com o dano); no jogador (contra o bot) ficam vermelhos para ver na hora quem apanhou
+  var NT = 24, textos = [], proxT = 0, cacheTxt = {}, nCacheTxt = 0, EH_NUM = /^[-+]\d+$/;
+  for (var ti = 0; ti < NT; ti++) textos.push({ vivo: false, s: null, x: 0, y: 0, vida: 0, vy: 0, vx: 0, esc: 1, idade: 0, num: false });
+  function spriteTexto(txt, cor, num) {
+    var k = txt + "|" + cor + (num ? "|n" : ""), s = cacheTxt[k];
     if (s) return s;
-    if (nCacheTxt > 90) { cacheTxt = {}; nCacheTxt = 0; }
-    var F = 24, pad = 5, rgb = hexRgb(cor);
-    var fonte = "800 " + F + "px Nunito, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif";
+    if (nCacheTxt > 160) { cacheTxt = {}; nCacheTxt = 0; }
+    var F = num ? 30 : 24, pad = num ? 8 : 6, rgb = hexRgb(cor);
+    var fonte = "900 " + F + "px Nunito, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif";
     var m = criarCanvas(4, 4).getContext("2d"); m.font = fonte;
-    var w = Math.ceil(m.measureText(txt).width) + pad * 2, h = F + pad * 2 + 4;
+    var w = Math.ceil(m.measureText(txt).width) + pad * 2, h = F + pad * 2 + (num ? 7 : 4);
     var c = criarCanvas(w, h), g = c.getContext("2d");
     g.font = fonte; g.textAlign = "center"; g.textBaseline = "middle"; g.lineJoin = "round";
-    g.lineWidth = 3.6; g.strokeStyle = mix(rgb, ESC, 0.82); g.strokeText(txt, w / 2, h / 2 + 1);   // contorno escuro fino
-    g.fillStyle = "rgb(" + rgb.join(",") + ")"; g.fillText(txt, w / 2, h / 2 + 1);
+    if (num) {
+      var yb = h / 2 - 1;
+      g.lineWidth = 7; g.strokeStyle = mix(rgb, ESC, 0.86);
+      g.strokeText(txt, w / 2, yb + 3); g.strokeText(txt, w / 2, yb);
+      g.fillStyle = mix(rgb, ESC, 0.5); g.fillText(txt, w / 2, yb + 3);
+      var gr = g.createLinearGradient(0, yb - F * 0.42, 0, yb + F * 0.36);
+      gr.addColorStop(0, mix(rgb, BRA, 0.62)); gr.addColorStop(0.55, "rgb(" + rgb.join(",") + ")"); gr.addColorStop(1, mix(rgb, ESC, 0.15));
+      g.fillStyle = gr; g.fillText(txt, w / 2, yb);
+    } else {
+      // nome da arma, "SALVO!"...: contorno escuro com um pouco de "espessura" embaixo (lê melhor em qualquer mapa)
+      g.lineWidth = 5.5; g.strokeStyle = mix(rgb, ESC, 0.85);
+      g.strokeText(txt, w / 2, h / 2 + 2); g.strokeText(txt, w / 2, h / 2);
+      g.fillStyle = "rgb(" + rgb.join(",") + ")"; g.fillText(txt, w / 2, h / 2);
+    }
     s = cacheTxt[k] = { c: c, w: w, h: h };
     nCacheTxt++;
     return s;
+  }
+  // o número caiu em quem joga contra o bot? (o motor põe o texto logo acima da bolinha)
+  function corDoAlvo(x, y, cor) {
+    if (typeof jogo === "undefined" || !jogo || !jogo.M || !jogo.M.contraBot) return cor;
+    var bs = jogo.M.bolinhas;
+    for (var i = 0; i < bs.length; i++) {
+      var b = bs[i];
+      if (b.humano && Math.abs(b.x - x) < 3 && Math.abs(b.y - b.r - 8 - y) < 3) return "#ff6b6b";
+    }
+    return cor;
   }
   function texto(x, y, txt, cor, escala) {
     var tx = null, k;
     for (k = 0; k < NT; k++) if (!textos[k].vivo) { tx = textos[k]; break; }
     if (!tx) { tx = textos[proxT]; proxT = (proxT + 1) % NT; }
-    tx.vivo = true; tx.s = spriteTexto(String(txt), cor || "#ffffff");
-    tx.x = x; tx.y = y; tx.idade = 0; tx.vida = 1.05; tx.vy = 110; tx.esc = escala || 1;
+    txt = String(txt);
+    var num = EH_NUM.test(txt);
+    if (num && txt.charAt(0) === "-") cor = corDoAlvo(x, y, cor || "#ffffff");
+    tx.vivo = true; tx.s = spriteTexto(txt, cor || "#ffffff", num); tx.num = num;
+    tx.x = x; tx.y = y; tx.idade = 0;
+    if (num) {
+      var v = Math.abs(parseInt(txt, 10)) || 0;
+      tx.vida = 0.9; tx.vy = entre(250, 310); tx.vx = entre(-80, 80); tx.esc = Math.min(1.55, 0.82 + v / 40);
+    } else { tx.vida = 1.05; tx.vy = 110; tx.vx = 0; tx.esc = escala || 1; }
   }
 
   // ---------- efeitos prontos ----------
@@ -380,7 +411,8 @@ const Efeitos = (function() {
       if (!tx.vivo) continue;
       tx.idade += dt;
       if (tx.idade >= tx.vida) { tx.vivo = false; continue; }
-      tx.y -= tx.vy * dt; tx.vy *= Math.max(0, 1 - 2.6 * dt);
+      if (tx.num) { tx.x += tx.vx * dt; tx.vx *= Math.max(0, 1 - 1.4 * dt); tx.y -= tx.vy * dt; tx.vy -= 600 * dt; }   // arco
+      else { tx.y -= tx.vy * dt; tx.vy *= Math.max(0, 1 - 2.6 * dt); }
     }
     if (tremorA > 0) {
       tremorA *= Math.pow(0.86, dt * 60);
@@ -546,7 +578,8 @@ const Efeitos = (function() {
     for (k = 0; k < NT; k++) {
       var tx = textos[k];
       if (!tx.vivo) continue;
-      var id = tx.idade, pop = id < 0.1 ? 0.6 + id / 0.1 * 0.7 : (id < 0.2 ? 1.3 - (id - 0.1) / 0.1 * 0.3 : 1);
+      var id = tx.idade, pop = tx.num ? (id < 0.08 ? 0.4 + id / 0.08 * 1.15 : (id < 0.2 ? 1.55 - (id - 0.08) / 0.12 * 0.55 : 1)) :
+        (id < 0.1 ? 0.6 + id / 0.1 * 0.7 : (id < 0.2 ? 1.3 - (id - 0.1) / 0.1 * 0.3 : 1));
       var fade = tx.vida - id < 0.3 ? (tx.vida - id) / 0.3 : 1;
       ctx.globalAlpha = fade;
       if (pop === 1 && tx.esc === 1) ctx.drawImage(tx.s.c, (tx.x - tx.s.w / 2 + 0.5) | 0, (tx.y - tx.s.h / 2 + 0.5) | 0);

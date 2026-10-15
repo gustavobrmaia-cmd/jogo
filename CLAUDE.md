@@ -234,6 +234,23 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
   placar em estrelas que pulam quando o ponto entra (o letreiro do fim da rodada já mostra o placar novo); "LUTE!" entra
   grande e bate no lugar; vencer rodada/partida tem raios girando atrás e a partida tem confete; a bolinha amassa na
   direção do golpe; quem está rápido (Velocidade/Rapidez) deixa rastro; arma rara/lendária pegada tem nome maior e anel.
+- VISUAL v17.5 (feito por 2 agentes em paralelo, luta e telas, depois juntado):
+  - Luta (desenho.js, arte/efeitos.js):
+    - HUD com retrato da bolinha num medalhão (cara muda: dor, medo, feliz; sprite em cache `retrato()`).
+    - Barra de vida com degradê, pedaço creme que some e piscada branca; relógio em medalhão dourado; "Rodada N" e
+      "dano em dobro" em pílulas.
+    - Abertura do rival: faixa VS com os dois retratos. Letreiros de arcade (`letreiro()`: contorno, 3D, degradê,
+      diminui em idioma longo). K.O. em estouro de HQ, vitória numa fita na cor de quem venceu.
+    - Números de dano saltando em arco (vermelhos no jogador). Carta pega abaixo do HUD.
+    - Controles de toque com ícones e mais visíveis (opacidade 0,28 -> 0,62). Mesmo tempo de desenho por quadro.
+  - Telas (estilo.css, index.html, interface/*, arte/bau.js):
+    - Em pé o conteúdo das telas cresce com `zoom` (1,3 em 16:9, 1,42 em celular mais alto): antes, no celular, quase
+      todo texto ficava com 8–12 px. Corrigidos skins cortando a 3ª coluna, abas de missões vazando e botões de 520 px.
+    - Tela de fim: título dourado com raios (vitória) ou frio (derrota), prêmios em fichas (`mostrarSub`), XP numa
+      pílula, escada num painel com trilho que enche e baú em cima dos rivais 5 e 10, baú num cartão com luz e moedas
+      (`ArteBau.luz`/`ArteBau.moedas`), contagem do PRÓXIMO RIVAL num selo com barra que esvazia (só desenho).
+    - Pausa, Opções e Continuar em caixas com placa de título; menu com ícone e cor por botão; "Voltar"/"Menu"
+      secundários; `body.leve` desliga os raios girando.
 - PODER v14: cartões sem porcentagem — frase curta ("Bate mais forte", "Aguenta mais", "Corre mais") e 5 estrelas por
   faixa (bronze 1–5, prata 6–10, ouro 11–15, diamante 16–20, mestre 21–25); "+1" sobe do cartão ao comprar. Na tela de fim
   deitado só as estrelas (para caber); a frase aparece em pé e na tela Melhorar.

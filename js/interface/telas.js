@@ -35,7 +35,9 @@ function atualizarTextos() {
   el("btnSom").textContent = somTxt;
   el("btnSomPausa").textContent = somTxt;
   el("btnQualidade").textContent = t("qualidade_" + save.qualidade);
+  document.querySelectorAll('[data-acao="som"] .ic').forEach(function(e) { e.textContent = save.mudo ? "🔇" : "🔊"; });
   document.body.classList.toggle("toque", !!entrada.toque);
+  document.body.classList.toggle("leve", !!CONFIG.leve);   // v17.5: modo leve sem as animações de fundo das telas
   el("listaIdiomas").querySelectorAll("button").forEach(function(b) {
     b.classList.toggle("ativo", b.dataset.idioma === IDIOMA);
   });

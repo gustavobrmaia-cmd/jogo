@@ -36,9 +36,12 @@ function abrirRecompensa(j, titulo, sub) {
   garantirDemo();          // no fundo, a luta de demonstração (sem o placar da partida que acabou)
   atualizarTextos();
   el("recTitulo").textContent = titulo;
-  el("recSub").textContent = sub || "";
   rec.sub = sub || "";
+  mostrarSub(rec.sub);
   el("recPremio").textContent = "";
+  // v17.5: vitória (título dourado com raios) ou derrota (tons frios)
+  el("telaRecompensa").classList.toggle("venceu", rec.venceu || j.modo === "2p");
+  el("telaRecompensa").classList.toggle("perdeu", !rec.venceu && j.modo !== "2p");
   animarXp(xp);
   // painel de poder (contra máquina): ao lado do baú; comprar não cancela a contagem, só dá mais tempo
   const painel = el("recPoder");
@@ -86,13 +89,30 @@ function animarXp(xp) {
         passo++;
         som("vitoria_rodada");
         el("recNivel").textContent = t("nivel_jogador", xp.nivelAntes + passo);
-        el("recSub").textContent = t("subiu_nivel", xp.nivelAntes + passo) + (rec && rec.sub ? "   ·   " + rec.sub : "");
+        reanimar(el("recNivel"), "pop");
+        mostrarSub(rec ? rec.sub : "", "⭐ " + t("subiu_nivel", xp.nivelAntes + passo));
         barra.style.transition = "none"; barra.style.width = "0%"; void barra.offsetWidth;
         proximo();
       }, 650);
     } else barra.style.width = pct(xp.nivel, xp.xp);
   }
   setTimeout(proximo, 250);
+}
+
+// v17.5: o subtítulo vira "fichas" (moedas, troféu, skin, nível) em vez de uma linha comprida só
+function mostrarSub(texto, nivelTxt) {
+  const alvo = el("recSub");
+  alvo.innerHTML = "";
+  const partes = String(texto || "").split(/\s+·\s+|\s{3,}/);
+  if (nivelTxt) partes.unshift(nivelTxt);
+  partes.forEach(function(p, i) {
+    p = p.trim();
+    if (!p) return;
+    const s = document.createElement("span");
+    s.className = "chip" + (nivelTxt && i === 0 ? " nivel" : /^🏆/.test(p) ? " trofeu" : /^✨/.test(p) ? " skin" : /🪙/.test(p) ? " moeda" : "");
+    s.textContent = p;
+    alvo.appendChild(s);
+  });
 }
 
 function atualizarBotoesRecompensa() {
@@ -102,6 +122,7 @@ function atualizarBotoesRecompensa() {
   const podeExtra = !faltam && rec.fase !== "sacudindo" && !rec.extraUsado && Poki.premiadoDisponivel();
   el("btnOutroBau").classList.toggle("escondido", !podeExtra);
   el("btnOutroBau").textContent = "▶ " + t("outro_bau");
+  el("telaRecompensa").classList.toggle("comExtra", podeExtra);   // v17.5: o baú sobe para o botão caber no cartão
   textoRevanche(rec.cancelou ? 0 : rec.n || 0);
   if (podeExtra && !rec.ofertou) { rec.ofertou = true; Eventos.oferta("extra-chest", "visible"); }
 }
@@ -137,6 +158,7 @@ function mostrarPremio(alvo, premio) {
   let txt = "+" + premio.moedas + " 🪙";
   if (premio.skin) txt += "   ✨ " + t(premio.equipou ? "premio_equipado" : "premio_skin", t("sk_" + premio.skin));
   alvo.textContent = txt;
+  reanimar(alvo, "pop");
 }
 
 // botão da próxima partida: contra o bot vira "▶ PRÓXIMO RIVAL" com a contagem
@@ -145,7 +167,14 @@ function textoRevanche(n) {
   if (!b || !rec) return;
   const contra = rec.modo === "bot" || rec.modo === "rivais";
   const nome = contra && rec.venceu ? t("proximo_rival") : t("revanche");
-  b.textContent = contra ? "▶ " + nome + (n > 0 ? "  " + n : "") : nome;
+  if (!contra) { b.textContent = nome; return; }
+  // v17.5: o número da contagem num selo redondo e uma barra que esvazia embaixo do botão
+  b.innerHTML = "";
+  const tx = document.createElement("span"); tx.textContent = "▶ " + nome; b.appendChild(tx);
+  if (n > 0) {
+    const num = document.createElement("span"); num.className = "rvNum"; num.textContent = n; b.appendChild(num);
+    const barra = document.createElement("span"); barra.className = "rvBarra"; b.appendChild(barra);
+  }
 }
 
 // chamado a cada quadro com a tela aberta: abre o baú sozinho e conta para a próxima partida
@@ -226,53 +255,100 @@ function desenharRecompensa(tempo) {
   if (rec.fase === "sacudindo") sacode = Math.min(1, dt * 2);
   if (rec.fase === "aberto") abre = Math.min(1, dt * 3);
   const pula = rec.fase === "fechado" ? Math.abs(Math.sin(tempo * 3)) * 6 : 0;
-  ArteBau.desenhar(g, cv.width / 2, cv.height * 0.58 - pula, 1, tipoVisto, abre, tempo, sacode);
+  const cx = cv.width / 2, cy = cv.height * 0.54;
+  ArteBau.luz(g, cx, cy - 10, 150, tipoVisto, tempo, abre);
+  ArteBau.desenhar(g, cx, cy - pula, 1.05, tipoVisto, abre, tempo, sacode);
+  if (rec.fase === "aberto") ArteBau.moedas(g, cx, cy - 40, 1, dt);
+  // barra da contagem do PRÓXIMO RIVAL (só o desenho; a conta é a de contagemRecompensa)
+  const barra = el("btnRevanche").querySelector(".rvBarra");
+  if (barra && rec.fimBaus) barra.style.transform = "scaleX(" + Math.max(0, Math.min(1, (rec.espera - (tempo - rec.fimBaus - 0.4)) / rec.espera)).toFixed(3) + ")";
 }
 
 // Fileira dos 10 rivais: vencidos com ✓, o próximo (ou o da revanche) grande e pulsando, os que faltam escondidos.
 // Logo depois de uma vitória o rival vencido fica em destaque um instante, ganha o ✓ e o destaque passa adiante.
+// v17.5: trilho que enche (verde -> dourado) até o próximo, nome do próximo numa plaquinha e baú em cima do 5º e do 10º.
 function desenharEscada(tempo) {
   const cv = el("canvasEscada"), g = cv.getContext("2d"), rr = rec.rival;
   g.clearRect(0, 0, cv.width, cv.height);
-  const n = RIVAIS.length, passo = Math.min(92, (cv.width - 80) / (n - 1)), x0 = cv.width / 2 - passo * (n - 1) / 2, y = cv.height * 0.5;
+  const n = RIVAIS.length, passo = Math.min(94, (cv.width - 90) / (n - 1)), x0 = cv.width / 2 - passo * (n - 1) / 2, y = cv.height * 0.47;
   const dt = tempo - rec.aberta;
   const trocou = rr.venceu && dt > 0.9;
   const vencidos = rr.campeao ? (trocou ? n : n - 1) : rr.i + (trocou ? 1 : 0);
   const destaque = rr.campeao ? (trocou ? -1 : n - 1) : rr.venceu && !trocou ? rr.i : vencidos;
-  g.strokeStyle = "rgba(255,255,255,0.18)"; g.lineWidth = 6;
+  const fonte = "px Nunito, system-ui, sans-serif";
+  // trilho: fundo escuro + parte já andada (enche até o próximo quando o ✓ entra)
+  const ate = rr.campeao ? n - 1 : rr.venceu ? rr.i + Math.max(0, Math.min(1, (dt - 0.9) / 0.4)) : rr.i;
+  g.lineCap = "round";
+  g.strokeStyle = "rgba(0,0,0,0.35)"; g.lineWidth = 14;
   g.beginPath(); g.moveTo(x0, y); g.lineTo(x0 + passo * (n - 1), y); g.stroke();
+  g.strokeStyle = "rgba(255,255,255,0.12)"; g.lineWidth = 8;
+  g.beginPath(); g.moveTo(x0, y); g.lineTo(x0 + passo * (n - 1), y); g.stroke();
+  if (ate > 0) {
+    const gr = g.createLinearGradient(x0, 0, x0 + passo * ate, 0);
+    gr.addColorStop(0, "#51cf66"); gr.addColorStop(1, "#ffd43b");
+    g.strokeStyle = gr; g.lineWidth = 8;
+    g.beginPath(); g.moveTo(x0, y); g.lineTo(x0 + passo * ate, y); g.stroke();
+  }
   for (let k = 0; k < n; k++) {
     const r = RIVAIS[k], x = x0 + k * passo, grande = k === destaque;
     const raio = grande ? 34 + 3 * Math.sin(tempo * 6) : 24;
+    // baú do 5º (de nível) e do 10º (lendário) em cima, enquanto não foi vencido
+    // (no rival em destaque o baú vai para o canto de cima, fora do anel)
+    if ((k === 4 || k === n - 1) && k >= vencidos && typeof ArteBau !== "undefined")
+      ArteBau.desenhar(g, x + (grande ? 40 : 0), y - (grande ? 40 : 46) + Math.sin(tempo * 3 + k) * 2, grande ? 0.2 : 0.22, k === n - 1 ? "lendario" : "nivel", 0, tempo, 0);
     if (grande) {
-      g.fillStyle = "rgba(255,212,59,0.25)"; g.beginPath(); g.arc(x, y, raio + 12, 0, 7); g.fill();
-      g.strokeStyle = "#ffd43b"; g.lineWidth = 5; g.beginPath(); g.arc(x, y, raio + 8, 0, 7); g.stroke();
+      const halo = g.createRadialGradient(x, y, raio * 0.6, x, y, raio + 22);
+      halo.addColorStop(0, "rgba(255,212,59,0.55)"); halo.addColorStop(1, "rgba(255,212,59,0)");
+      g.fillStyle = halo; g.beginPath(); g.arc(x, y, raio + 22, 0, 7); g.fill();
+      g.strokeStyle = "#ffd43b"; g.lineWidth = 5; g.beginPath(); g.arc(x, y, raio + 7, 0, 7); g.stroke();
+      g.strokeStyle = "rgba(255,255,255,0.7)"; g.lineWidth = 2; g.beginPath(); g.arc(x, y, raio + 11 + 3 * Math.sin(tempo * 6), -2.4, -0.7); g.stroke();
     }
     if (k < vencidos || grande) {
-      g.globalAlpha = k < vencidos && !grande ? 0.55 : 1;
+      if (!grande) { g.fillStyle = "#2b8a3e"; g.beginPath(); g.arc(x, y, raio + 4, 0, 7); g.fill(); }
+      g.globalAlpha = k < vencidos && !grande ? 0.85 : 1;
       if (typeof ArteSkins !== "undefined") ArteSkins.miniatura(g, r.corpo, r.acessorio, r.cor, x, y, raio, tempo);
       else { g.fillStyle = r.cor; g.beginPath(); g.arc(x, y, raio, 0, 7); g.fill(); }
       g.globalAlpha = 1;
     } else {
       // quem ainda não apareceu: silhueta com "?"
-      g.fillStyle = "#2b2f45"; g.beginPath(); g.arc(x, y, raio, 0, 7); g.fill();
-      g.strokeStyle = "rgba(255,255,255,0.25)"; g.lineWidth = 3; g.stroke();
-      g.fillStyle = "rgba(255,255,255,0.5)"; g.font = "900 26px Nunito, system-ui, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+      g.fillStyle = "#1d1f36"; g.beginPath(); g.arc(x, y, raio + 3, 0, 7); g.fill();
+      const fundo = g.createLinearGradient(0, y - raio, 0, y + raio);
+      fundo.addColorStop(0, "#3a3f63"); fundo.addColorStop(1, "#262a46");
+      g.fillStyle = fundo; g.beginPath(); g.arc(x, y, raio, 0, 7); g.fill();
+      g.strokeStyle = "rgba(255,255,255,0.18)"; g.lineWidth = 2; g.beginPath(); g.arc(x, y, raio - 3, 3.6, 5.8); g.stroke();
+      g.fillStyle = "rgba(255,255,255,0.55)"; g.font = "900 26" + fonte; g.textAlign = "center"; g.textBaseline = "middle";
       g.fillText("?", x, y + 1);
     }
     if (k < vencidos) {
       // ✓ verde (com um "pulo" quando acabou de ganhar)
       const novo = rr.venceu && k === vencidos - 1 && dt < 1.3 ? 1 + 0.6 * Math.max(0, 1.3 - dt) : 1;
-      g.save(); g.translate(x + 16, y + 16); g.scale(novo, novo);
-      g.fillStyle = "#2b8a3e"; g.beginPath(); g.arc(0, 0, 13, 0, 7); g.fill();
-      g.strokeStyle = "#fff"; g.lineWidth = 4; g.lineCap = "round"; g.lineJoin = "round";
-      g.beginPath(); g.moveTo(-6, 0); g.lineTo(-1, 5); g.lineTo(7, -5); g.stroke();
+      g.save(); g.translate(x + 17, y + 15); g.scale(novo, novo);
+      g.fillStyle = "#fff"; g.beginPath(); g.arc(0, 0, 14, 0, 7); g.fill();
+      g.fillStyle = "#2f9e44"; g.beginPath(); g.arc(0, 0, 11, 0, 7); g.fill();
+      g.strokeStyle = "#fff"; g.lineWidth = 3.5; g.lineCap = "round"; g.lineJoin = "round";
+      g.beginPath(); g.moveTo(-5, 0); g.lineTo(-1, 4); g.lineTo(6, -4); g.stroke();
       g.restore();
     }
-    g.fillStyle = grande ? "#ffd43b" : "rgba(255,255,255,0.6)"; g.font = "900 " + (grande ? 22 : 16) + "px Nunito, system-ui, sans-serif";
-    g.textAlign = "center"; g.textBaseline = "alphabetic";
-    g.fillText(grande ? r.nome : String(k + 1), x, y + (grande ? 66 : 48));
+    g.textAlign = "center"; g.textBaseline = "middle";
+    if (grande) {
+      // nome numa plaquinha dourada
+      g.font = "900 21" + fonte;
+      const w = g.measureText(r.nome).width + 26, py = y + raio + 24;
+      g.fillStyle = "#8a4b00"; retArredondado(g, x - w / 2, py - 13, w, 30, 15); g.fill();
+      g.fillStyle = "#ffd43b"; retArredondado(g, x - w / 2, py - 15, w, 28, 14); g.fill();
+      g.fillStyle = "#3b1d00"; g.fillText(r.nome, x, py);
+    } else {
+      g.font = "900 16" + fonte;
+      g.fillStyle = k < vencidos ? "rgba(140,233,154,0.9)" : "rgba(255,255,255,0.5)";
+      g.fillText(String(k + 1), x, y + raio + 16);
+    }
   }
+}
+
+function retArredondado(g, x, y, w, h, r) {
+  g.beginPath();
+  g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+  g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
 }
 
 // ---------- recompensa diária ----------
@@ -340,7 +416,9 @@ function fecharDiaria() {
 
 function desenharDiaria(tempo) {
   if (!diaria || diaria.fase !== "aberto" || typeof ArteBau === "undefined") return;
-  const cv = el("canvasDiaria"), g = cv.getContext("2d");
+  const cv = el("canvasDiaria"), g = cv.getContext("2d"), dt = tempo - diaria.t0;
   g.clearRect(0, 0, cv.width, cv.height);
-  ArteBau.desenhar(g, cv.width / 2, cv.height * 0.6, 0.8, diaria.tipoBau, Math.min(1, (tempo - diaria.t0) * 3), tempo, 0);
+  ArteBau.luz(g, cv.width / 2, cv.height * 0.6 - 10, 110, diaria.tipoBau, tempo, 1);
+  ArteBau.desenhar(g, cv.width / 2, cv.height * 0.6, 0.8, diaria.tipoBau, Math.min(1, dt * 3), tempo, 0);
+  ArteBau.moedas(g, cv.width / 2, cv.height * 0.6 - 30, 0.7, dt);
 }

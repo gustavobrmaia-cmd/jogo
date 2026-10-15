@@ -35,6 +35,7 @@ function montarPainelPoder(alvo, aoComprar) {
       b.appendChild(mais);
       setTimeout(function() { mais.remove(); }, 850);
       reanimar(topo.querySelector(".poderValor"), "pulou");
+      reanimar(topo.querySelector(".poderMoedas"), "gastou");
       atualizarPainelPoder(alvo);
       atualizarMenuProgresso();
       if (aoComprar) aoComprar(m.id);

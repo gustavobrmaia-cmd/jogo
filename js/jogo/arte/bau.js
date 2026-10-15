@@ -5,6 +5,8 @@
 // ArteBau.desenhar(ctx, cx, cy, escala, tipo, abre, t, sacode)
 //   tipo: "normal" (madeira + metal azul), "nivel" (roxo + ouro), "lendario" (ouro + pedras)
 //   abre: 0 = fechado .. 1 = tampa toda aberta (com raios de luz)   sacode: 0..1 (tremendo antes de abrir)
+// ArteBau.luz(ctx, cx, cy, raio, tipo, t, abre): brilho redondo atrás do baú (pulsa fechado, acende quando abre)
+// ArteBau.moedas(ctx, cx, cy, escala, dt): moedas pulando do baú aberto (dt = segundos desde que abriu)
 // Estilo igual ao resto da arte: cel-shading (base + sombra + luz), contorno na cor escura do material, sem preto.
 // Só aparece em menus, então pode desenhar com caminhos a cada quadro.
 // =========================
@@ -149,5 +151,36 @@ const ArteBau = (function() {
     g.restore();
   }
 
-  return { desenhar: desenhar };
+  // brilho redondo atrás do baú (v17.5): da cor do baú; pulsa fechado e acende quando abre
+  const LUZ = { normal: "255,214,140", nivel: "190,150,255", lendario: "255,220,90" };
+  function luz(g, cx, cy, raio, tipo, t, abre) {
+    const c = LUZ[tipo] || LUZ.normal;
+    const forca = 0.32 + 0.08 * Math.sin(t * 3) + 0.35 * Math.max(0, Math.min(1, abre || 0));
+    const gr = g.createRadialGradient(cx, cy, 0, cx, cy, raio);
+    gr.addColorStop(0, "rgba(" + c + "," + forca.toFixed(3) + ")");
+    gr.addColorStop(0.55, "rgba(" + c + "," + (forca * 0.35).toFixed(3) + ")");
+    gr.addColorStop(1, "rgba(" + c + ",0)");
+    g.fillStyle = gr;
+    g.beginPath(); g.arc(cx, cy, raio, 0, Math.PI * 2); g.fill();
+  }
+
+  // moedas pulando do baú aberto (v17.5): saem em leque, giram, caem e somem em ~1,6 s (sem estado guardado)
+  function moedas(g, cx, cy, s, dt) {
+    if (dt <= 0 || dt > 1.7) return;
+    const some = Math.max(0, Math.min(1, (1.7 - dt) / 0.6));
+    for (let k = 0; k < 12; k++) {
+      const a = -Math.PI / 2 + (k / 11 - 0.5) * 2.4, v = (230 + (k * 53) % 110) * s;
+      const x = cx + Math.cos(a) * v * dt * 0.9, y = cy + Math.sin(a) * v * dt + 620 * s * dt * dt;
+      const r = (9 + (k % 3) * 2) * s, gira = Math.abs(Math.cos(dt * 9 + k));
+      g.save();
+      g.globalAlpha = some;
+      g.translate(x, y); g.scale(Math.max(0.15, gira), 1);
+      g.fillStyle = "#c2850e"; g.beginPath(); g.arc(0, 0, r, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "#ffd43b"; g.beginPath(); g.arc(0, -r * 0.08, r * 0.8, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "rgba(255,255,255,0.75)"; g.beginPath(); g.arc(-r * 0.3, -r * 0.35, r * 0.25, 0, Math.PI * 2); g.fill();
+      g.restore();
+    }
+  }
+
+  return { desenhar: desenhar, luz: luz, moedas: moedas };
 })();
