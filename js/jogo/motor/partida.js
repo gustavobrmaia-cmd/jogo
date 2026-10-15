@@ -133,6 +133,9 @@ function novaPartida(modo, opcoes) {
     // tutorial desenhado da 1ª partida (atirar -> andar -> pular; desenho.js)
     tuto: modo === "bot" && save.partidas <= 1 ? { passo: null, tempo: 0, andou: 0, pulou: false } : null
   };
+  // v18.2: contra rival (menos o treino), a 1ª rodada começa com a pessoa escolhendo 1 de 3 armas (comum, rara, lendária)
+  // na abertura VS. O relatório do jogador de teste: até o 3º minuto a criança não decidia nada
+  if (rival && !treino && !opcoes.lendaria) { jogo.escolha = { armas: sortearEscolha(), sel: null, tSel: 0 }; Poki.medir("choice", "weapon", "visible"); }
   escolherSkins(jogo);
   // rival: a cara dele (cor, corpo e acessório); se a skin do jogador tiver a mesma cor, o rival troca de cor
   if (rival) {
@@ -192,6 +195,13 @@ function iniciarRodada() {
   // acabava em 3–5 s de tiro segurado — no celular a pessoa segura o botão) e o bot, que só atira quando acerta, ~40%:
   // as armas malucas, que são a graça do jogo, quase não ficavam na mão de quem joga
   if (M.contraBot) { b1.multMunicao = CONFIG.municaoJogador; b2.multMunicao = CONFIG.municaoBot; }
+  // v18.2: da Prata em diante cada rival tem um truque (uma carta que ele já começa a rodada usando, com o dobro do tempo):
+  // antes a liga nova era "o mesmo de antes, mais difícil"
+  if (j.rival && j.rival.liga > 0) {
+    const truque = ["rapidez", "escudo", "tiro_duplo", "super_pulo", "fantasma", "rapidez", "escudo", "furia", "tiro_duplo", "fantasma"][j.rival.i];
+    pegarCarta(M, b2, truque);
+    if (CARTA[truque].duracao) b2.efeitos[truque] = CARTA[truque].duracao * 2;
+  }
   // os dois começam com a mesma arma (justo) e ela muda a cada rodada
   const arma = j.treino && j.rodada === 1 ? "rifle" : sortearArma(M, true);
   equipar(b1, arma); equipar(b2, arma);
@@ -259,7 +269,10 @@ function atualizarJogo(dt) {
 
   if (j.fase === "intro") {
     passoMundo(j, M, false, 1);
-    if (j.tempoFase >= (j.rodada === 1 ? RODADA.introPrimeira : RODADA.intro)) {
+    const es = j.rodada === 1 ? j.escolha : null;
+    j.durIntro = j.rodada === 1 ? (es ? (es.sel !== null ? Math.max(RODADA.introPrimeira, es.tSel + 0.6) : 4.2) : RODADA.introPrimeira) : RODADA.intro;
+    if (es && es.sel === null && j.tempoFase >= j.durIntro - 0.6) escolherArma(1, true);   // ninguém tocou: fica com a rara
+    if (j.tempoFase >= j.durIntro) {
       j.fase = "luta"; j.tempoFase = 0;
       if (!j.demo) som("lute");
       if (j.bots[1] && typeof emote === "function") emote(M.bolinhas[1], "!", 0.8);
@@ -288,7 +301,7 @@ function atualizarJogo(dt) {
   if (j.fase === "fimRodada") {
     // câmera lenta no começo do fim da rodada (mais longa e mais lenta num K.O.)
     passoMundo(j, M, true, M.ko ? (j.tempoFase < 1.1 ? 0.25 : 1) : (j.tempoFase < 0.7 ? 0.35 : 1));
-    if (j.tempoFase >= RODADA.fim) fecharRodada(j);
+    if (j.tempoFase >= (j.M.ko ? RODADA.fim : 1.5)) fecharRodada(j);   // v18.2: sem K.O. (tempo, queda de braço) é mais curto
   }
 }
 
@@ -589,6 +602,23 @@ function proximoNivelBot(nivel, desempenho, venceu, partidas) {
   return limitar(Math.min(alvo, teto), 0, 1);
 }
 function nivelBotTexto(nivel) { return Math.round(nivel * 9) + 1; }   // 1 a 10, para mostrar
+
+// 3 armas para escolher: uma de cada raridade (sem minas e armas do céu, que confundem no começo)
+function sortearEscolha() {
+  return [1, 2, 3].map(function(r) {
+    const l = ARMAS.filter(function(a) { return a.raridade === r && a.tipo !== "mina" && a.tipo !== "ceu"; });
+    return l[Math.floor(Math.random() * l.length)].id;
+  });
+}
+// i = 0, 1 ou 2 (toque, clique ou teclas 1/2/3: telas.js)
+function escolherArma(i, auto) {
+  const j = jogo, es = j && j.escolha;
+  if (!es || es.sel !== null || j.fase !== "intro" || j.rodada !== 1) return;
+  es.sel = i; es.tSel = j.tempoFase;
+  equipar(j.M.bolinhas[0], es.armas[i]);
+  som("pegar");
+  Poki.medir("choice", "weapon-r" + ARMA[es.armas[i]].raridade + (auto ? "-auto" : ""), "interact");
+}
 
 function terminarPartida() {
   const j = jogo;

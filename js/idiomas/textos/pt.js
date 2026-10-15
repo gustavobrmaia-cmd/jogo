@@ -364,5 +364,6 @@ TEXTOS.pt = {
   mel_d_veloc: "Corre mais",
   gratis: "GRÁTIS!",
   escolha_gratis: "Escolha 1 de graça!",
-  rival_venceu_rodada: "{0} VENCEU A RODADA"
+  rival_venceu_rodada: "{0} VENCEU A RODADA",
+  escolha_arma: "ESCOLHA SUA ARMA!"
 };

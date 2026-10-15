@@ -419,9 +419,20 @@ function montarTelas() {
     });
   });
 
+  // v18.2: escolha da arma na abertura do rival (toque/clique num dos 3 cartões ou teclas 1/2/3)
+  const cvJogo = document.getElementById("canvas");
+  cvJogo.addEventListener("pointerdown", function(e) {
+    const es = jogo && jogo.escolha;
+    if (estado !== "jogo" || !es || es.sel !== null || !es.rects || jogo.fase !== "intro") return;
+    const r = cvJogo.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width * CONFIG.largura, y = (e.clientY - r.top) / r.height * cvJogo.height;
+    es.rects.forEach(function(q, i) { if (x >= q.x && x <= q.x + q.w && y >= q.y && y <= q.y + q.h) escolherArma(i); });
+  });
+
   // atalhos de teclado nos menus
   window.addEventListener("keydown", function(e) {
     if (e.repeat) return;
+    if (estado === "jogo" && /^(Digit|Numpad)[123]$/.test(e.code)) escolherArma(+e.code.slice(-1) - 1);
     if (estado === "pausa" && (e.code === "Escape" || e.code === "KeyP")) continuar();
     else if (estado === "menu" && e.code === "Enter") abrirModo();
   });

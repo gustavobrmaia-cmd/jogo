@@ -364,5 +364,6 @@ TEXTOS.fr = {
   mel_d_veloc: "Cours plus vite",
   gratis: "GRATUIT !",
   escolha_gratis: "Choisis-en 1 gratuite !",
-  rival_venceu_rodada: "{0} GAGNE LA MANCHE"
+  rival_venceu_rodada: "{0} GAGNE LA MANCHE",
+  escolha_arma: "CHOISIS TON ARME !"
 };

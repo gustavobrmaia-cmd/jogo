@@ -364,5 +364,6 @@ TEXTOS.ro = {
   mel_d_veloc: "Fugi mai repede",
   gratis: "GRATUIT!",
   escolha_gratis: "Alege 1 gratuit!",
-  rival_venceu_rodada: "{0} CÂȘTIGĂ RUNDA"
+  rival_venceu_rodada: "{0} CÂȘTIGĂ RUNDA",
+  escolha_arma: "ALEGE-ȚI ARMA!"
 };

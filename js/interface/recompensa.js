@@ -62,10 +62,13 @@ function abrirRecompensa(j, titulo, sub) {
   el("telaRecompensa").classList.toggle("comEscada", !!rr);
   if (rr) {
     const prox = rr.venceu ? (rr.campeao ? 0 : rr.i + 1) : rr.i, liga = rr.venceu && rr.campeao ? rr.liga + 1 : rr.liga;
-    el("recProximo").textContent = rr.campeao ? "🏆 " + t("campeao_liga", nomeLiga(rr.liga)) :
+    // v18.2: campeão ganha a Partida Lendária de presente (a próxima: só armas raras e lendárias) e a tela vira festa
+    if (rr.campeao) lendariaPronta = true;
+    el("recProximo").textContent = rr.campeao ? "🏆 " + t("campeao_liga", nomeLiga(rr.liga)) + "   ✨ " + t("lendaria") + " ✨" :
       rr.venceu ? t("proximo", RIVAIS[prox].nome + " ⚡" + Poder.valor(Poder.doRival(prox, liga))) + "   ·   " + textoPremioRival(prox, liga) :
       t("revanche_contra", rr.nome + " ⚡" + Poder.valor(Poder.doRival(rr.i, rr.liga)));
   }
+  el("telaRecompensa").classList.toggle("campeao", !!(rr && rr.campeao));
   atualizarBotoesRecompensa();
   mostrarTela("telaRecompensa");
   if (xp.subiu) Eventos.marco("player-level-" + xp.nivel);

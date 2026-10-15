@@ -364,5 +364,6 @@ TEXTOS.nl = {
   mel_d_veloc: "Sneller rennen",
   gratis: "GRATIS!",
   escolha_gratis: "Kies er 1 gratis!",
-  rival_venceu_rodada: "{0} WINT DE RONDE"
+  rival_venceu_rodada: "{0} WINT DE RONDE",
+  escolha_arma: "KIES JE WAPEN!"
 };

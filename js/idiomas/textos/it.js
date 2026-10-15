@@ -364,5 +364,6 @@ TEXTOS.it = {
   mel_d_veloc: "Corri più veloce",
   gratis: "GRATIS!",
   escolha_gratis: "Scegline 1 gratis!",
-  rival_venceu_rodada: "{0} VINCE IL ROUND"
+  rival_venceu_rodada: "{0} VINCE IL ROUND",
+  escolha_arma: "SCEGLI LA TUA ARMA!"
 };

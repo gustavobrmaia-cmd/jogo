@@ -44,6 +44,8 @@ function layoutTela(j) {
       L.limitePulo = (H - 470) / H;
     }
   }
+  // v18.2: 2 jogadores em pé: o pulo descia por cima das barras de vida; agora fica logo acima do analógico de mira
+  if (L.emPe && j && j.modo === "2p") { L.yPulo = H - 640; L.limitePulo = (H - 470) / H; }
   return L;
 }
 // fração da altura da tela acima da qual um toque no lado de dentro é pulo (entrada.js)
@@ -656,6 +658,16 @@ function desenharHud(ctx, j, M, L) {
     const txt = surv ? t("fim_sobrevivencia", j.onda) : j.modo === "bot" ? (v === 1 ? t("voce_venceu") : j.rival ? t("rival_venceu", j.rival.d.nome.toUpperCase()) : t("bot_venceu")) : t("jogador_venceu", v);
     const esc = 1 + 0.06 * Math.sin(j.tempoFase * 6);
     const festa = v && (v === 1 || j.modo === "2p") && !surv;
+    // v18.2: venceu o rival e ganha o acessório dele: um 🎁 sai do rival e voa até a bolinha da pessoa
+    const ace = j.rival && v === 1 && j.rival.d.acessorio;
+    if (ace && typeof Progresso !== "undefined" && !Progresso.temSkin(ace) && j.tempoFase > 0.5) {
+      const k = Math.min(1, (j.tempoFase - 0.5) / 1.1), e = 1 - Math.pow(1 - k, 3);
+      const a = mundoParaTela(M.bolinhas[1].x, M.bolinhas[1].y), b = mundoParaTela(M.bolinhas[0].x, M.bolinhas[0].y - 60);
+      const gx = a.x + (b.x - a.x) * e, gy = a.y + (b.y - a.y) * e - Math.sin(e * Math.PI) * 220;
+      const tg = (em ? 90 : 60) * (k < 1 ? 1 : 1 + 0.15 * Math.sin(j.tempoFase * 10));
+      ctx.save(); ctx.font = tg + "px system-ui, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText("🎁", gx, gy); ctx.restore();
+    }
     const cor = v ? j.cores[v - 1] : "#ffd43b";
     if (festa) raiosSol(ctx, cx, meio - 20, 330, cor, performance.now() / 1000, Math.min(1, j.tempoFase * 3) * 0.45);
     const tp = j.tempoFase, pop = tp < 0.15 ? 0.5 + tp / 0.15 * 0.75 : tp < 0.3 ? 1.25 - (tp - 0.15) / 0.15 * 0.25 : 1;
@@ -691,7 +703,8 @@ function desenharHud(ctx, j, M, L) {
   }
   // v16: prêmios da partida anterior (fluxo contínuo, sem a tela de fim): faixa que pula e some em ~4 s
   let topoFaixa = null;   // v17: os avisos de conquista sobem para cima da faixa (antes ficavam por cima dela)
-  if (typeof faixaPremio !== "undefined" && faixaPremio && j !== faixaPremio.velho && estado === "jogo") {
+  if (typeof faixaPremio !== "undefined" && faixaPremio && j !== faixaPremio.velho && estado === "jogo" &&
+      !(j.escolha && j.fase === "intro" && j.rodada === 1)) {   // v18.2: espera a escolha da arma
     if (!faixaPremio.t0) faixaPremio.t0 = performance.now() / 1000;
     const tf = performance.now() / 1000 - faixaPremio.t0;
     // v17: com a melhoria grátis (destaque) a faixa fica mais tempo
@@ -818,9 +831,10 @@ function desenharRelogio(ctx, j, M, cx, cy, tempo, dobro) {
 // (com as skins e acessórios). Em pé com câmera vai para o céu vazio entre o HUD e a arena (não cobre a luta).
 function desenharAbertura(ctx, j, M, L, cx, meio) {
   const em = L.emPe, esc = em ? 1.4 : 1;
-  const dur = j.rodada === 1 ? RODADA.introPrimeira : RODADA.intro, tf = j.tempoFase;
+  const dur = j.durIntro || (j.rodada === 1 ? RODADA.introPrimeira : RODADA.intro), tf = j.tempoFase;
   const vs = !!(j.rival && j.rodada === 1);
-  const cima = vs ? 95 : 60, baixo = vs ? (j.lendaria ? 200 : 165) : (j.lendaria ? 145 : 112);   // quanto o bloco ocupa
+  const escolha = vs && j.escolha ? j.escolha : null;
+  const cima = vs ? 95 : 60, baixo = vs ? (escolha ? 370 : j.lendaria ? 215 : 195) : (j.lendaria ? 145 : 112);   // quanto o bloco ocupa
   let y = meio;
   // (decidido no começo da abertura, para o bloco não pular quando um aviso some)
   if (j.lotadoRodada !== j.rodada) {
@@ -878,12 +892,66 @@ function desenharAbertura(ctx, j, M, L, cx, meio) {
     ctx.lineWidth = 2.5; ctx.strokeStyle = "rgba(255,212,59,0.8)"; ctx.stroke();
     textoCaber(ctx, pr, 0, 146, 24, "#ffd43b", 620);
     if (j.lendaria) textoContorno(ctx, "✨ " + t("lendaria") + " ✨", 0, 192, 26, "#ffd43b");
+    else trilhaRivais(ctx, j, 0, 180, entra(0.2));
+    if (escolha) desenharEscolha(ctx, j, escolha, cx, y, esc, entra(0.25), tf);
   } else {
     const surv = j.modo === "sobrevivencia";
     textoContorno(ctx, surv ? t("onda_n", j.onda) : t("rodada_n", j.rodada), 0, -16, 24, surv ? "#ffd43b" : "#e9ecef", "center", 5);
     escalaEm(ctx, 0, 18, 0.6 + 0.4 * entra(0.04), function() { letreiro(ctx, t("c_" + M.cen.id), 0, 40, 60, cor, 760); });
     textoCaber(ctx, t("r_" + M.cen.id), 0, 96, 28, "#fff", W - 200);
     if (j.lendaria) textoContorno(ctx, "✨ " + t("lendaria") + " ✨", 0, 136, 26, "#ffd43b");
+  }
+  ctx.restore();
+  // v18.2: 2 jogadores em pé a arena fica minúscula: sugere deitar o celular (só ícone, sem texto)
+  if (j.modo === "2p" && em) {
+    const yy = L.hudTopo + 330, gira = Math.sin(tf * 4) * 0.5;
+    ctx.save(); ctx.globalAlpha = fecha;
+    ctx.fillStyle = "rgba(12,8,30,0.85)"; ctx.beginPath(); ctx.arc(cx, yy, 90, 0, 7); ctx.fill();
+    ctx.translate(cx, yy); ctx.rotate(-gira * Math.PI / 2);
+    ctx.font = "110px system-ui, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("📱", 0, 4);
+    ctx.restore();
+    textoContorno(ctx, "↻", cx + 92, yy - 60, 70, "#ffd43b");
+  }
+}
+// v18.2: trilha dos 10 rivais na abertura VS (vencidos verdes, o atual dourado; 5 e 10 dão baú)
+function trilhaRivais(ctx, j, x, y, k) {
+  if (k <= 0.01) return;
+  const n = RIVAIS.length, p = 34, x0 = x - p * (n - 1) / 2, at = j.rival.i;
+  ctx.save(); ctx.globalAlpha *= k;
+  ctx.lineWidth = 6; ctx.strokeStyle = "rgba(12,8,30,0.8)"; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x0 + p * (n - 1), y); ctx.stroke();
+  ctx.strokeStyle = "#51cf66"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x0 + p * at, y); ctx.stroke();
+  for (let i = 0; i < n; i++) {
+    const cxx = x0 + p * i, r = i === at ? 12 : (i === 4 || i === 9) ? 9 : 7;
+    ctx.fillStyle = "rgba(12,8,30,0.9)"; ctx.beginPath(); ctx.arc(cxx, y, r + 3, 0, 7); ctx.fill();
+    ctx.fillStyle = i < at ? "#51cf66" : i === at ? "#ffd43b" : (i === 4 || i === 9) ? "#b197fc" : "#495057";
+    ctx.beginPath(); ctx.arc(cxx, y, r, 0, 7); ctx.fill();
+  }
+  ctx.restore();
+}
+// v18.2: as 3 armas para escolher (toque/clique ou 1/2/3); guarda os retângulos na tela para o toque (telas.js)
+function desenharEscolha(ctx, j, es, cx, y0, esc, k, tf) {
+  if (k <= 0.01) return;
+  const cores = ["#ced4da", "#b197fc", "#ffd43b"], bw = 150, bh = 128, gap = 172, yb = 300;
+  ctx.save(); ctx.globalAlpha *= k;
+  if (es.sel === null) {
+    letreiro(ctx, t("escolha_arma"), 0, 222, 34, "#ffffff", 600);
+    const resta = Math.max(0, 1 - tf / 3.6);   // barrinha do tempo
+    ctx.fillStyle = "rgba(12,8,30,0.8)"; retRedondo(ctx, -120, 236, 240, 8, 4); ctx.fill();
+    ctx.fillStyle = "#ffd43b"; retRedondo(ctx, -120, 236, 240 * resta, 8, 4); ctx.fill();
+  }
+  es.rects = [];
+  for (let i = 0; i < 3; i++) {
+    const x = (i - 1) * gap, sel = es.sel === i, fora = es.sel !== null && !sel;
+    const s = sel ? 1.15 : fora ? 0.85 : 1 + 0.04 * Math.sin(tf * 7 + i);
+    es.rects.push({ x: cx + (x - bw / 2) * esc, y: y0 + (yb - bh / 2) * esc, w: bw * esc, h: bh * esc });
+    ctx.save(); ctx.translate(x, yb); ctx.scale(s, s); if (fora) ctx.globalAlpha *= 0.35;
+    if (i === 2 || sel) { ctx.fillStyle = cores[i]; ctx.globalAlpha *= 0.35; ctx.beginPath(); ctx.arc(0, 0, bw * 0.62, 0, 7); ctx.fill(); ctx.globalAlpha /= 0.35; }
+    ctx.fillStyle = "rgba(16,11,42,0.94)"; retRedondo(ctx, -bw / 2, -bh / 2, bw, bh, 18); ctx.fill();
+    ctx.lineWidth = sel ? 6 : 4; ctx.strokeStyle = cores[i]; ctx.stroke();
+    if (temArte.armas) ArteArmas.icone(ctx, es.armas[i], 0, -12, 78);
+    textoCaber(ctx, t("a_" + es.armas[i]), 0, 50, 20, cores[i], bw - 14);
+    if (!entrada.toque) textoContorno(ctx, String(i + 1), -bw / 2 + 16, -bh / 2 + 22, 20, "#fff");
+    ctx.restore();
   }
   ctx.restore();
 }

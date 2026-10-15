@@ -221,6 +221,17 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     "+N 🪙" (antes esperavam num menu que o novato não conhecia).
   - "Contra o bot" e sobrevivência: mapas cruéis sempre por último (não só nas 6 primeiras partidas).
   - Ficou para depois: escolha 1 de 3 na abertura (textos novos), tela de campeão, truques na Prata, 2 jogadores em pé.
+- v18.2 (o resto do relatório):
+  - ESCOLHA 1 DE 3: contra rival (menos treino e Partida Lendária), na abertura VS da 1ª rodada aparecem 3 armas (comum,
+    rara, lendária; sem minas/céu). Toque/clique no cartão ou teclas 1/2/3 (telas.js, `j.escolha.rects`); sem escolha em
+    ~3,6 s fica a rara. Só a pessoa troca de arma (o bot fica com a sorteada). A abertura dura até 4,2 s (`j.durIntro`) e a
+    faixa de prêmios espera a escolha. Eventos choice/weapon (visible) e choice/weapon-rN[-auto] (interact). Chave nova
+    escolha_arma (12 idiomas).
+  - Trilha dos 10 rivais na abertura VS (`trilhaRivais`). Vencer o rival e ganhar o acessório: 🎁 voa do rival para a pessoa.
+  - Campeão da liga: frase grande dourada pulsando (`#telaRecompensa.campeao`) e a próxima partida é Lendária de presente.
+  - Prata em diante: cada rival começa a rodada com um truque (carta com o dobro do tempo: rapidez, escudo, tiro duplo...).
+  - Fim de rodada sem K.O. 2,1 -> 1,5 s.
+  - 2 jogadores em pé: pulo logo acima do analógico (não mais sobre as barras de vida) e ícone 📱↻ na abertura.
 - Poki v16 (4 testes): 11 out 10:18 2m29/23%, 13 out 11:14 2m30 (manhã); 12 out 18:51 2m40, 13 out 19:59 2m39/26% (noite).
   Repetiu igual no mesmo horário (ruído menor que se achava). À noite passa no Engaged, falta ~20 s na média.
   O vazamento ficou no rival 2: rodadas 2 e 3 da 2ª partida com 31–32% de derrota (1ª partida 7–8%), só 41% venciam
