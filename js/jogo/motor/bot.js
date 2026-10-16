@@ -562,6 +562,8 @@ function pensarBot(bot, M, b) {
     // na direção certa e com munição sobrando: atira "pressionando" (como um humano faz); impaciente atira mais
     if (Math.random() < bot.pressiona * (fantasma ? 0.4 : 1) * (bot.impaciente ? 2 : 1)) ent.tiro = true;
   } else if (Math.random() < bot.chuta && a.tipo !== "mina") ent.tiro = true;
+  // v18.3: rodada 1 do treino: o Bob só começa a atirar depois do 1º acerto da pessoa (quem não entendia apanhava 30 s)
+  if (jogo && jogo.treino && jogo.rodada === 1 && M.stats.acertos[0] === 0) ent.tiro = false;
   // aprendiz: respira entre um tiro e outro
   if (ent.tiro && b.cad <= 0 && bot.folgaTiro > 0) {
     if (M.t < (bot.proxTiro || 0)) ent.tiro = false;

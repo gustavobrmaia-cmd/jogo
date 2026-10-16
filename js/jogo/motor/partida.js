@@ -110,6 +110,8 @@ function novaPartida(modo, opcoes) {
     ordem = ordem.filter(function(id) { return crueis.indexOf(id) < 0 || id === rival.casa; });
   }
   if (rival && !treino) ordem = [rival.casa].concat(ordem.filter(function(id) { return id !== rival.casa; }));
+  // v18.3: rivais 6–10 da Bronze (casas cruéis): a casa vem na 2ª rodada — a partida não abre com uma morte de 2–3 s
+  if (rival && !treino && !(opcoes.liga > 0) && opcoes.rival >= 5 && ordem.length > 1) ordem = [ordem[1], ordem[0]].concat(ordem.slice(2));
   jogo = {
     modo: modo,
     demo: modo === "demo",
@@ -268,10 +270,14 @@ function atualizarJogo(dt) {
   }
 
   if (j.fase === "intro") {
+    // v18.3: na abertura nada empurra para os lados (as esteiras da fábrica levavam as duas bolinhas até as paredes)
+    const xs = [M.bolinhas[0].x, M.bolinhas[1].x];
     passoMundo(j, M, false, 1);
+    M.bolinhas.forEach(function(b, k) { b.x = xs[k]; b.vx = 0; });
     const es = j.rodada === 1 ? j.escolha : null;
-    j.durIntro = j.rodada === 1 ? (es ? (es.sel !== null ? Math.max(RODADA.introPrimeira, es.tSel + 0.6) : 4.2) : RODADA.introPrimeira) : RODADA.intro;
-    if (es && es.sel === null && j.tempoFase >= j.durIntro - 0.6) escolherArma(1, true);   // ninguém tocou: fica com a rara
+    // v18.3: escolhe sozinho em 2,4 s (era 3,6) e a carta virada fica 0,9 s à vista
+    j.durIntro = j.rodada === 1 ? (es ? (es.sel !== null ? Math.max(RODADA.introPrimeira, es.tSel + 0.9) : 3.3) : RODADA.introPrimeira) : RODADA.intro;
+    if (es && es.sel === null && j.tempoFase >= 2.4) escolherArma(Math.floor(Math.random() * 3), true);
     if (j.tempoFase >= j.durIntro) {
       j.fase = "luta"; j.tempoFase = 0;
       if (!j.demo) som("lute");
@@ -309,7 +315,8 @@ function atualizarJogo(dt) {
 // fez sozinha é pulado e cada dica some assim que ela faz (o desenho fica em desenho.js)
 function passoTutorial(j, M) {
   const tu = j.tuto;
-  const tiros = M.stats.tiros[0] + (tu.so ? 0 : j.total.tiros[0]);   // dica que voltou: conta só os tiros desta rodada
+  // v18.3: conta ACERTOS (antes 3 tiros errados já tiravam a dica de quem não estava entendendo)
+  const tiros = M.stats.acertos[0] + (tu.so ? 0 : j.total.acertos[0]);   // dica que voltou: conta só os desta rodada
   const passo = tiros < 3 ? "tiro" : tu.andou < 0.5 ? "andar" : !tu.pulou ? "pulo" : null;
   if (tu.so && passo !== "tiro") { j.tuto = null; return; }
   if (!passo) { j.tuto = null; if (!j.demo) Eventos.marco("tutorial-done"); return; }
@@ -604,10 +611,16 @@ function proximoNivelBot(nivel, desempenho, venceu, partidas) {
 function nivelBotTexto(nivel) { return Math.round(nivel * 9) + 1; }   // 1 a 10, para mostrar
 
 // 3 armas para escolher: uma de cada raridade (sem minas e armas do céu, que confundem no começo)
+// v18.3: 3 cartas viradas ("?"): cada uma esconde uma arma sorteada (comum 55%, rara 35%, lendária 10%). Escolher às cegas
+// (com 3 opções à vista a pessoa sempre pegava a lendária: ficava forte demais)
 function sortearEscolha() {
-  return [1, 2, 3].map(function(r) {
-    const l = ARMAS.filter(function(a) { return a.raridade === r && a.tipo !== "mina" && a.tipo !== "ceu"; });
-    return l[Math.floor(Math.random() * l.length)].id;
+  const usadas = [];
+  return [0, 1, 2].map(function() {
+    const s = Math.random(), r = s < 0.10 ? 3 : s < 0.45 ? 2 : 1;
+    const l = ARMAS.filter(function(a) { return a.raridade === r && a.tipo !== "mina" && a.tipo !== "ceu" && usadas.indexOf(a.id) < 0; });
+    const id = l[Math.floor(Math.random() * l.length)].id;
+    usadas.push(id);
+    return id;
   });
 }
 // i = 0, 1 ou 2 (toque, clique ou teclas 1/2/3: telas.js)

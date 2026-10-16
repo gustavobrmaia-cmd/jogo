@@ -186,7 +186,7 @@ function finalizarPartida(j) {
       save.rivalAjuste = 0;
       if (r.i + 1 >= RIVAIS.length) { save.rival = 0; save.liga = r.liga + 1; j.resultadoRival.campeao = true; Eventos.marco("champion-" + r.liga); }
       else save.rival = r.i + 1;
-    } else save.rivalAjuste = Math.max(-0.3, (save.rivalAjuste || 0) - 0.07);
+    } else save.rivalAjuste = Math.max(-0.3, (save.rivalAjuste || 0) - (r.i >= 5 ? 0.10 : 0.07));   // v18.3: revanche mais generosa nos 6–10
     salvar();
     texto = (venceu ? t("rival_derrotado", r.d.nome) : t("rival_venceu", r.d.nome)) + "  " + j.pontos[0] + " – " + j.pontos[1];
     if (venceu) extra = "🏆 +" + j.resultadoRival.moedas + " 🪙" + (j.resultadoRival.acessorio ? "   ✨ " + t("premio_equipado", t("sk_" + j.resultadoRival.acessorio)) : "");
@@ -234,6 +234,9 @@ function fluxoDireto(j) {
   const rr = j.resultadoRival;
   if (!rr || !rr.venceu || rr.campeao || rr.i === 4) return false;
   if (j.treino) return true;                         // 1ª partida da vida: direto para o rival 2
+  // v18.3: a 1ª tela que interrompe o fluxo perdia 23–34% onde estivesse (v18.2: 108 vencem o rival 3, 83 começam o 4;
+  // sem tela ~0%). Agora a 1ª é a do rival 5 (que tem baú de nível); nos rivais 3 e 4 as melhorias vêm sozinhas
+  if (!save.stats.viuPoder && rr.i < 4) return true;
   if (save.stats.comprouUltima) return false;        // quem compra melhoria sempre vê a tela
   return (save.stats.semTela || 0) < 2;              // quem não compra: tela a cada 3 vitórias (1ª: depois do rival 3)
 }
@@ -256,6 +259,13 @@ function entregarSemTela(j, ganho) {
   // v17: a melhoria grátis vem sozinha (Força: a rodada fica mais curta e a abertura mostra "⚡110 VS ⚡100")
   let destaque = null;
   if (!j.treino && Poder.gratis() && Poder.comprar("forca", true)) destaque = "💥 " + t("mel_forca") + " +1   " + t("gratis");
+  // v18.3: antes da 1ª tela de melhorias (rivais 3 e 4) o jogo compra sozinho +1 Força e +1 Vida se der
+  else if (!j.treino && !save.stats.viuPoder) {
+    const comprou = [];
+    if (Poder.comprar("forca", true)) comprou.push("💥 " + t("mel_forca") + " +1");
+    if (Poder.comprar("vida", true)) comprou.push("❤️ " + t("mel_vida") + " +1");
+    if (comprou.length) destaque = comprou.join("   ");
+  }
   save.stats.semTela = (save.stats.semTela || 0) + 1;
   salvar();
   faixaPremio = { linhas: linhas, destaque: destaque, t0: 0, velho: j };   // o relógio da faixa começa quando a próxima partida aparece

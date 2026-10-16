@@ -232,6 +232,20 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
   - Prata em diante: cada rival começa a rodada com um truque (carta com o dobro do tempo: rapidez, escudo, tiro duplo...).
   - Fim de rodada sem K.O. 2,1 -> 1,5 s.
   - 2 jogadores em pé: pulo logo acima do analógico (não mais sobre as barras de vida) e ícone 📱↻ na abertura.
+- Poki v18.2 (15 out 17:17): **2m57, Engaged 29%** (faltaram 3 s). 5 min+ 58 -> 76; chegam ao rival 4 15% e ao 5 10%.
+  Treinador (agente, relatório em scratchpad/v182/jogador/relatorio.md): a 1ª tela de fim perde 23–34% onde estiver
+  (108 vencem o rival 3, 83 começam o 4; sem tela ~0%); o final apertado não mudou as derrotas, mas no treino deixava a
+  criança no vermelho; esteira da fábrica arrastava as bolinhas na abertura; faixa cobria a luta em pé.
+- v18.3:
+  - Escolha de arma ÀS CEGAS: 3 cartas "?" (cada uma comum 55% / rara 35% / lendária 10%); depois de escolher todas se
+    revelam. Automática (carta aleatória) em 2,4 s; abertura no máximo 3,3 s.
+  - 1ª tela de melhorias só depois do rival 5 (`fluxoDireto`: sem `viuPoder` e rr.i < 4 -> direto); nas passagens dos
+    rivais 3 e 4 o jogo compra sozinho +1 Força e +1 Vida se der (faixa "💥 Força +1 ❤️ Vida +1").
+  - Abertura sem empurrão: o x das bolinhas fica parado na `intro` (esteiras). Em pé com câmera, a faixa de prêmios fica
+    no céu logo abaixo do HUD.
+  - Treino sem sufoco: `tensao` no treino = x0,25 com <40 de vida (sem x1,6); na rodada 1 o Bob só atira depois do 1º
+    acerto da pessoa; a dica de tiro conta ACERTOS (3).
+  - Rivais 6–10 da Bronze: a casa cruel vem na 2ª rodada; revanche -0,10 por derrota (era -0,07).
 - Poki v16 (4 testes): 11 out 10:18 2m29/23%, 13 out 11:14 2m30 (manhã); 12 out 18:51 2m40, 13 out 19:59 2m39/26% (noite).
   Repetiu igual no mesmo horário (ruído menor que se achava). À noite passa no Engaged, falta ~20 s na média.
   O vazamento ficou no rival 2: rodadas 2 e 3 da 2ª partida com 31–32% de derrota (1ª partida 7–8%), só 41% venciam

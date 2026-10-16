@@ -742,6 +742,8 @@ function sortearArma(M, inicio) {
 // está com folga e ele quase morto, e menos quando ela está quase morta (no v17.5 os rivais 1–3 acabavam com 65–82% de vida)
 function tensao(M, b) {
   if (!M.contraBot || !b.humano || (jogo && jogo.modo === "sobrevivencia")) return 1;
+  // v18.3: no treino (não dá para perder) nada de apertar: quem está com pouca vida quase não apanha
+  if (jogo && jogo.treino) return b.vida < 40 ? 0.25 : 1;
   const bot = M.bolinhas[1];
   if (b.vida > 55 && bot.vida < 50) return 1.6;
   if (b.vida < 25) return 0.65;

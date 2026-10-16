@@ -728,7 +728,8 @@ function desenharHud(ctx, j, M, L) {
       // a parte de baixo fica acima das bolinhas, que começam no chão (v17: a faixa mais alta cobria as duas);
       // em pé a câmera aproxima e as bolinhas ficam maiores: mais folga
       const h = 58 + (ld ? 42 : 0) + (l2 ? 36 : 0) + (l3 ? 36 : 0), esc = em ? 1.35 : 1;
-      const yf = mundoParaTela(0, FIS.altura).y - (em ? 205 : 110) - h * (esc + 1) / 2;
+      // v18.3: em pé com câmera a faixa fica no céu, logo abaixo do HUD (antes cobria a luta nos 4 s iniciais)
+      const yf = L.cam ? L.hudTopo + 128 * 1.45 + 30 + h * (esc - 1) / 2 : mundoParaTela(0, FIS.altura).y - (em ? 205 : 110) - h * (esc + 1) / 2;
       const yd = yf + 86, y2 = yf + (ld ? 122 : 80);
       ctx.globalAlpha = tf > dur - 0.6 ? Math.max(0, (dur - tf) / 0.6) : 1;
       topoFaixa = yf + h / 2 - h / 2 * esc;
@@ -935,7 +936,7 @@ function desenharEscolha(ctx, j, es, cx, y0, esc, k, tf) {
   ctx.save(); ctx.globalAlpha *= k;
   if (es.sel === null) {
     letreiro(ctx, t("escolha_arma"), 0, 222, 34, "#ffffff", 600);
-    const resta = Math.max(0, 1 - tf / 3.6);   // barrinha do tempo
+    const resta = Math.max(0, 1 - tf / 2.4);   // barrinha do tempo
     ctx.fillStyle = "rgba(12,8,30,0.8)"; retRedondo(ctx, -120, 236, 240, 8, 4); ctx.fill();
     ctx.fillStyle = "#ffd43b"; retRedondo(ctx, -120, 236, 240 * resta, 8, 4); ctx.fill();
   }
@@ -945,11 +946,16 @@ function desenharEscolha(ctx, j, es, cx, y0, esc, k, tf) {
     const s = sel ? 1.15 : fora ? 0.85 : 1 + 0.04 * Math.sin(tf * 7 + i);
     es.rects.push({ x: cx + (x - bw / 2) * esc, y: y0 + (yb - bh / 2) * esc, w: bw * esc, h: bh * esc });
     ctx.save(); ctx.translate(x, yb); ctx.scale(s, s); if (fora) ctx.globalAlpha *= 0.35;
-    if (i === 2 || sel) { ctx.fillStyle = cores[i]; ctx.globalAlpha *= 0.35; ctx.beginPath(); ctx.arc(0, 0, bw * 0.62, 0, 7); ctx.fill(); ctx.globalAlpha /= 0.35; }
-    ctx.fillStyle = "rgba(16,11,42,0.94)"; retRedondo(ctx, -bw / 2, -bh / 2, bw, bh, 18); ctx.fill();
-    ctx.lineWidth = sel ? 6 : 4; ctx.strokeStyle = cores[i]; ctx.stroke();
-    if (temArte.armas) ArteArmas.icone(ctx, es.armas[i], 0, -12, 78);
-    textoCaber(ctx, t("a_" + es.armas[i]), 0, 50, 20, cores[i], bw - 14);
+    // v18.3: carta virada com "?" até escolher; depois todas se revelam (a escolhida em destaque, na cor da raridade)
+    const rar = ARMA[es.armas[i]].raridade, cor = es.sel === null ? "#9775fa" : cores[Math.max(0, rar - 1)];
+    if (sel || (es.sel !== null && rar === 3)) { ctx.fillStyle = cor; ctx.globalAlpha *= 0.35; ctx.beginPath(); ctx.arc(0, 0, bw * 0.62, 0, 7); ctx.fill(); ctx.globalAlpha /= 0.35; }
+    ctx.fillStyle = es.sel === null ? "rgba(48,30,110,0.96)" : "rgba(16,11,42,0.94)"; retRedondo(ctx, -bw / 2, -bh / 2, bw, bh, 18); ctx.fill();
+    ctx.lineWidth = sel ? 6 : 4; ctx.strokeStyle = cor; ctx.stroke();
+    if (es.sel === null) letreiro(ctx, "?", 0, 26, 78, "#ffd43b");
+    else {
+      if (temArte.armas) ArteArmas.icone(ctx, es.armas[i], 0, -12, 78);
+      textoCaber(ctx, t("a_" + es.armas[i]), 0, 50, 20, cor, bw - 14);
+    }
     if (!entrada.toque) textoContorno(ctx, String(i + 1), -bw / 2 + 16, -bh / 2 + 22, 20, "#fff");
     ctx.restore();
   }
