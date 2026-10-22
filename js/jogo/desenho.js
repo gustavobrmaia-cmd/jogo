@@ -94,12 +94,18 @@ function desenharJogo(ctx) {
     ctx.translate(M.ko.x, M.ko.y); ctx.scale(z, z); ctx.translate(-M.ko.x, -M.ko.y);
   }
 
-  // 1. fundo fixo (refeito só quando muda o cenário ou o tamanho)
+  // 1. fundo fixo (refeito quando muda o cenário, a rodada ou o tamanho; a variação de clima só muda na rodada nova)
   if (!j.prerender || j.prerenderCen !== cen.id || j.prerenderH !== H) {
-    j.prerender = temArte.cen ? ArteCenarios.prerender(cen, CONFIG.largura, H) : null;
-    j.prerenderCen = cen.id; j.prerenderH = H;
+    const manter = j.prerenderCen === cen.id && j.prerenderRodada === j.rodada;
+    j.prerender = temArte.cen ? ArteCenarios.prerender(cen, CONFIG.largura, H, manter) : null;
+    j.prerenderCen = cen.id; j.prerenderH = H; j.prerenderRodada = j.rodada;
   }
-  if (j.prerender) ctx.drawImage(j.prerender, 0, -dy);
+  if (j.prerender && ArteCenarios.desenharFundo) {
+    // v19: paralaxe leve (o fundo anda menos que a arena) e, em pé com câmera, só a faixa da arena é ampliada
+    const b0 = M.bolinhas[0], b1 = M.bolinhas[1];
+    cam.cam = L.cam; cam.mx = b0.viva && b1.viva ? (b0.x + b1.x) / 2 : b0.viva ? b0.x : b1.x;
+    ArteCenarios.desenharFundo(ctx, cen, est, cam, j.prerender);
+  } else if (j.prerender) ctx.drawImage(j.prerender, 0, -dy);
   else { ctx.fillStyle = "#1b2140"; ctx.fillRect(0, -dy, CONFIG.largura, H); }
 
   // 2-3. fundo animado e plataformas
