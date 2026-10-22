@@ -11,6 +11,7 @@
 // A 1ª partida da vida é contra o rival 1 (a partida "treino"). O progresso fica no save (rival, liga, rivalAjuste).
 // Os mapas mais cruéis (no v10 o jogador perdia 67–85% neles) são a casa dos últimos rivais.
 // Cores: só tons que se distinguem bem da bolinha rosa do jogador. Sem o "cauteloso" (foge e a rodada arrasta).
+// v19: os rivais 6–10 ganharam as personalidades novas (estrategista, provocador, ninja, furioso); 1–5 continuam iguais.
 // =========================
 
 const RIVAIS = [
@@ -19,11 +20,11 @@ const RIVAIS = [
   { id: "kiki",   nome: "Kiki",   cor: "#845ef7", corpo: "pintas",    acessorio: "orelhas_gato",  estilo: "agressivo",    casa: "floresta" },
   { id: "rocky",  nome: "Rocky",  cor: "#94d82d", corpo: "camuflado", acessorio: "chifres",       estilo: "saltitante",   casa: "fliperama" },
   { id: "nova",   nome: "Nova",   cor: "#22b8cf", corpo: "xadrez",    acessorio: "fone",          estilo: "atirador",     casa: "templo" },
-  { id: "taz",    nome: "Taz",    cor: "#20c997", corpo: "robo",      acessorio: "antena",        estilo: "colecionador", casa: "laboratorio" },
-  { id: "ivy",    nome: "Ivy",    cor: "#2f9e44", corpo: "melancia",  acessorio: "tiara_flores",  estilo: "saltitante",   casa: "deserto" },
+  { id: "taz",    nome: "Taz",    cor: "#20c997", corpo: "robo",      acessorio: "antena",        estilo: "estrategista", casa: "laboratorio" },
+  { id: "ivy",    nome: "Ivy",    cor: "#2f9e44", corpo: "melancia",  acessorio: "tiara_flores",  estilo: "provocador",   casa: "deserto" },
   { id: "frost",  nome: "Frost",  cor: "#a5d8ff", corpo: "gelo",      acessorio: "viking",        estilo: "atirador",     casa: "castelo" },
-  { id: "shadow", nome: "Shadow", cor: "#845ef7", corpo: "cromado",   acessorio: "mascara_ninja", estilo: "agressivo",    casa: "cidade" },
-  { id: "king",   nome: "King",   cor: "#5f3dc4", corpo: "galaxia",   acessorio: "coroa",         estilo: "agressivo",    casa: "dojo" }
+  { id: "shadow", nome: "Shadow", cor: "#845ef7", corpo: "cromado",   acessorio: "mascara_ninja", estilo: "ninja",        casa: "cidade" },
+  { id: "king",   nome: "King",   cor: "#5f3dc4", corpo: "galaxia",   acessorio: "coroa",         estilo: "furioso",      casa: "dojo" }
 ];
 
 // força do bot: sobe devagar ao longo da escada (rival 1 = nível mais baixo, rival 10 ≈ 0,6) e 0,12 por liga;
@@ -48,5 +49,6 @@ function nomeLiga(liga) {
 // o que se ganha vencendo o rival i: o acessório dele (se ainda não tiver) ou só as moedas
 function textoPremioRival(i, liga) {
   const ace = RIVAIS[i].acessorio, novo = ace && typeof Progresso !== "undefined" && !Progresso.temSkin(ace);
-  return t("venca_ganhe", (novo ? "🎁 " + t("sk_" + ace) + " + " : "") + premioRival(i, liga) + " 🪙");
+  // v19: sem emoji (o texto aparece no HTML e no canvas): "Boné + 85 moedas"
+  return t("venca_ganhe", (novo ? t("sk_" + ace) + " + " : "") + t("premio_moedas", premioRival(i, liga)));
 }
