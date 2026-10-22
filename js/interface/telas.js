@@ -43,7 +43,7 @@ function atualizarTextos() {
     b.classList.toggle("ativo", b.dataset.idioma === IDIOMA);
   });
   const toque = entrada.toque;
-  el("dicaBot").textContent = t("nivel_bot", nivelBotTexto(save.nivelBot)) + "\n" + (toque ? t("dica_bot_toque") : dicaTeclas(true));
+  el("dicaBot").innerHTML = Icone.html("robo") + " " + escHtml(t("nivel_bot", nivelBotTexto(save.nivelBot)) + "\n" + (toque ? t("dica_bot_toque") : dicaTeclas(true)));
   el("dica2p").textContent = toque ? t("dica_2p_toque") : dicaTeclas(false);
   el("dicaRivais").innerHTML = escHtml(t("rival_n", save.rival + 1, RIVAIS.length) + ": " + RIVAIS[save.rival].nome) + "\n" + escHtml(t("liga_n", nomeLiga(save.liga))) + "\n" + premioRivalHtml(save.rival, save.liga);
   atualizarBotaoLendaria();

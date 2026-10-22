@@ -86,7 +86,7 @@ const Roleta = (function() {
   }
 
   // ---------- roleta de arma ----------
-  function cartaoArma(ctx, id, x, y, w, h, destaque, t) {
+  function cartaoArma(ctx, id, x, y, w, h, destaque) {
     var rar = ARMA[id] ? ARMA[id].raridade : 1, cor = COR_RAR[rar] || "#ced4da";
     cartao(ctx, x - w / 2, y - h / 2, w, h, destaque ? "#2c1a5e" : "#22164a", cor, 18);
     if (typeof ArteArmas !== "undefined" && ArteArmas.icone) ArteArmas.icone(ctx, id, x, y - h * 0.1, h * 0.56);

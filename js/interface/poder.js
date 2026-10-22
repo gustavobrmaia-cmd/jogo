@@ -65,7 +65,7 @@ function atualizarPainelPoder(alvo) {
   alvo.classList.toggle("comGratis", Poder.gratis());
   // v17: a grátis vem sozinha depois do rival 2; a mão continua apontando até a pessoa comprar a 1ª com moedas
   alvo.classList.toggle("comMao", !Poder.gratis() && (save.stats.melhorias || 0) < 2 && Poder.podeComprar("forca"));
-  alvo.querySelector(".poderValor").textContent = t("poder_n", Poder.valor(Poder.doJogador()));
+  alvo.querySelector(".poderValor").innerHTML = Icone.html("raio") + " " + escHtml(t("poder_n", Poder.valor(Poder.doJogador())));
   alvo.querySelector(".poderMoedas").innerHTML = moedasHtml(save.moedas);
   // dica curta: depois de perder ("melhore e volte mais forte") ou para quem ainda não comprou quase nada
   alvo.querySelector(".poderDica").textContent = Poder.gratis() ? t("escolha_gratis") : !pode ? "" : alvo.dataset.perdeu === "1" ? t("poder_dica") :

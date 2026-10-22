@@ -301,7 +301,7 @@ function atualizarJogo(dt) {
   if (j.fase === "roleta") { atualizarRoleta(j); return; }
   if (j.fase === "intro") {
     // v19: depois das roletas a abertura é curta (o VS do rival fica um pouco mais para dar tempo de ler)
-    j.durIntro = j.rodada === 1 ? (j.depoisRoleta ? (j.rival ? 1.15 : 0.7) : RODADA.introPrimeira) : RODADA.intro;
+    j.durIntro = j.rodada === 1 ? (j.depoisRoleta ? (j.rival ? 0.95 : 0.6) : RODADA.introPrimeira) : RODADA.intro;
     if (j.tempoFase >= j.durIntro) {
       j.fase = "luta"; j.tempoFase = 0;
       if (!j.demo) som("lute");
@@ -650,7 +650,7 @@ function nivelBotTexto(nivel) { return Math.round(nivel * 9) + 1; }   // 1 a 10,
 //          roulette/weapon-start (a pessoa tem arma inicial), roulette/map (visible) e roulette/map-skip (interact).
 // Desenho: arte/roleta.js (Roleta.desenhar), chamado pelo desenho.js na fase "roleta".
 const ROLETA = {
-  rapida: { arma: 0.85, atraso: 0.12, seguraArma: 0.3, mapa: 0.7, seguraMapa: 0.28 },   // primeiras partidas: ~2,1 s
+  rapida: { arma: 0.8, atraso: 0.1, seguraArma: 0.28, mapa: 0.62, seguraMapa: 0.25 },   // primeiras partidas: ~2 s
   normal: { arma: 1.15, atraso: 0.16, seguraArma: 0.4, mapa: 0.95, seguraMapa: 0.32 }
 };
 // posição (0 até n-1) da roleta: começa rápido e desacelera (cúbica)
@@ -659,7 +659,7 @@ function posRoleta(t, dur, n) { const u = Math.min(1, Math.max(0, t / dur)); ret
 // arma da roleta: sortearArma; a Sorte (melhoria) dá uma 2ª chance e fica a de raridade maior
 function sortearArmaRoleta(M, b) {
   let id = sortearArma(M, true);
-  const sorte = b.lado === 1 && b.humano && typeof sorteJogador === "function" ? sorteJogador() : 0;
+  const sorte = b.lado === 1 && b.humano && jogo && jogo.modo !== "2p" && typeof sorteJogador === "function" ? sorteJogador() : 0;
   if (sorte > 0 && Math.random() < sorte * 0.6) {
     const outra = sortearArma(M, true);
     if (ARMA[outra].raridade > ARMA[id].raridade) id = outra;
