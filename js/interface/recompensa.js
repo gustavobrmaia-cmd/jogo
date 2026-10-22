@@ -3,16 +3,16 @@
 // =========================
 // RECOMPENSAS RÁPIDAS
 // 1. Fim da partida: tela com o resultado, a barra de XP enchendo (subir de nível dá um baú especial),
-//    o baú da partida para abrir (toque -> treme -> abre com raios e o prêmio), "▶ abrir outro baú" (premiado,
+//    o baú da partida para abrir (toque -> treme -> abre com raios e o prêmio), "abrir outro baú" (premiado,
 //    1 vez) e REVANCHE direto (sem passar pelo menu).
-//    O baú abre sozinho e, contra o bot, "▶ PRÓXIMO RIVAL" conta 3 s e começa a próxima partida sozinho
+//    O baú abre sozinho e, contra o bot, "PRÓXIMO RIVAL" conta 3 s e começa a próxima partida sozinho
 //    (no Poki v9 ~30% de quem terminava a 1ª partida não começava a 2ª). Clicar em outro botão cancela a contagem.
 //    O baú da 1ª partida da vida sempre traz um acessório, que já vem equipado.
 //    v16: no modo rivais, vitória sem nada para decidir NÃO abre esta tela (fluxo contínuo, telas.js fluxoDireto).
 //    v17: a melhoria grátis vem sozinha depois do rival 2; a 1ª vez que esta tela aparece vencendo é depois do rival 3.
 //    v13: ao lado do baú, o painel de PODER (Força, Vida, Velocidade; interface/poder.js). Dá para comprar ->
 //    a contagem espera 5 s (8 s na 1ª vez) e cada compra devolve pelo menos 4 s.
-//    Modo rivais: a fileira dos 10 rivais (vencidos com ✓, o próximo em destaque), o nome do próximo e o prêmio;
+//    Modo rivais: a fileira dos 10 rivais (vencidos com um "ok", o próximo em destaque), o nome do próximo e o prêmio;
 //    perdeu -> "REVANCHE" contra o mesmo. O 5º rival dá um baú de nível e o 10º um baú lendário.
 // 2. Recompensa diária: sequência de 7 dias que cresce (dia 3 tem baú, dia 7 baú lendário). Aparece sozinha
 //    no menu uma vez por dia; perder um dia volta para o dia 1.
@@ -22,6 +22,7 @@ let rec = null;        // estado da tela de recompensa
 let diaria = null;     // estado da tela da recompensa diária
 
 // ---------- fim da partida ----------
+// sub (v19): lista de fichas { icone, texto, classe } (sem emoji; o ícone é do módulo Icone)
 function abrirRecompensa(j, titulo, sub) {
   const xp = Progresso.ganharXP(Progresso.xpDaPartida(j));
   const baus = ["normal"];
@@ -36,7 +37,7 @@ function abrirRecompensa(j, titulo, sub) {
   garantirDemo();          // no fundo, a luta de demonstração (sem o placar da partida que acabou)
   atualizarTextos();
   el("recTitulo").textContent = titulo;
-  rec.sub = sub || "";
+  rec.sub = (sub || []).concat((xp.liberados || []).map(function(id) { return { icone: "brilho", texto: t("item_liberado", t("sk_" + id)), classe: "skin" }; }));
   mostrarSub(rec.sub);
   el("recPremio").textContent = "";
   // v17.5: vitória (título dourado com raios) ou derrota (tons frios)
@@ -64,9 +65,10 @@ function abrirRecompensa(j, titulo, sub) {
     const prox = rr.venceu ? (rr.campeao ? 0 : rr.i + 1) : rr.i, liga = rr.venceu && rr.campeao ? rr.liga + 1 : rr.liga;
     // v18.2: campeão ganha a Partida Lendária de presente (a próxima: só armas raras e lendárias) e a tela vira festa
     if (rr.campeao) lendariaPronta = true;
-    el("recProximo").textContent = rr.campeao ? "🏆 " + t("campeao_liga", nomeLiga(rr.liga)) + "   ✨ " + t("lendaria") + " ✨" :
-      rr.venceu ? t("proximo", RIVAIS[prox].nome + " ⚡" + Poder.valor(Poder.doRival(prox, liga))) + "   ·   " + textoPremioRival(prox, liga) :
-      t("revanche_contra", rr.nome + " ⚡" + Poder.valor(Poder.doRival(rr.i, rr.liga)));
+    const poderHtml = function(i, lg) { return Icone.html("raio") + Poder.valor(Poder.doRival(i, lg)); };
+    el("recProximo").innerHTML = rr.campeao ? Icone.html("trofeu") + " " + escHtml(t("campeao_liga", nomeLiga(rr.liga))) + "   " + Icone.html("brilho") + " " + escHtml(t("lendaria")) :
+      rr.venceu ? escHtml(t("proximo", "@@")).replace("@@", escHtml(RIVAIS[prox].nome) + " " + poderHtml(prox, liga)) + "   ·   " + premioRivalHtml(prox, liga) :
+      escHtml(t("revanche_contra", "@@")).replace("@@", escHtml(rr.nome) + " " + poderHtml(rr.i, rr.liga));
   }
   el("telaRecompensa").classList.toggle("campeao", !!(rr && rr.campeao));
   atualizarBotoesRecompensa();
@@ -93,7 +95,7 @@ function animarXp(xp) {
         som("vitoria_rodada");
         el("recNivel").textContent = t("nivel_jogador", xp.nivelAntes + passo);
         reanimar(el("recNivel"), "pop");
-        mostrarSub(rec ? rec.sub : "", "⭐ " + t("subiu_nivel", xp.nivelAntes + passo));
+        mostrarSub(rec ? rec.sub : [], { icone: "estrela", texto: t("subiu_nivel", xp.nivelAntes + passo), classe: "nivel" });
         barra.style.transition = "none"; barra.style.width = "0%"; void barra.offsetWidth;
         proximo();
       }, 650);
@@ -103,17 +105,17 @@ function animarXp(xp) {
 }
 
 // v17.5: o subtítulo vira "fichas" (moedas, troféu, skin, nível) em vez de uma linha comprida só
-function mostrarSub(texto, nivelTxt) {
+// v19: cada ficha é { icone, texto, classe } (ícone desenhado, sem emoji)
+function mostrarSub(lista, nivel) {
   const alvo = el("recSub");
   alvo.innerHTML = "";
-  const partes = String(texto || "").split(/\s+·\s+|\s{3,}/);
-  if (nivelTxt) partes.unshift(nivelTxt);
-  partes.forEach(function(p, i) {
-    p = p.trim();
-    if (!p) return;
+  const partes = (lista || []).slice();
+  if (nivel) partes.unshift(nivel);
+  partes.forEach(function(p) {
+    if (!p || !p.texto) return;
     const s = document.createElement("span");
-    s.className = "chip" + (nivelTxt && i === 0 ? " nivel" : /^🏆/.test(p) ? " trofeu" : /^✨/.test(p) ? " skin" : /🪙/.test(p) ? " moeda" : "");
-    s.textContent = p;
+    s.className = "chip" + (p.classe ? " " + p.classe : "");
+    s.innerHTML = (p.icone ? Icone.html(p.icone) + " " : "") + escHtml(p.texto);
     alvo.appendChild(s);
   });
 }
@@ -124,7 +126,7 @@ function atualizarBotoesRecompensa() {
   el("btnAbrirBau").textContent = rec.baus[rec.i] === "nivel" ? t("abrir_bau_nivel") : t("abrir_bau");
   const podeExtra = !faltam && rec.fase !== "sacudindo" && !rec.extraUsado && Poki.premiadoDisponivel();
   el("btnOutroBau").classList.toggle("escondido", !podeExtra);
-  el("btnOutroBau").textContent = "▶ " + t("outro_bau");
+  el("btnOutroBau").innerHTML = Icone.html("play") + " " + escHtml(t("outro_bau"));
   el("telaRecompensa").classList.toggle("comExtra", podeExtra);   // v17.5: o baú sobe para o botão caber no cartão
   textoRevanche(rec.cancelou ? 0 : rec.n || 0);
   if (podeExtra && !rec.ofertou) { rec.ofertou = true; Eventos.oferta("extra-chest", "visible"); }
@@ -158,13 +160,13 @@ function abrirBauDaVez() {
 }
 
 function mostrarPremio(alvo, premio) {
-  let txt = "+" + premio.moedas + " 🪙";
-  if (premio.skin) txt += "   ✨ " + t(premio.equipou ? "premio_equipado" : "premio_skin", t("sk_" + premio.skin));
-  alvo.textContent = txt;
+  let txt = Icone.html("moeda") + " " + escHtml(t("n_moedas", premio.moedas));
+  if (premio.skin) txt += "   " + Icone.html("presente") + " " + escHtml(t(premio.equipou ? "premio_equipado" : "premio_skin", t("sk_" + premio.skin)));
+  alvo.innerHTML = txt;
   reanimar(alvo, "pop");
 }
 
-// botão da próxima partida: contra o bot vira "▶ PRÓXIMO RIVAL" com a contagem
+// botão da próxima partida: contra o bot vira "PRÓXIMO RIVAL" com a contagem
 function textoRevanche(n) {
   const b = el("btnRevanche");
   if (!b || !rec) return;
@@ -173,7 +175,7 @@ function textoRevanche(n) {
   if (!contra) { b.textContent = nome; return; }
   // v17.5: o número da contagem num selo redondo e uma barra que esvazia embaixo do botão
   b.innerHTML = "";
-  const tx = document.createElement("span"); tx.textContent = "▶ " + nome; b.appendChild(tx);
+  const tx = document.createElement("span"); tx.innerHTML = Icone.html("play") + " " + escHtml(nome); b.appendChild(tx);
   if (n > 0) {
     const num = document.createElement("span"); num.className = "rvNum"; num.textContent = n; b.appendChild(num);
     const barra = document.createElement("span"); barra.className = "rvBarra"; b.appendChild(barra);
@@ -267,8 +269,8 @@ function desenharRecompensa(tempo) {
   if (barra && rec.fimBaus) barra.style.transform = "scaleX(" + Math.max(0, Math.min(1, (rec.espera - (tempo - rec.fimBaus - 0.4)) / rec.espera)).toFixed(3) + ")";
 }
 
-// Fileira dos 10 rivais: vencidos com ✓, o próximo (ou o da revanche) grande e pulsando, os que faltam escondidos.
-// Logo depois de uma vitória o rival vencido fica em destaque um instante, ganha o ✓ e o destaque passa adiante.
+// Fileira dos 10 rivais: vencidos com o "ok" verde, o próximo (ou o da revanche) grande e pulsando, os que faltam escondidos.
+// Logo depois de uma vitória o rival vencido fica em destaque um instante, ganha o "ok" e o destaque passa adiante.
 // v17.5: trilho que enche (verde -> dourado) até o próximo, nome do próximo numa plaquinha e baú em cima do 5º e do 10º.
 function desenharEscada(tempo) {
   const cv = el("canvasEscada"), g = cv.getContext("2d"), rr = rec.rival;
@@ -279,7 +281,7 @@ function desenharEscada(tempo) {
   const vencidos = rr.campeao ? (trocou ? n : n - 1) : rr.i + (trocou ? 1 : 0);
   const destaque = rr.campeao ? (trocou ? -1 : n - 1) : rr.venceu && !trocou ? rr.i : vencidos;
   const fonte = "px Nunito, system-ui, sans-serif";
-  // trilho: fundo escuro + parte já andada (enche até o próximo quando o ✓ entra)
+  // trilho: fundo escuro + parte já andada (enche até o próximo quando o "ok" entra)
   const ate = rr.campeao ? n - 1 : rr.venceu ? rr.i + Math.max(0, Math.min(1, (dt - 0.9) / 0.4)) : rr.i;
   g.lineCap = "round";
   g.strokeStyle = "rgba(0,0,0,0.35)"; g.lineWidth = 14;
@@ -323,7 +325,7 @@ function desenharEscada(tempo) {
       g.fillText("?", x, y + 1);
     }
     if (k < vencidos) {
-      // ✓ verde (com um "pulo" quando acabou de ganhar)
+      // "ok" verde desenhado (com um "pulo" quando acabou de ganhar)
       const novo = rr.venceu && k === vencidos - 1 && dt < 1.3 ? 1 + 0.6 * Math.max(0, 1.3 - dt) : 1;
       g.save(); g.translate(x + 17, y + 15); g.scale(novo, novo);
       g.fillStyle = "#fff"; g.beginPath(); g.arc(0, 0, 14, 0, 7); g.fill();
@@ -385,7 +387,7 @@ function montarDiaria(dia, pego) {
       c.appendChild(cv);
     } else { const ic = document.createElement("div"); ic.className = "moedaGrande"; c.appendChild(ic); }
     const v = document.createElement("div"); v.className = "diaValor"; v.textContent = r.moedas + (r.bau ? " + " + t(r.bau === "lendario" ? "bau_lendario" : "bau") : ""); c.appendChild(v);
-    if (n < dia || (pego && n === dia)) { const ok = document.createElement("div"); ok.className = "diaOk"; ok.textContent = "✓"; c.appendChild(ok); }
+    if (n < dia || (pego && n === dia)) { const ok = document.createElement("div"); ok.className = "diaOk"; ok.innerHTML = Icone.html("ok"); c.appendChild(ok); }
     g.appendChild(c);
   });
 }
@@ -398,13 +400,13 @@ function pegarDiaria() {
   diaria.premio = premio;
   montarDiaria(premio.dia, true);
   som("carta");
-  let txt = "+" + premio.moedas + " 🪙";
+  let txt = Icone.html("moeda") + " " + escHtml(t("n_moedas", premio.moedas));
   if (premio.bau) {
     diaria.fase = "aberto"; diaria.t0 = performance.now() / 1000; diaria.tipoBau = premio.bau.tipo;
     el("canvasDiaria").classList.remove("escondido");
-    txt += "   🎁 +" + premio.bau.moedas + " 🪙" + (premio.bau.skin ? "   ✨ " + t("premio_skin", t("sk_" + premio.bau.skin)) : "");
+    txt += "   " + Icone.html("bau") + " " + escHtml(t("n_moedas", premio.bau.moedas)) + (premio.bau.skin ? "   " + Icone.html("presente") + " " + escHtml(t("premio_skin", t("sk_" + premio.bau.skin))) : "");
   } else diaria.fase = "pego";
-  el("diariaPremio").textContent = txt;
+  el("diariaPremio").innerHTML = txt;
   el("btnPegarDiaria").classList.add("escondido");
   el("btnFecharDiaria").classList.remove("escondido");
   atualizarMenuProgresso();

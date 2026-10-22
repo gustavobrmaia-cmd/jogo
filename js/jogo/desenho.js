@@ -615,6 +615,7 @@ function desenharHud(ctx, j, M, L) {
   const meio = mundoParaTela(0, FIS.altura * 0.42).y;
   // abertura da rodada (v17.5): faixa com o mapa; contra rival na 1ª rodada, o "VS" com os retratos
   if (j.fase === "intro") desenharAbertura(ctx, j, M, L, cx, meio);
+  else if (j.fase === "roleta" && typeof Roleta !== "undefined") Roleta.desenhar(ctx, j, M, L, cx, meio);   // v19 (agente C): roletas de arma e mapa
   // textos do meio (LUTE, K.O., placar): em pé ficam 40% maiores (a tela do celular é estreita)
   const ke = em ? 1.4 : 1, largura = CONFIG.largura / ke - 60;   // largura que cabe (alguns idiomas são longos)
   ctx.save();

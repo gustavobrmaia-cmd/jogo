@@ -13,11 +13,21 @@
 // metade do tempo jogado; enfeite (skins, acessórios) não fez essas pessoas ficarem mais.
 // =========================
 
+// icone = nome em Icone.NOMES (v19: sem emoji). base/mult = preço do 1º nível e quanto ele cresce (padrão 40 e x1,28)
+// v19: SORTE — não entra no PODER (não é força de luta): a roleta de arma da abertura puxa mais raras/lendárias,
+// os baús vêm melhores e as caixas de arma usam sorteJogador() (combate.js). Mais cara e cresce mais rápido.
 const MELHORIAS = [
-  { id: "forca", icone: "💥", cor: "#ff8787", passo: 0.10, max: 25 },
-  { id: "vida",  icone: "❤️", cor: "#69db7c", passo: 0.10, max: 25 },
-  { id: "veloc", icone: "⚡", cor: "#4dabf7", passo: 0.03, max: 10 }
+  { id: "forca", icone: "explosao", cor: "#ff8787", passo: 0.10, max: 25 },
+  { id: "vida",  icone: "coracao", cor: "#69db7c", passo: 0.10, max: 25 },
+  { id: "veloc", icone: "raio", cor: "#4dabf7", passo: 0.03, max: 10 },
+  { id: "sorte", icone: "trevo", cor: "#38d9a9", passo: 0.10, max: 10, base: 60, mult: 1.35 }
 ];
+
+// Sorte do jogador 1 (0 a 1): nível de Sorte / máximo. Contrato com o combate (caixas de arma).
+function sorteJogador() {
+  const n = save.poder && save.poder.sorte || 0;
+  return Math.max(0, Math.min(1, n / 10));
+}
 
 const Poder = (function() {
   function nivel(id) { return (save.poder && save.poder[id]) || 0; }
@@ -28,7 +38,12 @@ const Poder = (function() {
   // v15: a 1ª melhoria da vida é GRÁTIS (com a mão apontando): no v14 só 28% de quem podia comprar comprava.
   // v17: se a pessoa vence o rival 2 sem ter usado, ela vem sozinha (Força +1, telas.js entregarSemTela)
   function gratis() { return !(save.stats && save.stats.melhorias); }
-  function custo(id) { return gratis() ? 0 : Math.round(40 * Math.pow(1.28, nivel(id)) / 5) * 5; }
+  // a grátis não vale para a Sorte (a mão aponta para a Força; a Sorte não ajuda quem está aprendendo a lutar)
+  function custo(id) {
+    const m = info(id);
+    if (gratis() && id !== "sorte") return 0;
+    return Math.round((m.base || 40) * Math.pow(m.mult || 1.28, nivel(id)) / 5) * 5;
+  }
   function podeComprar(id) { return !noMax(id) && save.moedas >= custo(id); }
   function algumaPossivel() { return MELHORIAS.some(function(m) { return podeComprar(m.id); }); }
 
@@ -36,10 +51,10 @@ const Poder = (function() {
   function comprar(id, auto) {
     if (!podeComprar(id)) return false;
     save.moedas -= custo(id);
-    if (!save.poder) save.poder = { forca: 0, vida: 0, veloc: 0 };
+    const eraGratis = gratis() && id !== "sorte";
+    if (!save.poder) save.poder = { forca: 0, vida: 0, veloc: 0, sorte: 0 };
     save.poder[id] = nivel(id) + 1;
-    const eraGratis = gratis();
-    save.stats.melhorias = (save.stats.melhorias || 0) + 1;
+    if (id !== "sorte" || !gratis()) save.stats.melhorias = (save.stats.melhorias || 0) + 1;
     salvar();
     const tot = total(doJogador());
     Poki.medir("upgrade", (auto ? "auto-" : "") + (eraGratis ? "free-" : "") + id, auto ? "reached" : "interact");

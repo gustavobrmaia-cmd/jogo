@@ -42,7 +42,7 @@ const Progresso = (function() {
     return escolhidos.map(function(d) { return nova({ id: d.id, chave: d.chave, meta: d.meta, moedas: d.moedas }); });
   }
   function skinDaSemana(sem) {
-    const lista = SKINS_CORPO.concat(SKINS_ACESSORIO).filter(function(s) { return s.semanal; });
+    const lista = SKINS.filter(function(s) { return s.semanal; });
     return lista[sem % lista.length].id;
   }
 
@@ -50,6 +50,7 @@ const Progresso = (function() {
   function preparar() {
     save.stats = save.stats || {};
     save.donos = save.donos && save.donos.length ? save.donos : ["classico", "nenhum"];
+    prepararVisual();
     save.conquistas = save.conquistas || {};
     ["armasVistas", "cartasVistas", "cenariosVencidos"].forEach(function(k) { if (!Array.isArray(save[k])) save[k] = []; });
     if (!Array.isArray(save.missoes)) save.missoes = [];
@@ -81,7 +82,7 @@ const Progresso = (function() {
       if (save.semana.cenarios.indexOf(extra.cenario) < 0) { save.semana.cenarios.push(extra.cenario); registrar("cenarioNovoSemana", 1); }
       registrar("rodadaCenario", 1, { cenario: extra.cenario, interno: true });
     }
-    // missões e desafios. v18: quem nunca abriu o menu de Missões (o novato) recebe na hora e vê só "+N 🪙"
+    // missões e desafios. v18: quem nunca abriu o menu de Missões (o novato) recebe na hora e vê só "+N moedas"
     // (antes os prêmios ficavam esperando num menu que ele não conhecia e o aviso falava de algo que ele nunca viu)
     const auto = !save.stats.viuMissoes, prontas = [];
     save.missoes.forEach(function(m, i) {
@@ -90,11 +91,11 @@ const Progresso = (function() {
       m.prog = Math.min(m.meta, m.prog + n);
       if (m.prog >= m.meta) { m.feito = true; Poki.medir("mission", m.id, "complete"); if (auto) prontas.push(i); else avisar(t("aviso_missao"), "#69db7c"); }
     });
-    prontas.reverse().forEach(function(i) { avisar("+" + resgatarMissao(i) + " 🪙", "#69db7c"); });
+    prontas.reverse().forEach(function(i) { avisar(t("n_moedas", resgatarMissao(i)), "#69db7c", "moeda"); });
     save.semana.desafios.forEach(function(d, i) {
       if (d.feito || d.chave !== chave) return;
       d.prog = Math.min(d.meta, d.prog + n);
-      if (d.prog >= d.meta) { d.feito = true; Poki.medir("weekly", d.id, "complete"); if (auto) avisar("+" + resgatarDesafio(i) + " 🪙", "#ffd43b"); else avisar(t("aviso_desafio"), "#ffd43b"); }
+      if (d.prog >= d.meta) { d.feito = true; Poki.medir("weekly", d.id, "complete"); if (auto) avisar(t("n_moedas", resgatarDesafio(i)), "#ffd43b", "moeda"); else avisar(t("aviso_desafio"), "#ffd43b"); }
     });
     conferirConquistas();
   }
@@ -104,15 +105,16 @@ const Progresso = (function() {
       if (save.conquistas[c.id]) return;
       if (valorStat(c.stat) >= c.meta) {
         save.conquistas[c.id] = "feita";
-        if (!save.stats.viuMissoes && !c.skin && resgatarConquista(c.id)) avisar("+" + c.moedas + " 🪙", "#b197fc");
+        if (!save.stats.viuMissoes && !c.skin && resgatarConquista(c.id)) avisar(t("n_moedas", c.moedas), "#b197fc", "moeda");
         else avisar(t("aviso_conquista", t("co_" + c.id)), "#b197fc");
         Poki.medir("achievement", c.id, "complete");
       }
     });
   }
 
-  function avisar(texto, cor) {
-    avisos.push({ texto: texto, cor: cor, t: 0 });
+  // icone (opcional, nome de Icone.NOMES): o desenho pode pôr o ícone ao lado do texto (o texto não tem emoji)
+  function avisar(texto, cor, icone) {
+    avisos.push({ texto: texto, cor: cor, t: 0, icone: icone || "" });
     if (avisos.length > 4) avisos.shift();
     som("carta");
   }
@@ -174,8 +176,14 @@ const Progresso = (function() {
     return true;
   }
 
-  // ---------- skins ----------
-  function temSkin(id) { return save.donos.indexOf(id) >= 0; }
+  // ---------- skins / personalização (v19) ----------
+  // tem: comprou/ganhou, vem com o jogo (gratis) ou já chegou no nível que libera
+  function temSkin(id) {
+    const s = SKIN[id];
+    if (id === "nenhum" || id === "") return true;
+    if (save.donos.indexOf(id) >= 0) return true;
+    return !!(s && (s.gratis || (s.nivel && save.nivel >= s.nivel)));
+  }
   function comprarSkin(id) {
     const s = SKIN[id];
     if (!s || temSkin(id) || !s.preco || save.moedas < s.preco) return false;
@@ -185,11 +193,68 @@ const Progresso = (function() {
     Poki.medir("skin", id, "interact");
     return true;
   }
-  function equipar(id) {
+  // põe o item na categoria dele (id "" + tipo = tirar). Mantém o espelho antigo (skinCorpo / skinAcessorio)
+  function equipar(id, tipo) {
     const s = SKIN[id];
-    if (!s || !temSkin(id)) return false;
-    if (s.tipo === "corpo") save.skinCorpo = id; else save.skinAcessorio = id;
+    if (id === "" || id === "nenhum") {
+      if (!tipo || !VISUAL_OPCIONAL[tipo]) return false;
+      save.visual[tipo] = "";
+    } else {
+      if (!s || !temSkin(id)) return false;
+      save.visual[s.tipo] = id;
+    }
+    espelhoAntigo();
     salvar();
+    return true;
+  }
+  function espelhoAntigo() {
+    const v = save.visual;
+    save.skinCorpo = v.corpo || "classico";
+    save.skinAcessorio = v.chapeu || v.acessorio || v.olhos || "nenhum";
+  }
+  // v19: save antigo (v18: corpo + 1 acessório) vira o visual novo; ids inválidos voltam ao padrão
+  function prepararVisual() {
+    if (!save.visual || typeof save.visual !== "object") save.visual = Object.assign({}, VISUAL_PADRAO);
+    if (!(save.versao >= 2)) {
+      save.visual = visualDeAntigo(save.skinCorpo, save.skinAcessorio);
+      save.versao = 2;
+    }
+    CATEGORIAS_VISUAL.forEach(function(c) {
+      const id = save.visual[c];
+      if (typeof id !== "string") save.visual[c] = VISUAL_PADRAO[c];
+      else if (id && (!SKIN[id] || SKIN[id].tipo !== c || !temSkin(id))) save.visual[c] = VISUAL_PADRAO[c];
+    });
+    if (!save.poder || typeof save.poder !== "object") save.poder = { forca: 0, vida: 0, veloc: 0, sorte: 0 };
+    if (typeof save.poder.sorte !== "number") save.poder.sorte = 0;
+    if (!Array.isArray(save.armas)) save.armas = [];
+    save.armas = save.armas.filter(function(id) { return typeof ARMA !== "undefined" && ARMA[id]; });
+    if (save.armaInicial && save.armas.indexOf(save.armaInicial) < 0) save.armaInicial = "";
+    espelhoAntigo();
+  }
+
+  // ---------- loja de armas (v19) ----------
+  // Preço por raridade, medido com a economia da v18.3 (scratchpad/v19/trab-c/economia.js): uma vitória contra rival
+  // da Bronze dá ~150–230 moedas (partida + prêmio do rival + baú). Comum ~2 vitórias, rara ~5, lendária ~14.
+  const PRECO_ARMA = [0, 350, 900, 2600];
+  function precoArma(id) { const a = ARMA[id]; return a ? PRECO_ARMA[a.raridade] || 0 : 0; }
+  function temArma(id) { return save.armas.indexOf(id) >= 0; }
+  // a loja só aparece depois que o novato passou pelo começo (rival 5 vencido ou já viu a tela das melhorias)
+  function lojaLiberada() { return !!(save.stats.viuPoder || save.rival >= 5 || save.liga > 0); }
+  function comprarArma(id) {
+    const p = precoArma(id);
+    if (!p || temArma(id) || save.moedas < p) return false;
+    save.moedas -= p;
+    save.armas.push(id);
+    if (!save.armaInicial) save.armaInicial = id;   // a 1ª arma comprada já vira a inicial
+    salvar();
+    Poki.medir("shop", "buy-" + id, "interact");
+    return true;
+  }
+  function equiparArma(id) {
+    if (id && !temArma(id)) return false;
+    save.armaInicial = id || "";
+    salvar();
+    Poki.medir("shop", id ? "start-" + id : "start-none", "interact");
     return true;
   }
 
@@ -219,6 +284,8 @@ const Progresso = (function() {
     save.xp += n;
     while (save.xp >= xpParaSubir(save.nivel)) { save.xp -= xpParaSubir(save.nivel); save.nivel++; r.subiu++; }
     r.nivel = save.nivel; r.xp = save.xp;
+    // v19: itens que o nível novo libera (personalização)
+    r.liberados = r.subiu ? SKINS.filter(function(s) { return s.nivel && s.nivel > r.nivelAntes && s.nivel <= r.nivel; }).map(function(s) { return s.id; }) : [];
     if (r.subiu) Poki.medir("player", "level-" + save.nivel, "reached");
     salvar();
     return r;
@@ -232,25 +299,36 @@ const Progresso = (function() {
 
   // ---------- baús ----------
   // "normal" (todo fim de partida), "nivel" (subiu de nível), "lendario" (7º dia da recompensa diária)
+  // v19: os itens "só de baú" entram aqui; com Sorte a raridade pesa mais para cima
   function skinSorteada(raridadeMax) {
-    const lista = SKINS_CORPO.concat(SKINS_ACESSORIO).filter(function(s) {
-      return s.preco && !temSkin(s.id) && s.raridade <= raridadeMax;
+    const sorte = typeof sorteJogador === "function" ? sorteJogador() : 0;
+    const lista = SKINS.filter(function(s) {
+      return (s.preco || s.bau) && !temSkin(s.id) && s.raridade <= raridadeMax;
     });
-    return lista.length ? lista[Math.floor(Math.random() * lista.length)].id : null;
+    if (!lista.length) return null;
+    let soma = 0;
+    const peso = function(s) { return (s.bau ? 1.6 : 1) * Math.pow(1 + sorte * 1.5, s.raridade - 1); };
+    lista.forEach(function(s) { soma += peso(s); });
+    let r = Math.random() * soma;
+    for (let i = 0; i < lista.length; i++) { r -= peso(lista[i]); if (r <= 0) return lista[i].id; }
+    return lista[0].id;
   }
   // garantir: o baú da 1ª partida da vida sempre traz um acessório, que já vem equipado na partida seguinte
   // (a pessoa vê o prêmio em cima da bolinha logo de cara)
   function abrirBau(tipo, garantir) {
     const regra = { normal: [15, 40, 0.08, 2], nivel: [80, 150, 0.35, 3], lendario: [250, 400, 1, 4] }[tipo] || [15, 40, 0, 1];
-    const premio = { tipo: tipo, moedas: Math.round(regra[0] + Math.random() * (regra[1] - regra[0])), skin: null };
+    // v19: Sorte (0 a 1) = baú melhor: +40% de moedas e o dobro da chance de item no máximo; o baú normal pode
+    // trazer até épico
+    const sorte = typeof sorteJogador === "function" ? sorteJogador() : 0;
+    const premio = { tipo: tipo, moedas: Math.round((regra[0] + Math.random() * (regra[1] - regra[0])) * (1 + 0.4 * sorte)), skin: null };
     if (garantir) {
-      const lista = SKINS_ACESSORIO.filter(function(s) { return s.preco && !temSkin(s.id) && s.raridade <= 2; });
+      const lista = SKINS_POR_TIPO.chapeu.filter(function(s) { return s.preco && !temSkin(s.id) && s.raridade <= 2; });
       if (lista.length) { premio.skin = lista[Math.floor(Math.random() * lista.length)].id; premio.equipou = true; }
     }
-    if (!premio.skin && Math.random() < regra[2]) premio.skin = skinSorteada(regra[3]);
+    if (!premio.skin && Math.random() < regra[2] * (1 + sorte)) premio.skin = skinSorteada(Math.min(4, regra[3] + (sorte >= 0.5 ? 1 : 0)));
     ganharMoedas(premio.moedas);
     if (premio.skin) ganharSkin(premio.skin);
-    if (premio.equipou) save.skinAcessorio = premio.skin;
+    if (premio.equipou) equipar(premio.skin);
     salvar();
     Poki.medir("chest", tipo, "interact");
     return premio;
@@ -294,6 +372,8 @@ const Progresso = (function() {
     resgatarMissao: resgatarMissao, trocarMissao: trocarMissao, resgatarDesafio: resgatarDesafio,
     semanaCompleta: semanaCompleta, resgatarPremioSemana: resgatarPremioSemana, resgatarConquista: resgatarConquista,
     temSkin: temSkin, ganharSkin: ganharSkin, comprarSkin: comprarSkin, equipar: equipar, pendentes: pendentes,
+    prepararVisual: prepararVisual, precoArma: precoArma, temArma: temArma, comprarArma: comprarArma, equiparArma: equiparArma,
+    lojaLiberada: lojaLiberada, PRECO_ARMA: PRECO_ARMA,
     moedasDaPartida: moedasDaPartida, ganharMoedas: ganharMoedas, avisos: avisos, atualizarAvisos: atualizarAvisos,
     xpParaSubir: xpParaSubir, ganharXP: ganharXP, xpDaPartida: xpDaPartida, abrirBau: abrirBau,
     DIARIAS: DIARIAS, diaDisponivel: diaDisponivel, pegarDiaria: pegarDiaria

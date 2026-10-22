@@ -21,7 +21,8 @@ let lendariaPronta = false;     // assistiu o anúncio da Partida Lendária
 let pendente = null;            // partida que acabou e espera a resposta do "continuar"
 
 const TELAS = ["telaMenu", "telaModo", "telaIdiomas", "telaPausa", "telaContinuar",
-  "telaOpcoes", "telaControles", "telaMissoes", "telaSkins", "telaRecompensa", "telaDiaria", "telaPoder"];
+  "telaOpcoes", "telaControles", "telaMissoes", "telaSkins", "telaRecompensa", "telaDiaria", "telaPoder",
+  "telaVisual", "telaLoja"];   // v19: personalização (interface/visual.js) e loja de armas (interface/loja.js)
 let diariaVista = false;     // a recompensa diária abre sozinha uma vez por visita
 
 function mostrarTela(id) {
@@ -35,7 +36,7 @@ function atualizarTextos() {
   el("btnSom").textContent = somTxt;
   el("btnSomPausa").textContent = somTxt;
   el("btnQualidade").textContent = t("qualidade_" + save.qualidade);
-  document.querySelectorAll('[data-acao="som"] .ic').forEach(function(e) { e.textContent = save.mudo ? "🔇" : "🔊"; });
+  document.querySelectorAll('[data-acao="som"] .ic').forEach(function(e) { e.innerHTML = Icone.html(save.mudo ? "mudo" : "som"); });
   document.body.classList.toggle("toque", !!entrada.toque);
   document.body.classList.toggle("leve", !!CONFIG.leve);   // v17.5: modo leve sem as animações de fundo das telas
   el("listaIdiomas").querySelectorAll("button").forEach(function(b) {
@@ -44,17 +45,28 @@ function atualizarTextos() {
   const toque = entrada.toque;
   el("dicaBot").textContent = t("nivel_bot", nivelBotTexto(save.nivelBot)) + "\n" + (toque ? t("dica_bot_toque") : dicaTeclas(true));
   el("dica2p").textContent = toque ? t("dica_2p_toque") : dicaTeclas(false);
-  el("dicaRivais").textContent = t("rival_n", save.rival + 1, RIVAIS.length) + ": " + RIVAIS[save.rival].nome + "\n" + t("liga_n", nomeLiga(save.liga)) + "\n" + textoPremioRival(save.rival, save.liga);
+  el("dicaRivais").innerHTML = escHtml(t("rival_n", save.rival + 1, RIVAIS.length) + ": " + RIVAIS[save.rival].nome) + "\n" + escHtml(t("liga_n", nomeLiga(save.liga))) + "\n" + premioRivalHtml(save.rival, save.liga);
   atualizarBotaoLendaria();
   atualizarMenuProgresso();
 }
 
 function atualizarBotaoLendaria() {
   const b = el("btnLendaria");
-  if (lendariaPronta) { b.textContent = "✨ " + t("lendaria_ativada"); b.disabled = true; b.classList.remove("escondido"); return; }
+  if (lendariaPronta) { b.innerHTML = Icone.html("brilho") + " " + escHtml(t("lendaria_ativada")); b.disabled = true; b.classList.remove("escondido"); return; }
   b.disabled = false;
-  b.textContent = "▶ " + t("lendaria_anuncio");
+  b.innerHTML = Icone.html("play") + " " + escHtml(t("lendaria_anuncio"));
   b.classList.toggle("escondido", !Poki.premiadoDisponivel());
+}
+
+// v19: texto para innerHTML (as traduções são nossas, mas nomes e números passam por aqui também)
+function escHtml(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+// número com o ícone da moeda (HTML)
+function moedasHtml(n) { return Icone.html("moeda") + " " + n; }
+// "Vença e ganhe: [presente] Acessório + N [moeda]" sem emoji (o textoPremioRival de dados/rivais.js tem emoji)
+function premioRivalHtml(i, liga) {
+  const ace = RIVAIS[i].acessorio, novo = ace && !Progresso.temSkin(ace);
+  const dentro = (novo ? Icone.html("presente") + " " + escHtml(t("sk_" + ace)) + " + " : "") + premioRival(i, liga) + " " + Icone.html("moeda");
+  return escHtml(t("venca_ganhe", "@@")).replace("@@", dentro);
 }
 
 // ---------- menus ----------
@@ -153,7 +165,7 @@ function aoTerminarPartida(j) {
 
 function finalizarPartida(j) {
   pendente = null;
-  let texto, extra = "";
+  let texto, extra = [];   // v19: fichas { icone, texto, classe } (sem emoji)
   // progresso: moedas da partida e contadores das missões/conquistas
   const ganho = Progresso.moedasDaPartida(j);
   Progresso.ganharMoedas(ganho);
@@ -182,14 +194,17 @@ function finalizarPartida(j) {
       j.resultadoRival.moedas = premio;
       // o acessório do rival vencido vira seu (e já vem equipado na próxima partida)
       const ace = r.d.acessorio;
-      if (ace && !Progresso.temSkin(ace)) { Progresso.ganharSkin(ace); save.skinAcessorio = ace; j.resultadoRival.acessorio = ace; }
+      if (ace && !Progresso.temSkin(ace)) { Progresso.ganharSkin(ace); Progresso.equipar(ace); j.resultadoRival.acessorio = ace; }
       save.rivalAjuste = 0;
       if (r.i + 1 >= RIVAIS.length) { save.rival = 0; save.liga = r.liga + 1; j.resultadoRival.campeao = true; Eventos.marco("champion-" + r.liga); }
       else save.rival = r.i + 1;
     } else save.rivalAjuste = Math.max(-0.3, (save.rivalAjuste || 0) - (r.i >= 5 ? 0.10 : 0.07));   // v18.3: revanche mais generosa nos 6–10
     salvar();
     texto = (venceu ? t("rival_derrotado", r.d.nome) : t("rival_venceu", r.d.nome)) + "  " + j.pontos[0] + " – " + j.pontos[1];
-    if (venceu) extra = "🏆 +" + j.resultadoRival.moedas + " 🪙" + (j.resultadoRival.acessorio ? "   ✨ " + t("premio_equipado", t("sk_" + j.resultadoRival.acessorio)) : "");
+    if (venceu) {
+      extra.push({ icone: "trofeu", texto: t("n_moedas", j.resultadoRival.moedas), classe: "trofeu" });
+      if (j.resultadoRival.acessorio) extra.push({ icone: "presente", texto: t("premio_equipado", t("sk_" + j.resultadoRival.acessorio)), classe: "skin" });
+    }
   } else if (j.modo === "bot") {
     const venceu = j.vencedorPartida === 1;
     const antes = save.nivelBot;
@@ -202,21 +217,21 @@ function finalizarPartida(j) {
     Poki.medir("bot", save.nivelBot > antes ? "harder" : "easier", "interact");
     texto = (venceu ? t("voce_venceu") : t("bot_venceu")) + "  " + j.pontos[0] + " – " + j.pontos[1];
     const n0 = nivelBotTexto(antes), n1 = nivelBotTexto(save.nivelBot);
-    if (n1 > n0) extra = t("bot_subiu", n1);
-    else if (n1 < n0) extra = t("bot_desceu", n1);
+    if (n1 > n0) extra.push({ icone: "robo", texto: t("bot_subiu", n1) });
+    else if (n1 < n0) extra.push({ icone: "robo", texto: t("bot_desceu", n1) });
   } else if (j.modo === "sobrevivencia") {
     salvar();
     Poki.medir("match", "survival", "complete");
     Poki.medir("survival", "best-" + j.onda, "reached");
     texto = t("fim_sobrevivencia", j.onda);
-    extra = novoRecorde ? t("novo_recorde") : t("recorde_onda", save.recordeOnda);
+    extra.push({ icone: "trofeu", texto: novoRecorde ? t("novo_recorde") : t("recorde_onda", save.recordeOnda), classe: "trofeu" });
   } else {
     Poki.medir("match", "2p", "complete");
     texto = t("jogador_venceu", j.vencedorPartida) + "  " + j.pontos[0] + " – " + j.pontos[1];
   }
   el("menuResultado").textContent = texto;
   if (fluxoDireto(j)) { entregarSemTela(j, ganho); return; }
-  abrirRecompensa(j, texto, "+" + ganho + " 🪙" + (extra ? "   ·   " + extra : ""));
+  abrirRecompensa(j, texto, [{ icone: "moeda", texto: t("n_moedas", ganho), classe: "moeda" }].concat(extra));
 }
 
 // ---------- v16: FLUXO CONTÍNUO entre partidas do modo rivais ----------
@@ -245,30 +260,32 @@ function entregarSemTela(j, ganho) {
   const rr = j.resultadoRival;
   const xp = Progresso.ganharXP(Progresso.xpDaPartida(j));
   let moedas = ganho + (rr.moedas || 0);
-  const linhas = [];
+  // v19: textos sem emoji; icones[i] (nome em Icone.NOMES) acompanha linhas[i] para o desenho pôr o ícone se quiser
+  const linhas = [], icones = [];
   const baus = ["normal"];
   for (let i = 0; i < xp.subiu; i++) baus.push("nivel");
   baus.forEach(function(tipo) {
     const p = Progresso.abrirBau(tipo, false);
     moedas += p.moedas;
-    if (p.skin) linhas.push("✨ " + t("premio_skin", t("sk_" + p.skin)));
+    if (p.skin) { linhas.push(t("premio_skin", t("sk_" + p.skin))); icones.push("presente"); }
   });
-  linhas.unshift("+" + moedas + " 🪙");
-  if (rr.acessorio) linhas.push("✨ " + t("premio_equipado", t("sk_" + rr.acessorio)));
-  if (xp.subiu) { linhas.push("⭐ " + t("subiu_nivel", xp.nivel)); Eventos.marco("player-level-" + xp.nivel); }
+  linhas.unshift(t("n_moedas", moedas)); icones.unshift("moeda");
+  if (rr.acessorio) { linhas.push(t("premio_equipado", t("sk_" + rr.acessorio))); icones.push("presente"); }
+  if (xp.subiu) { linhas.push(t("subiu_nivel", xp.nivel)); icones.push("estrela"); Eventos.marco("player-level-" + xp.nivel); }
+  (xp.liberados || []).forEach(function(id) { linhas.push(t("item_liberado", t("sk_" + id))); icones.push("brilho"); });
   // v17: a melhoria grátis vem sozinha (Força: a rodada fica mais curta e a abertura mostra "⚡110 VS ⚡100")
   let destaque = null;
-  if (!j.treino && Poder.gratis() && Poder.comprar("forca", true)) destaque = "💥 " + t("mel_forca") + " +1   " + t("gratis");
+  if (!j.treino && Poder.gratis() && Poder.comprar("forca", true)) destaque = t("mel_forca") + " +1   " + t("gratis");
   // v18.3: antes da 1ª tela de melhorias (rivais 3 e 4) o jogo compra sozinho +1 Força e +1 Vida se der
   else if (!j.treino && !save.stats.viuPoder) {
     const comprou = [];
-    if (Poder.comprar("forca", true)) comprou.push("💥 " + t("mel_forca") + " +1");
-    if (Poder.comprar("vida", true)) comprou.push("❤️ " + t("mel_vida") + " +1");
+    if (Poder.comprar("forca", true)) comprou.push(t("mel_forca") + " +1");
+    if (Poder.comprar("vida", true)) comprou.push(t("mel_vida") + " +1");
     if (comprou.length) destaque = comprou.join("   ");
   }
   save.stats.semTela = (save.stats.semTela || 0) + 1;
   salvar();
-  faixaPremio = { linhas: linhas, destaque: destaque, t0: 0, velho: j };   // o relógio da faixa começa quando a próxima partida aparece
+  faixaPremio = { linhas: linhas, icones: icones, destaque: destaque, t0: 0, velho: j };   // o relógio da faixa começa quando a próxima partida aparece
   Eventos.marco("next-rival-direct");
   atualizarMenuProgresso();
   comecarPartida("rivais");
@@ -342,10 +359,11 @@ function sairDaPartida() {
 
 // moedas no topo, selo de prêmios esperando e o botão de dobrar
 function atualizarMenuProgresso() {
-  const txt = "🪙 " + save.moedas;
-  el("menuMoedas").textContent = txt;
-  el("missoesMoedas").textContent = txt;
-  el("skinsMoedas").textContent = txt;
+  const txt = moedasHtml(save.moedas);
+  ["menuMoedas", "missoesMoedas", "skinsMoedas", "visualMoedas", "lojaMoedas"].forEach(function(id) { const e = el(id); if (e) e.innerHTML = txt; });
+  // v19: a loja de armas só aparece depois do começo (rival 5 vencido ou a 1ª tela de melhorias)
+  const bl = el("btnLoja");
+  if (bl) bl.classList.toggle("escondido", !Progresso.lojaLiberada());
   const n = Progresso.pendentes();
   el("seloMissoes").textContent = n;
   el("seloMissoes").classList.toggle("escondido", n === 0);
@@ -396,7 +414,8 @@ function montarTelas() {
     controles: abrirControles,
     teclasPadrao: teclasDeFabrica,
     missoes: function() { abrirMissoes("missoes"); },
-    skins: function() { abrirSkins("corpo"); },
+    skins: function() { abrirVisual(); },
+    loja: function() { abrirLoja(); },
     poder: abrirTelaPoder,
     modoSurv: function() { comecarPartida("sobrevivencia"); },
     abrirBau: abrirBauDaVez,
@@ -429,20 +448,10 @@ function montarTelas() {
     });
   });
 
-  // v18.2: escolha da arma na abertura do rival (toque/clique num dos 3 cartões ou teclas 1/2/3)
-  const cvJogo = document.getElementById("canvas");
-  cvJogo.addEventListener("pointerdown", function(e) {
-    const es = jogo && jogo.escolha;
-    if (estado !== "jogo" || !es || es.sel !== null || !es.rects || jogo.fase !== "intro") return;
-    const r = cvJogo.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width * CONFIG.largura, y = (e.clientY - r.top) / r.height * cvJogo.height;
-    es.rects.forEach(function(q, i) { if (x >= q.x && x <= q.x + q.w && y >= q.y && y <= q.y + q.h) escolherArma(i); });
-  });
-
-  // atalhos de teclado nos menus
+  // v19: roletas da abertura: qualquer tecla acelera (toque e clique chegam pela entrada, partida.js atualizarRoleta)
   window.addEventListener("keydown", function(e) {
     if (e.repeat) return;
-    if (estado === "jogo" && /^(Digit|Numpad)[123]$/.test(e.code)) escolherArma(+e.code.slice(-1) - 1);
+    if (estado === "jogo" && jogo && jogo.fase === "roleta" && e.code !== "Escape" && e.code !== "KeyP") acelerarRoleta();
     if (estado === "pausa" && (e.code === "Escape" || e.code === "KeyP")) continuar();
     else if (estado === "menu" && e.code === "Enter") abrirModo();
   });
