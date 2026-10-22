@@ -215,19 +215,29 @@ function desenharBolinhaNoMundo(ctx, j, M, b, o, tm) {
   if (!b.viva) return;
   const ef = b.efeitos;
   const fantasma = ef.fantasma > 0 ? 0.82 : 0;
-  // expressão
+  // expressão (v19): feliz quando vence, triste quando perde, tonta congelada, dor ao apanhar, medo com pouca vida,
+  // brava quando mira/atira (a pessoa mirando com o dedo/mouse, o bot avisando ou atirando)
   let expr = "normal";
-  if (j.fase === "fimRodada" && j.vencedorRodada === b.lado) expr = "feliz";
+  const fimP = j.fase === "fimPartida" && j.vencedorPartida;
+  if ((j.fase === "fimRodada" && j.vencedorRodada === b.lado) || (fimP && j.vencedorPartida === b.lado)) expr = "feliz";
+  else if (fimP || (j.fase === "fimRodada" && j.vencedorRodada && j.vencedorRodada !== b.lado)) expr = "triste";
   else if (ef.congelado > 0 || ef.lento > 0.5) expr = "tonto";
   else if (b.dor > 0) expr = "dor";
   else if (b.vida < 25) expr = "medo";
-  else if (ef.furia > 0 || b.recuoAnim > 0.5 || b.golpe > 0) expr = "bravo";
+  else if (ef.furia > 0 || b.recuoAnim > 0.2 || b.golpe > 0 || b.avisando || (b.humano && b.ent && b.ent.tiro)) expr = "bravo";
   const ox = o.x - b.x, oy = o.y - b.y, od = Math.sqrt(ox * ox + oy * oy) || 1;
   const d = b.desc || (b.desc = {});
   d.x = b.x; d.y = b.y; d.r = b.r; d.cor = b.cor; d.vx = b.vx; d.vy = b.vy;
-  d.olharX = o.viva ? ox / od : b.dir; d.olharY = o.viva ? oy / od * 0.7 : 0;
+  // os olhos seguem a mira (armas de tiro); de perto/minas/céu olham para o outro
+  const aMira = ARMA[b.arma], miraOk = aMira && aMira.tipo !== "melee" && aMira.tipo !== "mina" && aMira.tipo !== "ceu" && b.mira !== undefined;
+  if (miraOk) { d.olharX = Math.round(Math.cos(b.mira) * 10) / 10; d.olharY = Math.round(Math.sin(b.mira) * 7) / 10; }
+  else { d.olharX = o.viva ? ox / od : b.dir; d.olharY = o.viva ? oy / od * 0.7 : 0; }
   d.expressao = expr; d.piscar = b.piscar || 0;
-  d.escalaX = b.escalaX || 1; d.escalaY = (b.escalaY || 1) * (gravSinal(M.cen, tm) < 0 ? -1 : 1);
+  // squash & stretch: o motor amassa no pulo/aterrissagem; aqui estica um pouco na direção da velocidade vertical
+  const gs = gravSinal(M.cen, tm);
+  let kv = 0;
+  if (!b.noChao && !M.cen.semGravidade) kv = Math.min(0.13, Math.abs(b.vy || 0) * 0.011);
+  d.escalaX = (b.escalaX || 1) * (1 - kv * 0.6); d.escalaY = (b.escalaY || 1) * (1 + kv) * (gs < 0 ? -1 : 1);
   d.flash = b.flash || 0; d.escudo = ef.escudo > 0; d.fantasma = fantasma; d.congelado = ef.congelado > 0;
   d.fogo = ef.fogo > 0; d.furia = ef.furia > 0; d.rapidez = ef.rapidez > 0; d.t = tm;
   const sk = j.skins && j.skins[b.lado - 1];
@@ -561,6 +571,19 @@ function chaoEmbaixo(M, b) {
     if (b.x > p.x && b.x < p.x + p.w && p.y >= b.y && p.y < y) y = p.y;
   }
   return y;
+}
+
+// ---------- logo do menu (v19): as duas bolinhas encarando ao lado do título ----------
+function desenharLogo() {
+  if (typeof ArteBolinha === "undefined") return;
+  [["logoBola1", 0, 1], ["logoBola2", 1, -1]].forEach(function(q) {
+    const cv = document.getElementById(q[0]);
+    if (!cv) return;
+    const g = cv.getContext("2d"), cor = typeof CORES_BOLINHAS !== "undefined" ? CORES_BOLINHAS[q[1] ? 3 : 0] || "#35d6ff" : "#ff5d8f";
+    g.clearRect(0, 0, cv.width, cv.height);
+    ArteBolinha.desenhar(g, { x: 100, y: 104, r: 74, cor: q[1] ? "#35d6ff" : cor, expressao: q[1] ? "bravo" : "smirk", olharX: q[2] * 0.8, olharY: 0.1,
+      vira: q[2] * 0.35, t: 0.3, piscar: 0, escalaX: 1, escalaY: 1 });
+  });
 }
 
 // ---------- HUD ----------

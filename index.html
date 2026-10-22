@@ -22,15 +22,15 @@
     <div id="telaMenu" class="tela">
       <div class="moedas" id="menuMoedas"></div>
       <div class="nivelJogador"><span id="menuNivelNum"></span><div class="barraXp"><div id="menuXp"></div></div></div>
-      <h1 data-t="titulo"></h1>
+      <div class="logo"><canvas class="bolaLogo e" id="logoBola1" width="200" height="200"></canvas><h1 data-t="titulo"></h1><canvas class="bolaLogo d" id="logoBola2" width="200" height="200"></canvas></div>
       <p class="resultado" id="menuResultado"></p>
       <div class="botoes">
-        <button class="grande" data-acao="jogar"><span class="ic">▶</span> <span data-t="jogar"></span></button>
+        <button class="grande" data-acao="jogar"><span class="ic"><i data-ico="play"></i></span> <span data-t="jogar"></span></button>
         <div class="linha">
-          <button data-acao="poder" class="botaoPoder">⚡ <span data-t="melhorar"></span><span class="selo escondido" id="seloPoder">!</span></button>
-          <button data-acao="missoes"><span class="ic">🎯</span> <span data-t="missoes"></span><span class="selo escondido" id="seloMissoes"></span></button>
-          <button data-acao="skins"><span class="ic">🎨</span> <span data-t="skins"></span></button>
-          <button data-acao="opcoes" class="botaoOpcoes"><span class="ic">⚙️</span> <span data-t="opcoes"></span></button>
+          <button data-acao="poder" class="botaoPoder"><span class="ic"><i data-ico="raio"></i></span> <span data-t="melhorar"></span><span class="selo escondido" id="seloPoder">!</span></button>
+          <button data-acao="missoes"><span class="ic"><i data-ico="alvo"></i></span> <span data-t="missoes"></span><span class="selo escondido" id="seloMissoes"></span></button>
+          <button data-acao="skins"><span class="ic"><i data-ico="pincel"></i></span> <span data-t="skins"></span></button>
+          <button data-acao="opcoes" class="botaoOpcoes"><span class="ic"><i data-ico="engrenagem"></i></span> <span data-t="opcoes"></span></button>
         </div>
       </div>
     </div>
@@ -48,10 +48,10 @@
       <div class="caixa">
         <h2 class="placa" data-t="opcoes"></h2>
         <div class="botoes">
-          <button data-acao="idiomas"><span class="ic">🌐</span> <span data-t="idioma"></span></button>
-          <button data-acao="som"><span class="ic">🔊</span> <span id="btnSom"></span></button>
-          <button data-acao="controles"><span class="ic">🎮</span> <span data-t="controles"></span></button>
-          <button data-acao="qualidade"><span class="ic">✨</span> <span id="btnQualidade"></span></button>
+          <button data-acao="idiomas"><span class="ic"><i data-ico="globo"></i></span> <span data-t="idioma"></span></button>
+          <button data-acao="som"><span class="ic"><i data-ico="som"></i></span> <span id="btnSom"></span></button>
+          <button data-acao="controles"><span class="ic"><i data-ico="controle"></i></span> <span data-t="controles"></span></button>
+          <button data-acao="qualidade"><span class="ic"><i data-ico="brilho"></i></span> <span id="btnQualidade"></span></button>
         </div>
       </div>
       <button data-acao="voltar" data-t="voltar" class="voltar"></button>
@@ -103,23 +103,23 @@
       <h2 data-t="escolha_modo"></h2>
       <div class="modos">
         <button class="modo rivais" data-acao="modoRivais">
-          <span class="icone">🏆</span>
+          <span class="icone"><i data-ico="trofeu"></i></span>
           <span class="nome" data-t="modo_rivais"></span>
           <span class="dica" id="dicaRivais"></span>
         </button>
         <button class="modo" data-acao="modoBot">
-          <span class="icone">🤖</span>
+          <span class="icone"><i data-ico="robo"></i></span>
           <span class="nome" data-t="contra_bot"></span>
           <span class="dica" id="dicaBot"></span>
         </button>
         <button class="modo" data-acao="modo2p">
-          <span class="icone">👥</span>
+          <span class="icone"><i data-ico="dupla"></i></span>
           <span class="nome" data-t="dois_jogadores"></span>
           <span class="selo" data-t="mesmo_aparelho"></span>
           <span class="dica" id="dica2p"></span>
         </button>
         <button class="modo surv" data-acao="modoSurv">
-          <span class="icone">🔥</span>
+          <span class="icone"><i data-ico="fogo"></i></span>
           <span class="nome" data-t="sobrevivencia"></span>
           <span class="dica" id="dicaSurv"></span>
         </button>
@@ -140,10 +140,10 @@
       <div class="caixa">
         <h2 class="placa" data-t="pausado"></h2>
         <div class="botoes">
-          <button class="grande" data-acao="continuar"><span class="ic">▶</span> <span data-t="continuar"></span></button>
+          <button class="grande" data-acao="continuar"><span class="ic"><i data-ico="play"></i></span> <span data-t="continuar"></span></button>
           <div class="linha">
-            <button data-acao="som"><span class="ic">🔊</span> <span id="btnSomPausa"></span></button>
-            <button data-acao="sair"><span class="ic">🏠</span> <span data-t="menu"></span></button>
+            <button data-acao="som"><span class="ic"><i data-ico="som"></i></span> <span id="btnSomPausa"></span></button>
+            <button data-acao="sair"><span class="ic"><i data-ico="casa"></i></span> <span data-t="menu"></span></button>
           </div>
         </div>
       </div>
@@ -171,7 +171,7 @@
       </div>
       <div class="linha recBotoes">
         <button class="grande" data-acao="revanche" id="btnRevanche"></button>
-        <button data-acao="recMenu" class="voltar"><span class="ic">🏠</span> <span data-t="menu"></span></button>
+        <button data-acao="recMenu" class="voltar"><span class="ic"><i data-ico="casa"></i></span> <span data-t="menu"></span></button>
       </div>
     </div>
 

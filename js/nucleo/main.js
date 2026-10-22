@@ -131,6 +131,7 @@ function quadro(agora) {
     const fonte = document.fonts && document.fonts.load ?
       Promise.race([document.fonts.load("900 20px Nunito"), new Promise(function(r) { setTimeout(r, 1500); })]).catch(function() {}) :
       Promise.resolve();
+    if (typeof desenharLogo === "function") protegido(desenharLogo);   // v19: bolinhas do logo do menu
     fonte.then(function() { aquecer.forEach(function(f, i) { setTimeout(function() { protegido(f); }, 300 + i * 250); }); });
   });
 })();
