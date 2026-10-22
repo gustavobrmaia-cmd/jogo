@@ -787,3 +787,6 @@ body.retrato #recPoder .pcNivel { font-size: 18px; padding: 2px 10px; }
 #telaRecompensa.campeao #recProximo { font-size: 34px; color: #ffd43b; text-shadow: 0 0 18px rgba(255, 212, 59, 0.8), 0 3px 0 #5c3d00; animation: campeaoPulsa 1s ease-in-out infinite; }
 #telaRecompensa.campeao #recTitulo { font-size: 1.25em; text-shadow: 0 0 24px rgba(255, 212, 59, 0.9); }
 @keyframes campeaoPulsa { 50% { transform: scale(1.08); } }
+
+/* v19: ícones desenhados (js/jogo/arte/icones.js) */
+.ico { display: inline-block; width: 1.15em; height: 1.15em; vertical-align: -0.2em; background: center / contain no-repeat; }
