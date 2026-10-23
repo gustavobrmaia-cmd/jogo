@@ -374,6 +374,10 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     - anúncio comum antes de procurar e antes da revanche, nunca no meio. Vitória dá 40 moedas, derrota 15;
     - v19.1: a variação do cenário vai no estado (`varCen`) e o convidado usa a mesma; aba escondida avisa o outro
       ("oculto": o anfitrião solta os controles do convidado; o convidado espera até 40 s em vez de 6 s);
+    - v19.5: `CONFIG.idRede` = id do jogo no Poki (df3225ad-…; antes um id inventado, e a partida rápida voltava na
+      hora). A partida rápida espera até 1 min (`ESPERA_RAPIDA`; tempo na tela, globo girando, Cancelar). Erro de
+      rede tenta de novo a cada 3 s. Sem ninguém: "Tentar de novo" ou "Jogar contra o bot". O motivo do erro aparece
+      entre parênteses no texto (ex.: "servidor-socket-error"). Se a netlib falhar, a próxima tentativa recria a conexão;
     - não testado com a rede de verdade aqui (o ambiente bloqueia netlib.poki.io); testar no site.
 
 ## Entrega para o Poki

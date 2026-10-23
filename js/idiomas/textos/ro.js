@@ -562,5 +562,9 @@ TEXTOS.ro = {
   on_venceu: "AI CÂȘTIGAT!",
   on_perdeu: "AI PIERDUT",
   on_rival: "RIVAL",
-  on_versao: "Celălalt jucător are altă versiune a jocului. Reîncărcați pagina."
+  on_versao: "Celălalt jucător are altă versiune a jocului. Reîncărcați pagina.",
+  // v19.5
+  on_ninguem: "Nu a apărut nimeni acum. Încearcă din nou puțin mai târziu!",
+  on_tentar: "ÎNCEARCĂ DIN NOU",
+  on_contra_bot: "Joacă împotriva botului"
 };

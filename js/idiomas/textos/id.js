@@ -562,5 +562,9 @@ TEXTOS.id = {
   on_venceu: "KAMU MENANG!",
   on_perdeu: "KAMU KALAH",
   on_rival: "LAWAN",
-  on_versao: "Pemain lain memakai versi game yang berbeda. Muat ulang halaman."
+  on_versao: "Pemain lain memakai versi game yang berbeda. Muat ulang halaman.",
+  // v19.5
+  on_ninguem: "Belum ada yang datang. Coba lagi sebentar lagi!",
+  on_tentar: "COBA LAGI",
+  on_contra_bot: "Main melawan bot"
 };

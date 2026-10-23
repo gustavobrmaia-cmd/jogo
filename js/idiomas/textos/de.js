@@ -562,5 +562,9 @@ TEXTOS.de = {
   on_venceu: "DU HAST GEWONNEN!",
   on_perdeu: "DU HAST VERLOREN",
   on_rival: "GEGNER",
-  on_versao: "Der andere Spieler hat eine andere Spielversion. Ladet die Seite neu."
+  on_versao: "Der andere Spieler hat eine andere Spielversion. Ladet die Seite neu.",
+  // v19.5
+  on_ninguem: "Gerade ist niemand da. Versuch es gleich noch mal!",
+  on_tentar: "NOCHMAL",
+  on_contra_bot: "Gegen den Bot spielen"
 };

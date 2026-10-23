@@ -562,5 +562,9 @@ TEXTOS.tr = {
   on_venceu: "KAZANDIN!",
   on_perdeu: "KAYBETTİN",
   on_rival: "RAKİP",
-  on_versao: "Diğer oyuncuda oyunun başka bir sürümü var. Sayfayı yenileyin."
+  on_versao: "Diğer oyuncuda oyunun başka bir sürümü var. Sayfayı yenileyin.",
+  // v19.5
+  on_ninguem: "Şu an kimse yok. Biraz sonra tekrar dene!",
+  on_tentar: "TEKRAR DENE",
+  on_contra_bot: "Bota karşı oyna"
 };

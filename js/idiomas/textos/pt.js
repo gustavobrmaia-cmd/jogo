@@ -562,5 +562,9 @@ TEXTOS.pt = {
   on_venceu: "VOCÊ VENCEU!",
   on_perdeu: "VOCÊ PERDEU",
   on_rival: "RIVAL",
-  on_versao: "O outro jogador está com outra versão do jogo. Recarreguem a página."
+  on_versao: "O outro jogador está com outra versão do jogo. Recarreguem a página.",
+  // v19.5
+  on_ninguem: "Ninguém apareceu agora. Tente de novo daqui a pouco!",
+  on_tentar: "TENTAR DE NOVO",
+  on_contra_bot: "Jogar contra o bot"
 };

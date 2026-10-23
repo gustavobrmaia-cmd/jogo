@@ -755,3 +755,7 @@ body.retrato #telaOnline .onInput { font-size: 64px; width: 520px; }
 body:not(.retrato) .modos { gap: 14px; width: 1236px; max-width: 1236px; }
 body:not(.retrato) .modos button.modo { flex: 1 1 0; width: auto; min-width: 0; box-sizing: border-box; padding-left: 10px; padding-right: 10px; }
 body:not(.retrato) .modos > button.modo:nth-child(5) { animation-delay: 0.28s; }
+#telaOnline .onRoda { font-size: 84px; margin: 6px 0 4px; line-height: 1; }
+#telaOnline .onRoda .ico { animation: girarGlobo 1.6s linear infinite; }
+@keyframes girarGlobo { to { transform: rotate(360deg); } }
+body.retrato #telaOnline .onRoda { font-size: 130px; }

@@ -24,7 +24,7 @@ const CONFIG = {
   municaoJogador: 3,
   municaoBot: 1.5,
   leve: false,              // modo leve (celular/computador fraco): menos partículas e fundo dos menus a 30 qps
-  // v19: id do jogo na Poki Networking Library (online). Pode trocar pelo id do jogo no painel do Poki;
-  // quem tem ids diferentes não se encontra (mudar o id separa as salas).
-  idRede: "254722a9-734e-4087-961b-92e9308b337f"
+  // v19: id do jogo na Poki Networking Library (online) = o id do jogo no Poki (aparece na URL do inspector:
+  // ?game=poki-<id>). v19.5: antes era um id inventado e o servidor recusava (a partida rápida voltava na hora).
+  idRede: "df3225ad-e8de-440a-8421-14738ee004f5"
 };

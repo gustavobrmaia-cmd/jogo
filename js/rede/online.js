@@ -364,6 +364,7 @@ const Online = (function() {
     }
   });
   Rede.ao("conectou", function() {
+    pararBusca();
     tela = "conectado";
     seq = 0; passos = 0; usados = { pc: 0, tc: 0, cc: 0 };
     entRemota = { esq: false, dir: false, sp: false, bx: false, t: false, pc: 0, tc: 0, cc: 0, m: null };
@@ -419,6 +420,7 @@ const Online = (function() {
   function mostrarBotoes(qual) {
     el("onInicio").classList.toggle("escondido", qual !== "inicio");
     el("onFim").classList.toggle("escondido", qual !== "fim");
+    el("onNinguem").classList.toggle("escondido", qual !== "ninguem");
     el("onLinhaCodigo").classList.add("escondido");
     el("onCancelar").classList.toggle("escondido", qual !== "esperando");
     el("onVoltar").classList.toggle("escondido", qual === "esperando");
@@ -439,6 +441,44 @@ const Online = (function() {
   api.abrir = function() { Eventos.botao("mode-online"); abrir(""); };
 
   // antes de procurar alguém: anúncio comum (o Poki decide se mostra) e a rede
+  // v19.5: a partida rápida procura por até 1 minuto (tempo na tela, globo girando, dá para cancelar a qualquer hora).
+  // Erro de rede não desiste na hora: tenta de novo a cada 3 s. Sem ninguém: "Tentar de novo" ou "Jogar contra o bot".
+  const ESPERA_RAPIDA = 60;
+  let busca = null;
+  function pararBusca() { if (busca) { clearInterval(busca.timer); clearTimeout(busca.tentar); busca = null; } el("onRoda").classList.add("escondido"); }
+  function buscarRapida() {
+    pararBusca();
+    tela = "procurando";
+    const b = busca = { t0: performance.now(), timer: 0, tentar: 0, erro: "" };
+    el("onRoda").classList.remove("escondido");
+    function falta() { return Math.max(0, ESPERA_RAPIDA - Math.floor((performance.now() - b.t0) / 1000)); }
+    function mostrar() {
+      if (busca !== b || Rede.conectado) return;
+      const f = falta();
+      status(t("on_procurando") + "  " + Math.floor(f / 60) + ":" + String(f % 60).padStart(2, "0"));
+      if (f > 0) return;
+      pararBusca();
+      Rede.sair();
+      tela = "inicio";
+      status(t("on_ninguem") + (b.erro ? " (" + b.erro + ")" : ""));
+      mostrarBotoes("ninguem");
+      Poki.medir("online", "quick", b.erro ? "error" : "timeout");
+    }
+    function tentar() {
+      if (busca !== b) return;
+      Rede.rapida().catch(function(e) {
+        if (busca !== b) return;
+        b.erro = String(e && e.message || e && e.type || e || "erro").slice(0, 30);
+        console.warn("online: partida rápida falhou (" + b.erro + "), tentando de novo");
+        Rede.sair();
+        if (falta() > 3) b.tentar = setTimeout(tentar, 3000);
+      });
+    }
+    b.timer = setInterval(mostrar, 250);
+    mostrar();
+    tentar();
+  }
+
   function procurar(como, codigo) {
     if (ocupado) return;
     ocupado = true;
@@ -446,6 +486,7 @@ const Online = (function() {
     status(t("on_conectando"));
     Poki.intervalo().then(function() {
       ocupado = false;
+      if (como === "rapida") { buscarRapida(); return; }
       tela = "procurando";
       const p = como === "rapida" ? Rede.rapida() : como === "criar" ? Rede.criar(false) : Rede.entrar(codigo);
       return p.then(function(r) {
@@ -460,10 +501,10 @@ const Online = (function() {
           } else status(t("on_procurando"));
         } else status(t("on_conectando"));
       });
-    }).catch(function() {
+    }).catch(function(e) {
       ocupado = false;
       tela = "inicio";
-      status(t("on_erro"));
+      status(t("on_erro") + " (" + String(e && e.message || e && e.type || e || "erro").slice(0, 30) + ")");
       mostrarBotoes("inicio");
     });
   }
@@ -483,7 +524,7 @@ const Online = (function() {
       Eventos.botao("online-join");
       procurar("entrar", c);
     },
-    onCancelar: function() { Rede.sair(); tela = "inicio"; status(t("on_dica")); mostrarBotoes("inicio"); },
+    onCancelar: function() { pararBusca(); Rede.sair(); tela = "inicio"; status(t("on_dica")); mostrarBotoes("inicio"); },
     onRevanche: function() {
       if (ocupado || !Rede.conectado) { if (!Rede.conectado) abrir(t("on_saiu")); return; }
       ocupado = true;
@@ -496,7 +537,8 @@ const Online = (function() {
         if (Rede.anfitriao && prontoOutro) comecar();
       });
     },
-    onVoltar: function() { sair(); irParaMenu(""); }
+    onVoltar: function() { pararBusca(); sair(); irParaMenu(""); },
+    onBot: function() { pararBusca(); sair(); Eventos.botao("online-bot"); comecarPartida("bot"); }
   };
 
   document.addEventListener("visibilitychange", function() {

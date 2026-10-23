@@ -562,5 +562,9 @@ TEXTOS.en = {
   on_venceu: "YOU WIN!",
   on_perdeu: "YOU LOSE",
   on_rival: "RIVAL",
-  on_versao: "The other player has a different version of the game. Reload the page."
+  on_versao: "The other player has a different version of the game. Reload the page.",
+  // v19.5
+  on_ninguem: "Nobody showed up right now. Try again in a bit!",
+  on_tentar: "TRY AGAIN",
+  on_contra_bot: "Play against the bot"
 };

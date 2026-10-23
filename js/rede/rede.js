@@ -83,12 +83,14 @@ const Rede = (function() {
   function abrirNet() {
     if (net) return Promise.resolve(net);
     return carregarScript("js/rede/netlib.js").then(function() {
-      return new Promise(function(ok, falha) {
+      return new Promise(function(ok, falhaBruta) {
         net = new window.netlib.Network(CONFIG.idRede);
         let pronto = false;
+        // v19.5: se não ficou pronta, a próxima tentativa começa do zero (antes reaproveitava a conexão quebrada)
+        const falha = function(m) { if (pronto) return; try { net.close(); } catch (e) {} net = null; falhaBruta(m); };
         net.on("ready", function() { pronto = true; ok(net); });
-        net.on("failed", function() { if (!pronto) falha("falhou"); emitir("erro", "falhou"); });
-        net.on("signalingerror", function() { if (!pronto) falha("servidor"); });
+        net.on("failed", function() { falha("falhou"); emitir("erro", "falhou"); });
+        net.on("signalingerror", function(e) { falha("servidor" + (e && e.code ? "-" + e.code : e && e.type ? "-" + e.type : "")); });
         net.on("connected", function(p) {
           if (par) return;
           par = p; conectou();
@@ -100,7 +102,7 @@ const Rede = (function() {
           try { obj = JSON.parse(dado); } catch (e) { return; }
           receber(canal === "unreliable" ? "u" : "r", obj);
         });
-        setTimeout(function() { if (!pronto) falha("tempo"); }, 10000);
+        setTimeout(function() { falha("tempo"); }, 10000);
       });
     });
   }

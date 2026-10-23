@@ -562,5 +562,9 @@ TEXTOS.it = {
   on_venceu: "HAI VINTO!",
   on_perdeu: "HAI PERSO",
   on_rival: "RIVALE",
-  on_versao: "L'altro giocatore ha un'altra versione del gioco. Ricaricate la pagina."
+  on_versao: "L'altro giocatore ha un'altra versione del gioco. Ricaricate la pagina.",
+  // v19.5
+  on_ninguem: "Non è arrivato nessuno. Riprova tra poco!",
+  on_tentar: "RIPROVA",
+  on_contra_bot: "Gioca contro il bot"
 };

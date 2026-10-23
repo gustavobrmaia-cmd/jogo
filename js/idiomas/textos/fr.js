@@ -562,5 +562,9 @@ TEXTOS.fr = {
   on_venceu: "TU AS GAGNÉ !",
   on_perdeu: "TU AS PERDU",
   on_rival: "RIVAL",
-  on_versao: "L'autre joueur a une autre version du jeu. Rechargez la page."
+  on_versao: "L'autre joueur a une autre version du jeu. Rechargez la page.",
+  // v19.5
+  on_ninguem: "Personne pour l'instant. Réessaie dans un moment !",
+  on_tentar: "RÉESSAYER",
+  on_contra_bot: "Jouer contre le bot"
 };

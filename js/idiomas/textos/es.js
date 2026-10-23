@@ -562,5 +562,9 @@ TEXTOS.es = {
   on_venceu: "¡GANASTE!",
   on_perdeu: "PERDISTE",
   on_rival: "RIVAL",
-  on_versao: "El otro jugador tiene otra versión del juego. Recarguen la página."
+  on_versao: "El otro jugador tiene otra versión del juego. Recarguen la página.",
+  // v19.5
+  on_ninguem: "No apareció nadie ahora. ¡Inténtalo de nuevo en un rato!",
+  on_tentar: "REINTENTAR",
+  on_contra_bot: "Jugar contra el bot"
 };

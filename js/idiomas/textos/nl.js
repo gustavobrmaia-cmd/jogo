@@ -562,5 +562,9 @@ TEXTOS.nl = {
   on_venceu: "JIJ WINT!",
   on_perdeu: "JIJ VERLIEST",
   on_rival: "RIVAAL",
-  on_versao: "De andere speler heeft een andere versie van het spel. Herlaad de pagina."
+  on_versao: "De andere speler heeft een andere versie van het spel. Herlaad de pagina.",
+  // v19.5
+  on_ninguem: "Er is nu niemand. Probeer het straks opnieuw!",
+  on_tentar: "OPNIEUW",
+  on_contra_bot: "Speel tegen de bot"
 };
