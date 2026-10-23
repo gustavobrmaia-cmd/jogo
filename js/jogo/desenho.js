@@ -615,7 +615,7 @@ function textoContorno(ctx, s, x, y, tam, cor, alinh, contorno) {
 // v19: texto com ícone (no lugar dos emojis): ícone à esquerda + letreiro / ícone dos dois lados + texto
 function letreiroIcone(ctx, nome, s, x, y, tam, cor) {
   ctx.font = "900 " + tam + FONTE;
-  const w = ctx.measureText(s).width, ic = tam * 1.15, gap = tam * 0.12, tot = ic + gap + w;
+  const w = ctx.measureText(s).width, ic = tam * 1.5, gap = tam * 0.05, tot = ic + gap + w;
   if (typeof Icone !== "undefined") Icone.desenhar(ctx, nome, x - tot / 2 + ic / 2, y - tam * 0.36, ic);
   letreiro(ctx, s, x - tot / 2 + ic + gap + w / 2, y, tam, cor);
 }
@@ -1529,13 +1529,15 @@ function desenharReacao(ctx, M, b, tm) {
   ctx.globalAlpha = alfa;
   ctx.translate(x, y); ctx.scale(esc, esc);
   ctx.font = "900 24px Nunito, system-ui, sans-serif";
-  const nota = e.s === "\u266a", w = nota ? 42 : Math.max(40, ctx.measureText(e.s).width + 20), h = 34;
+  // o motor pode mandar "!" "?!" "!!", a nota musical ou o nome de um ícone (Icone.NOMES): ícone desenhado no balão
+  const icB = typeof Icone !== "undefined" ? (e.s === "\u266a" ? "nota" : Icone.NOMES.indexOf(e.s) >= 0 ? e.s : null) : null;
+  const nota = !!icB, w = nota ? 42 : Math.max(40, ctx.measureText(e.s).width + 20), h = 34;
   // v19: balão de HQ com contorno escuro (o rabinho entra no mesmo caminho)
   arredondado(ctx, -w / 2, -h / 2, w, h, 12);
   ctx.moveTo(-10, h / 2 - 1); ctx.lineTo(-18, h / 2 + 11); ctx.lineTo(-1, h / 2 - 1);
   ctx.lineJoin = "round"; ctx.lineWidth = 6; ctx.strokeStyle = "#1a0d33"; ctx.stroke();
   ctx.fillStyle = "#ffffff"; ctx.fill();
-  if (nota && typeof Icone !== "undefined") Icone.desenhar(ctx, "nota", 0, 0, 26);
+  if (nota) Icone.desenhar(ctx, icB, 0, 0, 26);
   else {
     ctx.fillStyle = "#e8590c"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.lineWidth = 4; ctx.strokeStyle = "#1a0d33"; ctx.strokeText(e.s, 0, 1); ctx.fillText(e.s, 0, 1);
