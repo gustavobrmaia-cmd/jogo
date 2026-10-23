@@ -57,6 +57,7 @@ index.html, estilo.css, fonte/ (Nunito em woff2 + OFL.txt)
 js/
   nucleo/     config.js (ajustes), util.js (ferramentas), save.js (localStorage), main.js (tela e loop; carrega por último)
   poki/       poki.js (SDK e anúncios), eventos.js (Game Events)
+  rede/       netlib.js (Poki Networking Library, v19), rede.js (conexão e salas), online.js (partida online)
   idiomas/    idiomas.js (t(), detecção, troca)  +  textos/xx.js (os 12 idiomas)
   sistemas/   audio.js (som sintetizado), entrada.js (teclado, toque, controle; 2 jogadores)
   interface/  telas.js (menu, escolha do modo, pausa, continuar; anúncios), menus.js, recompensa.js (fim da partida),
@@ -319,8 +320,47 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
 - Equilíbrio: `node` + simulação bot x bot (script fora do repositório) — medir % de rodadas na queda de braço (~10–35%)
   e duração da partida (2–3,5 min). `CONFIG.multDano` é o ajuste geral.
 
+- v18.3 PASSOU no Player Fit Test (16/10, começou 17:11): 500 jogadas, 3m15 (de manhã a mesma versão fez 2m58). Foi
+  para o Web Fit em 19/10 (7 dias de teste + revisão manual, ~2 semanas; o painel não mostra números no meio).
+  A v18.3 continua sendo a do Web Fit: não trocar a versão de lá.
+- v19 (reformulação pedida pelo dono; feita por 3 agentes em paralelo + online, juntados na branch v19):
+  - **Visual (agente A):**
+    - estilo cartoon: contorno #1a0d33 grosso, cel-shading em 2–3 tons, meia-lua de brilho (sem gradiente por quadro);
+    - ícones desenhados (`js/jogo/arte/icones.js`, `Icone.desenhar/html/preencher`, `<i data-ico>` no HTML): sem emoji
+      em lugar nenhum. `textoRico` (desenho.js) troca emoji que ainda chegar em texto pelo ícone;
+    - os 15 mapas refeitos com 3 variações de horário/clima sorteadas por rodada;
+    - bolinhas com expressões e squash & stretch; efeitos, HUD, baú, cartas e queda de braço refeitos;
+    - telas com botões gordos que afundam e painéis de borda dupla.
+  - **Combate (agente B):**
+    - 60 armas, 10 novas: disco, gosma, boliche, banana, ímã, bomba grudenta, inflador, vampiro, tornado, torreta;
+    - cada arma com som, tranco, clarão e cápsula; arte de todas no estilo novo;
+    - bot com cobertura, desvio por trajetória, previsão e uso certo de cada arma;
+    - 4 personalidades novas (só nos rivais 6–10) e provocações em texto (12 idiomas);
+    - simulação contra a v18.3: os rivais 1–5 não ficaram mais difíceis.
+  - **Meta (agente C):**
+    - personalização com 123 itens em 9 categorias (`save.visual`, tela `#telaVisual`); o save antigo é convertido;
+    - loja de armas (`#telaLoja`; comum 350, rara 900, lendária 2600) com arma inicial (`save.armas`,
+      `save.armaInicial`); a loja só aparece depois do rival 5 ou de `viuPoder`;
+    - roletas na 1ª rodada (arma, DEPOIS mapa; ~3 s; o toque acelera), no lugar das 3 cartas "?". Só mostram o que as
+      regras de sempre sortearam;
+    - melhoria Sorte (`sorteJogador()`, 0–1; vale 0 no 2 jogadores e no online). CSS das telas dela: `estilo-v19c.css`.
+  - **Online (js/rede/):**
+    - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
+      topo do arquivo). Só é baixada quando a pessoa abre o online;
+    - `rede.js` faz a conexão. Com `?rede=teste` na URL usa um "cabo" local (BroadcastChannel entre duas abas) para
+      testar sem internet. `CONFIG.idRede` é o id do jogo na netlib (pode trocar pelo id do Poki);
+    - `online.js`: o anfitrião roda a partida (modo "online", igual ao 2p com a bolinha 2 vinda da rede). Ele manda o
+      estado 30x/s, só o que mudou, e um pacote cheio a cada 1 s (~540 bytes em média), mais os efeitos e sons
+      gravados no passo;
+    - o convidado não simula: manda os controles e vê tudo ESPELHADO (a bolinha dele é a 1), então o HUD, o "VOCÊ",
+      a mira e a câmera funcionam sem mexer no desenho;
+    - partida rápida (salas públicas; quem espera procura outra sala a cada 3 s para duas pessoas não ficarem
+      esperando em salas separadas), sala com código e revanche;
+    - anúncio comum antes de procurar e antes da revanche, nunca no meio. Vitória dá 40 moedas, derrota 15;
+    - não testado com a rede de verdade aqui (o ambiente bloqueia netlib.poki.io); testar no site.
+
 ## Entrega para o Poki
 - Zip com número de versão (ex.: `jogo-v1.zip`):
-  `git archive --format=zip -o jogo-vX.zip HEAD index.html estilo.css js fonte`
+  `git archive --format=zip -o jogo-vX.zip HEAD index.html estilo.css estilo-v19c.css js fonte`
 - Player Fit Test: média ≥ 3 min e ≥ 25% dos jogadores com mais de 3 min.
   - Meta do dono antes do Web Fit: 4m30–5m de média e ≥ 35% acima de 3 min.
