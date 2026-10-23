@@ -1,9 +1,12 @@
 "use strict";
 
 // =========================
-// ARTE DAS ARMAS (v2) — armas na mão, ícones, projéteis, feixes, avisos e caixas.
-// Estilo "flat premium": cor base + sombra (azul/roxo) + luz de borda + contorno fino na versão escura
-// da própria cor. Tudo é desenhado UMA vez em sprites (canvas fora da tela) e depois só drawImage.
+// ARTE DAS ARMAS (v19) — armas na mão, ícones, projéteis, feixes, avisos, caixas, clarão da boca do cano,
+// cápsulas/pedaços que voam e o estado das bolinhas (bolha, gosma, inflado, tonto, bomba grudada).
+// Estilo cartoon arcade (direção de arte v19): contorno escuro e grosso (#1a0d33), cel-shading em 3 tons duros
+// (base, sombra, sombra funda), meia-lua de luz no alto de cada peça, cores saturadas.
+// Raridade: comum sem brilho, rara com contorno de luz azul-violeta, lendária dourada com brilho correndo.
+// Tudo é desenhado UMA vez em sprites (canvas fora da tela) e depois só drawImage (sem gradiente por quadro).
 // Convenção das armas: sprite aponta para +x, o eixo do cano é y = 0, (0,0) é onde a arma fica ao lado
 // da bolinha (a mão fica em "h").
 // =========================
@@ -19,13 +22,16 @@ const ArteArmas = (function() {
     const A = rgb(a), B = rgb(b);
     return "#" + [0, 1, 2].map(function(i) { return ("0" + Math.round(A[i] + (B[i] - A[i]) * t).toString(16)).slice(-2); }).join("");
   }
-  // b = base, s = sombra, l = luz, o = contorno
-  function pal(c) { return cc[c] || (cc[c] = { b: c, s: mix(c, "#2a2166", 0.42), l: mix(c, "#ffffff", 0.62), o: mix(c, "#150e33", 0.6) }); }
+  // b = base, s = sombra, s2 = sombra funda, l = luz (meia-lua), o = contorno (o mesmo escuro em tudo)
+  const OUT = "#1a0d33";
+  function pal(c) { return cc[c] || (cc[c] = { b: c, s: mix(c, "#2b1a6e", 0.36), s2: mix(c, "#1a0d33", 0.62), l: mix(c, "#ffffff", 0.58), o: OUT }); }
+  // v19: paleta mais saturada (metal azulado/roxo para casar com os fundos profundos)
   const K = {
-    ac: "#a9b5cd", ac2: "#7d8aa8", fe: "#59627f", pr: "#3a4162", mad: "#cb8d54", mad2: "#9a6439", ou: "#f7c545",
-    ve: "#ec5a5a", az: "#4ea8f6", ci: "#3edbe8", vd: "#5fcf74", rx: "#a273f7", rs: "#f47fb2", lj: "#f98d3d",
-    br: "#f3f6fd", am: "#ffd94e", ol: "#718f56", ol2: "#4f6e3d", ge: "#8fe4ff"
+    ac: "#b7c4ea", ac2: "#8492c9", fe: "#5d5f9e", pr: "#3d3474", mad: "#e3924a", mad2: "#a95f2e", ou: "#ffc93c",
+    ve: "#ff5a5f", az: "#45a8ff", ci: "#35e0f0", vd: "#5bd96a", rx: "#a66bff", rs: "#ff7ab8", lj: "#ff8a2e",
+    br: "#f6f7ff", am: "#ffdd4a", ol: "#78a64f", ol2: "#4f7a37", ge: "#8fe9ff", gs: "#7bd94f"
   };
+  let LW = 1.7;                              // espessura do contorno das peças (projéteis usam um pouco menos)
 
   // ---------- canvas / sprites ----------
   function cv(w, h) { const c = document.createElement("canvas"); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; }
@@ -79,8 +85,12 @@ const ArteArmas = (function() {
       g.arcTo(x, y + h, x, y, q); g.arcTo(x, y, x + w, y, q); g.closePath();
     };
   }
-  function pC(x, y, r) { return function(g) { g.beginPath(); g.arc(x, y, r, 0, TAU); }; }
-  function pE(x, y, rx, ry, rot) { return function(g) { g.beginPath(); g.ellipse(x, y, rx, ry, rot || 0, 0, TAU); }; }
+  function pC(x, y, r) { return function(g) { g.beginPath(); g.moveTo(x + r, y); g.arc(x, y, r, 0, TAU); g.closePath(); }; }
+  function pE(x, y, rx, ry, rot) {
+    return function(g) { const c = Math.cos(rot || 0), s = Math.sin(rot || 0); g.beginPath(); g.moveTo(x + rx * c, y + rx * s); g.ellipse(x, y, rx, ry, rot || 0, 0, TAU); g.closePath(); };
+  }
+  // monta o caminho sem começar um novo (para juntar duas cópias e pintar a diferença com "evenodd")
+  function semBegin(g, path) { const bp = g.beginPath; g.beginPath = function() {}; try { path(g); } finally { g.beginPath = bp; } }
   function pP(a) {
     return function(g) { g.beginPath(); g.moveTo(a[0], a[1]); for (let i = 2; i < a.length; i += 2) g.lineTo(a[i], a[i + 1]); g.closePath(); };
   }
@@ -96,15 +106,21 @@ const ArteArmas = (function() {
     return a;
   }
 
-  // ---------- peça com cel-shading: sombra (crescente embaixo/direita), luz de borda e contorno ----------
+  // ---------- peça com cel-shading (v19): 3 tons duros (sombra funda, sombra, base), meia-lua de luz no alto
+  // e contorno escuro grosso. k = tamanho da sombra (0 = peça chapada só com contorno) ----------
   function cel(path, col, k, inner) {
     const g = G, p = pal(col); k = k == null ? 2 : k;
-    g.save(); path(g); g.fillStyle = p.s; g.fill(); g.clip();
-    g.save(); g.translate(-k * 0.7, -k); path(g); g.fillStyle = p.b; g.fill(); g.restore();
-    g.save(); g.translate(0.9, 0.9); path(g); g.lineWidth = 1.7; g.strokeStyle = p.l; g.stroke(); g.restore();
+    g.save(); path(g); g.fillStyle = k > 0.2 ? p.s2 : p.b; g.fill(); g.clip();
+    if (k > 0.2) {
+      g.save(); g.translate(-k * 0.3, -k * 0.45); path(g); g.fillStyle = p.s; g.fill(); g.restore();
+      g.save(); g.translate(-k * 0.75, -k * 1.05); path(g); g.fillStyle = p.b; g.fill(); g.restore();
+      // meia-lua de luz: a parte da peça que some quando ela desce um pouco (borda de cima)
+      g.beginPath(); semBegin(g, path); g.save(); g.translate(k * 0.35, k * 0.7 + 0.7); semBegin(g, path); g.restore();
+      g.fillStyle = p.l; g.globalAlpha = 0.92; g.fill("evenodd"); g.globalAlpha = 1;
+    }
     if (inner) inner(g);
     g.restore();
-    path(g); g.lineWidth = 1.5; g.lineJoin = "round"; g.strokeStyle = p.o; g.stroke();
+    path(g); g.lineWidth = LW; g.lineJoin = "round"; g.strokeStyle = OUT; g.stroke();
   }
   const R = function(x, y, w, h, r, c, k, i) { cel(pR(x, y, w, h, r), c, k, i); };
   const C = function(x, y, r, c, k, i) { cel(pC(x, y, r), c, k, i); };
@@ -120,9 +136,10 @@ const ArteArmas = (function() {
   // tubo curvo com volume (arco, boomerangue...): contorno, sombra, base e luz
   function tb(path, w, col) {
     const g = G, p = pal(col);
-    trc(path, w + 3, p.o); trc(path, w, p.s);
-    g.save(); g.translate(-w * 0.12, -w * 0.2); trc(path, w * 0.72, p.b); g.restore();
-    g.save(); g.translate(-w * 0.2, -w * 0.3); trc(path, w * 0.2, p.l, 0.9); g.restore();
+    trc(path, w + LW * 2, OUT); trc(path, w, p.s2);
+    g.save(); g.translate(-w * 0.06, -w * 0.1); trc(path, w * 0.8, p.s); g.restore();
+    g.save(); g.translate(-w * 0.12, -w * 0.2); trc(path, w * 0.6, p.b); g.restore();
+    g.save(); g.translate(-w * 0.2, -w * 0.3); trc(path, w * 0.2, p.l, 0.95); g.restore();
   }
   function curva(g, a) { // moveTo + curvas quadráticas de um vetor [x,y, cx,cy,x,y, ...]
     g.beginPath(); g.moveTo(a[0], a[1]);
@@ -426,7 +443,7 @@ const ArteArmas = (function() {
 
   // ---------- sprites das armas (caixa justa medida em pixels) ----------
   const bruto = cv(320 * E, 240 * E), bg = bruto.getContext("2d", { willReadFrequently: true });
-  const RCOR = { 2: "#b46bff", 3: "#ffc83a" };                     // brilho de raridade (rara roxa, lendária dourada)
+  const RCOR = { 2: "#7d7bff", 3: "#ffc83a" };                     // brilho de raridade (rara azul-violeta, lendária dourada)
   function rarid(id) { return typeof ARMA !== "undefined" && ARMA[id] ? ARMA[id].raridade : 1; }
   // silhueta de a dilatada em n direções com raio o, pintada de cor, no contexto gb
   function silhueta(gb, a, o, n, cor) {
@@ -440,10 +457,12 @@ const ArteArmas = (function() {
     const w = c.width, h = c.height, g = c.getContext("2d"), a = cv(w, h), b = cv(w, h), gb = b.getContext("2d");
     a.getContext("2d").drawImage(c, 0, 0); g.clearRect(0, 0, w, h);
     if (r >= 2) {
-      silhueta(gb, a, 4.6 * E, 16, RCOR[r]); g.globalAlpha = r === 3 ? 0.42 : 0.34; g.drawImage(b, 0, 0);
-      silhueta(gb, a, 2.9 * E, 16, RCOR[r]); g.globalAlpha = r === 3 ? 0.75 : 0.6; g.drawImage(b, 0, 0); g.globalAlpha = 1;
+      // v19: raridade bem clara — rara com aro de luz, lendária com aro duplo dourado mais largo
+      if (r === 3) { silhueta(gb, a, 6.2 * E, 20, RCOR[r]); g.globalAlpha = 0.3; g.drawImage(b, 0, 0); }
+      silhueta(gb, a, 4.4 * E, 16, RCOR[r]); g.globalAlpha = r === 3 ? 0.55 : 0.4; g.drawImage(b, 0, 0);
+      silhueta(gb, a, 3.1 * E, 16, r === 3 ? "#fff1a8" : "#c9c4ff"); g.globalAlpha = r === 3 ? 0.95 : 0.8; g.drawImage(b, 0, 0); g.globalAlpha = 1;
     }
-    silhueta(gb, a, 1.25 * E, 12, "#1a1238"); g.drawImage(b, 0, 0);
+    silhueta(gb, a, 2.1 * E, 16, OUT); g.drawImage(b, 0, 0);
     g.drawImage(a, 0, 0);
     // luz de borda: o que é arma mas não é arma 2 px abaixo = borda de cima
     gb.clearRect(0, 0, w, h); gb.drawImage(a, 0, 0); gb.globalCompositeOperation = "destination-out"; gb.drawImage(a, 0, 2.2 * E);
@@ -455,7 +474,7 @@ const ArteArmas = (function() {
     bg.setTransform(1, 0, 0, 1, 0, 0); bg.clearRect(0, 0, bruto.width, bruto.height);
     bg.setTransform(E, 0, 0, E, 100 * E, 120 * E);
     const ant = G; G = bg; W[id].d(); G = ant;
-    const w = bruto.width, h = bruto.height, d = bg.getImageData(0, 0, w, h).data, r = rarid(id), mg = Math.ceil((r >= 2 ? 5 : 1.6) * E) + 2;
+    const w = bruto.width, h = bruto.height, d = bg.getImageData(0, 0, w, h).data, r = rarid(id), mg = Math.ceil((r === 3 ? 6.6 : r === 2 ? 5 : 2.4) * E) + 2;
     let x0 = w, y0 = h, x1 = 0, y1 = 0;
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 12) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
     x0 = Math.max(0, x0 - mg); y0 = Math.max(0, y0 - mg); x1 = Math.min(w - 1, x1 + mg); y1 = Math.min(h - 1, y1 + mg);
