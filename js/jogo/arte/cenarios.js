@@ -1390,7 +1390,8 @@ const ArteCenarios = (function() {
         poli(g, [q[0] - 32, 660 - q[1], q[0] + 32, 660 - q[1], q[0] + 20, 660 - q[1] - 14 - k * 3, q[0] - 6, 660 - q[1] - 6, q[0] - 24, 660 - q[1] - 12]); g.fillStyle = T("#d8d0b0"); g.fill(); tracar(g, TINTA, 3);
       });
       const r = rnd(5);
-      for (let k = 0; k < 9; k++) { const x = r() * L; g.beginPath(); g.moveTo(x, S.top); for (let y = S.top; y < 140 + r() * 200; y += 20) g.lineTo(x + Math.sin(y / 30 + k) * 10, y); tracar(g, TINTA, 6); g.beginPath(); g.moveTo(x, S.top); for (let y = S.top; y < 140 + r() * 200; y += 20) g.lineTo(x + Math.sin(y / 30 + k) * 10, y); tracar(g, T("#4ab06a"), 3); }
+      for (let k = 0; k < 9; k++) { const x = r() * L, fim = 120 + r() * 200; g.beginPath(); g.moveTo(x, -20); for (let y = -20; y < fim; y += 20) g.lineTo(x + Math.sin(y / 30 + k) * 10, y); tracar(g, TINTA, 6); g.beginPath(); g.moveTo(x, -20); for (let y = -20; y < fim; y += 20) g.lineTo(x + Math.sin(y / 30 + k) * 10, y); tracar(g, T("#4ab06a"), 3); }
+      { const b = []; for (let x = -PAD - 30; x < L + PAD + 40; x += 50 + r() * 40) b.push([x, -26 + r() * 14, 26 + r() * 18]); blobs(g, b, T("#2e8a4a"), 3); g.fillStyle = T("#5ac46a"); b.forEach(c => { g.beginPath(); g.ellipse(c[0] - c[2] * .2, c[1] + c[2] * .25, c[2] * .45, c[2] * .18, 0, 0, TAU); g.fill(); }); }   // copa da selva
       // folhagem da frente
       const b = []; for (let x = -PAD; x < L + PAD; x += 70 + r() * 60) if (x < 420 || x > 860) b.push([x, 650 + r() * 10, 26 + r() * 20]);
       blobs(g, b, T("#3aa05a"), 3); g.fillStyle = T("#6ad07a"); b.forEach(c => { g.beginPath(); g.ellipse(c[0] - c[2] * .2, c[1] - c[2] * .4, c[2] * .45, c[2] * .2, -.3, 0, TAU); g.fill(); });

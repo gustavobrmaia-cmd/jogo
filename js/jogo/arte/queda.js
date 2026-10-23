@@ -23,7 +23,7 @@
 
 const ArteQueda = (function() {
   var PI = Math.PI, PI2 = PI * 2;
-  var ESC = [26, 13, 51], AZ = [48, 28, 120], BR = [255, 255, 255];
+  var ESC = [26, 13, 51], AZ = [48, 28, 120], BR = [255, 255, 255], TINTA = "#1a0d33";   // v19: contorno escuro e grosso do jogo
 
   // ---------- geometria (mundo 1280x720; b2 é o espelho de b1 em x = 640) ----------
   var RB = 90;                    // raio das bolinhas
@@ -90,7 +90,7 @@ const ArteQueda = (function() {
     p = peles[cor] = {
       rgb: c, base: css(base), sombra: mix(c, AZ, l > 0.7 ? 0.46 : 0.4), luz: mix(c, BR, 0.42), luzS: css(mixA(base, BR, 0.26)),
       musc: css(mixA(base, BR, 0.12)), brilho: mix(c, BR, 0.8), rim: mix(c, [175, 230, 255], 0.55),
-      contorno: mix(c, ESC, 0.7), unha: mix(c, BR, 0.62)
+      contorno: TINTA, unha: mix(c, BR, 0.62)
     };
     return p;
   }
@@ -169,7 +169,7 @@ const ArteQueda = (function() {
 
   // punho fechado (em pé, nós para fora): usado no pino e no braço erguido. Referencial: centro do punho.
   function desenhaPunho(g, M, p, S) {
-    var lw = 2.3 * S;
+    var lw = 3.2 * S;
     function dorso(g) { g.beginPath(); g.moveTo(-30, -26); g.bezierCurveTo(-42, -24, -44, 20, -32, 28); g.bezierCurveTo(-18, 36, 10, 34, 24, 26); g.lineTo(26, -24); g.bezierCurveTo(10, -34, -16, -32, -30, -26); g.closePath(); }
     cel(g, M, dorso, p, 8 * S, lw, false, 0.5);
     var ys = [-16, -4, 8, 19], hs = [7, 7, 6.6, 5.8], ls = [30, 32, 30, 26];
@@ -189,7 +189,7 @@ const ArteQueda = (function() {
   function desenhaMembro(g, ax, ay, bx, by, p, S, lado, gross) {
     var dx = bx - ax, dy = by - ay, L = Math.sqrt(dx * dx + dy * dy), ux = dx / L, uy = dy / L;
     var nx = lado > 0 ? uy : -uy, ny = lado > 0 ? -ux : ux;
-    var M = [ux * S, uy * S, nx * S, ny * S, ax * S, ay * S], lw = 2.4 * S, G = gross || 1;
+    var M = [ux * S, uy * S, nx * S, ny * S, ax * S, ay * S], lw = 3.3 * S, G = gross || 1;
     function sil(g) {
       g.beginPath();
       g.moveTo(-6, -32 * G);
@@ -254,7 +254,7 @@ const ArteQueda = (function() {
     molde = {}; bracoS = {};                 // nova dupla de cores: solta os caches grandes da dupla anterior
     var pa = pele(c1), pb = pele(c2), S = MS;
     var c = cv(MW * S, MH * S), g = c.getContext("2d");
-    var K = S * HS, MA = [K, 0, 0, K, MOX * S, MOY * S], MB = [-K, 0, 0, K, MOX * S, MOY * S], lw = 2.3 * S;
+    var K = S * HS, MA = [K, 0, 0, K, MOX * S, MOY * S], MB = [-K, 0, 0, K, MOX * S, MOY * S], lw = 3.2 * S;
     function corpo(g) {                    // dorso/palma (lado esquerdo; espelhado para B)
       g.beginPath();
       g.moveTo(-52, 46);
@@ -368,7 +368,7 @@ const ArteQueda = (function() {
   }
   function contorno(ctx, forma, L, p, inch) {
     poe(ctx, 0, inch, 0, 0); forma(ctx, L); poeBase(ctx);
-    ctx.strokeStyle = p.contorno; ctx.lineWidth = 2.4; ctx.lineJoin = "round"; ctx.stroke();
+    ctx.strokeStyle = p.contorno; ctx.lineWidth = 3.4; ctx.lineJoin = "round"; ctx.stroke();
   }
   function sombraProj(ctx, forma, L, inch, dx, dy) {
     poe(ctx, 0, inch, dx, dy); forma(ctx, L); ctx.fill();
@@ -406,7 +406,7 @@ const ArteQueda = (function() {
     poe(ctx, sl * 4, 0.84 * inch, 0, 0); ctx.translate(0, 36); ctx.scale(1, 1); ctx.translate(0, -36); formaBiceps(ctx, L); ctx.fillStyle = p.luzS; ctx.fill();
     poe(ctx, sl * 1, 0.84 * inch, 0, 0); formaBiceps(ctx, L); ctx.fillStyle = p.musc; ctx.fill();
     poe(ctx, 0, inch, 0, 0); ctx.beginPath(); ctx.moveTo(L * 0.16, 32); ctx.bezierCurveTo(L * 0.3, 4, L * 0.68, 2, L * 0.84, 26);
-    poeBase(ctx); ctx.strokeStyle = p.contorno; ctx.lineWidth = 2.5; ctx.lineCap = "round"; ctx.stroke();
+    poeBase(ctx); ctx.strokeStyle = p.contorno; ctx.lineWidth = 3.4; ctx.lineCap = "round"; ctx.stroke();
     poe(ctx, 0, inch, 0, 0); ctx.beginPath(); ctx.moveTo(L * 0.14, -24); ctx.bezierCurveTo(L * 0.3, -18, L * 0.48, -18, L * 0.62, -26);
     poeBase(ctx); ctx.globalAlpha = 0.45; ctx.lineWidth = 1.8; ctx.stroke(); ctx.globalAlpha = 1;
     // brilho no pico do bíceps e luz de borda do lado da sombra
@@ -481,7 +481,7 @@ const ArteQueda = (function() {
     poe(ctx, sl * 4, 0.8, 0, 0); formaBanda(ctx, L); ctx.rect(L - 10, -23, 6, 46); ctx.fillStyle = pf.base; ctx.fill("evenodd");
     poe(ctx, 0, 1, 0, 0); ctx.beginPath(); ctx.rect(L - 10, -23, 6, 46); ctx.fillStyle = listra; ctx.fill();
     poe(ctx, 0, inch, 0, 0); formaAnte(ctx, L); poe(ctx, 0, 1, 0, 0); formaBanda(ctx, L, true); poeBase(ctx);
-    ctx.strokeStyle = p.contorno; ctx.lineWidth = 2.4; ctx.lineJoin = "round"; ctx.stroke();
+    ctx.strokeStyle = p.contorno; ctx.lineWidth = 3.4; ctx.lineJoin = "round"; ctx.stroke();
     return L;
   }
 
@@ -585,6 +585,8 @@ const ArteQueda = (function() {
     var gv = g.createLinearGradient(0, yA, 0, 360);
     gv.addColorStop(0, "rgba(10,8,28,0.8)"); gv.addColorStop(0.55, "rgba(10,8,28,0.3)"); gv.addColorStop(1, "rgba(10,8,28,0)");
     g.fillStyle = gv; g.fillRect(-dx, yA, W, 360 - yA);
+    g.fillStyle = "rgba(255,255,255,0.05)";                 // v19: retícula de HQ no painel
+    for (var ry = yA + 8, rk = 0; ry < 360; ry += 14, rk++) { g.beginPath(); for (var rx2 = -dx + (rk % 2) * 7; rx2 < W - dx; rx2 += 14) { g.moveTo(rx2 + 2.2, ry); g.arc(rx2, ry, 2.2, 0, PI2); } g.fill(); }
     if (yA > TOP) {                                    // tela alta: teto escuro com treliça e brilho difuso
       var gt0 = g.createLinearGradient(0, TOP, 0, yA);
       gt0.addColorStop(0, "#0a0920"); gt0.addColorStop(1, "#141233");
@@ -672,19 +674,19 @@ const ArteQueda = (function() {
     g.beginPath(); g.ellipse(640, PCY + 8, PRX - 1, PRY - 1, 0, 0, PI * 0.5); g.strokeStyle = P2.base; g.stroke();
     ell(g, 640, PCY, PRX, PRY); g.fillStyle = "#332e74"; g.fill();
     ell(g, 640, PCY - 4, PRX - 40, PRY - 14); g.strokeStyle = "rgba(255,255,255,0.07)"; g.lineWidth = 3; g.stroke();
-    ell(g, 640, PCY, PRX, PRY); g.strokeStyle = "#0c0a24"; g.lineWidth = 2.4; g.stroke();
+    ell(g, 640, PCY, PRX, PRY); g.strokeStyle = TINTA; g.lineWidth = 3.6; g.stroke();
     g.fillStyle = "rgba(255,240,210,0.07)"; ell(g, 640, 700, 520, 76); g.fill();
     g.fillStyle = "rgba(255,240,210,0.06)"; ell(g, 640, 700, 340, 48); g.fill();
     // ---- mesa ----
     var TAMPO = [56, 52, 120], LADO = [34, 31, 82];
     // pé central + base
     g.fillStyle = "rgba(8,5,26,0.5)"; ell(g, 640, 716, 300, 22); g.fill();
-    rr(g, 560, MESA_Y2 - 6, 160, 48, 8); g.fillStyle = "#1d1a4a"; g.fill(); g.strokeStyle = "#0c0a24"; g.lineWidth = 2.4; g.stroke();
+    rr(g, 560, MESA_Y2 - 6, 160, 48, 8); g.fillStyle = "#1d1a4a"; g.fill(); g.strokeStyle = TINTA; g.lineWidth = 3.6; g.stroke();
     g.fillStyle = "#2a2664"; g.fillRect(566, MESA_Y2 - 2, 26, 38);
     rr(g, 480, 706, 320, 18, 9); g.fillStyle = "#1d1a4a"; g.fill(); g.stroke();
     // frente
     g.beginPath(); g.moveTo(150, MESA_Y1); g.lineTo(1130, MESA_Y1); g.lineTo(1116, MESA_Y2); g.lineTo(164, MESA_Y2); g.closePath();
-    g.fillStyle = css(LADO); g.fill(); g.strokeStyle = "#0c0a24"; g.lineWidth = 2.4; g.lineJoin = "round"; g.stroke();
+    g.fillStyle = css(LADO); g.fill(); g.strokeStyle = TINTA; g.lineWidth = 3.6; g.lineJoin = "round"; g.stroke();
     g.fillStyle = "rgba(10,6,30,0.35)"; g.fillRect(166, MESA_Y2 - 12, 948, 10);
     // tampo
     function tampo() { g.beginPath(); g.moveTo(262, MESA_Y0); g.lineTo(1018, MESA_Y0); g.lineTo(1130, MESA_Y1); g.lineTo(150, MESA_Y1); g.closePath(); }
@@ -701,14 +703,14 @@ const ArteQueda = (function() {
     g.fillStyle = "rgba(12,8,36,0.38)"; ell(g, BX + 8, MESA_Y0 + 20, RB * 0.95, 16); g.fill(); ell(g, 1280 - BX - 8, MESA_Y0 + 20, RB * 0.95, 16); g.fill();
     g.restore();
     // borda frontal do tampo (bisel claro)
-    g.strokeStyle = "#0c0a24"; g.lineWidth = 2.4; tampo(); g.stroke();
+    g.strokeStyle = TINTA; g.lineWidth = 3.6; tampo(); g.stroke();
     g.fillStyle = "rgba(190,186,255,0.5)"; g.fillRect(152, MESA_Y1 - 3, 976, 3);
     // almofadas dos cotovelos (cor de cada time)
     function almofada(x, P) {
       g.fillStyle = "rgba(10,6,30,0.4)"; ell(g, x + 3, PVY + 14, 62, 18); g.fill();
       ell(g, x, PVY + 8, 60, 18); g.fillStyle = "#1c1a45"; g.fill();
       g.save(); g.clip(); ell(g, x - 3, PVY + 3, 58, 15); g.fillStyle = "#2f2c6c"; g.fill(); g.restore();
-      ell(g, x, PVY + 8, 60, 18); g.strokeStyle = "#0c0a24"; g.lineWidth = 2.4; g.stroke();
+      ell(g, x, PVY + 8, 60, 18); g.strokeStyle = TINTA; g.lineWidth = 3.6; g.stroke();
       ell(g, x - 2, PVY + 4, 46, 11); g.strokeStyle = P.base; g.globalAlpha = 0.85; g.lineWidth = 3; g.stroke(); g.globalAlpha = 1;
     }
     almofada(PVX - ED, P1); almofada(PVX + ED, P2);
@@ -717,7 +719,7 @@ const ArteQueda = (function() {
       g.fillStyle = "rgba(10,6,30,0.4)"; ell(g, x + 3, 596, 50, 16); g.fill();
       ell(g, x, 590, 48, 15); g.fillStyle = "#24214f"; g.fill();
       g.save(); g.clip(); ell(g, x - 3, 586, 46, 12); g.fillStyle = "#3b3880"; g.fill(); g.restore();
-      ell(g, x, 590, 48, 15); g.strokeStyle = "#0c0a24"; g.lineWidth = 2.4; g.stroke();
+      ell(g, x, 590, 48, 15); g.strokeStyle = TINTA; g.lineWidth = 3.6; g.stroke();
       ell(g, x, 587, 30, 7); g.strokeStyle = "rgba(255,255,255,0.14)"; g.lineWidth = 2; g.stroke();
     }
     batida(PVX - BATIDA); batida(PVX + BATIDA);
@@ -728,7 +730,7 @@ const ArteQueda = (function() {
       rr(g, x - 9, PINO_Y - 92, 18, 92, 8); g.fillStyle = "#9aa0c8"; g.fill();
       g.fillStyle = "#6c71a3"; g.fillRect(x + 2, PINO_Y - 88, 7, 86);
       g.fillStyle = "#e3e6ff"; g.fillRect(x - 6, PINO_Y - 86, 3, 82);
-      rr(g, x - 9, PINO_Y - 92, 18, 92, 8); g.strokeStyle = "#232248"; g.lineWidth = 2.2; g.stroke();
+      rr(g, x - 9, PINO_Y - 92, 18, 92, 8); g.strokeStyle = TINTA; g.lineWidth = 3; g.stroke();
       ell(g, x, PINO_Y - 92, 11, 5); g.fillStyle = "#c9cdf2"; g.fill(); g.stroke();
     }
     pino(PINO_X); pino(1280 - PINO_X);
@@ -811,7 +813,7 @@ const ArteQueda = (function() {
     if (barras[cor]) return barras[cor];
     var P = pele(cor), c = cv(BW + 10, BH + 10), g = c.getContext("2d");
     g.translate(5, 5);
-    rr(g, -5, -5, BW + 10, BH + 10, (BH + 10) / 2); g.fillStyle = "#0c0a24"; g.fill();
+    rr(g, -5, -5, BW + 10, BH + 10, (BH + 10) / 2); g.fillStyle = TINTA; g.fill();
     g.save(); rr(g, 0, 0, BW, BH, BH / 2); g.clip();
     g.fillStyle = P.base; g.fillRect(0, 0, BW, BH);
     g.fillStyle = P.sombra; g.fillRect(0, BH * 0.64, BW, BH);
@@ -822,7 +824,7 @@ const ArteQueda = (function() {
   function divisor() {
     if (divS) return divS;
     var c = cv(22, 52), g = c.getContext("2d");
-    rr(g, 5, 3, 12, 46, 6); g.fillStyle = "#ffffff"; g.fill(); g.strokeStyle = "#0c0a24"; g.lineWidth = 2.5; g.stroke();
+    rr(g, 5, 3, 12, 46, 6); g.fillStyle = "#ffffff"; g.fill(); g.strokeStyle = TINTA; g.lineWidth = 2.5; g.stroke();
     g.fillStyle = "#d9d6f5"; g.fillRect(12, 6, 3, 40);
     return (divS = c);
   }

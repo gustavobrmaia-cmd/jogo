@@ -4,9 +4,11 @@
 // ARTE DAS CARTAS DE HABILIDADE (v2): carta com moldura na cor da habilidade + pictograma limpo
 // (cel-shading, contorno fino na versão escura da cor). Tudo pré-renderizado por id; por quadro só
 // drawImage (leve balanço, brilho que passeia e faísca).
+// v19 (cartoon arcade): contorno escuro e grosso (#1a0d33) em tudo, carta com borda dupla (branca + tinta), faixa de
+// título na cor da carta, brilho em meia-lua no canto e selo de estrela embaixo.
 // =========================
 const ArteCartas = (function() {
-  const TAU = Math.PI * 2, E = 2;
+  const TAU = Math.PI * 2, E = 2, TINTA = "#1a0d33";
 
   // ---------- cor ----------
   const cc = {};
@@ -52,14 +54,14 @@ const ArteCartas = (function() {
     g.save(); g.translate(0.8, 0.8); path(g); g.lineWidth = 1.5; g.strokeStyle = p.l; g.stroke(); g.restore();
     if (inner) inner(g);
     g.restore();
-    path(g); g.lineWidth = 1.4; g.lineJoin = "round"; g.strokeStyle = p.o; g.stroke();
+    path(g); g.lineWidth = 2.2; g.lineJoin = "round"; g.strokeStyle = TINTA; g.stroke();
   }
   function fl(path, col, al) { path(G); G.globalAlpha = al === undefined ? 1 : al; G.fillStyle = col; G.fill(); G.globalAlpha = 1; }
   function trc(fn, w, col, al) { const g = G; fn(g); g.lineCap = "round"; g.lineJoin = "round"; g.lineWidth = w; g.strokeStyle = col; g.globalAlpha = al === undefined ? 1 : al; g.stroke(); g.globalAlpha = 1; }
   // traço grosso com volume: contorno, sombra e luz (pictogramas de linha)
   function tubo(fn, w, col) {
     const p = pal(col);
-    trc(fn, w + 3, p.o); trc(fn, w, p.s); G.save(); G.translate(-w * 0.1, -w * 0.18); trc(fn, w * 0.72, p.b); G.restore();
+    trc(fn, w + 3.8, TINTA); trc(fn, w, p.s); G.save(); G.translate(-w * 0.1, -w * 0.18); trc(fn, w * 0.72, p.b); G.restore();
   }
   function est(cx, cy, Ro, Ri, n, rot) { const a = []; for (let i = 0; i < n * 2; i++) { const r = i % 2 ? Ri : Ro, t = rot + i * Math.PI / n; a.push(cx + Math.cos(t) * r, cy + Math.sin(t) * r); } return a; }
 
@@ -142,16 +144,17 @@ const ArteCartas = (function() {
     return sp("cd" + id, -26, -35, 26, 35, function() {
       // borda branca grossa com contorno escuro (cara de carta colecionável; destaca em qualquer mapa)
       const borda = pR(-25.2, -34.2, 50.4, 68.4, 9);
-      trc(borda, 2.6, "#1a1238"); fl(borda, "#ffffff"); fl(pR(-25.2, 10, 50.4, 24.2, 9), mix(cor, "#c9d2ee", 0.75), 0.6);
-      cel(pR(-23, -32, 46, 64, 7), cor, 2.4, function() { fl(pR(-23, -32, 46, 18, 0), mix(cor, "#ffffff", 0.2), 0.5); });
-      const painel = pR(-18.5, -27.5, 37, 55, 4.5);
+      trc(borda, 4.6, TINTA); fl(borda, "#ffffff"); fl(pR(-25.2, 14, 50.4, 20.2, 9), mix(cor, "#c9d2ee", 0.75), 0.7);
+      cel(pR(-23, -32, 46, 64, 7), cor, 2.4, function() { fl(pR(-23, -32, 46, 9, 0), mix(cor, "#ffffff", 0.35), 0.8); fl(pR(-23, 25, 46, 8, 0), mix(cor, "#14102e", 0.3), 0.8); });
+      const painel = pR(-18.5, -26.5, 37, 51, 4.5);
       fl(painel, mix(cor, "#14102e", 0.82));
       G.save(); painel(G); G.clip(); fl(pR(-20, -29, 40, 24, 0), mix(cor, "#14102e", 0.7), 0.7); G.restore();
-      trc(painel, 1, mix(cor, "#ffffff", 0.35), 0.8);
+      trc(painel, 2.2, TINTA);
+      G.save(); G.beginPath(); G.arc(-12, -21, 6, Math.PI * 1.05, Math.PI * 1.55); G.lineCap = "round"; G.lineWidth = 2.4; G.strokeStyle = "rgba(255,255,255,.7)"; G.stroke(); G.restore();
       G.drawImage(brilho(cor), -20, -23, 40, 40);
       G.save(); G.translate(0, -3); G.scale(1.08, 1.08); GL[id](cor, clara); G.restore();
       // ornamentos: losango embaixo e pontinhos nos cantos
-      cel(pP([0, 19.5, 4, 23, 0, 26.5, -4, 23]), mix(cor, "#ffffff", 0.55), 0.6);
+      cel(pP(est(0, 25.5, 5.4, 2.4, 5, -Math.PI / 2)), "#ffd23f", 0.6);
       for (const sx of [-1, 1]) { fl(pC(sx * 12.5, 23, 1.5), mix(cor, "#ffffff", 0.5), 0.9); fl(pC(sx * 14.5, -24, 1.6), mix(cor, "#ffffff", 0.6), 0.9); }
     }, 1.5, 1);
   }
@@ -185,7 +188,7 @@ const ArteCartas = (function() {
   function icone(ctx, id, x, y, tam) {
     if (!GL[id]) return;
     const cor = CARTA[id].cor, s = sp("ic" + id, -22, -22, 22, 22, function() {
-      cel(pC(0, 0, 20.5), cor, 2.6); trc(pC(0, 0, 16.6), 1.2, mix(cor, "#ffffff", 0.5), 0.7);
+      trc(pC(0, 0, 20), 3, TINTA); cel(pC(0, 0, 20), cor, 2.6); trc(pC(0, 0, 16.2), 1.6, mix(cor, "#ffffff", 0.5), 0.8);
       G.scale(0.78, 0.78); GL[id](cor, "#ffffff");
     });
     ctx.drawImage(s.c, x - tam / 2, y - tam / 2, tam, tam);

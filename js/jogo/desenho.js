@@ -482,7 +482,7 @@ function setaTuto(ctx, x, y, dx, dy, esc) {
   ctx.save();
   ctx.translate(x, y); ctx.rotate(Math.atan2(dy, dx)); ctx.scale(esc, esc);
   ctx.beginPath(); ctx.moveTo(24, 0); ctx.lineTo(-12, -22); ctx.lineTo(-12, 22); ctx.closePath();
-  ctx.lineJoin = "round"; ctx.lineWidth = 7; ctx.strokeStyle = "rgba(12,8,30,0.9)"; ctx.stroke();
+  ctx.lineJoin = "round"; ctx.lineWidth = 7; ctx.strokeStyle = "#1a0d33"; ctx.stroke();
   ctx.fillStyle = "#fff"; ctx.fill();
   ctx.restore();
 }
@@ -516,14 +516,14 @@ function dedoTuto(ctx, x, y, apertando, k, tm) {
     ctx.moveTo(42, 56); ctx.arc(32, 56, 10, 0, 7);
   };
   ctx.lineJoin = "round";
-  ctx.beginPath(); forma(); ctx.lineWidth = 9; ctx.strokeStyle = "rgba(12,8,30,0.9)"; ctx.stroke();
+  ctx.beginPath(); forma(); ctx.lineWidth = 9; ctx.strokeStyle = "#1a0d33"; ctx.stroke();
   ctx.beginPath(); forma(); ctx.fillStyle = "#fff"; ctx.fill();
   ctx.restore();
 }
 function mouseTuto(ctx, x, y, clicando) {
   ctx.save();
   ctx.translate(x, y);
-  ctx.lineWidth = 6; ctx.strokeStyle = "rgba(12,8,30,0.95)";
+  ctx.lineWidth = 6; ctx.strokeStyle = "#1a0d33";
   retRedondo(ctx, -30, -44, 60, 88, 28);
   ctx.fillStyle = "#f1f3f5"; ctx.fill(); ctx.stroke();
   // botão esquerdo aceso no clique
@@ -572,7 +572,7 @@ function etiquetaNovo(ctx, x, y, tm) {
   ctx.lineJoin = "round";
   retRedondo(ctx, x - w / 2, yy - 15, w, 30, 15);
   ctx.moveTo(x - 8, yy + 13); ctx.lineTo(x + 8, yy + 13); ctx.lineTo(x, yy + 23); ctx.closePath();
-  ctx.lineWidth = 5; ctx.strokeStyle = "rgba(12,8,30,0.9)"; ctx.stroke();
+  ctx.lineWidth = 5; ctx.strokeStyle = "#1a0d33"; ctx.stroke();
   ctx.fillStyle = "#ffd43b"; ctx.fill();
   ctx.fillStyle = "rgba(255,255,255,0.4)"; retRedondo(ctx, x - w / 2 + 6, yy - 12, w - 12, 9, 4.5); ctx.fill();
   ctx.fillStyle = "#3a1c00"; ctx.textAlign = "center"; ctx.fillText(txt, x, yy + 8);
@@ -606,10 +606,59 @@ function textoContorno(ctx, s, x, y, tam, cor, alinh, contorno) {
   ctx.textAlign = alinh || "center";
   ctx.lineJoin = "round";
   ctx.lineWidth = contorno || Math.max(4, tam * 0.16);
-  ctx.strokeStyle = "rgba(12,8,30,0.9)";
+  ctx.strokeStyle = "#1a0d33";
   ctx.strokeText(s, x, y);
   ctx.fillStyle = cor || "#fff";
   ctx.fillText(s, x, y);
+}
+
+// v19: texto com ícone (no lugar dos emojis): ícone à esquerda + letreiro / ícone dos dois lados + texto
+function letreiroIcone(ctx, nome, s, x, y, tam, cor) {
+  ctx.font = "900 " + tam + FONTE;
+  const w = ctx.measureText(s).width, ic = tam * 1.15, gap = tam * 0.12, tot = ic + gap + w;
+  if (typeof Icone !== "undefined") Icone.desenhar(ctx, nome, x - tot / 2 + ic / 2, y - tam * 0.36, ic);
+  letreiro(ctx, s, x - tot / 2 + ic + gap + w / 2, y, tam, cor);
+}
+function textoIcones(ctx, nome, s, x, y, tam, cor) {
+  ctx.font = "900 " + tam + FONTE;
+  const w = ctx.measureText(s).width, ic = tam * 1.1;
+  textoContorno(ctx, s, x, y, tam, cor);
+  if (typeof Icone !== "undefined") { Icone.desenhar(ctx, nome, x - w / 2 - ic * 0.7, y - tam * 0.36, ic); Icone.desenhar(ctx, nome, x + w / 2 + ic * 0.7, y - tam * 0.36, ic); }
+}
+
+// v19: texto que ainda chega com emoji (faixa de prêmios, avisos, prêmio do rival) é desenhado com os ícones do jogo
+// (módulo Icone) no lugar de cada emoji. estilo: "letreiro" ou contorno simples (padrão).
+const EMOJI_ICONE = { "\u{1FA99}": "moeda", "\u2728": "brilho", "\u2B50": "estrela", "\u{1F4A5}": "explosao", "\u2764": "coracao",
+  "\u26A1": "raio", "\u{1F3C6}": "trofeu", "\u{1F381}": "presente", "\u{1F916}": "robo", "\u{1F525}": "fogo", "\u{1F451}": "coroa" };
+const RE_EMOJI = /(\u{1FA99}|\u2728|\u2B50|\u{1F4A5}|\u2764|\u26A1|\u{1F3C6}|\u{1F381}|\u{1F916}|\u{1F525}|\u{1F451})\uFE0F?/u;
+const RE_EMOJI_G = new RegExp(RE_EMOJI.source, "gu");
+const partesCache = {};
+function partesTexto(txt) {
+  let p = partesCache[txt];
+  if (p) return p;
+  p = []; let i = 0, m;
+  RE_EMOJI_G.lastIndex = 0;
+  while ((m = RE_EMOJI_G.exec(txt))) { if (m.index > i) p.push({ t: txt.slice(i, m.index) }); p.push({ ic: EMOJI_ICONE[m[1]] }); i = m.index + m[0].length; }
+  if (i < txt.length) p.push({ t: txt.slice(i) });
+  return (partesCache[txt] = p);
+}
+function textoRico(ctx, txt, x, y, tam, cor, estilo, contorno) {
+  if (typeof Icone === "undefined" || !RE_EMOJI.test(txt)) {
+    if (estilo === "letreiro") letreiro(ctx, txt, x, y, tam, cor); else textoContorno(ctx, txt, x, y, tam, cor, "center", contorno);
+    return;
+  }
+  const p = partesTexto(txt), iw = tam * 1.12;
+  ctx.font = "900 " + tam + FONTE;
+  let w = 0;
+  for (let k = 0; k < p.length; k++) w += p[k].ic ? iw : ctx.measureText(p[k].t).width;
+  let xx = x - w / 2;
+  for (let k = 0; k < p.length; k++) {
+    if (p[k].ic) { Icone.desenhar(ctx, p[k].ic, xx + iw / 2, y - tam * 0.36, tam * 1.05); xx += iw; continue; }
+    ctx.font = "900 " + tam + FONTE;
+    const tw = ctx.measureText(p[k].t).width;
+    if (p[k].t.trim()) { if (estilo === "letreiro") letreiro(ctx, p[k].t, xx, y, tam, cor, null, "left"); else textoContorno(ctx, p[k].t, xx, y, tam, cor, "left", contorno); }
+    xx += tw;
+  }
 }
 
 function retRedondo(ctx, x, y, w, h, r) {
@@ -695,15 +744,14 @@ function desenharHud(ctx, j, M, L) {
     const txt = surv ? t("fim_sobrevivencia", j.onda) : j.modo === "bot" ? (v === 1 ? t("voce_venceu") : j.rival ? t("rival_venceu", j.rival.d.nome.toUpperCase()) : t("bot_venceu")) : t("jogador_venceu", v);
     const esc = 1 + 0.06 * Math.sin(j.tempoFase * 6);
     const festa = v && (v === 1 || j.modo === "2p") && !surv;
-    // v18.2: venceu o rival e ganha o acessório dele: um 🎁 sai do rival e voa até a bolinha da pessoa
+    // v18.2: venceu o rival e ganha o acessório dele: um presente sai do rival e voa até a bolinha da pessoa
     const ace = j.rival && v === 1 && j.rival.d.acessorio;
     if (ace && typeof Progresso !== "undefined" && !Progresso.temSkin(ace) && j.tempoFase > 0.5) {
       const k = Math.min(1, (j.tempoFase - 0.5) / 1.1), e = 1 - Math.pow(1 - k, 3);
       const a = mundoParaTela(M.bolinhas[1].x, M.bolinhas[1].y), b = mundoParaTela(M.bolinhas[0].x, M.bolinhas[0].y - 60);
       const gx = a.x + (b.x - a.x) * e, gy = a.y + (b.y - a.y) * e - Math.sin(e * Math.PI) * 220;
       const tg = (em ? 90 : 60) * (k < 1 ? 1 : 1 + 0.15 * Math.sin(j.tempoFase * 10));
-      ctx.save(); ctx.font = tg + "px system-ui, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.fillText("🎁", gx, gy); ctx.restore();
+      if (typeof Icone !== "undefined") Icone.desenhar(ctx, "presente", gx, gy, tg);
     }
     const cor = v ? j.cores[v - 1] : "#ffd43b";
     if (festa) raiosSol(ctx, cx, meio - 20, 330, cor, performance.now() / 1000, Math.min(1, j.tempoFase * 3) * 0.45);
@@ -772,13 +820,13 @@ function desenharHud(ctx, j, M, L) {
       topoFaixa = yf + h / 2 - h / 2 * esc;
       escalaEm(ctx, cx, yf + h / 2, pop * esc, function() {
         painelPremio(ctx, cx - w / 2, yf, w, h, tf);
-        letreiro(ctx, l1, cx, yf + 44, 38, "#ffd43b");
+        textoRico(ctx, l1, cx, yf + 44, 38, "#ffd43b", "letreiro");
         // a melhoria grátis pulsa (entra um pouco depois das moedas)
         if (ld) escalaEm(ctx, cx, yd - td * 0.35, tf < 0.45 ? Math.max(0.01, (tf - 0.15) / 0.3) * 1.2 : 1 + 0.06 * Math.sin(tf * 9), function() {
-          letreiro(ctx, ld, cx, yd, Math.round(td), "#ff8787");
+          textoRico(ctx, ld, cx, yd, Math.round(td), "#ff8787", "letreiro");
         });
-        if (l2) textoContorno(ctx, l2, cx, y2, Math.round(t2), "#ffffff");
-        if (l3) textoContorno(ctx, l3, cx, y2 + 36, Math.round(t2), "#ffffff");
+        if (l2) textoRico(ctx, l2, cx, y2, Math.round(t2), "#ffffff");
+        if (l3) textoRico(ctx, l3, cx, y2 + 36, Math.round(t2), "#ffffff");
       });
       ctx.restore();
     }
@@ -795,7 +843,7 @@ function desenharHud(ctx, j, M, L) {
     ctx.font = "900 " + ta + FONTE;
     const tw = ctx.measureText(a.texto).width;
     ctx.fillStyle = "rgba(12,8,30,0.72)"; retRedondo(ctx, cx - tw / 2 - 20, y - ta * 1.08, tw + 40, ta * 1.46, ta * 0.73); ctx.fill();
-    textoContorno(ctx, a.texto, cx, y, ta, a.cor);
+    textoRico(ctx, a.texto, cx, y, ta, a.cor);
     ctx.globalAlpha = 1;
   });
   // carta que alguém acabou de pegar: logo abaixo do HUD (v17.5: antes ficava por cima do "dano em dobro")
@@ -825,7 +873,7 @@ function baseRelogio() {
   if (baseRelogio.c) return baseRelogio.c;
   const R = 43, S = R * 2 + 8, c = document.createElement("canvas"); c.width = c.height = S;
   const g = c.getContext("2d"), m = S / 2;
-  g.fillStyle = "rgba(12,8,30,0.9)"; g.beginPath(); g.arc(m, m + 2, R + 1, 0, 7); g.fill();          // sombra/contorno
+  g.fillStyle = "#1a0d33"; g.beginPath(); g.arc(m, m + 2, R + 3, 0, 7); g.fill();          // sombra/contorno
   let gr = g.createLinearGradient(0, m - R, 0, m + R);
   gr.addColorStop(0, "#fff3bf"); gr.addColorStop(0.45, "#ffc93c"); gr.addColorStop(1, "#b8700f");
   g.fillStyle = gr; g.beginPath(); g.arc(m, m, R, 0, 7); g.fill();                                     // aro dourado
@@ -858,7 +906,7 @@ function desenharRelogio(ctx, j, M, cx, cy, tempo, dobro) {
     const wd = ctx.measureText(dd).width;
     escalaEm(ctx, cx, cy + 96, ps, function() {
       ctx.fillStyle = "#c92a3a"; retRedondo(ctx, cx - wd / 2 - 16, cy + 82, wd + 32, 30, 15); ctx.fill();
-      ctx.lineWidth = 3; ctx.strokeStyle = "rgba(12,8,30,0.9)"; ctx.stroke();
+      ctx.lineWidth = 3; ctx.strokeStyle = "#1a0d33"; ctx.stroke();
       textoContorno(ctx, dd, cx, cy + 104, 19, "#fff", "center", 4);
     });
   }
@@ -918,8 +966,8 @@ function desenharAbertura(ctx, j, M, L, cx, meio) {
     const P = typeof Poder !== "undefined" ? Poder : null;
     const pJ = P ? P.valor(P.doJogador()) : 100, pR = P ? P.valor(P.doRival(j.rival.i, j.rival.liga)) : 100;
     if (!j.treino && P && (pJ > 100 || pR > 100)) {   // v16: 100 x 100 não diz nada
-      letreiro(ctx, "⚡" + pJ, -335, 98, 30, j.cores[0]);
-      letreiro(ctx, "⚡" + pR, 335, 98, 30, j.cores[1]);
+      letreiroIcone(ctx, "raio", String(pJ), -335, 98, 30, j.cores[0]);
+      letreiroIcone(ctx, "raio", String(pR), 335, 98, 30, j.cores[1]);
     }
     // mapa e o que ele tem de diferente numa linha só; prêmio numa pílula dourada
     linhaMapa(ctx, M.cen.id, cor, 0, 100, 30, 24, 520);
@@ -929,7 +977,7 @@ function desenharAbertura(ctx, j, M, L, cx, meio) {
     ctx.fillStyle = "rgba(12,8,30,0.78)"; retRedondo(ctx, -wp / 2 - 20, 118, wp + 40, 40, 20); ctx.fill();
     ctx.lineWidth = 2.5; ctx.strokeStyle = "rgba(255,212,59,0.8)"; ctx.stroke();
     textoCaber(ctx, pr, 0, 146, 24, "#ffd43b", 620);
-    if (j.lendaria) textoContorno(ctx, "✨ " + t("lendaria") + " ✨", 0, 192, 26, "#ffd43b");
+    if (j.lendaria) textoIcones(ctx, "brilho", t("lendaria"), 0, 192, 26, "#ffd43b");
     else trilhaRivais(ctx, j, 0, 180, entra(0.2));
     if (escolha) desenharEscolha(ctx, j, escolha, cx, y, esc, entra(0.25), tf);
   } else {
@@ -937,7 +985,7 @@ function desenharAbertura(ctx, j, M, L, cx, meio) {
     textoContorno(ctx, surv ? t("onda_n", j.onda) : t("rodada_n", j.rodada), 0, -16, 24, surv ? "#ffd43b" : "#e9ecef", "center", 5);
     escalaEm(ctx, 0, 18, 0.6 + 0.4 * entra(0.04), function() { letreiro(ctx, t("c_" + M.cen.id), 0, 40, 60, cor, 760); });
     textoCaber(ctx, t("r_" + M.cen.id), 0, 96, 28, "#fff", W - 200);
-    if (j.lendaria) textoContorno(ctx, "✨ " + t("lendaria") + " ✨", 0, 136, 26, "#ffd43b");
+    if (j.lendaria) textoIcones(ctx, "brilho", t("lendaria"), 0, 136, 26, "#ffd43b");
   }
   ctx.restore();
   // v18.2: 2 jogadores em pé a arena fica minúscula: sugere deitar o celular (só ícone, sem texto)
@@ -946,9 +994,9 @@ function desenharAbertura(ctx, j, M, L, cx, meio) {
     ctx.save(); ctx.globalAlpha = fecha;
     ctx.fillStyle = "rgba(12,8,30,0.85)"; ctx.beginPath(); ctx.arc(cx, yy, 90, 0, 7); ctx.fill();
     ctx.translate(cx, yy); ctx.rotate(-gira * Math.PI / 2);
-    ctx.font = "110px system-ui, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("📱", 0, 4);
+    if (typeof Icone !== "undefined") Icone.desenhar(ctx, "celular", 0, 4, 110);
     ctx.restore();
-    textoContorno(ctx, "↻", cx + 92, yy - 60, 70, "#ffd43b");
+    if (typeof Icone !== "undefined") Icone.desenhar(ctx, "repetir", cx + 92, yy - 70, 64);
   }
 }
 // v18.2: trilha dos 10 rivais na abertura VS (vencidos verdes, o atual dourado; 5 e 10 dão baú)
@@ -1002,7 +1050,7 @@ function desenharEscolha(ctx, j, es, cx, y0, esc, k, tf) {
 function textoCaber(ctx, s, x, y, tam, cor, maxW) {
   ctx.font = "900 " + tam + FONTE;
   const w = ctx.measureText(s).width;
-  textoContorno(ctx, s, x, y, w > maxW ? Math.max(12, Math.floor(tam * maxW / w)) : tam, cor, "center", 5);
+  textoRico(ctx, s, x, y, w > maxW ? Math.max(12, Math.floor(tam * maxW / w)) : tam, cor, null, 5);
 }
 // faixa inclinada escura com as cores dos dois nas pontas e filetes dourados
 function faixaInclinada(ctx, W, h, corE, corD) {
@@ -1012,9 +1060,13 @@ function faixaInclinada(ctx, W, h, corE, corD) {
   };
   const a = ctx.globalAlpha;
   forma(); ctx.fillStyle = "rgba(16,11,42,0.86)"; ctx.fill();
-  const g = ctx.createLinearGradient(-W / 2, 0, W / 2, 0);
-  g.addColorStop(0, corE); g.addColorStop(0.32, "rgba(16,11,42,0)"); g.addColorStop(0.68, "rgba(16,11,42,0)"); g.addColorStop(1, corD);
-  ctx.globalAlpha = a * 0.45; ctx.fillStyle = g; ctx.fill();
+  // v19: as cores dos dois em blocos chapados nas pontas (sem degradê por quadro)
+  ctx.save(); ctx.clip();
+  ctx.globalAlpha = a * 0.5; ctx.fillStyle = corE; ctx.fillRect(-W / 2 - s * 2, -h / 2, W * 0.3, h);
+  ctx.fillStyle = corD; ctx.fillRect(W / 2 - W * 0.3 + s * 2, -h / 2, W * 0.3, h);
+  ctx.globalAlpha = a * 0.25; ctx.fillStyle = corE; ctx.fillRect(-W / 2 + W * 0.3 - s * 2, -h / 2, W * 0.06, h);
+  ctx.fillStyle = corD; ctx.fillRect(W / 2 - W * 0.36 + s * 2, -h / 2, W * 0.06, h);
+  ctx.restore();
   ctx.globalAlpha = a;
   ctx.fillStyle = "#ffd43b";
   ctx.fillRect(-W / 2, -h / 2 - 2, W + s * 2, 4); ctx.fillRect(-W / 2 - s * 2, h / 2 - 2, W + s * 2, 4);
@@ -1041,11 +1093,9 @@ function linhaMapa(ctx, id, cor, x, y, t1, t2, maxW) {
 }
 // painel da faixa de prêmios: degradê roxo, borda dourada e um reflexo passando
 function painelPremio(ctx, x, y, w, h, tf) {
-  const g = ctx.createLinearGradient(0, y, 0, y + h);
-  g.addColorStop(0, "rgba(70,48,140,0.95)"); g.addColorStop(1, "rgba(24,16,58,0.95)");
   retRedondo(ctx, x, y, w, h, 24);
-  ctx.lineWidth = 7; ctx.strokeStyle = "rgba(12,8,30,0.9)"; ctx.stroke();
-  ctx.fillStyle = g; ctx.fill();
+  ctx.lineWidth = 8; ctx.strokeStyle = "#1a0d33"; ctx.stroke();
+  ctx.fillStyle = "rgba(48,32,104,0.96)"; ctx.fill();   // v19: chapado (sem degradê por quadro); a faixa clara de cima já dá o volume
   ctx.save();
   ctx.clip();
   ctx.fillStyle = "rgba(255,255,255,0.09)"; ctx.fillRect(x, y, w, h * 0.38);
@@ -1103,13 +1153,14 @@ function letreiro(ctx, s, x, y, tam, cor, maxW, alinh) {
   if (maxW) { const w = ctx.measureText(s).width; if (w > maxW) { tam = Math.max(14, Math.floor(tam * maxW / w)); ctx.font = "900 " + tam + FONTE; } }
   ctx.textAlign = alinh || "center"; ctx.lineJoin = "round";
   const d = Math.max(2, Math.round(tam * 0.075));
-  ctx.lineWidth = Math.max(5, tam * 0.2); ctx.strokeStyle = "rgba(12,8,30,0.95)";
+  ctx.lineWidth = Math.max(5, tam * 0.2); ctx.strokeStyle = "#1a0d33";
   ctx.strokeText(s, x, y + d);
   ctx.strokeText(s, x, y);
   ctx.fillStyle = tom(cor, -0.45); ctx.fillText(s, x, y + d);
-  const g = ctx.createLinearGradient(0, y - tam * 0.74, 0, y);
-  g.addColorStop(0, tom(cor, 0.62)); g.addColorStop(0.5, cor); g.addColorStop(1, tom(cor, -0.12));
-  ctx.fillStyle = g; ctx.fillText(s, x, y);
+  // v19: sem degradê por quadro: 2 tons duros (cel), a metade de cima mais clara
+  ctx.fillStyle = cor; ctx.fillText(s, x, y);
+  ctx.save(); ctx.beginPath(); ctx.rect(x - 4000, y - tam * 1.2, 8000, tam * 0.78); ctx.clip();
+  ctx.fillStyle = tom(cor, 0.5); ctx.fillText(s, x, y); ctx.restore();
   return tam;
 }
 // mola (entra passando um pouco do ponto e volta)
@@ -1122,7 +1173,7 @@ function estouroHQ(ctx, x, y, r, n, cor) {
     ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
   }
   ctx.closePath();
-  ctx.lineJoin = "round"; ctx.lineWidth = 7; ctx.strokeStyle = "rgba(12,8,30,0.95)"; ctx.stroke();
+  ctx.lineJoin = "round"; ctx.lineWidth = 7; ctx.strokeStyle = "#1a0d33"; ctx.stroke();
   ctx.fillStyle = cor; ctx.fill();
 }
 // fita de campeão atrás do letreiro da partida (pontas dobradas para trás)
@@ -1134,16 +1185,15 @@ function fita(ctx, cx, y, w, h, cor) {
     ctx.beginPath();
     ctx.moveTo(xi, y - h / 2 + dobra); ctx.lineTo(xf, y - h / 2 + dobra); ctx.lineTo(xf - s * p * 0.42, y + dobra * 0.5);
     ctx.lineTo(xf, y + h / 2 + dobra); ctx.lineTo(xi, y + h / 2 + dobra); ctx.closePath();
-    ctx.lineWidth = 6; ctx.strokeStyle = "rgba(12,8,30,0.95)"; ctx.stroke();
+    ctx.lineWidth = 6; ctx.strokeStyle = "#1a0d33"; ctx.stroke();
     ctx.fillStyle = esc; ctx.fill();
     ctx.beginPath(); ctx.moveTo(cx + s * w / 2, y + h / 2); ctx.lineTo(xi, y + h / 2 + dobra); ctx.lineTo(xi, y + h / 2); ctx.closePath();
     ctx.fillStyle = dob; ctx.fill();
   }
-  const g = ctx.createLinearGradient(0, y - h / 2, 0, y + h / 2);
-  g.addColorStop(0, tom(cor, 0.3)); g.addColorStop(0.5, cor); g.addColorStop(1, tom(cor, -0.25));
   retRedondo(ctx, cx - w / 2, y - h / 2, w, h, 10);
-  ctx.lineWidth = 6; ctx.strokeStyle = "rgba(12,8,30,0.95)"; ctx.stroke();
-  ctx.fillStyle = g; ctx.fill();
+  ctx.lineWidth = 7; ctx.strokeStyle = "#1a0d33"; ctx.stroke();
+  ctx.fillStyle = cor; ctx.fill();
+  ctx.fillStyle = tom(cor, -0.25); ctx.fillRect(cx - w / 2 + 4, y + h * 0.18, w - 8, h * 0.28);   // v19: sombra dura embaixo
   ctx.fillStyle = "rgba(255,255,255,0.22)"; ctx.fillRect(cx - w / 2 + 8, y - h / 2 + 6, w - 16, h * 0.16);
 }
 // raios girando atrás de um texto de vitória
@@ -1152,9 +1202,7 @@ function raiosSol(ctx, x, y, r, cor, tempo, alfa) {
   ctx.save();
   ctx.translate(x, y); ctx.rotate(tempo * 0.5);
   ctx.globalAlpha *= alfa;
-  const g = ctx.createRadialGradient(0, 0, 20, 0, 0, r);
-  g.addColorStop(0, cor); g.addColorStop(1, "rgba(255,255,255,0)");
-  ctx.fillStyle = g;
+  ctx.globalAlpha *= 0.55; ctx.fillStyle = cor;   // v19: raios chapados (sem degradê por quadro)
   for (let i = 0; i < 12; i++) {
     ctx.rotate(Math.PI / 6);
     ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(r, -r * 0.14); ctx.lineTo(r, r * 0.14); ctx.closePath(); ctx.fill();
@@ -1202,17 +1250,6 @@ function placarGrande(ctx, j, cx, y, alfa) {
 // ---------- painel de cada um no HUD (v17.5) ----------
 // Retrato da bolinha (com skin e acessório; a cara muda: dor, medo, feliz) num medalhão, nome, barra de vida com
 // degradê, brilho e marcas, estrelas do placar e a arma com a munição. Ocupa a mesma largura de antes (380).
-const gradBarra = {};
-function degradeBarra(ctx, cor, by, bh) {
-  const k = cor + "|" + by + "|" + bh;
-  let g = gradBarra[k];
-  if (!g) {
-    g = ctx.createLinearGradient(0, by, 0, by + bh);
-    g.addColorStop(0, tom(cor, 0.42)); g.addColorStop(0.45, cor); g.addColorStop(1, tom(cor, -0.28));
-    gradBarra[k] = g;
-  }
-  return g;
-}
 function painelJogador(ctx, j, b, x, y, lado) {
   const w = 380, av = 31;
   const x0 = lado > 0 ? x : x - w;
@@ -1231,7 +1268,8 @@ function painelJogador(ctx, j, b, x, y, lado) {
   else if ((j.fase === "fimRodada" && j.vencedorRodada === b.lado) || (j.fase === "fimPartida" && j.vencedorPartida === b.lado)) ex = "feliz";
   else if (b.dor > 0) ex = "dor";
   else if (b.vida < 25) ex = "medo";
-  ctx.fillStyle = "rgba(12,8,30,0.88)"; ctx.beginPath(); ctx.arc(ax, ay + 2, av + 4, 0, 7); ctx.fill();
+  ctx.fillStyle = "#1a0d33"; ctx.beginPath(); ctx.arc(ax + 1, ay + 4, av + 5, 0, 7); ctx.fill();     // v19: sombra dura + contorno grosso
+  ctx.beginPath(); ctx.arc(ax, ay, av + 5, 0, 7); ctx.fill();
   ctx.fillStyle = tom(b.cor, -0.6); ctx.beginPath(); ctx.arc(ax, ay, av, 0, 7); ctx.fill();
   ctx.lineWidth = 4; ctx.strokeStyle = pouca ? "rgba(255,77,94," + (0.6 + 0.4 * Math.sin(agora * 10)) + ")" : b.cor;
   ctx.beginPath(); ctx.arc(ax, ay, av - 1, 0, 7); ctx.stroke();
@@ -1245,11 +1283,11 @@ function painelJogador(ctx, j, b, x, y, lado) {
   ctx.font = "900 21" + FONTE;
   const tn = Math.max(13, Math.min(21, Math.floor(21 * (bw - 8) / Math.max(1, ctx.measureText(nome).width))));   // nome longo: letra menor
   textoContorno(ctx, nome, lado > 0 ? bx + 4 : bx + bw - 4, y + 22, tn, b.cor, lado > 0 ? "left" : "right", 5);
-  ctx.fillStyle = "rgba(12,8,30,0.85)";
-  retRedondo(ctx, bx - 4, by - 4, bw + 8, bh + 8, 15); ctx.fill();
-  ctx.lineWidth = 2.5;
-  ctx.strokeStyle = pouca ? "rgba(255,77,94," + (0.5 + 0.5 * Math.sin(agora * 10)) + ")" : "rgba(255,255,255,0.24)";
-  ctx.stroke();
+  ctx.fillStyle = "#1a0d33";                                              // v19: trilho escuro com sombra dura embaixo
+  retRedondo(ctx, bx - 5, by - 3, bw + 10, bh + 10, 16); ctx.fill();
+  retRedondo(ctx, bx - 5, by - 5, bw + 10, bh + 10, 16); ctx.fill();
+  ctx.fillStyle = "#3a2a6e"; retRedondo(ctx, bx, by, bw, bh, 11); ctx.fill();
+  if (pouca) { ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,77,94," + (0.5 + 0.5 * Math.sin(agora * 10)) + ")"; retRedondo(ctx, bx - 5, by - 5, bw + 10, bh + 10, 16); ctx.stroke(); }
   const fill = function(f, cor) {
     if (f <= 0) return;
     ctx.fillStyle = cor;
@@ -1257,7 +1295,12 @@ function painelJogador(ctx, j, b, x, y, lado) {
     retRedondo(ctx, lado > 0 ? bx : bx + bw - ww, by, ww, bh, 11); ctx.fill();
   };
   fill(b.vidaLenta, b.vidaLenta - vida > 0.002 ? "#fff1c1" : "#ffffff");
-  fill(vida, degradeBarra(ctx, pouca ? "#ff4d5e" : b.cor, by, bh));
+  const corV = pouca ? "#ff4d5e" : b.cor;
+  fill(vida, corV);
+  if (vida > 0) {   // v19: cel-shading em 2 tons duros (sem degradê por quadro): faixa de sombra embaixo
+    const ww = Math.max(bh * 0.5, bw * Math.min(1, vida));
+    ctx.fillStyle = tom(corV, -0.3); retRedondo(ctx, lado > 0 ? bx : bx + bw - ww, by + bh * 0.58, ww, bh * 0.42, 8); ctx.fill();
+  }
   if (b.escudoHP > 0 && b.efeitos.escudo > 0) fill(b.escudoHP / 100, "rgba(77,171,247,0.75)");
   // acabou de apanhar: a barra pisca branca por um instante
   if (b.dor > 0.24 && vida > 0) { ctx.globalAlpha = Math.min(1, (b.dor - 0.24) / 0.11) * 0.7; fill(vida, "#ffffff"); ctx.globalAlpha = 1; }
@@ -1287,7 +1330,7 @@ function painelJogador(ctx, j, b, x, y, lado) {
     estrela5(ctx, 0, 0, 12.5, 5.8);
     ctx.fillStyle = cheia ? "#ffd43b" : "rgba(12,8,30,0.6)";
     ctx.fill();
-    ctx.lineWidth = 2.5; ctx.lineJoin = "round"; ctx.strokeStyle = cheia ? "#b35c00" : "rgba(255,255,255,0.45)"; ctx.stroke();
+    ctx.lineWidth = 3; ctx.lineJoin = "round"; ctx.strokeStyle = cheia ? "#1a0d33" : "rgba(255,255,255,0.45)"; ctx.stroke();
     if (cheia) { estrela5(ctx, -1.5, -2, 6, 2.8); ctx.fillStyle = "#fff3bf"; ctx.fill(); }
     ctx.restore();
   }
@@ -1463,7 +1506,7 @@ function puxadorToque(cor) {
 }
 
 // ---------- sensação: reações do bot, combo, tela vermelha, moedas ----------
-// Balão com um símbolo acima do bot ("!", "?!", "!!", "♪") + gota de suor com pouca vida
+// Balão com um símbolo acima do bot ("!", "?!", "!!" ou a nota musical, que vira o ícone "nota") + gota de suor
 function desenharReacao(ctx, M, b, tm) {
   if (!b.viva || b.humano) return;
   const inv = gravSinal(M.cen, tm) < 0;
@@ -1486,15 +1529,17 @@ function desenharReacao(ctx, M, b, tm) {
   ctx.globalAlpha = alfa;
   ctx.translate(x, y); ctx.scale(esc, esc);
   ctx.font = "900 24px Nunito, system-ui, sans-serif";
-  const w = Math.max(40, ctx.measureText(e.s).width + 20), h = 34;
-  ctx.fillStyle = "rgba(12,8,30,0.35)";
-  arredondado(ctx, -w / 2 + 2, -h / 2 + 3, w, h, 12); ctx.fill();
-  ctx.fillStyle = "#ffffff";
-  arredondado(ctx, -w / 2, -h / 2, w, h, 12); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(-10, h / 2 - 1); ctx.lineTo(-18, h / 2 + 10); ctx.lineTo(-1, h / 2 - 1); ctx.fill();
-  ctx.fillStyle = e.s === "♪" ? "#cc5de8" : "#e8590c";
-  ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  ctx.fillText(e.s, 0, 1);
+  const nota = e.s === "\u266a", w = nota ? 42 : Math.max(40, ctx.measureText(e.s).width + 20), h = 34;
+  // v19: balão de HQ com contorno escuro (o rabinho entra no mesmo caminho)
+  arredondado(ctx, -w / 2, -h / 2, w, h, 12);
+  ctx.moveTo(-10, h / 2 - 1); ctx.lineTo(-18, h / 2 + 11); ctx.lineTo(-1, h / 2 - 1);
+  ctx.lineJoin = "round"; ctx.lineWidth = 6; ctx.strokeStyle = "#1a0d33"; ctx.stroke();
+  ctx.fillStyle = "#ffffff"; ctx.fill();
+  if (nota && typeof Icone !== "undefined") Icone.desenhar(ctx, "nota", 0, 0, 26);
+  else {
+    ctx.fillStyle = "#e8590c"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.lineWidth = 4; ctx.strokeStyle = "#1a0d33"; ctx.strokeText(e.s, 0, 1); ctx.fillText(e.s, 0, 1);
+  }
   ctx.restore();
 }
 
