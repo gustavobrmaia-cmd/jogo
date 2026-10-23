@@ -391,7 +391,7 @@ TEXTOS.ru = {
   rar_armas_3: "Легендарное",
   st_dano: "Урон",
   st_municao: "Патроны",
-  st_rapidez: "Скорострельность",
+  st_rapidez: "Скорость",
   comprar: "Купить",
   tirar: "Снять",
   tem: "Куплено",

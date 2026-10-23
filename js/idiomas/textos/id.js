@@ -391,7 +391,7 @@ TEXTOS.id = {
   rar_armas_3: "Legendaris",
   st_dano: "Damage",
   st_municao: "Amunisi",
-  st_rapidez: "Kecepatan tembak",
+  st_rapidez: "Kecepatan",
   comprar: "Beli",
   tirar: "Lepas",
   tem: "Dimiliki",

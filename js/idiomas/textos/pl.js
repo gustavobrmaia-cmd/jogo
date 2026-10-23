@@ -391,7 +391,7 @@ TEXTOS.pl = {
   rar_armas_3: "Legendarne",
   st_dano: "Obrażenia",
   st_municao: "Amunicja",
-  st_rapidez: "Szybkostrzelność",
+  st_rapidez: "Szybkość",
   comprar: "Kup",
   tirar: "Zdejmij",
   tem: "Kupiona",
