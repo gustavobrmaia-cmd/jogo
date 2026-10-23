@@ -159,6 +159,7 @@ function desenharJogo(ctx) {
 
   // 8. partículas
   if (temArte.fx) Efeitos.desenhar(ctx);
+  if (temArte.armas && ArteArmas.desenharSoltos) ArteArmas.desenharSoltos(ctx, M);   // v19-b: clarão, cápsulas, gosma
 
   // 9. frente do cenário (lava, água, escuridão, vento)
   if (temArte.cen) ArteCenarios.desenharFrente(ctx, cen, est, t);
@@ -275,6 +276,7 @@ function desenharBolinhaNoMundo(ctx, j, M, b, o, tm) {
     ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.fill();
     ctx.globalAlpha = 1;
   }
+  if (temArte.armas && ArteArmas.desenharEstado) ArteArmas.desenharEstado(ctx, b, tm);   // v19-b: bolha, gosma, inflado...
   if (fantasma > 0) ctx.globalAlpha = 0.25;
   const a = ARMA[b.arma];
   const ang = a.tipo === "melee" || a.tipo === "mina" || a.tipo === "ceu" ? (b.dir > 0 ? 0 : Math.PI) : (b.mira === undefined ? 0 : b.mira);
@@ -311,7 +313,7 @@ function desenharBolinhaNoMundo(ctx, j, M, b, o, tm) {
 // Linha pontilhada da mira livre: reta para tiros normais, curva para granadas/flechas (mostra onde cai)
 function desenharGuiaMira(ctx, M, b, ang) {
   const a = ARMA[b.arma];
-  if (a.tipo === "melee" || a.tipo === "mina" || a.tipo === "ceu") return;
+  if (a.tipo === "melee" || a.tipo === "mina" || a.tipo === "ceu" || a.tipo === "torreta") return;   // v19-b: torreta não mira
   const boca = pontaDoCano(b, ang);
   const g = (a.grav || 0) * gravidadeDe(M.cen) * gravSinal(M.cen, M.t);
   const v = (a.vel || 18) * (M.cen.agua ? 0.7 : 1);

@@ -16,6 +16,7 @@ const FIS = {
   quedaMax: 15,
   raio: 28,
   raioMini: 16,
+  raioInflado: 40,          // v19: inflado pelo Inflador
   largura: 1280,
   altura: 720
 };
@@ -86,7 +87,7 @@ function copiarBolinha(b) {
     lado: b.lado, x: b.x, y: b.y, vx: b.vx, vy: b.vy, r: b.r, dir: b.dir,
     noChao: b.noChao, tempoNoAr: b.tempoNoAr, pulos: b.pulos, puloCd: b.puloCd, ignoraFina: b.ignoraFina,
     segurouPulo: b.segurouPulo, chao: b.chao, portalCd: b.portalCd, lavaCd: 0, vida: b.vida, viva: b.viva,
-    multVel: b.multVel, efeitos: b.efeitos
+    multVel: b.multVel, efeitos: b.efeitos, lancado: b.lancado
   };
 }
 
@@ -103,8 +104,12 @@ function moverBolinha(b, ent, cen, plats, t, bumpers) {
   const sinal = gravSinal(cen, t);
   const g = gravidadeDe(cen) * sinal;
   const ef = b.efeitos;
-  const congelado = ef.congelado > 0;
-  const mult = (b.multVel || 1) * (ef.rapidez > 0 ? 1.4 : 1) * (ef.lento > 0 ? 0.5 : 1) * (ef.mini > 0 ? 1.12 : 1);
+  // v19: preso na bolha ou escorregando na banana também tira o controle; grudado na gosma não pula
+  const semControle = ef.congelado > 0 || ef.bolha > 0 || ef.escorrega > 0;
+  const congelado = semControle;
+  const grudado = ef.grudado > 0;
+  const mult = (b.multVel || 1) * (ef.rapidez > 0 ? 1.4 : 1) * (ef.lento > 0 ? 0.5 : 1) * (ef.mini > 0 ? 1.12 : 1) *
+    (grudado ? 0.42 : 1) * (ef.inflado > 0 ? 0.82 : 1);
   const esq = !congelado && ent.esq, dir = !congelado && ent.dir;
   const input = (dir ? 1 : 0) - (esq ? 1 : 0);
   if (input) b.dir = input;
@@ -114,6 +119,7 @@ function moverBolinha(b, ent, cen, plats, t, bumpers) {
   const gelo = b.noChao && b.chao && b.chao.gelo;
   let k;
   if (cen.semGravidade) k = 0.05;
+  else if (ef.escorrega > 0) k = 0.006;
   else if (b.noChao) k = gelo ? (input ? 0.03 : 0.008) : (input ? 0.3 : 0.38);
   else k = cen.agua ? 0.08 : 0.13;
   b.vx += (alvo - b.vx) * k;
@@ -121,7 +127,7 @@ function moverBolinha(b, ent, cen, plats, t, bumpers) {
 
   // ---- pular ----
   if (b.puloCd > 0) b.puloCd -= FIS.dt;
-  if (!congelado && ent.pulo && b.puloCd <= 0) {
+  if (!congelado && !grudado && ent.pulo && b.puloCd <= 0) {
     const forca = (ef.super_pulo > 0 ? 1.18 : 1) * (ef.rapidez > 0 ? 1.06 : 1);
     if (cen.semGravidade) {
       b.vy = -6.2 * sinal * forca; b.puloCd = 0.16; b.evento = "pulo";
@@ -135,7 +141,9 @@ function moverBolinha(b, ent, cen, plats, t, bumpers) {
   }
   b.segurouPulo = ent.segPulo;
   // soltou o pulo cedo: pulo mais baixo (dá controle fino)
-  if (!ent.segPulo && !cen.semGravidade && !cen.agua && b.vy * sinal < -5) b.vy *= 0.88;
+  // (v19: menos quando foi o tornado que jogou para cima)
+  if (b.lancado && b.vy * sinal >= 0) b.lancado = false;
+  if (!ent.segPulo && !b.lancado && !cen.semGravidade && !cen.agua && b.vy * sinal < -5) b.vy *= 0.88;
 
   // ---- descer de plataforma fina / cair mais rápido ----
   if (ent.baixo && !congelado) {
@@ -145,7 +153,11 @@ function moverBolinha(b, ent, cen, plats, t, bumpers) {
   if (b.ignoraFina > 0) b.ignoraFina -= FIS.dt;
 
   // ---- gravidade e freio ----
-  b.vy += g;
+  if (ef.bolha > 0) {
+    // presa numa bolha: sobe devagar balançando (a gravidade não vale)
+    b.vy += (-1.5 * sinal - b.vy) * 0.08;
+    b.vx *= 0.94;
+  } else b.vy += g * (ef.inflado > 0 ? 0.45 : 1);
   if (cen.agua) { b.vx *= 0.975; b.vy *= 0.955; }
   if (cen.semGravidade) { b.vx *= 0.99; b.vy *= 0.985; }
   b.vy = limitar(b.vy, -FIS.quedaMax, FIS.quedaMax);

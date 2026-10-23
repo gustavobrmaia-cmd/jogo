@@ -1,7 +1,7 @@
 "use strict";
 
 // =========================
-// COMBATE: mira, tiros das 50 armas, projéteis, explosões, dano, caixas de arma e cartas.
+// COMBATE: mira, tiros das 60 armas, projéteis, explosões, dano, caixas de arma e cartas.
 // Tudo acontece dentro do "mundo" M da rodada (criado em partida.js):
 //   M.cen, M.plats, M.t, M.bolinhas[0..1], M.proj, M.feixes, M.avisos, M.caixas, M.cartas, M.bumpers, M.stats
 // =========================
@@ -13,7 +13,7 @@ function oponente(M, b) { return M.bolinhas[b.lado === 1 ? 1 : 0]; }
 function difAng(a, b) { let d = a - b; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return d; }
 function somJogo(M, nome, tomMult) { if (!M.mudo) som(nome, tomMult); }
 
-// Reação do bot (balão acima da cabeça): "!" "?!" "♪" ... dura alguns décimos de segundo
+// Reação do bot (balão acima da cabeça): "!" "?!" ou uma provocação curta (texto do idioma) — dura alguns décimos de segundo
 function emote(b, s, dur) {
   if (b.humano) return;
   if (b.emote && b.emote.t > 0.4 && b.emote.s === s) return;
@@ -38,7 +38,7 @@ function calcularMira(M, b) {
   // mira livre do jogador: vai exatamente para onde ele aponta (e a bolinha vira para esse lado)
   if (b.miraLivre !== null && b.miraLivre !== undefined) {
     b.dir = Math.cos(b.miraLivre) >= 0 ? 1 : -1;
-    if (a.tipo === "melee" || a.tipo === "mina" || a.tipo === "ceu") return b.dir > 0 ? 0 : Math.PI;
+    if (semMira(a)) return b.dir > 0 ? 0 : Math.PI;
     // "ímã" leve para o jogador: se a mira passa quase em cima do oponente (tiro reto), vai certinho nele
     const o2 = oponente(M, b);
     if (b.humano && o2.viva && !(o2.efeitos.fantasma > 0) && !(a.grav > 0.05)) {
@@ -71,7 +71,7 @@ function calcularMira(M, b) {
   const arco = g > 0.05 && a.tipo === "bala";
   // arremesso sem alvo: um pouco para "cima" (contra a gravidade)
   const inclinado = b.dir > 0 ? -0.35 * sinal : Math.PI + 0.35 * sinal;
-  if (a.tipo === "melee" || a.tipo === "mina" || a.tipo === "ceu") return base;
+  if (semMira(a)) return base;
   const visivel = o.viva && !(o.efeitos.fantasma > 0);
   const dx = o.x - b.x, dy = o.y - b.y;
   if (!visivel || dx * b.dir < -10) return arco ? inclinado : base;
@@ -87,6 +87,9 @@ function calcularMira(M, b) {
   const lim = M.cen.semGravidade ? ANG_ASSIST * 1.4 : ANG_ASSIST;
   return Math.abs(difAng(alvo, base)) < lim ? alvo : base;
 }
+
+// armas que não miram (golpe, mina/banana, torreta, céu): usam só o lado para onde a bolinha olha
+function semMira(a) { return a.tipo === "melee" || a.tipo === "mina" || a.tipo === "ceu" || a.tipo === "torreta"; }
 
 // Ângulo de lançamento (acima da horizontal, em radianos) para acertar um ponto a "x" de distância e
 // "yCima" de altura com velocidade v e gravidade g. Usa o arco baixo (mais rápido). null = não alcança.
@@ -138,7 +141,6 @@ function gastar(b, n) {
 
 function dispararArma(M, b, a) {
   b.cad = a.cadencia;
-  b.recuoAnim = 1;
   M.stats.tiros[b.lado - 1]++;
   const vezes = b.efeitos.tiro_duplo > 0 ? 2 : 1;
   const ang = b.mira;
@@ -151,31 +153,37 @@ function dispararArma(M, b, a) {
         criarProjetil(M, b, a, boca.x, boca.y, ang + esp + desvio);
       }
     }
-    if (typeof Efeitos !== "undefined" && a.visual !== "chama" && a.visual !== "vento" && a.visual !== "agua")
-      Efeitos.disparo(boca.x, boca.y, ang, (a.dano * (a.qtd || 1)) > 25 ? 1.4 : 0.8);
-    somJogo(M, a.explode >= 60 || a.dano >= 30 ? "tiro_pesado" : (a.visual === "chama" || a.visual === "vento" || a.visual === "agua") ? "sopro" : "tiro");
   } else if (a.tipo === "laser") {
     for (let v = 0; v < vezes; v++) laser(M, b, a, boca, ang + (vezes > 1 ? (v ? 0.06 : -0.06) : 0));
-    somJogo(M, "laser");
   } else if (a.tipo === "raio") {
     for (let v = 0; v < vezes; v++) choque(M, b, a, boca, v);
-    somJogo(M, "choque");
   } else if (a.tipo === "melee") {
     golpe(M, b, a, vezes);
-    somJogo(M, "golpe");
   } else if (a.tipo === "mina") {
-    colocarMina(M, b, a);
-    somJogo(M, "clique");
+    for (let v = 0; v < vezes; v++) colocarMina(M, b, a, v);
+  } else if (a.tipo === "torreta") {
+    montarTorreta(M, b, a);
   } else if (a.tipo === "ceu") {
     const o = oponente(M, b);
     for (let i = 0; i < a.qtd * vezes; i++) {
       const espalha = a.qtd > 1 ? (i - (a.qtd - 1) / 2) * 75 : 0;
       avisarCeu(M, b.lado, o.x + o.vx * 22 + espalha + (Math.random() - 0.5) * 30, o.y, a.aviso + i * 0.16, a);
     }
-    somJogo(M, "alarme");
   }
+  sensacaoTiro(M, b, a, boca, ang);
   if (a.recuo) { b.vx -= Math.cos(ang) * a.recuo; b.vy -= Math.sin(ang) * a.recuo * 0.5; }
   gastar(b, 1);
+}
+
+// v19: cada arma tem a sua sensação: tranco na mão (recuoVis), clarão desenhado na boca do cano, cápsula ou fumaça
+// saindo (ArteArmas), tela tremendo proporcional (só no tiro de quem joga; os pesados do bot tremem um pouco) e som próprio
+function sensacaoTiro(M, b, a, boca, ang) {
+  b.recuoAnim = a.recuoVis === undefined ? 1 : a.recuoVis;
+  somJogo(M, a.som || "tiro");
+  if (typeof ArteArmas !== "undefined" && ArteArmas.disparo) ArteArmas.disparo(a, boca.x, boca.y, ang, b.dir, M.mudo);
+  if (typeof Efeitos === "undefined") return;
+  if (a.fumaca && Math.random() < a.fumaca) for (let i = 0; i < Math.max(1, Math.floor(a.fumaca)); i++) Efeitos.fumaca(boca.x + Math.cos(ang) * 6, boca.y + Math.sin(ang) * 6 - i * 3);
+  if (!M.mudo && a.tremor) Efeitos.tremer(b.humano ? a.tremor : (a.tremor >= 3 ? a.tremor * 0.35 : 0));
 }
 
 // ---------- projéteis ----------
@@ -187,8 +195,10 @@ function criarProjetil(M, b, a, x, y, ang) {
     x: x, y: y, vx: Math.cos(ang) * v + b.vx * 0.25, vy: Math.sin(ang) * v + (a.grav ? b.vy * 0.2 : 0),
     a: a, dono: b.lado, cor: b.cor, visual: a.visual, raio: a.raio || 4,
     passos: 0, t: 0, quicas: a.quica || 0, vivo: true, hit: [0, 0], portalCd: 0, voltas: 0,
-    timer01: 0, parado: false, fragmento: false
+    timer01: 0, parado: false, fragmento: false, mult: 1, preso: null
   });
+  // o tornado anda quase na horizontal (não afunda no chão nem sobe para o céu)
+  if (a.levanta) { const p = M.proj[M.proj.length - 1]; p.vy *= 0.25; }
 }
 
 function criarFragmentos(M, p, n) {
@@ -218,10 +228,31 @@ function atualizarProjeteis(M) {
 
     // ---- mina: cai até o chão, arma e espera ----
     if (a.tipo === "mina") { atualizarMina(M, p, g); continue; }
+    if (a.tipo === "torreta") { atualizarTorreta(M, p, g); continue; }
+    // ---- bomba grudada numa bolinha: vai junto com ela até explodir ----
+    if (p.preso) {
+      let q = p.preso;
+      // batata quente: encostou no outro com a bomba grudada, ela passa para ele
+      const outro = M.bolinhas[q.lado === 1 ? 1 : 0];
+      if (outro.viva && p.passos - (p.passou || -99) > 24) {
+        const dx = outro.x - q.x, dy = outro.y - q.y, rr = outro.r + q.r + 6;
+        if (dx * dx + dy * dy < rr * rr) {
+          q.bombaGrudada = null; outro.bombaGrudada = p; p.preso = q = outro; p.passou = p.passos;
+          somJogo(M, "s_gosma", 1.3);
+          if (typeof Efeitos !== "undefined") Efeitos.anel(q.x, q.y, "#7bd94f", q.r + 14);
+        }
+      }
+      p.x = q.x + p.ox; p.y = q.y + p.oy;
+      p.timer01 = p.passos / a.timer;
+      if (p.passos >= a.timer || !q.viva) explodirProjetil(M, p, q.viva ? q : undefined);
+      continue;
+    }
 
     const xa = p.x, ya = p.y;
     // comportamento especial
     if (a.teleguia) teleguiar(M, p, a.teleguia);
+    if (a.ima) imaPuxa(M, p, a);
+    if (a.desvia) sopraTiros(M, p);
     if (a.volta && p.passos > (a.vida || 110) * 0.42) voltarAoDono(M, p);
     if (a.grav && !p.parado) p.vy += g * a.grav;
     if (a.arrasto) { p.vx *= a.arrasto; p.vy *= a.arrasto; }
@@ -259,6 +290,11 @@ function atualizarProjeteis(M) {
       if (p.x < -20) { p.x += FIS.largura + 40; p.voltas++; }
       else if (p.x > FIS.largura + 20) { p.x -= FIS.largura + 40; p.voltas++; }
     }
+    // v19: o disco ricocheteia também nas paredes e no teto da arena (e fica mais forte)
+    if (a.ricocheteia && !cen.atravessaLados) {
+      if ((p.x < p.raio && p.vx < 0) || (p.x > FIS.largura - p.raio && p.vx > 0)) { p.vx = -p.vx; quicouDisco(M, p); }
+      if (p.y < p.raio && p.vy < 0) { p.vy = -p.vy; quicouDisco(M, p); }
+    }
     if (p.x < -60 || p.x > FIS.largura + 60 || p.y > 820 || p.y < -400) { p.vivo = false; continue; }
     if (cen.quicaParede && (p.x < 0 || p.x > FIS.largura) && !a.atravessa) { p.vx = -p.vx; p.x = limitar(p.x, 0, FIS.largura); }
     if (p.y > lava) { if (a.explode) explodirProjetil(M, p); else { p.vivo = false; if (typeof Efeitos !== "undefined") Efeitos.fumaca(p.x, lava); } continue; }
@@ -293,18 +329,99 @@ function acertouBolinha(M, p, b, k) {
     somJogo(M, "reflexo");
     return;
   }
+  // v19: a bomba grudenta gruda em quem acerta (explode no timer)
+  if (a.grudaNele) {
+    p.preso = b; p.ox = limitar(p.x - b.x, -b.r * 0.7, b.r * 0.7); p.oy = limitar(p.y - b.y, -b.r * 0.7, b.r * 0.7);
+    p.passos = Math.max(p.passos, a.timer - 60);         // 1 s para fugir (ou correr para abraçar o outro)
+    b.bombaGrudada = p;
+    somJogo(M, "s_gosma");
+    if (typeof ArteArmas !== "undefined" && ArteArmas.soltar) ArteArmas.soltar("gosma", p.x, p.y, 5);
+    return;
+  }
   if (a.explode && !a.perfura) { explodirProjetil(M, p, b); return; }
   const dono = M.bolinhas[p.dono - 1];
   const len = Math.sqrt(p.vx * p.vx + p.vy * p.vy) || 1;
-  causarDano(M, b, a.dano, dono, p.vx / len, p.vy / len, a.empurra || 1.2, p.x, p.y);
-  if (a.congela) b.efeitos.lento = Math.max(b.efeitos.lento || 0, a.congela);
-  if (a.fogo) b.efeitos.fogo = Math.max(b.efeitos.fogo || 0, a.fogo);
+  const vidaAntes = b.vida;
+  causarDano(M, b, a.dano * (p.mult || 1), dono, p.vx / len, p.vy / len, (a.empurra || 1.2) * (p.mult > 1 ? Math.min(2, p.mult) : 1), p.x, p.y);
+  aplicarEfeitosDoTiro(M, a, b, dono, p);
+  if (a.vampiro && dono && dono.viva) curar(M, dono, (vidaAntes - Math.max(0, b.vida)) * a.vampiro);
+  if (a.perfura) p.hit[k] = PULSO_PERFURA;
+  else p.vivo = false;
+}
+
+// efeitos que um tiro deixa em quem ele acerta (também usados pela explosão)
+function aplicarEfeitosDoTiro(M, a, b, dono, p) {
+  if (!b.viva) return;
+  const ef = b.efeitos;
+  if (a.congela) ef.lento = Math.max(ef.lento || 0, a.congela);
+  if (a.fogo) ef.fogo = Math.max(ef.fogo || 0, a.fogo);
+  if (a.gruda) { ef.grudado = Math.max(ef.grudado || 0, a.gruda); }
+  if (a.infla) { if (!(ef.inflado > 0)) somJogo(M, "s_inflou"); ef.inflado = Math.max(ef.inflado || 0, a.infla); b.vy -= 3; }
+  if (a.bolha && !(ef.bolha > 0) && !(ef.imuneBolha > 0)) { ef.bolha = a.bolha; b.bolhaDono = dono ? dono.lado : 0; b.vy = Math.min(b.vy, -1); }
+  if (a.levanta && p) {
+    b.vy = -a.levanta * (b.humano && M.contraBot ? 0.85 : 1);
+    b.vx = b.vx * 0.3 + (p.vx > 0 ? 1 : -1) * 3;
+    b.noChao = false; b.lancado = true;
+    somJogo(M, "s_tornado");
+  }
   if (a.puxa && dono) {
     const dx = dono.x - b.x, dy = dono.y - b.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
     b.vx = dx / d * a.puxa; b.vy = dy / d * a.puxa * 0.6 - 4;
   }
-  if (a.perfura) p.hit[k] = PULSO_PERFURA;
-  else p.vivo = false;
+}
+
+function curar(M, b, n) {
+  if (!(n > 0.2) || !b.viva) return;
+  b.vida = Math.min(100, b.vida + n);
+  b.curou = (b.curou || 0) + n;
+  if (b.curou >= 4 && typeof Efeitos !== "undefined") { Efeitos.texto(b.x, b.y - b.r - 12, "+" + Math.round(b.curou), "#69db7c", 0.9); b.curou = 0; }
+}
+
+// v19: o disco ganha força a cada quique (som de "ping" subindo de tom)
+function quicouDisco(M, p) {
+  const a = p.a;
+  if (!a.cresce) return;
+  p.mult = Math.min(1 + a.cresce * 5, (p.mult || 1) + a.cresce);
+  p.vx *= 1.06; p.vy *= 1.06;
+  p.hit[0] = p.hit[1] = 0;
+  somJogo(M, "s_ping", 0.9 + p.mult * 0.15);
+  if (typeof ArteArmas !== "undefined" && ArteArmas.soltar) ArteArmas.soltar("faisca", p.x, p.y, 3);
+}
+
+// v19: ímã: os tiros do oponente que passam perto são puxados e engolidos; o oponente perto faz o ímã curvar nele
+function imaPuxa(M, p, a) {
+  const R = a.ima;
+  for (let i = 0; i < M.proj.length; i++) {
+    const q = M.proj[i];
+    if (q === p || !q.vivo || q.dono === p.dono || q.a.tipo === "mina" || q.a.tipo === "torreta" || q.a.ima) continue;
+    const dx = p.x - q.x, dy = p.y - q.y, d2 = dx * dx + dy * dy;
+    if (d2 > R * R) continue;
+    const d = Math.sqrt(d2) || 1;
+    if (d < p.raio + q.raio + 6) {
+      q.vivo = false;
+      if (typeof ArteArmas !== "undefined" && ArteArmas.soltar) ArteArmas.soltar("faisca", q.x, q.y, 3);
+      continue;
+    }
+    const f = 1.1 * (1 - d / R) + 0.25;
+    q.vx += dx / d * f; q.vy += dy / d * f;
+  }
+  const o = M.bolinhas[p.dono === 1 ? 1 : 0];
+  if (o.viva && !(o.efeitos.fantasma > 0)) {
+    const dx = o.x - p.x, dy = o.y - p.y;
+    if (dx * dx + dy * dy < R * R * 0.6) teleguiar(M, p, 0.16);
+  }
+}
+
+// v19: o soprador empurra para longe os tiros do oponente que o vento encosta
+function sopraTiros(M, p) {
+  if ((M.passo & 1) !== 0) return;
+  for (let i = 0; i < M.proj.length; i++) {
+    const q = M.proj[i];
+    if (!q.vivo || q.dono === p.dono || q.a.tipo === "mina" || q.a.tipo === "torreta" || q.a.atrai) continue;
+    const dx = q.x - p.x, dy = q.y - p.y;
+    if (dx * dx + dy * dy > (p.raio + q.raio + 22) * (p.raio + q.raio + 22)) continue;
+    q.vx = q.vx * 0.55 + p.vx * 0.8; q.vy = q.vy * 0.55 + p.vy * 0.8;
+  }
 }
 
 // O ponto (com o raio do tiro) está dentro de uma plataforma grossa? (usado pela linha da mira)
@@ -323,6 +440,19 @@ function colidirProjetil(M, p, xa, ya, sinal) {
     const pl = M.plats[k];
     const x = pl.x, y = pl.y;
     if (p.x + p.raio * 0.5 < x || p.x - p.raio * 0.5 > x + pl.w || p.y + p.raio * 0.5 < y || p.y - p.raio * 0.5 > y + pl.h) continue;
+    // v19: bola de boliche: pousa em cima e rola; batendo de lado, volta
+    if (a.rola) {
+      if (sinal > 0 && p.vy >= 0 && ya <= y + 4) {
+        if (Math.abs(p.vy) > 4) { somJogo(M, "s_boliche"); if (typeof Efeitos !== "undefined") Efeitos.poeira(p.x, y); }
+        p.y = y - p.raio * 0.5; p.vy = 0;
+        if (Math.abs(p.vx) < 5) p.vx = (p.vx >= 0 ? 1 : -1) * 5;
+        continue;
+      }
+      if (pl.fina) continue;
+      const deLado = xa < x || xa > x + pl.w;
+      if (deLado) { p.vx = -p.vx * 0.85; p.x = xa; } else { p.vy = Math.abs(p.vy) * 0.4; p.y = ya; }
+      return false;
+    }
     // tiro reto atravessa plataforma fina; o que cai (granada) pousa nela
     if (pl.fina) {
       if (!a.grav || sinal < 0 || p.vy < 0 || ya > y + 2) continue;
@@ -337,9 +467,11 @@ function colidirProjetil(M, p, xa, ya, sinal) {
       if (veioDeLado) { p.vx = -p.vx * (a.timer ? 0.6 : 1); p.x = xa; }
       else { p.vy = -p.vy * (a.timer ? 0.55 : 0.95); p.y = ya; if (a.timer) p.vx *= 0.8; }
       p.quicas--;
-      if (a.timer || a.visual === "bola_pula") somJogo(M, "quique");
+      if (a.cresce) quicouDisco(M, p);
+      else if (a.timer || a.visual === "bola_pula") somJogo(M, "quique");
       return false;
     }
+    if (a.grudaNele) { p.x = xa; p.y = ya; p.vx = 0; p.vy = 0; p.parado = true; return false; }
     if (a.timer) { p.x = xa; p.y = ya; p.vx *= -0.2; p.vy = 0; p.parado = true; return false; }
     if (a.explode) { p.x = xa; p.y = ya; explodirProjetil(M, p); return true; }
     if (a.volta) { p.passos = Math.max(p.passos, (a.vida || 110) * 0.42); p.x = xa; p.y = ya; return false; }
@@ -401,17 +533,24 @@ function explodirProjetil(M, p, atingido) {
   if (!p.vivo) return;
   p.vivo = false;
   const a = p.a;
-  explosao(M, p.x, p.y, a.explode || 40, a.dano, M.bolinhas[p.dono - 1], a, atingido);
+  explosao(M, p.x, p.y, a.explode || 40, a.danoExplosao || a.dano, M.bolinhas[p.dono - 1], a, atingido);
+  if (p.preso && p.preso.bombaGrudada === p) p.preso.bombaGrudada = null;
   if (a.fragmentos) criarFragmentos(M, p, a.fragmentos);
 }
 
 // Explosão: dano cai do centro para a borda (mínimo 35%); quem atirou leva 40% (cuidado com a bazuca!)
 function explosao(M, x, y, raio, dano, dono, a, atingidoDireto) {
-  if (typeof Efeitos !== "undefined") {
-    if (a && a.congela) Efeitos.congelar(x, y);
-    Efeitos.explosao(x, y, raio);
+  if (a && a.gruda) {
+    // gosma: espirra verde em vez de explodir em fogo
+    if (typeof ArteArmas !== "undefined" && ArteArmas.soltar) ArteArmas.soltar("gosma", x, y, 9);
+    somJogo(M, "s_gosma");
+  } else {
+    if (typeof Efeitos !== "undefined") {
+      if (a && a.congela) Efeitos.congelar(x, y);
+      Efeitos.explosao(x, y, raio);
+    }
+    somJogo(M, raio >= 70 ? "explosao" : "explosao_peq");
   }
-  somJogo(M, raio >= 70 ? "explosao" : "explosao_peq");
   for (let k = 0; k < 2; k++) {
     const b = M.bolinhas[k];
     if (!b.viva) continue;
@@ -420,9 +559,8 @@ function explosao(M, x, y, raio, dano, dono, a, atingidoDireto) {
     const queda = b === atingidoDireto ? 1 : Math.max(0.35, 1 - Math.max(0, d - b.r) / raio);
     const proprio = dono && b === dono ? 0.4 : 1;
     const nx = dx / d, ny = dy / d - 0.35;
-    causarDano(M, b, dano * queda * proprio, dono, nx, ny, (a && a.empurra || 9) * queda, x, y);
-    if (a && a.congela) b.efeitos.lento = Math.max(b.efeitos.lento || 0, a.congela);
-    if (a && a.fogo) b.efeitos.fogo = Math.max(b.efeitos.fogo || 0, a.fogo);
+    causarDano(M, b, dano * queda * proprio, dono, nx, ny, (a && a.empurra || (a && a.gruda ? 2 : 9)) * queda, x, y);
+    if (a && (a.congela || a.fogo || a.gruda) && !(a.gruda && b === dono)) aplicarEfeitosDoTiro(M, a, b, dono, null);
   }
   // explosão detona minas e granadas por perto (reação em cadeia)
   for (let i = 0; i < M.proj.length; i++) {
@@ -522,7 +660,7 @@ function matar(M, b) {
     if (typeof Efeitos !== "undefined") Efeitos.tremer(20);
     if (matador.humano) somJogo(M, "ko");
   }
-  if (matador.viva) emote(matador, "♪", 1.6);
+  if (matador.viva && typeof provocar === "function") provocar(M, matador, "venceu");
   M.morreu = M.morreu || [];
   M.morreu.push(b.lado);
 }
@@ -634,11 +772,14 @@ function golpe(M, b, a, vezes) {
   }
 }
 
-function colocarMina(M, b, a) {
-  // no máximo 3 minas de cada um: a mais velha explode
-  const minhas = M.proj.filter(function(p) { return p.vivo && p.a.tipo === "mina" && p.dono === b.lado; });
-  if (minhas.length >= 3) minhas[0].detonar = true;
-  M.proj.push({ x: b.x, y: b.y + b.r * 0.4, vx: b.vx * 0.3, vy: 0, a: a, dono: b.lado, cor: b.cor, visual: "mina",
+function colocarMina(M, b, a, extra) {
+  // no máximo 3 minas (ou cascas) de cada um: a mais velha some (a mina explode)
+  const minhas = M.proj.filter(function(p) { return p.vivo && p.a === a && p.dono === b.lado; });
+  if (minhas.length >= 3) { if (a.escorrega) minhas[0].vivo = false; else minhas[0].detonar = true; }
+  // a casca de banana é jogada um pouco para a frente; a mina cai no pé
+  const joga = a.escorrega ? 1 : 0;
+  M.proj.push({ x: b.x + b.dir * b.r * 0.8 * joga, y: b.y + b.r * (joga ? -0.2 : 0.4), vx: b.vx * 0.3 + b.dir * (4.5 + (extra ? 2.5 : 0)) * joga, vy: -4 * joga,
+    a: a, dono: b.lado, cor: b.cor, visual: a.visual, ang: 0,
     raio: a.raio, passos: 0, t: 0, quicas: 0, vivo: true, hit: [0, 0], armada: false, parado: false, portalCd: 0, voltas: 0, timer01: 0 });
 }
 
@@ -646,24 +787,87 @@ function atualizarMina(M, p, g) {
   const a = p.a;
   if (!p.parado) {
     p.vy += g; p.x += p.vx; p.y += p.vy;
-    for (let k = 0; k < M.plats.length; k++) {
-      const pl = M.plats[k];
-      if (p.x < pl.x || p.x > pl.x + pl.w) continue;
-      if (g > 0 && p.y + p.raio >= pl.y && p.y - p.vy + p.raio <= pl.y + 2) { p.y = pl.y - p.raio; p.parado = true; p.chao = pl; }
-      if (g < 0 && p.y - p.raio <= pl.y + pl.h && p.y - p.vy - p.raio >= pl.y + pl.h - 2) { p.y = pl.y + pl.h + p.raio; p.parado = true; p.chao = pl; }
-    }
+    pousarNoChao(M, p, g);
+    if (p.parado) p.vx = 0;
     if (p.y > 800 || p.y < -100 || p.y > lavaY(M.cen, M.t)) { p.vivo = false; return; }
   } else if (p.chao && p.chao.move) {
     // acompanha a plataforma que anda
     posPlat(p.chao, M.t - FIS.dt); const ax = PX, ay = PY; posPlat(p.chao, M.t);
     p.x += PX - ax; p.y += PY - ay;
   }
-  if (p.passos > 48) p.armada = true;
+  if (p.passos > (a.escorrega ? 30 : 48)) p.armada = true;
   const o = M.bolinhas[p.dono === 1 ? 1 : 0];
+  if (a.escorrega) {
+    // casca de banana: quem pisa sai escorregando sem controle (e gira)
+    if (p.armada && o.viva && o.noChao && Math.abs(o.x - p.x) < o.r * 0.7 + p.raio && Math.abs(o.y + o.r - p.y) < 24) {
+      p.vivo = false;
+      const lado = Math.abs(o.vx) > 0.5 ? Math.sign(o.vx) : (o.x >= p.x ? 1 : -1);
+      o.efeitos.escorrega = a.escorrega;
+      o.vx = lado * 12; o.vy = -5; o.noChao = false;
+      causarDano(M, o, a.dano, M.bolinhas[p.dono - 1], lado, -0.4, 0, o.x, o.y + o.r * 0.5);
+      somJogo(M, "s_escorregou");
+      if (typeof ArteArmas !== "undefined" && ArteArmas.soltar) ArteArmas.soltar("banana", p.x, p.y, 1);
+    }
+    return;
+  }
   if (p.detonar || (p.armada && o.viva && Math.abs(o.x - p.x) < o.r + 46 && Math.abs(o.y - p.y) < o.r + 46)) {
     p.vivo = false;
     explosao(M, p.x, p.y, a.explode, a.dano, M.bolinhas[p.dono - 1], a);
   }
+}
+
+// cai até pousar numa plataforma (minas, cascas e torretas)
+function pousarNoChao(M, p, g) {
+  for (let k = 0; k < M.plats.length; k++) {
+    const pl = M.plats[k];
+    if (p.x < pl.x || p.x > pl.x + pl.w) continue;
+    if (g > 0 && p.y + p.raio >= pl.y && p.y - p.vy + p.raio <= pl.y + 2) { p.y = pl.y - p.raio; p.parado = true; p.chao = pl; }
+    if (g < 0 && p.y - p.raio <= pl.y + pl.h && p.y - p.vy - p.raio >= pl.y + pl.h - 2) { p.y = pl.y + pl.h + p.raio; p.parado = true; p.chao = pl; }
+  }
+  if (!p.parado && !M.cen.queda && !M.cen.lava && g > 0 && p.y > FIS.altura - p.raio) { p.y = FIS.altura - p.raio; p.parado = true; }
+}
+
+// ---------- v19: torreta (monta no chão e atira sozinha) ----------
+function montarTorreta(M, b, a) {
+  // uma por bolinha: a nova substitui a antiga
+  for (let i = 0; i < M.proj.length; i++) { const q = M.proj[i]; if (q.vivo && q.a === a && q.dono === b.lado) { q.vivo = false; if (typeof Efeitos !== "undefined") Efeitos.fumaca(q.x, q.y); } }
+  M.proj.push({ x: b.x + b.dir * b.r * 1.2, y: b.y, vx: b.dir * 3 + b.vx * 0.3, vy: -3, a: a, dono: b.lado, cor: b.cor, visual: "torreta",
+    raio: a.raio, passos: 0, t: 0, quicas: 0, vivo: true, hit: [0, 0], parado: false, portalCd: 0, voltas: 0, timer01: 0,
+    tiros: a.tiros, prox: 0.6, mira: b.dir > 0 ? 0 : Math.PI, recuo: 0 });
+}
+
+function atualizarTorreta(M, p, g) {
+  const a = p.a;
+  if (!p.parado) {
+    p.vy += g; p.x += p.vx; p.y += p.vy;
+    pousarNoChao(M, p, g);
+    if (p.parado) { p.vx = 0; p.vy = 0; somJogo(M, "s_torreta"); }
+    if (p.y > 800 || p.y < -100 || p.y > lavaY(M.cen, M.t)) { p.vivo = false; return; }
+    return;
+  }
+  if (p.chao && p.chao.move) { posPlat(p.chao, M.t - FIS.dt); const ax = PX, ay = PY; posPlat(p.chao, M.t); p.x += PX - ax; p.y += PY - ay; }
+  if (p.recuo > 0) p.recuo = Math.max(0, p.recuo - FIS.dt * 6);
+  const o = M.bolinhas[p.dono === 1 ? 1 : 0];
+  const cx = p.x, cy = p.y - p.raio * 0.9;
+  if (o.viva && !(o.efeitos.fantasma > 0)) {
+    const alvo = Math.atan2(o.y - cy, o.x - cx);
+    p.mira += limitar(difAng(alvo, p.mira), -0.12, 0.12);
+  }
+  p.prox -= FIS.dt;
+  if (p.prox > 0) return;
+  p.prox = a.intervalo;
+  const dx = o.x - cx, dy = o.y - cy;
+  if (!o.viva || dx * dx + dy * dy > a.alcance * a.alcance || o.efeitos.fantasma > 0 || !linhaLivre(cx, cy, o.x, o.y, M.plats, M.t)) { p.prox = 0.15; return; }
+  if (Math.abs(difAng(Math.atan2(dy, dx), p.mira)) > 0.25) { p.prox = 0.05; return; }
+  const dono = M.bolinhas[p.dono - 1];
+  const bx = cx + Math.cos(p.mira) * 22, by = cy + Math.sin(p.mira) * 22;
+  criarProjetil(M, { vx: 0, vy: 0, lado: p.dono, cor: p.cor }, TIRO_TORRETA, bx, by, p.mira + (Math.random() - 0.5) * 0.06);
+  p.recuo = 1;
+  if (dono) M.stats.tiros[p.dono - 1]++;
+  somJogo(M, "s_pistola", 1.25);
+  if (typeof ArteArmas !== "undefined" && ArteArmas.disparo) ArteArmas.disparo(TIRO_TORRETA, bx, by, p.mira, 1, M.mudo);
+  p.tiros--;
+  if (p.tiros <= 0) { p.vivo = false; if (typeof Efeitos !== "undefined") { Efeitos.fumaca(p.x, p.y - 10); Efeitos.fagulhas(p.x, p.y, "#ffd43b", 6); } }
 }
 
 // avisa onde vai cair (meteoro/relâmpago) e cai depois de "espera" segundos
@@ -690,12 +894,25 @@ function atualizarAvisos(M) {
 // ---------- efeitos das cartas e do tempo ----------
 function atualizarEfeitos(M, b) {
   const ef = b.efeitos;
+  const bolhaAntes = ef.bolha > 0;
   for (const k in ef) if (ef[k] > 0) ef[k] -= FIS.dt;
   if (ef.fogo > 0 && b.viva) {
     if ((M.passo % 6) === 0) causarDano(M, b, 0.5, null, 0, 0, 0);
     if ((M.passo % 4) === 0 && typeof Efeitos !== "undefined") Efeitos.fogo(b.x + (Math.random() - 0.5) * b.r, b.y - b.r * 0.5);
   }
-  b.r = ef.mini > 0 ? FIS.raioMini : FIS.raio;
+  // v19: bolha estoura (dano de quem prendeu); gosma pingando; inflado
+  if (bolhaAntes && !(ef.bolha > 0) && b.viva) {
+    const dono = b.bolhaDono ? M.bolinhas[b.bolhaDono - 1] : null;
+    causarDano(M, b, 9, dono, 0, -1, 3, b.x, b.y - b.r);
+    b.efeitos.imuneBolha = 1.4;                             // sem prender de novo logo em seguida (não vira prisão)
+    somJogo(M, "s_estoura_bolha");
+    if (typeof ArteArmas !== "undefined" && ArteArmas.soltar) ArteArmas.soltar("bolha", b.x, b.y, 8);
+  }
+  if (typeof ArteArmas !== "undefined" && ArteArmas.soltar && b.viva && (M.passo % 7) === 0) {
+    if (ef.grudado > 0) ArteArmas.soltar("pingo", b.x + (Math.random() - 0.5) * b.r * 1.4, b.y + b.r * 0.6, 1);
+    if (ef.escorrega > 0) ArteArmas.soltar("tonto", b.x, b.y - b.r - 8, 1);
+  }
+  b.r = ef.mini > 0 ? FIS.raioMini : ef.inflado > 0 ? FIS.raioInflado : FIS.raio;
   if (b.flash > 0) b.flash = Math.max(0, b.flash - FIS.dt * 6);
   if (b.dor > 0) b.dor -= FIS.dt;
 }
@@ -715,7 +932,7 @@ function pegarCarta(M, b, id) {
     const chuva = { id: "chuva", explode: 70, dano: 18, empurra: 9, visual: "meteoro" };
     for (let i = 0; i < 5; i++) avisarCeu(M, b.lado, o.x + (Math.random() - 0.5) * 220, o.y, 0.8 + i * 0.32, chuva);
   }
-  if (id === "mini") b.r = FIS.raioMini;
+  if (id === "mini") { b.r = FIS.raioMini; b.efeitos.inflado = 0; }
   M.ultimaCarta = { id: id, lado: b.lado, t: M.t };
   if (typeof Efeitos !== "undefined") Efeitos.anel(b.x, b.y, c.cor, 50);
   somJogo(M, "carta");
@@ -725,10 +942,17 @@ function pegarCarta(M, b, id) {
 function sortearArma(M, inicio) {
   // pesos por raridade; a "Partida Lendária" só tem raras e lendárias
   // v18: nas 3 primeiras partidas a arma da rodada é mais "maluca" (raras e lendárias)
-  const pesos = M.lendaria ? [0, 0, 60, 40] : inicio ? (save.partidas <= 3 ? [0, 55, 35, 10] : [0, 85, 15, 0]) : [0, 66, 29, 5];
+  // v19: 60 armas: os pesos por arma caem um pouco para a soma por raridade ficar parecida com a da v18.3
+  const pesos = (M.lendaria ? [0, 0, 60, 40] : inicio ? (save.partidas <= 3 ? [0, 55, 35, 10] : [0, 85, 15, 0]) : [0, 66, 29, 5]).slice();
+  // v19: SORTE (agente C, sorteJogador() de 0 a 1): contra a máquina, as caixas que caem puxam para raras e lendárias
+  // (moderado: no máximo +60% no peso delas). Não vale para a arma do começo da rodada (é igual para os dois).
+  if (!inicio && M.contraBot) {
+    const sorte = limitar(typeof sorteJogador === "function" ? +sorteJogador() || 0 : 0, 0, 1);
+    pesos[2] *= 1 + 0.6 * sorte; pesos[3] *= 1 + 0.6 * sorte;
+  }
   const lista = ARMAS.filter(function(a) {
     if (!pesos[a.raridade]) return false;
-    if (inicio && (a.tipo === "mina" || a.tipo === "ceu")) return false;
+    if (inicio && (a.tipo === "mina" || a.tipo === "ceu" || a.tipo === "torreta")) return false;
     return true;
   });
   let soma = 0;
