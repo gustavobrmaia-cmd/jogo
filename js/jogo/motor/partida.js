@@ -651,7 +651,7 @@ function nivelBotTexto(nivel) { return Math.round(nivel * 9) + 1; }   // 1 a 10,
 // Desenho: arte/roleta.js (Roleta.desenhar), chamado pelo desenho.js na fase "roleta".
 const ROLETA = {
   rapida: { arma: 0.8, atraso: 0.1, seguraArma: 0.28, mapa: 0.62, seguraMapa: 0.25 },   // primeiras partidas: ~2 s
-  normal: { arma: 1.15, atraso: 0.16, seguraArma: 0.4, mapa: 0.95, seguraMapa: 0.32 }
+  normal: { arma: 1.0, atraso: 0.14, seguraArma: 0.35, mapa: 0.8, seguraMapa: 0.3 }    // depois: ~2,6 s
 };
 // posição (0 até n-1) da roleta: começa rápido e desacelera (cúbica)
 function posRoleta(t, dur, n) { const u = Math.min(1, Math.max(0, t / dur)); return (n - 1) * (1 - Math.pow(1 - u, 3)); }

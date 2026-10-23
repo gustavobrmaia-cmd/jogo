@@ -192,12 +192,16 @@ const Roleta = (function() {
     if (ro.etapa === "arma") {
       ctx.globalAlpha = Math.min(1, ro.tEtapa / 0.12);
       titulo(ctx, t("roleta_arma"), cx, cy - 245 * esc, Math.round(60 * esc), "#ffd43b", CONFIG.largura - 80);
-      var dx = (em ? 250 : 260) * esc * (0.7 + 0.3 * mola(entra));
+      var dx = (em ? 213 : 260) * esc * (0.7 + 0.3 * mola(entra));
       for (var k = 0; k < 2; k++) {
         var a = ro.armas[k], x = cx + (k ? dx : -dx), yRet = cy - 160 * esc;
         var expr = a.parou || a.fixa ? (ARMA[a.id].raridade >= 3 ? "feliz" : "normal") : "bravo";
-        retrato(ctx, j, k, x - 70 * esc, yRet, 30 * esc, tAgora, expr);
-        texto(ctx, nomeDe(j, k), x + 22 * esc, yRet + 12 * esc, Math.round(32 * esc), j.cores[k], 200 * esc);
+        // nome centrado com o retrato logo à esquerda (nomes longos, como "JOGADOR 1", não ficam por baixo do retrato)
+        var nm = nomeDe(j, k), tn = Math.round(32 * esc);
+        ctx.font = "900 " + tn + FONTE_R;
+        var wn = Math.min(190 * esc, ctx.measureText(nm).width), xr = x + 20 * esc - wn / 2 - 38 * esc;
+        retrato(ctx, j, k, xr, yRet, 30 * esc, tAgora, expr);
+        texto(ctx, nm, x + 20 * esc, yRet + 12 * esc, tn, j.cores[k], 190 * esc);
         fitaArma(ctx, j, a, k, x, cy + 30 * esc, esc, tAgora);
       }
       // VS no meio
