@@ -1585,7 +1585,7 @@ const ArteCenarios = (function() {
       // em pé com câmera: só a faixa da arena (mundo 0..720) é ampliada; em cima e embaixo vão retângulos chapados
       const z = cam.z, x0 = cam.x - 4, x1 = cam.x + L / z + 4, topoMundo = -cam.oy / z - 8, baseMundo = (est.altura - cam.oy) / z + 8;
       const m = Math.max(40, Math.min(dy, Math.ceil(-topoMundo)));   // o céu visível acima da arena (antes ia a tela toda)
-      if (-topoMundo > m) { ctx.fillStyle = d.acima ? d.acima(S.V) : "#2a1458"; ctx.fillRect(x0, topoMundo, x1 - x0, -topoMundo - m + 2); }
+      if (-topoMundo > m) ceuAcima(ctx, d, f, dy - m, x0, x1, topoMundo, -m + 2);
       ctx.drawImage(f, 0, dy - m, L + PAD * 2, A + m, bx - PAD, -m, L + PAD * 2, A + m);
       const ab = d.abaixo ? d.abaixo(S.V) : ["#1f0f44"], hh = baseMundo - A;
       if (hh > 0) for (let i = 0; i < ab.length; i++) { ctx.fillStyle = ab[i]; const y = A + Math.round(hh * i / ab.length); ctx.fillRect(x0, y - (i ? 0 : 1), x1 - x0, Math.ceil(hh / ab.length) + 2); }
@@ -1593,6 +1593,33 @@ const ArteCenarios = (function() {
     } else {
       ctx.drawImage(f, bx - PAD, -dy);
       S.px = bx;
+    }
+  }
+  // v19.1: em pé, acima da arena aparecia uma faixa lisa (no fliperama até de outra cor). Agora o céu continua: a cor
+  // é a da 1ª linha do fundo pronto (lida 1 vez por fundo), em 6 faixas que escurecem de leve para cima, e estrelas
+  // quando o céu é escuro. Por quadro: 6 retângulos e, no escuro, 1 lote de pontos.
+  function ceuAcima(ctx, d, f, yFundo, x0, x1, y0, y1) {
+    if (S.ceuDe !== f) {
+      let cor = d.acima ? d.acima(S.V) : "#2a1458";
+      try {
+        const px = f.getContext("2d").getImageData(Math.floor(f.width / 2), Math.max(0, Math.floor(yFundo) + 1), 1, 1).data;
+        cor = "#" + [px[0], px[1], px[2]].map(function(v) { return (v < 16 ? "0" : "") + v.toString(16); }).join("");
+      } catch (e) { /* sem leitura: fica a cor do mapa */ }
+      const v = hex(cor), lum = (v[0] * .3 + v[1] * .59 + v[2] * .11) / 255;
+      S.ceuDe = f;
+      S.ceuCores = [0, 1, 2, 3, 4, 5].map(function(i) { return mix(cor, "#1a0d33", i * (lum > .5 ? .035 : .06)); });
+      S.ceuEstrelas = null;
+      if (lum < .32) { const r = rnd(1234), e = []; for (let i = 0; i < 70; i++) e.push(r(), r(), r() < .15 ? 3 : 2); S.ceuEstrelas = e; }
+    }
+    const h = y1 - y0, n = S.ceuCores.length, faixa = Math.min(140, h / n);
+    // de baixo (junto do fundo) para cima: a última faixa vai até o topo
+    for (let i = 0; i < n; i++) {
+      const yb = y1 - faixa * i, yt = i === n - 1 ? y0 : yb - faixa;
+      ctx.fillStyle = S.ceuCores[i]; ctx.fillRect(x0, yt, x1 - x0, yb - yt + 1);
+    }
+    if (S.ceuEstrelas) {
+      const e = S.ceuEstrelas; ctx.fillStyle = "rgba(255,255,255,.75)";
+      for (let i = 0; i < e.length; i += 3) ctx.fillRect(Math.round(x0 + e[i] * (x1 - x0)), Math.round(y0 + e[i + 1] * (h - 30)), e[i + 2], e[i + 2]);
     }
   }
   function desenharFundoAnimado(ctx, cen, est, t) { iniciar(cen, est.altura); const d = defDe(cen); if (d.fundo) d.fundo(ctx, est, t, S.V); }

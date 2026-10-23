@@ -346,6 +346,8 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     - melhoria Sorte (`sorteJogador()`, 0–1; vale 0 no 2 jogadores e no online). CSS das telas dela: `estilo-v19c.css`.
     - v19.1: roleta com chance por NÍVEL (o dono pediu as raras mais difíceis): comum 75%, rara 22%, lendária 3%
       (`PESOS_ROLETA` em combate.js; antes o peso era por arma e dava 82/17/0,8). Com a Sorte no máximo: 63/32/5.
+  - v19.2: em pé com câmera, acima da arena o céu continua (cor da 1ª linha do fundo pronto, 6 faixas escurecendo
+    para cima, estrelas se for escuro; `ceuAcima` em arte/cenarios.js). Antes era uma faixa lisa.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;
