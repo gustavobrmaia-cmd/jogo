@@ -197,6 +197,8 @@ function criarProjetil(M, b, a, x, y, ang) {
     passos: 0, t: 0, quicas: a.quica || 0, vivo: true, hit: [0, 0], portalCd: 0, voltas: 0,
     timer01: 0, parado: false, fragmento: false, mult: 1, preso: null
   });
+  // o tornado anda quase na horizontal (não afunda no chão nem sobe para o céu)
+  if (a.levanta) { const p = M.proj[M.proj.length - 1]; p.vy *= 0.25; }
 }
 
 function criarFragmentos(M, p, n) {

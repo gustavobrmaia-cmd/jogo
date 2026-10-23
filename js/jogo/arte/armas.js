@@ -50,7 +50,14 @@ const ArteArmas = (function() {
   let KK = 1;                                // escala visual do projétil atual (sprites já nascem nesse tamanho)
   function ps(chave, x0, y0, x1, y1, fn) {
     if (cache[chave]) return cache[chave];
-    const s = spr(x0, y0, x1, y1, fn, KK, KK), w = s.c.width, h = s.c.height, d = s.c.getContext("2d").getImageData(0, 0, w, h).data;
+    const lw0 = LW; LW = 1.25;                        // contorno um pouco mais fino nos projéteis (são pequenos)
+    const s = spr(x0, y0, x1, y1, fn, KK, KK);
+    LW = lw0;
+    const w = s.c.width, h = s.c.height;
+    // lê os pixels num canvas próprio para leitura (sem o aviso de "readback" do navegador)
+    if (!ps.lei || ps.lei.width < w || ps.lei.height < h) { ps.lei = cv(Math.max(w, 256), Math.max(h, 256)); ps.lg = ps.lei.getContext("2d", { willReadFrequently: true }); }
+    ps.lg.clearRect(0, 0, w, h); ps.lg.drawImage(s.c, 0, 0);
+    const d = ps.lg.getImageData(0, 0, w, h).data;
     let ax = w, ay = h, bx = 0, by = 0;                  // recorta o transparente: menos pixels por desenho
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 10) { if (x < ax) ax = x; if (x > bx) bx = x; if (y < ay) ay = y; if (y > by) by = y; }
     if (bx < ax) return (cache[chave] = s);
@@ -166,7 +173,7 @@ const ArteArmas = (function() {
   function bolinhas(x, y, n, dx, col) { for (let i = 0; i < n; i++) C(x + i * dx, y, 2.2, col, 0.6); }
 
   // =========================================================
-  // AS 50 ARMAS NA MÃO. d = desenho; m = boca do cano; h/h2 = mãos; n = brilho pulsante [x,y,r,cor];
+  // AS 60 ARMAS NA MÃO. d = desenho; m = boca do cano; h/h2 = mãos; n = brilho pulsante [x,y,r,cor];
   // mel = tipo de golpe; ir = rotação do ícone; sh = sem mão separada
   // =========================================================
   const W = {
@@ -431,6 +438,77 @@ const ArteArmas = (function() {
     relampago: { m: [24, 8], h: [4, 6], n: [22, 16, 18, "#ffe14d"], d: function() {
       P([22, 1, 12, 17, 19, 17, 14, 32, 31, 11, 23, 11, 30, 1], K.am, 1.5);
       R(2, -9, 38, 11, 5.5, "#9fabce", 1.8); C(10, -9, 8, "#c0cae6", 1.6); C(21, -13, 10, "#c0cae6", 1.6); C(32, -8, 7.5, "#c0cae6", 1.6);
+    } },
+
+    // ---- v19: as 10 novas ----
+    disco: { m: [39, -1], h: [0, 11], d: function() {
+      P([-5, 4, 7, 4, 6, 18, -7, 18], K.pr, 1.2);
+      R(-12, -9, 32, 15, 7, K.ci, 2.2, function() { ln(-8, 2, 14, 2, 1.6, "#1d8fa0", 0.8); });
+      R(16, -7, 12, 12, 3, K.fe, 1.4);
+      El(30, -1, 9, 4, 0, K.lj, 1.2, function() { trc(pE(30, -1.5, 5.5, 2, 0), 1.4, K.am); });
+      C(-4, -12, 3.2, K.ve, 0.6);
+    } },
+    gosma: { m: [41, 1], h: [-1, 11], d: function() {
+      P([-5, 5, 6, 5, 5, 18, -6, 18], K.pr, 1.2);
+      R(-13, -6, 34, 13, 5, K.rx, 2);
+      C(1, -14, 9.5, K.gs, 2.2, function() { fl(pC(-2, -12, 2.2), "#d4ffb8", 0.9); fl(pC(4, -17, 1.4), "#d4ffb8", 0.9); });
+      R(-4, -26, 10, 5, 2, K.fe, 0.8);
+      T(20, 1, 34, 1, 8, K.vd, 1.4);
+      El(38, 1, 4, 7, 0, K.gs, 1);
+      fl(pE(37, 10, 2, 3.4, 0), K.gs); fl(pE(33, 9, 1.4, 2.6, 0), K.gs);
+    } },
+    boliche: { m: [30, 0], h: [3, 9], d: function() {
+      C(15, 0, 14, "#4b3bd1", 2.6, function() { fl(pE(9, -7, 5, 2.4, -0.6), "#ffffff", 0.35); });
+      for (const b of [[19, -5], [23, 1], [17, 3]]) { fl(pC(b[0], b[1], 2.2), OUT); fl(pC(b[0] - 0.4, b[1] - 0.5, 1), "#7d72ff"); }
+    } },
+    banana: { m: [27, -6], h: [2, 5], d: function() {
+      tb(function(g) { curva(g, [4, 4, 17, 5, 26, -8]); }, 9, "#fff1a6");
+      fl(pC(26.5, -8.5, 2.6), "#8a5a1c");
+      cel(function(g) { g.beginPath(); g.moveTo(6, 2); g.quadraticCurveTo(-1, -5, -3, -13); g.quadraticCurveTo(7, -12, 14, 1); g.closePath(); }, K.am, 1.2);
+      cel(function(g) { g.beginPath(); g.moveTo(6, 6); g.quadraticCurveTo(1, 12, -1, 19); g.quadraticCurveTo(11, 18, 15, 7); g.closePath(); }, K.am, 1.2);
+      cel(function(g) { g.beginPath(); g.moveTo(12, 3); g.quadraticCurveTo(19, 7, 25, 14); g.quadraticCurveTo(13, 16, 8, 8); g.closePath(); }, "#f2c23a", 1);
+      R(-3, 1, 9, 7, 2.5, "#c78b2a", 1);
+    } },
+    ima: { m: [30, 0], h: [-1, 3], d: function() {
+      tb(function(g) { g.beginPath(); g.moveTo(22, -11); g.lineTo(8, -11); g.arc(8, 0, 11, -Math.PI / 2, Math.PI / 2, true); g.lineTo(22, 11); }, 9, K.ve);
+      R(20, -16, 9, 10, 2, K.ac, 1.2); R(20, 6, 9, 10, 2, K.ac, 1.2);
+      for (let i = 0; i < 2; i++) trc(function(g) { g.beginPath(); g.arc(30, 0, 6 + i * 5, -0.9, 0.9); }, 1.6, K.ge, 0.85 - i * 0.3);
+    } },
+    bomba_grude: { m: [28, -6], h: [3, 6], d: function() {
+      C(15, 2, 12.5, "#3f4a6e", 2.4);
+      cel(function(g) { g.beginPath(); g.moveTo(5, -4); g.quadraticCurveTo(15, -12, 26, -3); g.quadraticCurveTo(27, 4, 23, 5); g.quadraticCurveTo(21, 0, 18, 3); g.quadraticCurveTo(14, 8, 11, 2); g.quadraticCurveTo(7, 3, 5, -4); g.closePath(); }, K.gs, 1.2);
+      R(11, -14, 8, 5, 1.5, K.fe, 0.6);
+      tb(function(g) { g.beginPath(); g.moveTo(15, -14); g.quadraticCurveTo(19, -21, 26, -19); }, 2.2, "#e0c9a0");
+      faisca(27, -19, 5, K.am); faisca(27, -19, 2.4, "#fff");
+      fl(pC(15, 4, 2.6), K.ve); fl(pC(14.4, 3.4, 1), "#ffd0d6");
+    } },
+    inflador: { m: [42, 0], h: [-2, 11], d: function() {
+      R(-20, -9, 5, 18, 2, K.fe, 0.8); ln(-17, 0, -10, 0, 3, K.fe);
+      P([-6, 5, 5, 5, 4, 18, -7, 18], K.pr, 1.2);
+      R(-11, -7, 36, 14, 7, K.rs, 2.2, function() { for (let i = 0; i < 3; i++) ln(-4 + i * 8, -6, -4 + i * 8, 6, 1.4, "#c94d8a", 0.7); });
+      C(8, -12, 5.5, K.br, 1, function() { ln(8, -12, 10.5, -14.5, 1.4, K.ve); });
+      P([24, -5, 38, -2.5, 38, 2.5, 24, 5], K.ou, 1.2); R(37, -3, 5, 6, 1.5, K.fe, 0.6);
+    } },
+    vampiro: { m: [37, -1], h: [0, 11], d: function() {
+      P([-4, 4, 7, 4, 6, 18, -6, 18], K.pr, 1.2);
+      P([2, -6, -6, -20, -1, -16, 3, -21, 8, -15, 12, -20, 12, -6], "#5a2a8a", 1.2);
+      R(-11, -8, 34, 14, 6, "#7b3fc4", 2.2, function() { ln(-7, 2, 18, 2, 1.4, "#4a1f7a", 0.8); });
+      P([22, -7, 36, -4, 36, 2, 22, 5], "#3d2066", 1.2);
+      fl(pC(4, -2, 3), "#ff3b52"); fl(pC(3.3, -2.7, 1.1), "#ffd0d6");
+      P([30, -4, 32, 0, 34, -4], K.br, 0); P([30, 2, 32, -1, 34, 2], K.br, 0);
+    } },
+    tornado: { m: [40, 0], h: [-2, 11], d: function() {
+      P([-6, 5, 5, 5, 4, 18, -7, 18], K.pr, 1.2);
+      R(-13, -8, 30, 15, 6, "#5aa0a8", 2, function() { ln(-9, 2, 12, 2, 1.4, "#3c7179", 0.8); });
+      El(26, 0, 6, 15, 0, "#cfe7ec", 1.6, function() { for (let i = -1; i <= 1; i++) ln(22, i * 8, 30, i * 6 + 2, 1.6, "#7fb3bd", 0.9); });
+      fl(pC(26, 0, 3), K.fe);
+      for (let i = 0; i < 3; i++) trc(function(g) { g.beginPath(); g.ellipse(38 + i * 3, 0, 3 + i, 9 - i * 2, 0, -1.2, 1.2); }, 1.8, K.br, 0.85 - i * 0.2);
+    } },
+    torreta: { m: [32, -5], h: [-1, 10], d: function() {
+      R(-8, -2, 26, 12, 3, K.ol2, 1.6, function() { ln(-4, 4, 14, 4, 1.4, K.am, 0.9); });
+      ln(-2, 10, -8, 18, 2.6, K.fe); ln(12, 10, 18, 18, 2.6, K.fe);
+      R(-4, -14, 20, 13, 5, K.ol, 2, function() { fl(pC(3, -8, 2.2), "#ff3b52"); });
+      R(15, -9, 16, 6, 2, K.fe, 1); R(29, -10, 4, 8, 1.5, K.ac, 0.6);
     } }
   };
   // flecha: haste, ponta e penas (na mão)
@@ -821,8 +899,110 @@ const ArteArmas = (function() {
     fragmento: function(c, p) {
       const r = p.raio, s = ps("fr" + r, -r * 1.6, -r * 1.6, r * 1.6, r * 1.6, function() { P([r * 1.5, 0, -r * 0.4, -r, -r * 1.1, 0.1 * r, -r * 0.4, r * 0.9], K.am, 0.8); });
       blitR(c, s, p.x, p.y, p.t * 18);
+    },
+
+    // ---- v19: projéteis das armas novas ----
+    disco: function(c, p) {
+      const r = p.raio, s = ps("dc" + r, -r * 1.2, -r * 1.2, r * 1.2, r * 1.2, function() {
+        C(0, 0, r, K.lj, 1.6, function() { trc(pC(0, 0, r * 0.66), r * 0.22, K.am, 0.95); });
+        C(0, 0, r * 0.3, K.pr, 0.4); fl(pE(-r * 0.35, -r * 0.5, r * 0.32, r * 0.14, -0.5), "#ffffff", 0.8);
+      });
+      if (p.mult > 1.05) aura(c, "#ffb03a", p.x, p.y, r * (1.8 + p.mult * 0.5), Math.min(0.75, 0.25 + (p.mult - 1) * 0.35));
+      blitR(c, s, p.x, p.y, p.t * 18);
+    },
+    gosma: function(c, p) {
+      const r = p.raio, s = ps("gm" + r, -r * 2.4, -r * 1.1, r * 1.4, r * 1.1, function() {
+        C(-r * 1.6, r * 0.3, r * 0.32, K.gs, 0.4); C(-r * 1.1, -r * 0.35, r * 0.42, K.gs, 0.5);
+        El(0, 0, r * 1.25, r * 0.88, 0, K.gs, 1.8); fl(pE(r * 0.2, -r * 0.35, r * 0.42, r * 0.18, -0.2), "#e6ffd6", 0.95);
+        fl(pC(-r * 0.3, r * 0.2, r * 0.16), "#3f8f2a", 0.8);
+      });
+      blitR(c, s, p.x, p.y, ang(p));
+    },
+    boliche: function(c, p) {
+      const r = p.raio, s = ps("bl" + r, -r * 1.1, -r * 1.1, r * 1.1, r * 1.1, function() {
+        C(0, 0, r, "#4b3bd1", 2.4);
+        for (const b of [[0.3, -0.35], [0.6, 0.05], [0.25, 0.25]]) { fl(pC(b[0] * r, b[1] * r, r * 0.15), OUT); }
+        fl(pE(-r * 0.4, -r * 0.45, r * 0.3, r * 0.14, -0.6), "#ffffff", 0.45);
+      });
+      blitR(c, s, p.x, p.y, p.x / r);
+    },
+    banana: function(c, p) {
+      const s = ps("bnn", -14, -9, 14, 7, function() {
+        cel(function(g) { g.beginPath(); g.moveTo(-2, 2); g.quadraticCurveTo(-9, -1, -13, 4); g.quadraticCurveTo(-7, 6, -1, 5); g.closePath(); }, K.am, 1);
+        cel(function(g) { g.beginPath(); g.moveTo(2, 2); g.quadraticCurveTo(9, -1, 13, 4); g.quadraticCurveTo(7, 6, 1, 5); g.closePath(); }, K.am, 1);
+        cel(function(g) { g.beginPath(); g.moveTo(-3, 3); g.quadraticCurveTo(-2, -7, 1, -8); g.quadraticCurveTo(4, -2, 3, 3); g.closePath(); }, "#f2c23a", 1);
+        R(-3, 1, 6, 4.4, 1.6, "#c78b2a", 0.6);
+      });
+      if (p.parado) c.drawImage(s.c, Math.round(p.x + s.x), Math.round(p.y + p.raio - 5 + s.y));
+      else blitR(c, s, p.x, p.y, p.t * 12);
+    },
+    ima: function(c, p) {
+      const r = p.raio, s = ps("im" + r, -r * 1.3, -r * 1.3, r * 1.3, r * 1.3, function() {
+        tb(function(g) { g.beginPath(); g.moveTo(r * 0.9, -r * 0.62); g.lineTo(0, -r * 0.62); g.arc(0, 0, r * 0.62, -Math.PI / 2, Math.PI / 2, true); g.lineTo(r * 0.9, r * 0.62); }, r * 0.62, K.ve);
+        R(r * 0.7, -r * 0.98, r * 0.5, r * 0.62, 1.2, K.ac, 0.6); R(r * 0.7, r * 0.36, r * 0.5, r * 0.62, 1.2, K.ac, 0.6);
+      });
+      aura(c, "#8fe9ff", p.x, p.y, r * 2.6 + Math.sin(p.t * 9) * 3, 0.28);
+      blitR(c, s, p.x, p.y, ang(p) + Math.sin(p.t * 4) * 0.4);
+    },
+    bomba_grude: function(c, p) {
+      if (p.preso) return;                              // grudada numa bolinha: desenhada junto dela (desenharEstado)
+      const r = p.raio, s = bombaGrudeSpr(r);
+      if (p.parado) { const sp2 = ps("gsp", -14, -14, 14, 14, function() { fl(pP(estrela(0, 0, 13, 8, 7, 0.3)), K.gs, 0.95); }); c.drawImage(sp2.c, Math.round(p.x + sp2.x), Math.round(p.y + sp2.y)); }
+      const a = p.parado ? 0 : p.t * 6 * (p.vx < 0 ? -1 : 1), t1 = p.timer01 || 0, per = 0.5 - 0.42 * t1;
+      blitR(c, s, p.x, p.y, a);
+      luz(c, p.x, p.y, r * 0.3 * KK, (p.t % per) < per * 0.5, "#ff3b52");
+    },
+    dardo_ar: function(c, p) {
+      const s = ps("dar", -20, -6, 11, 6, function() {
+        rastro(13, 3.6, "#d9f3ff", 0.6); ln(-6, 0, 6, 0, 2.2, K.ac2); P([5, -2.2, 11, 0, 5, 2.2], K.az, 0.4);
+        P([-9, -4.5, -3, -1, -3, 1, -9, 4.5], K.rs, 0.6);
+      });
+      blitR(c, s, p.x, p.y, ang(p));
+    },
+    morcego: function(c, p) {
+      const f = Math.floor(p.t * 22) % 2, r = p.raio, fx = p.vx < 0, s = ps("mc" + f + r + (fx ? "f" : ""), -r * 2.2, -r * 1.6, r * 2.2, r * 1.3, function() {
+        if (fx) G.scale(-1, 1);
+        const w = f ? -1 : 0.6;
+        P([-r * 0.5, 0, -r * 2.1, -r * 1.2 * w - r * 0.2, -r * 1.6, r * 0.2, -r * 1.1, -r * 0.1, -r * 0.7, r * 0.4], "#5a2a8a", 0.6);
+        P([r * 0.5, 0, r * 2.1, -r * 1.2 * w - r * 0.2, r * 1.6, r * 0.2, r * 1.1, -r * 0.1, r * 0.7, r * 0.4], "#5a2a8a", 0.6);
+        El(0, 0, r * 0.75, r * 0.85, 0, "#3d2066", 1.2);
+        P([-r * 0.55, -r * 0.6, -r * 0.45, -r * 1.25, -r * 0.1, -r * 0.7], "#3d2066", 0.3); P([r * 0.55, -r * 0.6, r * 0.45, -r * 1.25, r * 0.1, -r * 0.7], "#3d2066", 0.3);
+        fl(pC(r * 0.3, -r * 0.15, r * 0.18), "#ff3b52"); fl(pC(-r * 0.05, -r * 0.15, r * 0.18), "#ff3b52");
+      });
+      c.drawImage(s.c, Math.round(p.x + s.x), Math.round(p.y + s.y));
+    },
+    tornado: function(c, p) {
+      const r = p.raio, f = Math.floor(p.t * 14) % 3, s = ps("tn" + r + f, -r * 1.4, -r * 1.6, r * 1.4, r * 1.3, function() {
+        for (let i = 0; i < 5; i++) {
+          const y = r * 1.05 - i * r * 0.6, w = r * (0.32 + i * 0.24), dx = Math.sin(i * 1.3 + f * 2.1) * r * 0.12;
+          El(dx, y, w, r * 0.24, 0, i % 2 ? "#cfe7ec" : "#a9d3db", 0.8, function() { trc(function(g) { g.beginPath(); g.ellipse(dx, y, w * 0.7, r * 0.12, 0, 0.2 + f, 2 + f); }, 1.3, "#ffffff", 0.9); });
+        }
+      });
+      c.globalAlpha = 0.92; c.drawImage(s.c, Math.round(p.x + s.x), Math.round(p.y + s.y)); c.globalAlpha = 1;
+    },
+    torreta: function(c, p) {
+      const r = p.raio, base = ps("tb" + r, -r * 1.3, -r * 0.5, r * 1.3, r * 1.1, function() {
+        ln(-r * 0.2, r * 0.3, -r * 1.1, r * 1.0, 2.6, K.fe); ln(r * 0.2, r * 0.3, r * 1.1, r * 1.0, 2.6, K.fe); ln(0, r * 0.3, 0, r * 1.0, 2.6, K.fe);
+        R(-r * 0.75, -r * 0.4, r * 1.5, r * 0.8, 2.5, K.ol2, 1.2, function() { ln(-r * 0.6, 0, r * 0.6, 0, 1.4, K.am, 0.9); });
+      });
+      const fx = Math.cos(p.mira || 0) < 0, cab = ps("tc" + r + (fx ? "f" : ""), -r * 0.8, -r * 0.8, r * 1.9, r * 0.8, function() {
+        if (fx) G.scale(1, -1);
+        R(r * 0.2, -r * 0.24, r * 1.6, r * 0.42, 1.5, K.fe, 0.8); R(r * 1.6, -r * 0.32, r * 0.3, r * 0.6, 1, K.ac, 0.4);
+        C(0, 0, r * 0.7, K.ol, 1.6, function() { fl(pC(r * 0.12, -r * 0.18, r * 0.2), "#ff3b52"); });
+      });
+      c.drawImage(base.c, Math.round(p.x + base.x), Math.round(p.y + base.y));
+      const hx = p.x - Math.cos(p.mira || 0) * (p.recuo || 0) * 4, hy = p.y - r * 0.9 - Math.sin(p.mira || 0) * (p.recuo || 0) * 4;
+      blitR(c, cab, hx, hy, p.mira || 0);
+      if (p.parado && p.tiros !== undefined) for (let i = 0; i < p.tiros; i++) { c.fillStyle = "#ffdd4a"; c.fillRect(Math.round(p.x - r * 0.7 + i * 3.4), Math.round(p.y + r * 0.45), 2, 3); }
     }
   };
+  function bombaGrudeSpr(r) {
+    return ps("bgr" + r, -r * 1.5, -r * 1.7, r * 1.5, r * 1.3, function() {
+      C(0, 0, r, "#3f4a6e", 1.8);
+      cel(function(g) { g.beginPath(); g.moveTo(-r, -r * 0.2); g.quadraticCurveTo(0, -r * 1.2, r, -r * 0.2); g.quadraticCurveTo(r * 0.7, r * 0.4, r * 0.3, r * 0.1); g.quadraticCurveTo(0, r * 0.6, -r * 0.4, r * 0.1); g.quadraticCurveTo(-r * 0.8, r * 0.3, -r, -r * 0.2); g.closePath(); }, K.gs, 1);
+      R(-r * 0.3, -r * 1.35, r * 0.6, r * 0.45, 1, K.fe, 0.4);
+    });
+  }
   function foguete(c, p, k, fl0, fh, L, corpo, nariz, faixa, off) {
     const a = ang(p), f = Math.floor(p.t * 24) % 2;
     blitR(c, chamaSpr(k + f, fl0, fh, f), p.x - Math.cos(a) * off * KK, p.y - Math.sin(a) * off * KK, a);
@@ -837,6 +1017,7 @@ const ArteArmas = (function() {
   const PK = { pedra: 1.4, bala: 1.35, bala_grande: 1.3, bala_rastro: 1.25, chumbo: 1.5, dardo: 1.3, shuriken: 1.3, flecha: 1.25, virote: 1.25, agua: 1.4, confete: 1.4, gelo: 1.3, mini_missil: 1.25, foguete: 1.1, missil: 1.1,
     granada: 1.35, granada_frag: 1.35, granada_gelo: 1.35, dinamite: 1.25, abelha: 1.4, fragmento: 1.5, bola_neve: 1.15, bola_pula: 1.15, mina: 1.2, plasma: 1.1 };
   function desenharProjetil(ctx, p) {
+    if (p.preso) return;                                   // bomba grudada: vai junto da bolinha (desenharEstado)
     const f = PR[p.visual];
     if (f) { KK = PK[p.visual] || 1; f(ctx, p); }
     else { ctx.fillStyle = p.cor; ctx.beginPath(); ctx.arc(p.x, p.y, p.raio, 0, TAU); ctx.fill(); }
@@ -1015,9 +1196,162 @@ const ArteArmas = (function() {
     ctx.restore();
   }
 
+
+  // =========================================================
+  // v19: SENSAÇÃO DO TIRO E PEDAÇOS QUE VOAM (pool fixo, sprites guardados; só drawImage por quadro)
+  //   disparo(a, x, y, ang, dir, mudo): clarão na boca do cano (pólvora, energia ou gosma) e cápsula saindo
+  //   soltar(tipo, x, y, n): gosma, faísca, banana, bolha, pingo
+  //   desenharSoltos(ctx, M): anda e desenha (o relógio é o da rodada: pausa e câmera lenta valem)
+  //   desenharEstado(ctx, b, t): bolha em volta, gosma no pé, nó de balão (inflado), estrelinhas (escorregou), bomba grudada
+  // =========================================================
+  const NS = 160;
+  const SX = new Float32Array(NS), SY = new Float32Array(NS), SVX = new Float32Array(NS), SVY = new Float32Array(NS);
+  const SV = new Float32Array(NS), SVM = new Float32Array(NS), SA = new Float32Array(NS), SVA = new Float32Array(NS), SG = new Float32Array(NS);
+  const SQ = new Uint8Array(NS), ST = [];
+  let ns = 0, mSoltos = null, tSoltos = 0;
+  function novoSolto(tipo, x, y, vx, vy, vida, a, va, grav) {
+    const lim = typeof CONFIG !== "undefined" && CONFIG.leve ? 70 : NS;
+    if (ns >= lim) return;
+    const i = ns++;
+    ST[i] = tipo; SX[i] = x; SY[i] = y; SVX[i] = vx; SVY[i] = vy; SV[i] = vida; SVM[i] = vida; SA[i] = a || 0; SVA[i] = va || 0; SG[i] = grav || 0; SQ[i] = 0;
+  }
+  function tipoClarao(a) {
+    if (a.tipo === "melee" || a.tipo === "mina" || a.tipo === "ceu" || a.tipo === "torreta" || a.tipo === "feixe") return null;
+    if (a.capsula === "energia" || a.tipo === "laser" || a.tipo === "raio") return "energia";
+    if (a.gruda || a.visual === "gosma") return "gosma";
+    if (a.capsula || (a.fumaca || 0) >= 1 || a.visual === "bala") return "polvora";
+    return null;
+  }
+  function disparo(a, x, y, ang, dir, mudo) {
+    if (!a) return;
+    const cl = tipoClarao(a);
+    if (cl) {
+      const tam = cl === "polvora" ? 0.75 + Math.min(1.1, (a.tremor || 1) * 0.13) : 0.9;
+      novoSolto("cl_" + cl, x, y, 0, 0, cl === "polvora" ? 0.07 : 0.1, ang, tam, 0);
+      if (cl === "gosma") for (let i = 0; i < 3; i++) novoSolto("gosma", x, y, Math.cos(ang + (Math.random() - 0.5)) * 90, Math.sin(ang + (Math.random() - 0.5)) * 90 - 40, 0.35, 0, 0, 700);
+    }
+    if (a.capsula && !(typeof CONFIG !== "undefined" && CONFIG.leve && a.cadencia < 0.1 && Math.random() < 0.5)) {
+      const bx = x - Math.cos(ang) * 26, by = y - Math.sin(ang) * 26 - 4;
+      novoSolto("cap_" + a.capsula, bx, by, -dir * (60 + Math.random() * 90), -(150 + Math.random() * 120), 1.1, Math.random() * 6, (Math.random() - 0.5) * 30, 1100);
+    }
+  }
+  function soltar(tipo, x, y, n) {
+    n = n || 1;
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * TAU, v = 40 + Math.random() * 140;
+      if (tipo === "gosma") novoSolto("gosma", x, y, Math.cos(a) * v, Math.sin(a) * v - 80, 0.5 + Math.random() * 0.3, 0, 0, 800);
+      else if (tipo === "faisca") novoSolto("faisca", x, y, Math.cos(a) * v * 1.5, Math.sin(a) * v * 1.5, 0.22, a, 0, 300);
+      else if (tipo === "banana") novoSolto("banana", x, y, (Math.random() - 0.5) * 120, -260, 0.8, 0, 14, 900);
+      else if (tipo === "bolha") novoSolto("bolha", x + Math.cos(a) * 20, y + Math.sin(a) * 20, Math.cos(a) * v, Math.sin(a) * v, 0.3, 0, 0, 0);
+      else if (tipo === "pingo") novoSolto("pingo", x, y, 0, 20, 0.5, 0, 0, 600);
+    }
+  }
+  // sprites dos pedaços (todos pequenos, desenhados 1:1 a partir de 16 rotações)
+  function spSolto(tipo) {
+    switch (tipo) {
+      case "cl_polvora": return sp("scp", -4, -14, 30, 14, function() {
+        fl(pP([-2, -6, 10, -12, 13, -4, 30, 0, 13, 4, 10, 12, -2, 6]), K.lj); fl(pP([0, -4, 9, -7, 11, -2, 22, 0, 11, 2, 9, 7, 0, 4]), K.am); fl(pE(5, 0, 6, 3, 0), "#ffffff"); }, 2, 1);
+      case "cl_energia": return sp("sce", -14, -14, 14, 14, function() { trc(pC(0, 0, 10), 3, K.ci); fl(pP(estrela(0, 0, 13, 3, 4, 0)), "#e8fdff"); fl(pC(0, 0, 4), "#ffffff"); }, 2, 1);
+      case "cl_gosma": return sp("scg", -12, -12, 12, 12, function() { fl(pP(estrela(0, 0, 11, 6, 6, 0.3)), K.gs); fl(pC(-2, -2, 3), "#e6ffd6"); }, 2, 1);
+      case "cap_bala": return sp("sk1", -4, -2.5, 4, 2.5, function() { R(-3, -1.6, 6, 3.2, 1.2, K.ou, 0.6); }, 2, 1);
+      case "cap_cartucho": return sp("sk2", -5, -3, 5, 3, function() { R(-4.4, -2.2, 6.2, 4.4, 1.2, K.ve, 0.6); R(1.6, -2.2, 2.6, 4.4, 0.8, K.ou, 0.3); }, 2, 1);
+      case "cap_grande": return sp("sk3", -6, -3, 6, 3, function() { R(-5, -2.2, 10, 4.4, 1.6, K.ou, 0.8); }, 2, 1);
+      case "cap_energia": return sp("sk4", -5, -3, 5, 3, function() { R(-4.2, -2.2, 8.4, 4.4, 1.6, K.ci, 0.6); fl(pR(-1.5, -1, 3, 2, 0.8), "#ffffff"); }, 2, 1);
+      case "gosma": return sp("sgm", -5, -5, 5, 5, function() { C(0, 0, 3.6, K.gs, 0.8); }, 2, 1);
+      case "pingo": return sp("spg", -4, -5, 4, 5, function() { cel(function(g) { g.beginPath(); g.moveTo(0, -4); g.quadraticCurveTo(3.4, 1, 0, 3.6); g.quadraticCurveTo(-3.4, 1, 0, -4); g.closePath(); }, K.gs, 0.6); }, 2, 1);
+      case "faisca": return sp("sfa", -6, -6, 6, 6, function() { faisca(0, 0, 5, K.am); faisca(0, 0, 2.4, "#ffffff"); }, 2, 1);
+      case "banana": return sp("sbn", -9, -6, 9, 6, function() {
+        cel(function(g) { g.beginPath(); g.moveTo(-1, 1); g.quadraticCurveTo(-6, -2, -8, 3); g.quadraticCurveTo(-4, 4, 0, 4); g.closePath(); }, K.am, 0.8);
+        cel(function(g) { g.beginPath(); g.moveTo(1, 1); g.quadraticCurveTo(6, -2, 8, 3); g.quadraticCurveTo(4, 4, 0, 4); g.closePath(); }, K.am, 0.8);
+        R(-2, 1, 4, 3.4, 1.2, "#c78b2a", 0.4); }, 2, 1);
+      case "bolha": return sp("sbo", -5, -5, 5, 5, function() { trc(pC(0, 0, 3.4), 1.4, "#d9f7ff"); }, 2, 1);
+    }
+    return null;
+  }
+  function desenharSoltos(ctx, M) {
+    if (M !== mSoltos) { mSoltos = M; ns = 0; tSoltos = M ? M.t : 0; }
+    if (!ns) { if (M) tSoltos = M.t; return; }
+    let dt = M.t - tSoltos; tSoltos = M.t;
+    if (dt < 0 || dt > 0.1) dt = dt < 0 ? 0 : 0.1;
+    const plats = M.plats || [];
+    for (let i = 0; i < ns; i++) {
+      SV[i] -= dt;
+      if (SV[i] <= 0) {                                  // remove trocando pelo último
+        ns--; ST[i] = ST[ns]; SX[i] = SX[ns]; SY[i] = SY[ns]; SVX[i] = SVX[ns]; SVY[i] = SVY[ns]; SV[i] = SV[ns]; SVM[i] = SVM[ns]; SA[i] = SA[ns]; SVA[i] = SVA[ns]; SG[i] = SG[ns]; SQ[i] = SQ[ns];
+        i--; continue;
+      }
+      const ya = SY[i];
+      SVY[i] += SG[i] * dt; SX[i] += SVX[i] * dt; SY[i] += SVY[i] * dt;
+      const tipo = ST[i];
+      if (tipo.charAt(0) !== "c" || tipo.charAt(1) === "a") SA[i] += SVA[i] * dt;
+      // cápsulas e cascas quicam no chão (e fazem "tlim")
+      if ((tipo.charAt(1) === "a" || tipo === "banana") && SVY[i] > 0 && SQ[i] < 3) {
+        for (let k = 0; k < plats.length; k++) {
+          const p = plats[k];
+          if (SX[i] < p.x || SX[i] > p.x + p.w || ya > p.y || SY[i] < p.y) continue;
+          SY[i] = p.y - 1; SVY[i] *= -0.38; SVX[i] *= 0.55; SVA[i] *= 0.5; SQ[i]++;
+          if (SQ[i] >= 3) { SVY[i] = 0; SVX[i] = 0; SG[i] = 0; SVA[i] = 0; }
+          break;
+        }
+      }
+      const spr = spSolto(tipo);
+      if (!spr) continue;
+      const u = SV[i] / SVM[i];
+      ctx.globalAlpha = tipo.charAt(1) === "l" ? 1 : Math.min(1, u * 3);
+      if (tipo === "cl_polvora" || tipo === "cl_energia" || tipo === "cl_gosma") blit(ctx, spr, SX[i], SY[i], SA[i], SVA[i] * (0.7 + 0.5 * u));
+      else blitR(ctx, spr, SX[i], SY[i], SA[i]);
+    }
+    ctx.globalAlpha = 1;
+  }
+  // estado em cima da bolinha
+  function desenharEstado(ctx, b, t) {
+    const ef = b.efeitos;
+    if (!ef) return;
+    if (ef.grudado > 0) {
+      const s = sp("egr", -40, -10, 40, 10, function() {
+        cel(function(g) { g.beginPath(); g.moveTo(-34, 6); g.quadraticCurveTo(-30, -6, -16, -4); g.quadraticCurveTo(-6, -9, 4, -5); g.quadraticCurveTo(18, -9, 30, -3); g.quadraticCurveTo(38, 2, 32, 6); g.closePath(); }, K.gs, 1.2);
+        fl(pE(-10, -3, 5, 1.4, 0), "#e6ffd6", 0.9);
+      }, 1.5, 1);
+      const k = b.r / 28;
+      ctx.save(); ctx.translate(b.x, b.y + b.r * 0.85); ctx.scale(k, k); ctx.globalAlpha = Math.min(1, ef.grudado * 3);
+      ctx.drawImage(s.c, s.x, s.y, s.w, s.h); ctx.restore();
+    }
+    if (ef.inflado > 0) {
+      const s = sp("ein", -7, 0, 7, 22, function() {
+        trc(function(g) { g.beginPath(); g.moveTo(0, 6); g.quadraticCurveTo(5, 12, 0, 16); g.quadraticCurveTo(-5, 19, 0, 22); }, 1.6, "#f6f7ff");
+        P([-5, 7, 0, 0, 5, 7], K.rs, 0.6);
+      }, 1.5, 1);
+      ctx.drawImage(s.c, Math.round(b.x + s.x), Math.round(b.y + b.r - 3 + s.y), s.w, s.h);
+    }
+    if (ef.escorrega > 0) {
+      const s = sp("ees", -7, -7, 7, 7, function() { P(estrela(0, 0, 6, 2.6, 5, -Math.PI / 2), K.am, 0.8); }, 2, 1);
+      for (let i = 0; i < 3; i++) {
+        const a = t * 7 + i * TAU / 3;
+        ctx.drawImage(s.c, Math.round(b.x + Math.cos(a) * b.r * 0.8 + s.x), Math.round(b.y - b.r - 10 + Math.sin(a) * 6 + s.y), s.w, s.h);
+      }
+    }
+    if (b.bombaGrudada && b.bombaGrudada.vivo) {
+      const p = b.bombaGrudada, r = p.raio, s = bombaGrudeSpr(r);
+      KK = 1.1;
+      blitR(ctx, s, p.x, p.y, Math.sin(t * 9) * 0.3);
+      const t1 = p.timer01 || 0, per = 0.4 - 0.32 * t1;
+      luz(ctx, p.x, p.y, r * 0.32, (t % per) < per * 0.5, "#ff3b52");
+    }
+    if (ef.bolha > 0) {
+      const R0 = b.r * 1.5, s = sp("ebo", -50, -50, 50, 50, function() {
+        fl(pC(0, 0, 46), "#9be8ff", 0.18); trc(pC(0, 0, 45), 3, "#d9f7ff", 0.95); trc(pC(0, 0, 40), 1.2, "#9be8ff", 0.6);
+        trc(function(g) { g.beginPath(); g.arc(0, 0, 32, 3.5, 4.7); }, 4, "#ffffff", 0.95); fl(pC(20, 22, 3.4), "#ffffff", 0.9);
+      }, 1.2, 1);
+      const w = 1 + Math.sin(t * 9) * 0.05, h = 1 - Math.sin(t * 9) * 0.05, k = R0 / 46;
+      ctx.save(); ctx.translate(b.x, b.y); ctx.scale(k * w, k * h); ctx.globalAlpha = ef.bolha < 0.25 && Math.floor(t * 20) % 2 ? 0.4 : 1;
+      ctx.drawImage(s.c, s.x, s.y, s.w, s.h); ctx.restore();
+    }
+  }
+
   function aquecer() {
     Object.keys(W).forEach(spriteArma); maoSpr(); brSpr(); [1, 2, 3].forEach(function(r) { caixaSpr(r); caixaSpr(r, true); paraSpr(r); });
     for (let i = 0; i < 6; i++) caixaBrilho(i);
+    ["cl_polvora", "cl_energia", "cl_gosma", "cap_bala", "cap_cartucho", "cap_grande", "cap_energia", "gosma", "pingo", "faisca", "banana", "bolha"].forEach(spSolto);
     if (typeof ARMAS !== "undefined") ARMAS.forEach(function(a) { if (PR[a.visual]) PR[a.visual](ctxAq(), { x: -999, y: -999, vx: 1, vy: 0, raio: a.raio || 4, t: 0, cor: "#ff5d73", timer01: 0 }); });
   }
   let _aq = null;
@@ -1025,6 +1359,8 @@ const ArteArmas = (function() {
 
   return {
     desenharNaMao: desenharNaMao, desenharProjetil: desenharProjetil, desenharFeixe: desenharFeixe, desenharAviso: desenharAviso,
-    desenharMeteoro: desenharMeteoro, icone: icone, desenharCaixa: desenharCaixa, pontaDoCano: pontaDoCano, aquecer: aquecer
+    desenharMeteoro: desenharMeteoro, icone: icone, desenharCaixa: desenharCaixa, pontaDoCano: pontaDoCano, aquecer: aquecer,
+    // v19
+    disparo: disparo, soltar: soltar, desenharSoltos: desenharSoltos, desenharEstado: desenharEstado
   };
 })();
