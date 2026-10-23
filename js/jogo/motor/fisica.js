@@ -127,6 +127,7 @@ function moverBolinha(b, ent, cen, plats, t, bumpers) {
 
   // ---- pular ----
   if (b.puloCd > 0) b.puloCd -= FIS.dt;
+  if (grudado && ent.pulo) b.evento = "preso";   // v19.6: tentou pular grudado: um "tuc" avisa (partida.js)
   if (!congelado && !grudado && ent.pulo && b.puloCd <= 0) {
     const forca = (ef.super_pulo > 0 ? 1.18 : 1) * (ef.rapidez > 0 ? 1.06 : 1);
     if (cen.semGravidade) {

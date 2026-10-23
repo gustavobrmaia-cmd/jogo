@@ -759,3 +759,10 @@ body:not(.retrato) .modos > button.modo:nth-child(5) { animation-delay: 0.28s; }
 #telaOnline .onRoda .ico { animation: girarGlobo 1.6s linear infinite; }
 @keyframes girarGlobo { to { transform: rotate(360deg); } }
 body.retrato #telaOnline .onRoda { font-size: 130px; }
+
+/* v19.6: preço "grátis/máximo" longo (ex.: "БЕСПЛАТНО!") cabe na pílula; textos pequenos no celular em pé */
+.pcPreco.longo { font-size: 0.72em !important; letter-spacing: -0.3px; white-space: nowrap; }
+body.retrato .cartao .barra span { font-size: 25px; line-height: 20px; }
+body.retrato .cartao .barra { height: 30px; }
+body.retrato .diaValor { font-size: 27px; }
+body.retrato .diaCard.grande .diaValor { font-size: 25px; }

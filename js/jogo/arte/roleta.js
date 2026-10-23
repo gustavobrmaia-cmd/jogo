@@ -225,12 +225,14 @@ const Roleta = (function() {
         texto(ctx, t("a_" + a2.id), x2, y2 + 48 * esc, Math.round(22 * esc), COR_RAR[ARMA[a2.id].raridade] || "#fff", 260 * esc);
       }
     }
-    // dica: toque acelera
-    if (!ro.pulou && ro.t > 0.25) {
-      ctx.globalAlpha = 0.55 + 0.35 * Math.sin(tAgora * 6);
-      var yd = em ? H * 0.47 + 470 : H - 34;
-      if (typeof Icone !== "undefined") Icone.desenhar(ctx, "mao", cx - 150 * esc, yd - 9 * esc, 30 * esc);
-      texto(ctx, t("roleta_acelera"), cx + 10 * esc, yd, Math.round(22 * esc), "#ffffff", 300 * esc);
+    // dica: toque PARA (v19.6: amarela, maior e pulsando; era cinza e pequena no pé da tela)
+    if (!ro.pulou && ro.t > 0.4) {
+      var pul = 1 + 0.06 * Math.sin(tAgora * 8);
+      var yd = em ? H * 0.47 + 470 : H - 40;
+      ctx.save(); ctx.translate(cx, yd); ctx.scale(pul, pul);
+      if (typeof Icone !== "undefined") Icone.desenhar(ctx, "mao", -190 * esc, -11 * esc, 40 * esc);
+      texto(ctx, t("roleta_acelera"), 14 * esc, 0, Math.round(30 * esc), "#ffe066", 360 * esc);
+      ctx.restore();
     }
     ctx.restore();
   }

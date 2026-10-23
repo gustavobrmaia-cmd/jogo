@@ -410,7 +410,7 @@ TEXTOS.ro = {
   n_moedas: "+{0} monede",
   roleta_arma: "ROATA ARMELOR!",
   roleta_mapa: "ROATA HĂRȚILOR!",
-  roleta_acelera: "Atinge ca să accelerezi",
+  roleta_acelera: "Atinge ca să OPREȘTI!",
   mel_sorte: "Noroc",
   mel_d_sorte: "Arme și cufere mai bune",
   sk_cor_rosa: "Roz",
@@ -566,5 +566,7 @@ TEXTOS.ro = {
   // v19.5
   on_ninguem: "Nu a apărut nimeni acum. Încearcă din nou puțin mai târziu!",
   on_tentar: "ÎNCEARCĂ DIN NOU",
-  on_contra_bot: "Joacă împotriva botului"
+  on_contra_bot: "Joacă împotriva botului",
+  // v19.6
+  proxima_partida: "MECIUL URMĂTOR"
 };

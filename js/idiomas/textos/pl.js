@@ -410,7 +410,7 @@ TEXTOS.pl = {
   n_moedas: "+{0} monet",
   roleta_arma: "KOŁO BRONI!",
   roleta_mapa: "KOŁO MAP!",
-  roleta_acelera: "Dotknij, by przyspieszyć",
+  roleta_acelera: "Dotknij, by ZATRZYMAĆ!",
   mel_sorte: "Szczęście",
   mel_d_sorte: "Lepsza broń i skrzynie",
   sk_cor_rosa: "Różowy",
@@ -566,5 +566,7 @@ TEXTOS.pl = {
   // v19.5
   on_ninguem: "Nikt się teraz nie pojawił. Spróbuj za chwilę!",
   on_tentar: "SPRÓBUJ PONOWNIE",
-  on_contra_bot: "Graj z botem"
+  on_contra_bot: "Graj z botem",
+  // v19.6
+  proxima_partida: "NASTĘPNY MECZ"
 };

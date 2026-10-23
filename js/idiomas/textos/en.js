@@ -410,7 +410,7 @@ TEXTOS.en = {
   n_moedas: "+{0} coins",
   roleta_arma: "WEAPON SPIN!",
   roleta_mapa: "MAP SPIN!",
-  roleta_acelera: "Tap to speed up",
+  roleta_acelera: "Tap to STOP!",
   mel_sorte: "Luck",
   mel_d_sorte: "Better weapons and chests",
   sk_cor_rosa: "Pink",
@@ -566,5 +566,7 @@ TEXTOS.en = {
   // v19.5
   on_ninguem: "Nobody showed up right now. Try again in a bit!",
   on_tentar: "TRY AGAIN",
-  on_contra_bot: "Play against the bot"
+  on_contra_bot: "Play against the bot",
+  // v19.6
+  proxima_partida: "NEXT MATCH"
 };

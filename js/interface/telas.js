@@ -454,9 +454,18 @@ function montarTelas() {
   // v19: roletas da abertura: qualquer tecla acelera (toque e clique chegam pela entrada, partida.js atualizarRoleta)
   window.addEventListener("keydown", function(e) {
     if (e.repeat) return;
-    if (estado === "jogo" && jogo && jogo.fase === "roleta" && e.code !== "Escape" && e.code !== "KeyP") acelerarRoleta();
+    // v19.6: as teclas de andar não param a roleta (quem já estava andando pulava a roleta sem ver)
+    const andar = /^(KeyA|KeyD|KeyS|ArrowLeft|ArrowRight|ArrowDown|ArrowUp)$/.test(e.code);
+    if (estado === "jogo" && jogo && jogo.fase === "roleta" && !andar && e.code !== "Escape" && e.code !== "KeyP") acelerarRoleta();
     if (estado === "pausa" && (e.code === "Escape" || e.code === "KeyP")) continuar();
     else if (estado === "menu" && e.code === "Enter") abrirModo();
+    else if (e.code === "Escape" && estado !== "jogo" && estado !== "pausa" && estado !== "recompensa") {
+      // v19.6: ESC volta nos menus (Opções, Loja, Personalizar, Missões...): aperta o "Voltar" da tela aberta
+      const tela = document.querySelector(".tela.aberta");
+      const v = tela && Array.from(tela.querySelectorAll("button.voltar, [data-acao='voltar'], [data-acao='voltarOpcoes'], [data-acao='fecharDiaria']"))
+        .filter(function(x) { return x.offsetParent !== null; })[0];
+      if (v) v.click();
+    }
   });
 
   // aba escondida no meio da partida: pausa sozinho

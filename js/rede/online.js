@@ -211,6 +211,7 @@ const Online = (function() {
     // só o anfitrião começa; o convidado começa quando chega o "ini"
     prontoEu = prontoOutro = false;
     ultimo.j = {}; ultimo.M = {}; ultimo.b = [{}, {}]; ultimaRodada = 0; seq = 0;
+    ultimoEstado = performance.now();   // o relógio de queda começa do zero (na revanche ele vinha da tela de fim)
     save.partidas++;
     salvar();
     novaPartida("online", {});
@@ -271,7 +272,12 @@ const Online = (function() {
   }
 
   // anfitrião: grava os efeitos durante o passo e manda o estado a cada 2 passos
-  api.antesDoPasso = function() { prepararGravacao(); api.gravando = true; };
+  api.antesDoPasso = function() {
+    prepararGravacao(); api.gravando = true;
+    // v19.6: o anfitrião também tem tempo-limite: sem os controles do convidado por 6 s (40 s se ele escondeu a aba)
+    // é queda. Antes ficava jogando contra uma bolinha parada se a rede caísse sem avisar
+    if (Rede.conectado && performance.now() - ultimoEstado > (outroOculto ? 40000 : 6000)) caiuConexao();
+  };
   api.depoisDoPasso = function() {
     api.gravando = false;
     passos++;
@@ -327,6 +333,7 @@ const Online = (function() {
       if (Rede.anfitriao) { status(t("on_achou")); setTimeout(function() { if (Rede.conectado && tela !== "jogo") { tela = "jogo"; comecar(); } }, 700); }
     } else if (m.k === "e" && Rede.anfitriao) {
       entRemota = m;
+      ultimoEstado = performance.now();
     } else if (m.k === "ini" && !Rede.anfitriao) {
       tela = "jogo";
       prontoEu = prontoOutro = false;

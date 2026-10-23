@@ -410,7 +410,7 @@ TEXTOS.it = {
   n_moedas: "+{0} monete",
   roleta_arma: "RUOTA DELL'ARMA!",
   roleta_mapa: "RUOTA DELLA MAPPA!",
-  roleta_acelera: "Tocca per accelerare",
+  roleta_acelera: "Tocca per FERMARE!",
   mel_sorte: "Fortuna",
   mel_d_sorte: "Armi e forzieri migliori",
   sk_cor_rosa: "Rosa",
@@ -566,5 +566,7 @@ TEXTOS.it = {
   // v19.5
   on_ninguem: "Non è arrivato nessuno. Riprova tra poco!",
   on_tentar: "RIPROVA",
-  on_contra_bot: "Gioca contro il bot"
+  on_contra_bot: "Gioca contro il bot",
+  // v19.6
+  proxima_partida: "PROSSIMA PARTITA"
 };

@@ -82,7 +82,9 @@ function atualizarPainelPoder(alvo) {
     est.dataset.faixa = faixa;
     est.innerHTML = '<span class="cheia">' + "★".repeat(cheias) + '</span><span class="vazia">' + "★".repeat(5 - cheias) + "</span>";
     const custo = Poder.custo(id);
-    b.querySelector(".pcPreco").innerHTML = max ? escHtml(t("mel_max")) : custo ? moedasHtml(custo) : escHtml(t("gratis"));
+    const pp = b.querySelector(".pcPreco"), txtPreco = max ? t("mel_max") : custo ? "" : t("gratis");
+    pp.innerHTML = max ? escHtml(txtPreco) : custo ? moedasHtml(custo) : escHtml(txtPreco);
+    pp.classList.toggle("longo", txtPreco.length > 8);   // v19.6: "БЕСПЛАТНО!" saía da pílula
     b.classList.toggle("gratis", !max && !custo);
     b.classList.toggle("pode", Poder.podeComprar(id));
     b.classList.toggle("max", max);

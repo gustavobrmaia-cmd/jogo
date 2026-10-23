@@ -741,9 +741,12 @@ function provocar(M, b, tipo) {
   const e = bot.e, agora = M.t;
   // na 1ª partida da vida (treino) o Bob não provoca (só os balões de reação)
   if (jogo.treino && tipo !== "venceu") return;
-  const espera = tipo === "venceu" ? 0 : 3.2 / Math.max(0.5, e.provoca);
+  // v19.6: o teste contou 1 provocação a cada 6–10 s (e "Muito lento!" para criança perdendo). Nos rivais 1–5 da
+  // Bronze só a do fim; nos outros, no mínimo 7 s entre uma e outra e com metade da chance
+  if (jogo.rival && jogo.rival.liga === 0 && jogo.rival.i < 5 && tipo !== "venceu") return;
+  const espera = tipo === "venceu" ? 0 : 7 / Math.max(0.5, e.provoca);
   if (agora < (bot.provAte || 0) + espera && tipo !== "venceu") return;
-  if (Math.random() > CHANCE_PROV[tipo] * Math.min(1.6, e.provoca)) return;
+  if (Math.random() > CHANCE_PROV[tipo] * 0.5 * Math.min(1.6, e.provoca)) return;
   bot.provAte = agora;
   const n = 1 + Math.floor(Math.random() * PROVOCACOES[tipo]);
   emote(b, t("prov_" + tipo + "_" + n), tipo === "venceu" ? 1.6 : 1.15);

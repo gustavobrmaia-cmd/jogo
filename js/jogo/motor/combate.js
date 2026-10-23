@@ -16,6 +16,8 @@ function somJogo(M, nome, tomMult) { if (!M.mudo) som(nome, tomMult); }
 // Reação do bot (balão acima da cabeça): "!" "?!" ou uma provocação curta (texto do idioma) — dura alguns décimos de segundo
 function emote(b, s, dur) {
   if (b.humano) return;
+  // v19.6: reações ("?!", "!!") não cobrem outro balão que ainda está na tela (o teste viu 1 balão a cada 1,5 s)
+  if ((s === "?!" || s === "!!") && b.emote && b.emote.t > 0.2) return;
   if (b.emote && b.emote.t > 0.4 && b.emote.s === s) return;
   b.emote = { s: s, t: dur || 1.1, d: dur || 1.1 };
 }
@@ -355,7 +357,9 @@ function aplicarEfeitosDoTiro(M, a, b, dono, p) {
   const ef = b.efeitos;
   if (a.congela) ef.lento = Math.max(ef.lento || 0, a.congela);
   if (a.fogo) ef.fogo = Math.max(ef.fogo || 0, a.fogo);
-  if (a.gruda) { ef.grudado = Math.max(ef.grudado || 0, a.gruda); }
+  // v19.6: a gosma prendia sem saída (gruda 1,6 s e o bot atirava de novo a cada 0,6 s). Agora não gruda de novo
+  // enquanto está grudado nem por 1,2 s depois que solta, e na pessoa contra a máquina gruda por menos tempo
+  if (a.gruda && !(ef.grudado > 0) && !(ef.imuneGosma > 0)) ef.grudado = a.gruda * (b.humano && M.contraBot ? 0.7 : 1);
   if (a.infla) { if (!(ef.inflado > 0)) somJogo(M, "s_inflou"); ef.inflado = Math.max(ef.inflado || 0, a.infla); b.vy -= 3; }
   if (a.bolha && !(ef.bolha > 0) && !(ef.imuneBolha > 0)) { ef.bolha = a.bolha; b.bolhaDono = dono ? dono.lado : 0; b.vy = Math.min(b.vy, -1); }
   if (a.levanta && p) {
@@ -655,9 +659,13 @@ function matar(M, b) {
   // golpe final: pausa maior, K.O. e câmera lenta com zoom em quem caiu (desenho.js)
   const matador = M.bolinhas[b.lado === 1 ? 1 : 0];
   if (!M.mudo) {
-    M.pausa = Math.max(M.pausa || 0, 9);
-    M.ko = { x: b.x, y: b.y, humano: !!matador.humano, perfeito: !(matador.danoRecebido > 0) };
-    if (typeof Efeitos !== "undefined") Efeitos.tremer(20);
+    // v19.6: o K.O. que FECHA a partida para mais e treme mais que os outros (antes parecia igual a qualquer ponto)
+    const final = typeof jogo !== "undefined" && jogo && jogo.modo !== "sobrevivencia" && matador.viva &&
+      jogo.pontos[matador.lado - 1] + 1 >= jogo.alvo;
+    M.pausa = Math.max(M.pausa || 0, final ? 16 : 9);
+    M.ko = { x: b.x, y: b.y, humano: !!matador.humano, perfeito: !(matador.danoRecebido > 0), final: final };
+    if (typeof Efeitos !== "undefined") Efeitos.tremer(final ? 30 : 20);
+    if (final && matador.humano) somJogo(M, "explosao", 0.7);
     if (matador.humano) somJogo(M, "ko");
   }
   if (matador.viva && typeof provocar === "function") provocar(M, matador, "venceu");
@@ -799,7 +807,7 @@ function atualizarMina(M, p, g) {
   const o = M.bolinhas[p.dono === 1 ? 1 : 0];
   if (a.escorrega) {
     // casca de banana: quem pisa sai escorregando sem controle (e gira)
-    if (p.armada && o.viva && o.noChao && Math.abs(o.x - p.x) < o.r * 0.7 + p.raio && Math.abs(o.y + o.r - p.y) < 24) {
+    if (p.armada && o.viva && o.noChao && !(o.efeitos.imuneBanana > 0) && Math.abs(o.x - p.x) < o.r * 0.7 + p.raio && Math.abs(o.y + o.r - p.y) < 24) {
       p.vivo = false;
       const lado = Math.abs(o.vx) > 0.5 ? Math.sign(o.vx) : (o.x >= p.x ? 1 : -1);
       o.efeitos.escorrega = a.escorrega;
@@ -894,8 +902,11 @@ function atualizarAvisos(M) {
 // ---------- efeitos das cartas e do tempo ----------
 function atualizarEfeitos(M, b) {
   const ef = b.efeitos;
-  const bolhaAntes = ef.bolha > 0;
+  const bolhaAntes = ef.bolha > 0, grudadoAntes = ef.grudado > 0, escorregaAntes = ef.escorrega > 0;
   for (const k in ef) if (ef[k] > 0) ef[k] -= FIS.dt;
+  // v19.6: depois de soltar da gosma ou de escorregar na banana, um tempinho sem pegar de novo (não vira prisão)
+  if (grudadoAntes && !(ef.grudado > 0)) ef.imuneGosma = 1.2;
+  if (escorregaAntes && !(ef.escorrega > 0)) ef.imuneBanana = 1.2;
   if (ef.fogo > 0 && b.viva) {
     if ((M.passo % 6) === 0) causarDano(M, b, 0.5, null, 0, 0, 0);
     if ((M.passo % 4) === 0 && typeof Efeitos !== "undefined") Efeitos.fogo(b.x + (Math.random() - 0.5) * b.r, b.y - b.r * 0.5);
@@ -954,6 +965,8 @@ function sortearArma(M, inicio, roleta) {
   }
   const lista = ARMAS.filter(function(a) {
     if (!pesos[a.raridade]) return false;
+    // v19.6: no começo (treino, rivais 1–5 da Bronze, 6 primeiras partidas) nada de arma que tira o controle
+    if (M.semControle && (a.gruda || a.escorrega || a.bolha || a.infla)) return false;
     if (inicio && (a.tipo === "mina" || a.tipo === "ceu" || a.tipo === "torreta")) return false;
     return true;
   });

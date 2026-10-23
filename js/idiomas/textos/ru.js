@@ -410,7 +410,7 @@ TEXTOS.ru = {
   n_moedas: "+{0} монет",
   roleta_arma: "РУЛЕТКА ОРУЖИЯ!",
   roleta_mapa: "РУЛЕТКА КАРТ!",
-  roleta_acelera: "Нажми, чтобы ускорить",
+  roleta_acelera: "Нажми, чтобы ОСТАНОВИТЬ!",
   mel_sorte: "Удача",
   mel_d_sorte: "Лучше оружие и сундуки",
   sk_cor_rosa: "Розовый",
@@ -566,5 +566,7 @@ TEXTOS.ru = {
   // v19.5
   on_ninguem: "Сейчас никого нет. Попробуй чуть позже!",
   on_tentar: "ЕЩЁ РАЗ",
-  on_contra_bot: "Играть с ботом"
+  on_contra_bot: "Играть с ботом",
+  // v19.6
+  proxima_partida: "СЛЕДУЮЩИЙ МАТЧ"
 };

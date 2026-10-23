@@ -410,7 +410,7 @@ TEXTOS.de = {
   n_moedas: "+{0} Münzen",
   roleta_arma: "WAFFENRAD!",
   roleta_mapa: "KARTENRAD!",
-  roleta_acelera: "Tippen zum Beschleunigen",
+  roleta_acelera: "Tippen zum STOPPEN!",
   mel_sorte: "Glück",
   mel_d_sorte: "Bessere Waffen und Truhen",
   sk_cor_rosa: "Rosa",
@@ -566,5 +566,7 @@ TEXTOS.de = {
   // v19.5
   on_ninguem: "Gerade ist niemand da. Versuch es gleich noch mal!",
   on_tentar: "NOCHMAL",
-  on_contra_bot: "Gegen den Bot spielen"
+  on_contra_bot: "Gegen den Bot spielen",
+  // v19.6
+  proxima_partida: "NÄCHSTES SPIEL"
 };

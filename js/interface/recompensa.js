@@ -171,7 +171,8 @@ function textoRevanche(n) {
   const b = el("btnRevanche");
   if (!b || !rec) return;
   const contra = rec.modo === "bot" || rec.modo === "rivais";
-  const nome = contra && rec.venceu ? t("proximo_rival") : t("revanche");
+  // v19.6: "PRÓXIMO RIVAL" só quando há rival (no "Contra o bot" é "PRÓXIMA PARTIDA")
+  const nome = contra && rec.venceu ? (rec.rival ? t("proximo_rival") : t("proxima_partida")) : t("revanche");
   if (!contra) { b.textContent = nome; return; }
   // v17.5: o número da contagem num selo redondo e uma barra que esvazia embaixo do botão
   b.innerHTML = "";
@@ -196,7 +197,10 @@ function contagemRecompensa(tempo) {
   const falta = rec.espera - (tempo - rec.fimBaus - 0.4);
   if (falta <= 0) { Eventos.marco("next-rival-auto"); revanche(); return; }
   const n = Math.ceil(Math.min(rec.espera, falta));
-  if (n !== rec.n) { rec.n = n; textoRevanche(n); }
+  if (n !== rec.n) {
+    rec.n = n; textoRevanche(n);
+    if (n > 0 && n <= 3 && !rec.cancelou) som("clique", 1.25 + (3 - n) * 0.15);   // v19.6: tic nos 3 últimos segundos
+  }
 }
 
 // comprou uma melhoria na tela de fim: a contagem para a próxima partida volta a ter pelo menos 4 s

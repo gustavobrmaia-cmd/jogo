@@ -682,6 +682,7 @@ function nomeJogador(j, lado) {
 }
 
 // v18: no modo rivais quem vence a rodada é o rival pelo nome (antes aparecia "O BOT VENCEU A RODADA")
+function maiusculas(s) { try { return s.toLocaleUpperCase(IDIOMA === "pt" ? "pt-BR" : IDIOMA); } catch (e) { return s.toUpperCase(); } }
 function textoBotVenceuRodada(j) { return j.rival ? t("rival_venceu_rodada", j.rival.d.nome.toUpperCase()) : t("bot_venceu_rodada"); }
 
 function desenharHud(ctx, j, M, L) {
@@ -735,7 +736,8 @@ function desenharHud(ctx, j, M, L) {
     const v = j.vencedorRodada;
     const surv = j.modo === "sobrevivencia";
     const txt = surv ? (v === 1 ? t("onda_concluida", j.onda) : t("bot_venceu_rodada")) :
-      !v ? t("empate") : j.modo === "bot" ? (v === 1 ? t("voce_venceu_rodada") : textoBotVenceuRodada(j)) : t("jogador_venceu_rodada", v);
+      !v ? t("empate") : j.modo === "bot" ? (v === 1 ? t("voce_venceu_rodada") : textoBotVenceuRodada(j)) :
+      j.modo === "online" ? (v === 1 ? t("voce_venceu_rodada") : t("rival_venceu_rodada", t("on_rival"))) : t("jogador_venceu_rodada", v);
     const tA = j.tempoFase - (M.ko && M.ko.humano ? 1.0 : 0.4);
     const pop = tA < 0.12 ? 0.4 + tA / 0.12 * 0.85 : tA < 0.26 ? 1.25 - (tA - 0.12) / 0.14 * 0.25 : 1;
     // quem joga venceu a rodada: raios girando atrás (contra o bot só quando é a pessoa; 2 jogadores: qualquer um)
@@ -745,7 +747,9 @@ function desenharHud(ctx, j, M, L) {
   } else if (j.fase === "fimPartida" && estado !== "continuar") {
     const v = j.vencedorPartida;
     const surv = j.modo === "sobrevivencia";
-    const txt = surv ? t("fim_sobrevivencia", j.onda) : j.modo === "bot" ? (v === 1 ? t("voce_venceu") : j.rival ? t("rival_venceu", j.rival.d.nome.toUpperCase()) : t("bot_venceu")) : t("jogador_venceu", v);
+    // v19.6: frase do rival toda em maiúsculas (era "IVY venceu!") e o online com VOCÊ/RIVAL (era "JOGADOR 2")
+    const txt = surv ? t("fim_sobrevivencia", j.onda) : j.modo === "bot" ? (v === 1 ? t("voce_venceu") : j.rival ? maiusculas(t("rival_venceu", j.rival.d.nome)) : t("bot_venceu")) :
+      j.modo === "online" ? (v === 1 ? t("voce_venceu") : t("on_perdeu")) : t("jogador_venceu", v);
     const esc = 1 + 0.06 * Math.sin(j.tempoFase * 6);
     const festa = v && (v === 1 || j.modo === "2p") && !surv;
     // v18.2: venceu o rival e ganha o acessório dele: um presente sai do rival e voa até a bolinha da pessoa
@@ -793,7 +797,8 @@ function desenharHud(ctx, j, M, L) {
   // v16: prêmios da partida anterior (fluxo contínuo, sem a tela de fim): faixa que pula e some em ~4 s
   let topoFaixa = null;   // v17: os avisos de conquista sobem para cima da faixa (antes ficavam por cima dela)
   if (typeof faixaPremio !== "undefined" && faixaPremio && j !== faixaPremio.velho && estado === "jogo" &&
-      !(j.escolha && j.fase === "intro" && j.rodada === 1)) {   // v18.2: espera a escolha da arma
+      // v19.6: espera a roleta e o VS (antes aparecia por cima dos dois: 4 camadas de texto em ~1 s)
+      !(j.rodada === 1 && (j.fase === "roleta" || (j.fase === "intro" && j.depoisRoleta)))) {
     if (!faixaPremio.t0) faixaPremio.t0 = performance.now() / 1000;
     const tf = performance.now() / 1000 - faixaPremio.t0;
     // v17: com a melhoria grátis (destaque) a faixa fica mais tempo
@@ -974,7 +979,8 @@ function desenharAbertura(ctx, j, M, L, cx, meio) {
       letreiroIcone(ctx, "raio", String(pR), 335, 98, 30, j.cores[1]);
     }
     // mapa e o que ele tem de diferente numa linha só; prêmio numa pílula dourada
-    linhaMapa(ctx, M.cen.id, cor, 0, 100, 30, 24, 520);
+    // v19.6: depois da roleta de mapa o nome do mapa já foi mostrado: o VS fica só com o rival e o prêmio
+    if (!j.depoisRoleta) linhaMapa(ctx, M.cen.id, cor, 0, 100, 30, 24, 520);
     const pr = textoPremioRival(j.rival.i, j.rival.liga);
     ctx.font = "900 24" + FONTE;
     const wp = Math.min(620, ctx.measureText(pr).width);
@@ -1399,8 +1405,17 @@ function desenharQueda(ctx, j, H) {
     ctx.globalAlpha = 1;
   } else if (!q.vencedor) {
     textoContorno(ctx, Math.max(0, Math.ceil(RODADA.quedaMax - q.t)).toString(), cx, H * 0.2, 54, "#fff");
+    // v19.6: no celular em pé a tela fica vazia e a dica era pequena: "TOQUE NA TELA!" grande no meio, com a mão
+    if (toque && j.modo !== "2p" && H > 1100) {
+      const pul = 1 + 0.08 * Math.sin(j.tempoFase * 12);
+      ctx.save(); ctx.translate(cx, H * 0.36); ctx.scale(pul, pul);
+      letreiro(ctx, maiusculas(t("queda_dica_toque")), 0, 0, 64, "#ffe066", CONFIG.largura - 120);
+      if (typeof Icone !== "undefined") Icone.desenhar(ctx, "mao", 0, 120 + 14 * Math.sin(j.tempoFase * 12), 130);
+      ctx.restore();
+    }
   } else {
-    const txt = j.modo === "bot" ? (q.vencedor === 1 ? t("voce_venceu_rodada") : textoBotVenceuRodada(j)) : t("jogador_venceu_rodada", q.vencedor);
+    const txt = j.modo === "bot" ? (q.vencedor === 1 ? t("voce_venceu_rodada") : textoBotVenceuRodada(j)) :
+      j.modo === "online" ? (q.vencedor === 1 ? t("voce_venceu_rodada") : t("rival_venceu_rodada", t("on_rival"))) : t("jogador_venceu_rodada", q.vencedor);
     textoContorno(ctx, txt, cx, H * 0.2, 54, j.cores[q.vencedor - 1]);
   }
 }

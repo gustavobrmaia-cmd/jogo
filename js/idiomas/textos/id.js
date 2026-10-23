@@ -410,7 +410,7 @@ TEXTOS.id = {
   n_moedas: "+{0} koin",
   roleta_arma: "RODA SENJATA!",
   roleta_mapa: "RODA PETA!",
-  roleta_acelera: "Ketuk untuk mempercepat",
+  roleta_acelera: "Ketuk untuk BERHENTI!",
   mel_sorte: "Hoki",
   mel_d_sorte: "Senjata dan peti lebih bagus",
   sk_cor_rosa: "Merah muda",
@@ -566,5 +566,7 @@ TEXTOS.id = {
   // v19.5
   on_ninguem: "Belum ada yang datang. Coba lagi sebentar lagi!",
   on_tentar: "COBA LAGI",
-  on_contra_bot: "Main melawan bot"
+  on_contra_bot: "Main melawan bot",
+  // v19.6
+  proxima_partida: "PERTANDINGAN BERIKUTNYA"
 };

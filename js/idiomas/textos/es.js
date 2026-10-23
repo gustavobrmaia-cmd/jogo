@@ -410,7 +410,7 @@ TEXTOS.es = {
   n_moedas: "+{0} monedas",
   roleta_arma: "¡RULETA DE ARMA!",
   roleta_mapa: "¡RULETA DE MAPA!",
-  roleta_acelera: "Toca para acelerar",
+  roleta_acelera: "¡Toca para PARAR!",
   mel_sorte: "Suerte",
   mel_d_sorte: "Mejores armas y cofres",
   sk_cor_rosa: "Rosa",
@@ -566,5 +566,7 @@ TEXTOS.es = {
   // v19.5
   on_ninguem: "No apareció nadie ahora. ¡Inténtalo de nuevo en un rato!",
   on_tentar: "REINTENTAR",
-  on_contra_bot: "Jugar contra el bot"
+  on_contra_bot: "Jugar contra el bot",
+  // v19.6
+  proxima_partida: "SIGUIENTE PARTIDA"
 };

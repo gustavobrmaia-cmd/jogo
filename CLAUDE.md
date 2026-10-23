@@ -359,6 +359,37 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     alguns navegadores (Night mode do Brave, Samsung Internet, flag do Chrome) escurecia a parte clara dos botões
     (o canvas não muda). Páginas que se declaram escuras costumam ficar de fora. Nos testes com o escurecimento
     FORÇADO do Chromium não adiantou (nem "only light"); esse modo não vem ligado por padrão.
+  - v19.6 (relatório do testador, ~100 min jogando a v19.5; nenhum erro de console):
+    - **Gosma:** prendia sem saída (gruda 1,6 s, o bot atirava a cada 0,6 s). Agora não gruda de novo enquanto está
+      grudado, tem 1,2 s de imunidade depois que solta e, na pessoa contra a máquina, gruda 30% menos.
+    - **Banana:** também tem 1,2 s de imunidade.
+    - **Armas que tiram o controle** (gruda, escorrega, bolha, infla): ficam fora das caixas e da roleta no treino,
+      nas 6 primeiras partidas e nos rivais 1–5 da Bronze (`M.semControle`).
+    - **Pular grudado:** dá um "tuc" e solta pingos.
+    - **Arma inicial:** só contra a máquina e no online (no 2 jogadores só o jogador 1 tinha).
+    - **Online:** o anfitrião também tem tempo-limite (6 s sem os controles do convidado; 40 s se a aba dele
+      estiver escondida).
+    - **Sobrevivência:** as ondas 1–3 batem 0,6 / 0,75 / 0,9 (antes 1; o jogador médio morria nas 3 primeiras).
+    - **Roleta:**
+      - toque, clique, pulo ou tiro PARA a roleta ("Toque para PARAR!", amarelo e pulsando);
+      - nos primeiros 0,4 s nada conta (toques que sobravam do botão pulavam a roleta);
+      - as teclas de andar não param.
+    - **Abertura do rival:**
+      - a faixa de prêmios espera a roleta e o VS (aparece quando a luta começa);
+      - o VS não repete o nome do mapa depois da roleta de mapa e dura 1,4 s (era 0,95).
+    - **Provocações:** nenhuma nos rivais 1–5 da Bronze (só a do fim); nos outros, 7 s no mínimo entre uma e outra e
+      metade da chance. "?!"/"!!" não cobrem outro balão.
+    - **Textos:**
+      - "PRÓXIMA PARTIDA" no "Contra o bot" (era "PRÓXIMO RIVAL");
+      - "IVY VENCEU!" todo em maiúsculas;
+      - online com VOCÊ/RIVAL nos letreiros;
+      - "БЕСПЛАТНО!" cabe (`.pcPreco.longo`);
+      - em pé, os textos das telas da v19 com 23–27 px lógicos (~11–12 px no aparelho), a grade com 3 colunas e o
+        status dos itens em 2 linhas (não corta mais com "...").
+    - **ESC:** volta nos menus.
+    - **K.O. que fecha a partida:** pausa 16 quadros e treme mais.
+    - **Queda de braço no celular em pé:** "TOQUE NA TELA!" grande com a mão e vibração a cada toque.
+    - **Tela de fim:** tic nos 3 últimos segundos da contagem.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

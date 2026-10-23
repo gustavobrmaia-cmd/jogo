@@ -149,10 +149,10 @@ function novaPartida(modo, opcoes) {
     // tutorial desenhado da 1ª partida (atirar -> andar -> pular; desenho.js)
     tuto: modo === "bot" && save.partidas <= 1 ? { passo: null, tempo: 0, andou: 0, pulou: false } : null
   };
-  // v19: arma inicial (comprada na loja): quem tem começa TODA rodada com ela (contra a máquina e no 2 jogadores;
-  // no 2 jogadores só o jogador 1, o dono do aparelho, tem loja). Treino e demonstração: nunca
+  // v19: arma inicial (comprada na loja): quem tem começa TODA rodada com ela. Contra a máquina e no online (cada um
+  // com a sua). v19.6: no 2 jogadores não vale (só o jogador 1 tinha, e a tela Melhorar diz que lá os dois são iguais)
   const ai = save.armaInicial;
-  jogo.armaInicial = [!treino && modo !== "demo" && ai && typeof ARMA !== "undefined" && ARMA[ai] && (save.armas || []).indexOf(ai) >= 0 ? ai : null, null];
+  jogo.armaInicial = [!treino && (modo === "bot" || modo === "sobrevivencia" || modo === "online") && ai && typeof ARMA !== "undefined" && ARMA[ai] && (save.armas || []).indexOf(ai) >= 0 ? ai : null, null];
   escolherSkins(jogo);
   // rival: a cara dele (cor, corpo e acessório); se a skin do jogador tiver a mesma cor, o rival troca de cor
   if (rival) {
@@ -196,6 +196,8 @@ function iniciarRodada() {
     stats: { dano: [0, 0], tiros: [0, 0], acertos: [0, 0] },
     morreu: null, pegou: null, ultimaCarta: null
   };
+  // v19.6: armas que tiram o controle (gosma, banana, bolhas, inflador) ficam fora no começo
+  M.semControle = !j.demo && (j.treino || save.partidas <= 6 || (j.rival && j.rival.liga === 0 && j.rival.i < 5));
   // contra bot (pessoa x máquina): os mapas cruéis ficam mais justos para a pessoa (veja combate.js e passoMundo)
   M.contraBot = !j.demo && (j.modo === "bot" || j.modo === "sobrevivencia");
   const b1 = novaBolinha(1, cen.spawn[0][0], cen.spawn[0][1], j.cores[0]);
@@ -243,7 +245,9 @@ function iniciarRodada() {
   if (j.modo === "bot" && j.dicaRodada === j.rodada && !j.tuto) j.tuto = { passo: null, tempo: 0, andou: 1, pulou: true, so: true };
   if (j.modo === "sobrevivencia") {
     b1.vida = j.vidaJogador;
-    M.multBot = 1 + Math.max(0, j.onda - 12) * 0.1;   // depois da onda 12 o bot também bate mais forte
+    // v19.6: as primeiras ondas batem menos (0,6 / 0,75 / 0,9; antes 1 desde a onda 1 e o jogador médio, que vencia os
+    // rivais 1–5, morria nas ondas 1–3); depois da onda 12 o bot também bate mais forte
+    M.multBot = j.onda <= 3 ? [0.6, 0.75, 0.9][j.onda - 1] : 1 + Math.max(0, j.onda - 12) * 0.1;
   }
   // contra o bot: o bot fraco também bate mais fraco (nível 1 tira ~70% do dano normal)
   if (j.modo === "bot" && j.bots[1]) M.multBot = lerp(0.45, 1, Math.min(1, j.bots[1].nivel / 0.45));
@@ -316,7 +320,8 @@ function passoDaPartida(dt) {
   if (j.fase === "roleta") { atualizarRoleta(j); return; }
   if (j.fase === "intro") {
     // v19: depois das roletas a abertura é curta (o VS do rival fica um pouco mais para dar tempo de ler)
-    j.durIntro = j.rodada === 1 ? (j.depoisRoleta ? (j.rival ? 0.95 : 0.6) : RODADA.introPrimeira) : RODADA.intro;
+    // v19.6: o VS do rival 0,95 -> 1,4 s (o teste viu que ninguém lia o prêmio do rival em 1 s)
+    j.durIntro = j.rodada === 1 ? (j.depoisRoleta ? (j.rival ? 1.4 : 0.6) : RODADA.introPrimeira) : RODADA.intro;
     if (j.tempoFase >= j.durIntro) {
       j.fase = "luta"; j.tempoFase = 0;
       if (!j.demo) som("lute");
@@ -402,6 +407,7 @@ function passoMundo(j, M, controles, lento) {
     else if (b.evento === "aterrissou" && typeof Efeitos !== "undefined" && Math.abs(yAntes) > 6) Efeitos.poeira(b.x, b.y + b.r * gravSinal(M.cen, M.t));
     else if (b.evento === "portal" && typeof Efeitos !== "undefined") Efeitos.teleporte(b.x, b.y, b.cor);
     else if (b.evento === "bumper" && !M.mudo) som("mola");
+    else if (b.evento === "preso" && b.humano && !M.mudo) { som("clique", 0.55); if (typeof ArteArmas !== "undefined" && ArteArmas.soltar) ArteArmas.soltar("pingo", b.x, b.y + b.r * 0.6, 3); }
     if (controles) usarArma(M, b, ent.tiro, ent.apertouTiro);
     atualizarEfeitos(M, b);
     if (b.rastroFx) atualizarRastro(M, b);
@@ -623,7 +629,11 @@ function atualizarQueda(j) {
       }
     }
     if (!clicou) continue;
-    if (k === 1) { q.toques1++; q.pos -= PASSO_QUEDA; q.pulso1 = 1; }
+    if (k === 1) {
+      q.toques1++; q.pos -= PASSO_QUEDA; q.pulso1 = 1;
+      // v19.6: no celular cada toque vibra de leve
+      if (entrada.toque && !j.bots[0] && navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+    }
     else { q.toques2++; q.pos += PASSO_QUEDA; q.pulso2 = 1; }
     if (!j.demo) som("clique");
   }
@@ -738,10 +748,11 @@ function ticRoleta(ro, tom) {
 function atualizarRoleta(j) {
   const ro = j.roleta;
   if (!ro) { j.fase = "intro"; j.tempoFase = 0; return; }
-  // toque, clique, pulo ou tiro (qualquer jogador) acelera
+  // toque, clique, pulo ou tiro (qualquer jogador) PARA a roleta. v19.6: nos primeiros 0,4 s nada conta (os toques
+  // que sobravam do botão "Rivais" pulavam a roleta antes de a pessoa ver)
   let apertou = false;
   for (let k = 1; k <= 2; k++) if (entrada.apertou(k, "toque") || entrada.apertou(k, "tiro") || entrada.apertou(k, "pulo")) apertou = true;
-  if (apertou) acelerarRoleta();
+  if (apertou && ro.t >= 0.4) acelerarRoleta();
   ro.t += FIS.dt;
   ro.tEtapa += FIS.dt;
   if (ro.etapa === "arma") {
@@ -775,7 +786,7 @@ function M0humano(j) { return j.M && j.M.bolinhas[0].humano; }
 // toque/tecla: a etapa que está girando para na hora; se já parou, passa para a próxima
 function acelerarRoleta() {
   const j = jogo, ro = j && j.roleta;
-  if (!ro || j.fase !== "roleta") return;
+  if (!ro || j.fase !== "roleta" || ro.t < 0.4) return;
   if (!ro.pulou) { ro.pulou = true; if (ro.etapa === "mapa") Poki.medir("roulette", "map-skip", "interact"); }
   if (ro.etapa === "arma") {
     if (ro.tEtapa < ro.fimArma) ro.tEtapa = ro.fimArma;

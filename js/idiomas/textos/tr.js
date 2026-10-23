@@ -410,7 +410,7 @@ TEXTOS.tr = {
   n_moedas: "+{0} altın",
   roleta_arma: "SİLAH ÇARKI!",
   roleta_mapa: "HARİTA ÇARKI!",
-  roleta_acelera: "Hızlandırmak için dokun",
+  roleta_acelera: "DURDURMAK için dokun!",
   mel_sorte: "Şans",
   mel_d_sorte: "Daha iyi silahlar ve sandıklar",
   sk_cor_rosa: "Pembe",
@@ -566,5 +566,7 @@ TEXTOS.tr = {
   // v19.5
   on_ninguem: "Şu an kimse yok. Biraz sonra tekrar dene!",
   on_tentar: "TEKRAR DENE",
-  on_contra_bot: "Bota karşı oyna"
+  on_contra_bot: "Bota karşı oyna",
+  // v19.6
+  proxima_partida: "SONRAKİ MAÇ"
 };

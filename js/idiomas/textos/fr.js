@@ -410,7 +410,7 @@ TEXTOS.fr = {
   n_moedas: "+{0} pièces",
   roleta_arma: "ROUE DES ARMES !",
   roleta_mapa: "ROUE DES CARTES !",
-  roleta_acelera: "Touche pour accélérer",
+  roleta_acelera: "Touche pour ARRÊTER !",
   mel_sorte: "Chance",
   mel_d_sorte: "Meilleures armes et coffres",
   sk_cor_rosa: "Rose",
@@ -566,5 +566,7 @@ TEXTOS.fr = {
   // v19.5
   on_ninguem: "Personne pour l'instant. Réessaie dans un moment !",
   on_tentar: "RÉESSAYER",
-  on_contra_bot: "Jouer contre le bot"
+  on_contra_bot: "Jouer contre le bot",
+  // v19.6
+  proxima_partida: "PARTIE SUIVANTE"
 };

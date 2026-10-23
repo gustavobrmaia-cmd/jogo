@@ -410,7 +410,7 @@ TEXTOS.nl = {
   n_moedas: "+{0} munten",
   roleta_arma: "WAPENRAD!",
   roleta_mapa: "KAARTENRAD!",
-  roleta_acelera: "Tik om te versnellen",
+  roleta_acelera: "Tik om te STOPPEN!",
   mel_sorte: "Geluk",
   mel_d_sorte: "Betere wapens en kisten",
   sk_cor_rosa: "Roze",
@@ -566,5 +566,7 @@ TEXTOS.nl = {
   // v19.5
   on_ninguem: "Er is nu niemand. Probeer het straks opnieuw!",
   on_tentar: "OPNIEUW",
-  on_contra_bot: "Speel tegen de bot"
+  on_contra_bot: "Speel tegen de bot",
+  // v19.6
+  proxima_partida: "VOLGENDE POTJE"
 };
