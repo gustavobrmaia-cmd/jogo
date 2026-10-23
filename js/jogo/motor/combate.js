@@ -950,6 +950,8 @@ function pegarCarta(M, b, id) {
 }
 
 // ---------- caixas de arma e cartas no mapa ----------
+// v19.7: as 10 armas novas da v19 (ficam fora das caixas e do começo da rodada quando M.soClassicas)
+const ARMAS_V19 = { banana: 1, boliche: 1, bomba_grude: 1, disco: 1, gosma: 1, ima: 1, inflador: 1, tornado: 1, torreta: 1, vampiro: 1 };
 // v19: roleta da 1ª rodada (o dono pediu as raras mais difíceis): comum 75%, rara 22%, lendária 3%
 const PESOS_ROLETA = [0, 75, 22, 3];
 function sortearArma(M, inicio, roleta) {
@@ -967,6 +969,7 @@ function sortearArma(M, inicio, roleta) {
     if (!pesos[a.raridade]) return false;
     // v19.6: no começo (treino, rivais 1–5 da Bronze, 6 primeiras partidas) nada de arma que tira o controle
     if (M.semControle && (a.gruda || a.escorrega || a.bolha || a.infla)) return false;
+    if (M.soClassicas && ARMAS_V19[a.id]) return false;
     if (inicio && (a.tipo === "mina" || a.tipo === "ceu" || a.tipo === "torreta")) return false;
     return true;
   });

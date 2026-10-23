@@ -196,6 +196,13 @@ function iniciarRodada() {
     stats: { dano: [0, 0], tiros: [0, 0], acertos: [0, 0] },
     morreu: null, pegou: null, ultimaCarta: null
   };
+  // v19.7: no treino, no rival 2 e nas 2 primeiras partidas só as armas que já existiam na v18.3 (no PFT da v19.6 a
+  // rodada 2 do treino, quando as caixas aparecem, perdeu 6 pontos a mais que na v18.3)
+  M.soClassicas = !j.demo && (j.treino || save.partidas <= 2 || (j.rival && j.rival.liga === 0 && j.rival.i < 2));
+  // v19.7: lutas ~15% mais longas nos rivais 2–5 da Bronze e nas primeiras partidas contra o bot (o testador mediu
+  // rodadas de 12,6 s na v19 contra 15,9 s na v18.3: mais trocas de rodada por minuto, e cada troca perde gente)
+  M.multInicio = !j.demo && !j.treino && ((j.rival && j.rival.liga === 0 && j.rival.i >= 1 && j.rival.i <= 4) ||
+    (j.modo === "bot" && !j.rival && save.partidas <= 6)) ? 0.87 : 1;
   // v19.6: armas que tiram o controle (gosma, banana, bolhas, inflador) ficam fora no começo
   M.semControle = !j.demo && (j.treino || save.partidas <= 6 || (j.rival && j.rival.liga === 0 && j.rival.i < 5));
   // contra bot (pessoa x máquina): os mapas cruéis ficam mais justos para a pessoa (veja combate.js e passoMundo)
@@ -268,9 +275,12 @@ function iniciarRodada() {
     som("rodada");
     if (estado === "jogo") Poki.jogando(true);   // a gameplay volta com a rodada nova
   }
-  // v19: na 1ª rodada (menos no treino) as roletas de arma e de mapa abrem a partida
+  // v19: na 1ª rodada (menos no treino) as roletas de arma e de mapa abrem a partida.
+  // v19.7: só a partir do rival 3. No PFT da v19.6 a passagem treino -> rival 2 (onde a roleta aparecia pela 1ª vez)
+  // perdeu 7 pontos a mais que na v18.3 (75% x 82%); os rivais 1 e 2 começam direto, como na v18.3
   j.depoisRoleta = false;
-  if (j.rodada === 1 && !j.demo && !j.treino && !j.continuou) iniciarRoleta(j, M);
+  const semRoleta = j.rival && j.rival.liga === 0 && j.rival.i < 2;
+  if (j.rodada === 1 && !j.demo && !j.treino && !j.continuou && !semRoleta) iniciarRoleta(j, M);
 }
 
 // ---------- um passo (1/60 s) ----------
@@ -331,7 +341,7 @@ function passoDaPartida(dt) {
   }
   if (j.fase === "luta") {
     // últimos segundos: dano em dobro (quase toda rodada acaba em derrota, não em empate)
-    M.multDano = CONFIG.multDano * (j.relogio <= RODADA.danoDobro ? 2 : 1);
+    M.multDano = CONFIG.multDano * (M.multInicio || 1) * (j.relogio <= RODADA.danoDobro ? 2 : 1);
     if (!j.avisouDobro && j.relogio <= RODADA.danoDobro) { j.avisouDobro = true; if (!j.demo) som("alarme"); }
     passoMundo(j, M, true, 1);
     j.relogio -= FIS.dt;

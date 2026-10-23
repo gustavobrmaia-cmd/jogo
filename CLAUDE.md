@@ -390,6 +390,20 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     - **K.O. que fecha a partida:** pausa 16 quadros e treme mais.
     - **Queda de braço no celular em pé:** "TOQUE NA TELA!" grande com a mão e vibração a cada toque.
     - **Tela de fim:** tic nos 3 últimos segundos da contagem.
+  - **PFT v19.6** (23/10, 15:24): 2m40, 27% engajados, FPS 57. Reprovou na média, passou nos engajados.
+    - Passagem por passagem contra a v18.3 (os dois testes de 16/10 somados), a v19.6 perde um pouco em quase tudo.
+    - Os mapas não explicam: a taxa de "Failed" no treino é igual (fábrica 17 x 19%, floresta 27 x 28%...).
+    - As maiores perdas extras:
+      - treino rodada 2 -> 3 (quando as caixas aparecem): 80% x 86%;
+      - fim do treino -> rival 2 (onde a roleta aparecia pela 1ª vez): 75% x 82%;
+      - rival 2 -> 3: 52% x 58%.
+  - v19.7 (o dono pediu as 3):
+    - **A)** roleta só a partir do rival 3: os rivais 1–2 da Bronze começam direto, com o VS de 1,7 s e a faixa de
+      prêmios, como na v18.3;
+    - **B)** no treino, no rival 2 e nas 2 primeiras partidas só as armas da v18.3 (`M.soClassicas`, `ARMAS_V19` em
+      combate.js);
+    - **C)** dano x0,87 nos rivais 2–5 da Bronze e nas 6 primeiras partidas do "Contra o bot" (`M.multInicio`).
+      Simulação bot x bot nos rivais 2–4: luta média 9,5 s -> 13,2 s.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;
