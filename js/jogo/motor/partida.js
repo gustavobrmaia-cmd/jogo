@@ -678,10 +678,10 @@ function posRoleta(t, dur, n) { const u = Math.min(1, Math.max(0, t / dur)); ret
 
 // arma da roleta: sortearArma; a Sorte (melhoria) dá uma 2ª chance e fica a de raridade maior
 function sortearArmaRoleta(M, b) {
-  let id = sortearArma(M, true);
+  let id = sortearArma(M, true, true);
   const sorte = b.lado === 1 && b.humano && jogo && jogo.modo !== "2p" && typeof sorteJogador === "function" ? sorteJogador() : 0;
   if (sorte > 0 && Math.random() < sorte * 0.6) {
-    const outra = sortearArma(M, true);
+    const outra = sortearArma(M, true, true);
     if (ARMA[outra].raridade > ARMA[id].raridade) id = outra;
   }
   return id;

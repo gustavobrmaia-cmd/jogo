@@ -939,11 +939,13 @@ function pegarCarta(M, b, id) {
 }
 
 // ---------- caixas de arma e cartas no mapa ----------
-function sortearArma(M, inicio) {
+// v19: roleta da 1ª rodada (o dono pediu as raras mais difíceis): comum 75%, rara 22%, lendária 3%
+const PESOS_ROLETA = [0, 75, 22, 3];
+function sortearArma(M, inicio, roleta) {
   // pesos por raridade; a "Partida Lendária" só tem raras e lendárias
   // v18: nas 3 primeiras partidas a arma da rodada é mais "maluca" (raras e lendárias)
   // v19: 60 armas: os pesos por arma caem um pouco para a soma por raridade ficar parecida com a da v18.3
-  const pesos = (M.lendaria ? [0, 0, 60, 40] : inicio ? (save.partidas <= 3 ? [0, 55, 35, 10] : [0, 85, 15, 0]) : [0, 66, 29, 5]).slice();
+  const pesos = (M.lendaria ? [0, 0, 60, 40] : roleta ? PESOS_ROLETA : inicio ? (save.partidas <= 3 ? [0, 55, 35, 10] : [0, 85, 15, 0]) : [0, 66, 29, 5]).slice();
   // v19: SORTE (agente C, sorteJogador() de 0 a 1): contra a máquina, as caixas que caem puxam para raras e lendárias
   // (moderado: no máximo +60% no peso delas). Não vale para a arma do começo da rodada (é igual para os dois).
   if (!inicio && M.contraBot) {
@@ -955,6 +957,14 @@ function sortearArma(M, inicio) {
     if (inicio && (a.tipo === "mina" || a.tipo === "ceu" || a.tipo === "torreta")) return false;
     return true;
   });
+  // roleta: o peso é do NÍVEL (comum 75%, rara 22%, lendária 3%), não de cada arma; depois uma arma do nível ao acaso
+  if (roleta) {
+    let sr = 0; for (let k = 1; k <= 3; k++) sr += pesos[k];
+    let x = Math.random() * sr, nivel = 1;
+    for (let k = 1; k <= 3; k++) { x -= pesos[k]; if (x <= 0) { nivel = k; break; } }
+    const doNivel = lista.filter(function(a) { return a.raridade === nivel; });
+    if (doNivel.length) return doNivel[Math.floor(Math.random() * doNivel.length)].id;
+  }
   let soma = 0;
   lista.forEach(function(a) { soma += pesos[a.raridade]; });
   let r = Math.random() * soma;

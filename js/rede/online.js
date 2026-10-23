@@ -22,6 +22,7 @@ const Online = (function() {
   let alvo = null, antes = null, tAlvo = 0;   // convidado: posições para suavizar entre dois estados
   const cont = { pc: 0, tc: 0, cc: 0 };
   let primeiroEstado = true;
+  let outroOculto = false;        // a aba do outro está escondida (o jogo dele para; não é queda de conexão)
 
   // ---------- serialização (anfitrião) ----------
   // referências viram marcas: bolinha {$b}, plataforma {$p}, arma {$a}, cenário {$c}; canvas e funções ficam de fora
@@ -76,6 +77,8 @@ const Online = (function() {
     const pular = Object.assign({ M: 1 }, LOCAIS);
     const jp = campos(j, M, pular);
     jp.M = Mp;
+    // a variação do cenário (dia, noite...) é sorteada no desenho: vai junto para os dois verem o mesmo
+    if (typeof ArteCenarios !== "undefined" && ArteCenarios.variacao) jp.varCen = ArteCenarios.variacao();
     return jp;
   }
 
@@ -150,6 +153,11 @@ const Online = (function() {
     const faseAntes = j.fase;
     for (const k in s) j[k] = reviver(s[k], M);
     j.M = M;
+    // mesma variação do cenário do anfitrião: se a daqui for outra, refaz o fundo com a dele
+    if (j.varCen && typeof ArteCenarios !== "undefined" && ArteCenarios.variacao && ArteCenarios.variacao() !== j.varCen) {
+      ArteCenarios.forcarVariacao(j.varCen);
+      j.prerender = null; j.prerenderRodada = -1;
+    }
     // gameplay do Poki: só conta a luta
     if (faseAntes !== j.fase) Poki.jogando(j.fase === "luta" && estado === "jogo");
   }
@@ -305,7 +313,8 @@ const Online = (function() {
         bb.y = antes[i].y + (alvo[i].y - antes[i].y) * tAlvo;
       });
     }
-    if (performance.now() - ultimoEstado > 6000 && Rede.conectado) caiuConexao();
+    // sem notícia do anfitrião: 6 s é queda; se ele só escondeu a aba, espera até 40 s
+    if (performance.now() - ultimoEstado > (outroOculto ? 40000 : 6000) && Rede.conectado) caiuConexao();
   };
 
   // ---------- mensagens ----------
@@ -346,6 +355,10 @@ const Online = (function() {
       prontoOutro = true;
       if (tela === "fim") status(t("on_quer_revanche"));
       if (Rede.anfitriao && prontoEu) comecar();
+    } else if (m.k === "oculto") {
+      outroOculto = !!m.v;
+      ultimoEstado = performance.now();
+      if (m.v && Rede.anfitriao) entRemota = { esq: false, dir: false, sp: false, bx: false, t: false, pc: entRemota.pc, tc: entRemota.tc, cc: entRemota.cc, m: null };
     } else if (m.k === "tchau") {
       caiuConexao();
     }
@@ -360,6 +373,8 @@ const Online = (function() {
   Rede.ao("caiu", function() { caiuConexao(); });
 
   function caiuConexao() {
+    if (typeof ArteCenarios !== "undefined" && ArteCenarios.forcarVariacao) ArteCenarios.forcarVariacao(null);
+    outroOculto = false;
     const estava = api.ativo || tela === "fim" || tela === "conectado";
     Rede.sair();
     api.ativo = false;
@@ -484,7 +499,12 @@ const Online = (function() {
     onVoltar: function() { sair(); irParaMenu(""); }
   };
 
+  document.addEventListener("visibilitychange", function() {
+    if (api.ativo && Rede.conectado) Rede.enviar("r", { k: "oculto", v: document.hidden });
+  });
+
   function sair() {
+    if (typeof ArteCenarios !== "undefined" && ArteCenarios.forcarVariacao) ArteCenarios.forcarVariacao(null);
     if (Rede.conectado) Rede.enviar("r", { k: "tchau" });
     Rede.sair();
     api.ativo = false;

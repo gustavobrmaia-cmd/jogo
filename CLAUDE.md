@@ -344,6 +344,8 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     - roletas na 1ª rodada (arma, DEPOIS mapa; ~3 s; o toque acelera), no lugar das 3 cartas "?". Só mostram o que as
       regras de sempre sortearam;
     - melhoria Sorte (`sorteJogador()`, 0–1; vale 0 no 2 jogadores e no online). CSS das telas dela: `estilo-v19c.css`.
+    - v19.1: roleta com chance por NÍVEL (o dono pediu as raras mais difíceis): comum 75%, rara 22%, lendária 3%
+      (`PESOS_ROLETA` em combate.js; antes o peso era por arma e dava 82/17/0,8). Com a Sorte no máximo: 63/32/5.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;
@@ -357,6 +359,8 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     - partida rápida (salas públicas; quem espera procura outra sala a cada 3 s para duas pessoas não ficarem
       esperando em salas separadas), sala com código e revanche;
     - anúncio comum antes de procurar e antes da revanche, nunca no meio. Vitória dá 40 moedas, derrota 15;
+    - v19.1: a variação do cenário vai no estado (`varCen`) e o convidado usa a mesma; aba escondida avisa o outro
+      ("oculto": o anfitrião solta os controles do convidado; o convidado espera até 40 s em vez de 6 s);
     - não testado com a rede de verdade aqui (o ambiente bloqueia netlib.poki.io); testar no site.
 
 ## Entrega para o Poki
