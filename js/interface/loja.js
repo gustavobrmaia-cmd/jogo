@@ -26,7 +26,8 @@ let armaLoja = null;
 })();
 
 function armasDaLoja(r) {
-  return ARMAS.filter(function(a) { return a.raridade === r; });
+  // v19: só armas que podem abrir a rodada (sem mina, ataque do céu e torreta)
+  return ARMAS.filter(function(a) { return a.raridade === r && a.tipo !== "mina" && a.tipo !== "ceu" && a.tipo !== "torreta"; });
 }
 
 function abrirLoja() {

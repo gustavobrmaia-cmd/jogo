@@ -681,7 +681,7 @@ function fitaRoleta(lista, final, n) {
 
 function iniciarRoleta(j, M) {
   const rapida = save.partidas <= 5, d = rapida ? ROLETA.rapida : ROLETA.normal;
-  const nomes = ARMAS.filter(function(a) { return a.raridade >= (M.lendaria ? 2 : 1) && a.tipo !== "mina" && a.tipo !== "ceu"; }).map(function(a) { return a.id; });
+  const nomes = ARMAS.filter(function(a) { return a.raridade >= (M.lendaria ? 2 : 1) && a.tipo !== "mina" && a.tipo !== "ceu" && a.tipo !== "torreta"; }).map(function(a) { return a.id; });
   let k2 = 0;
   const armas = M.bolinhas.map(function(b, k) {
     if (j.armaInicial && j.armaInicial[k]) return { id: j.armaInicial[k], fixa: true, pos: 0, fita: [j.armaInicial[k]] };
