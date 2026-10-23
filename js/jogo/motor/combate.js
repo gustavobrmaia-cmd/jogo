@@ -357,7 +357,7 @@ function aplicarEfeitosDoTiro(M, a, b, dono, p) {
   if (a.fogo) ef.fogo = Math.max(ef.fogo || 0, a.fogo);
   if (a.gruda) { ef.grudado = Math.max(ef.grudado || 0, a.gruda); }
   if (a.infla) { if (!(ef.inflado > 0)) somJogo(M, "s_inflou"); ef.inflado = Math.max(ef.inflado || 0, a.infla); b.vy -= 3; }
-  if (a.bolha && !(ef.bolha > 0)) { ef.bolha = a.bolha; b.bolhaDono = dono ? dono.lado : 0; b.vy = Math.min(b.vy, -1); }
+  if (a.bolha && !(ef.bolha > 0) && !(ef.imuneBolha > 0)) { ef.bolha = a.bolha; b.bolhaDono = dono ? dono.lado : 0; b.vy = Math.min(b.vy, -1); }
   if (a.levanta && p) {
     b.vy = -a.levanta * (b.humano && M.contraBot ? 0.85 : 1);
     b.vx = b.vx * 0.3 + (p.vx > 0 ? 1 : -1) * 3;
@@ -904,6 +904,7 @@ function atualizarEfeitos(M, b) {
   if (bolhaAntes && !(ef.bolha > 0) && b.viva) {
     const dono = b.bolhaDono ? M.bolinhas[b.bolhaDono - 1] : null;
     causarDano(M, b, 9, dono, 0, -1, 3, b.x, b.y - b.r);
+    b.efeitos.imuneBolha = 1.4;                             // sem prender de novo logo em seguida (não vira prisão)
     somJogo(M, "s_estoura_bolha");
     if (typeof ArteArmas !== "undefined" && ArteArmas.soltar) ArteArmas.soltar("bolha", b.x, b.y, 8);
   }

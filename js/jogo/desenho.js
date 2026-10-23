@@ -289,7 +289,7 @@ function desenharBolinhaNoMundo(ctx, j, M, b, o, tm) {
 // Linha pontilhada da mira livre: reta para tiros normais, curva para granadas/flechas (mostra onde cai)
 function desenharGuiaMira(ctx, M, b, ang) {
   const a = ARMA[b.arma];
-  if (a.tipo === "melee" || a.tipo === "mina" || a.tipo === "ceu") return;
+  if (a.tipo === "melee" || a.tipo === "mina" || a.tipo === "ceu" || a.tipo === "torreta") return;   // v19-b: torreta não mira
   const boca = pontaDoCano(b, ang);
   const g = (a.grav || 0) * gravidadeDe(M.cen) * gravSinal(M.cen, M.t);
   const v = (a.vel || 18) * (M.cen.agua ? 0.7 : 1);
