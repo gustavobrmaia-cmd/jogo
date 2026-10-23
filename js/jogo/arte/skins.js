@@ -1573,10 +1573,17 @@ const ArteSkins = (function() {
   // K.O. = um boneco estoura ao lado com o efeito; emote = comemora com o balão.
   var prevFx = { id: "", vida: 0.5, pts: [] }, prevB = { x: 0, y: 0, cor: "#fff", rastroFx: prevFx }, prevT = 0, prevS = 0;
   function previa(ctx, w, h, v, t, aba) {
-    var r = Math.min(w, h) * 0.2, chao = h * 0.8, ciclo = t % 4;
+    // na aba Comemoração a bolinha fica menor e mais baixa (o balão cabe em cima) e comemora do jeito do emote
+    var emo = aba === "emote" && v.emote && SKIN[v.emote], ciclo = t % 4;
+    var r = Math.min(w, h) * (emo ? 0.16 : 0.2), chao = h * (emo ? 0.88 : 0.8);
     var andar = v.rastro || aba === "rastro";
     var x = w / 2 + (andar ? Math.sin(t * 1.3) * w * 0.26 : 0), pulo = Math.max(0, Math.sin(t * 2.6)) * (andar ? r * 0.5 : r * 0.18);
-    var y = chao - r - pulo, sx = 1 + Math.sin(t * 5.2) * 0.04, sy = 2 - sx;
+    var sx = 1 + Math.sin(t * 5.2) * 0.04, sy = 2 - sx;
+    if (emo && ciclo < 2.4) {
+      if (emo.mov === "danca") { sx = 1 + 0.13 * Math.sin(t * 16); sy = 2 - sx; pulo = 0; }
+      else pulo = Math.abs(Math.sin(t * (emo.mov === "pulao" ? 4.2 : 7.5))) * r * (emo.mov === "pulao" ? 0.9 : 0.4);
+    }
+    var y = chao - r - pulo;
     // rastro (pontos guardados aqui mesmo, como no jogo)
     prevFx.id = v.rastro || "";
     var dt = Math.min(0.1, Math.max(0, t - prevT)); prevT = t;
