@@ -21,6 +21,7 @@
    - Telas novas (de outros arquivos) herdam: button, .grande, .premiado, .voltar, .caixa, .painelV19, .tituloV19.
    ===================================================================================================== */
 :root {
+  color-scheme: dark;   /* v19.4: o modo escuro automático do navegador pula páginas que já são escuras (não escurece as telas) */
   --tinta: #1a0d33;
   --fundo1: #2a1458; --fundo2: #160a33; --noite: #1b1f5e;
   --painel: #3a2885; --painel2: #2b1d6a; --filete: rgba(255, 255, 255, 0.16);

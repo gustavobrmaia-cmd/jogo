@@ -355,6 +355,10 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     - ventania: a areia andava `t × força` e dava saltos quando a força mudava; agora a fase é acumulada
       quadro a quadro e mais devagar;
     - roletas mais lentas (`ROLETA` em partida.js): ~3,3 s nas 5 primeiras partidas e ~3,8 s depois. O toque acelera.
+  - v19.4: `<meta name="color-scheme" content="dark">` e `color-scheme: dark` no :root. O modo escuro automático de
+    alguns navegadores (Night mode do Brave, Samsung Internet, flag do Chrome) escurecia a parte clara dos botões
+    (o canvas não muda). Páginas que se declaram escuras costumam ficar de fora. Nos testes com o escurecimento
+    FORÇADO do Chromium não adiantou (nem "only light"); esse modo não vem ligado por padrão.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;
