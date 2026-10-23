@@ -81,7 +81,10 @@ button.lAba.ativo { background: linear-gradient(#ffe066, #fab005); }
 button.lItem canvas { width: 90px; height: 90px; }
 
 /* botão Loja no menu e cartão da Sorte */
-button.botaoLoja { position: relative; background: linear-gradient(#63e6be, #0ca678); border-bottom-color: #08523b; }
+button.botaoLoja, #telaMenu button.botaoLoja { position: relative; background: linear-gradient(180deg, #74c0fc 0%, #339af0 55%, #1c7ed6 100%); border-bottom-color: #0b4a8a; }
+/* com a Loja são 5 botões na linha do menu: deitado eles ficam mais estreitos para caber */
+body:not(.retrato) #telaMenu .linha:has(#btnLoja:not(.escondido)) { gap: 10px; }
+body:not(.retrato) #telaMenu .linha:has(#btnLoja:not(.escondido)) button { min-width: 0; padding-left: 16px; padding-right: 16px; font-size: 23px; }
 button.poderCarta[data-melhoria="sorte"] { background: linear-gradient(#63e6be, #099268); border-bottom-color: #064d38; }
 .pcIcone .ico { width: 1.25em; height: 1.25em; vertical-align: middle; }
 .maoPoder .ico { width: 1.1em; height: 1.1em; }
