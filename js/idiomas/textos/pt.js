@@ -318,7 +318,7 @@ TEXTOS.pt = {
   sk_ouro: "Ouro",
   sk_nenhum: "Nenhum",
   sk_bone: "Boné",
-  sk_oculos: "Óculos Escuros",
+  sk_oculos: "Óculos redondos",
   sk_orelhas_gato: "Orelhas de Gato",
   sk_fone: "Fone",
   sk_cartola: "Cartola",

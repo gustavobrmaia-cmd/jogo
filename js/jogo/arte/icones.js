@@ -19,7 +19,7 @@ const Icone = (function() {
   var NOMES = ["moeda", "brilho", "raio", "ok", "trofeu", "presente", "nota", "som", "mudo", "estrela", "explosao",
     "coracao", "repetir", "robo", "casa", "mao", "celular", "alvo", "pincel", "engrenagem", "globo", "controle",
     "dupla", "fogo", "bau", "cadeado", "trevo", "arma", "mapa", "loja", "roleta", "coroa", "escudo", "relogio",
-    "seta", "voltar", "play", "fechar", "copiar", "wifi", "usuario", "chapeu", "olho", "rastro", "caveira"];
+    "seta", "voltar", "play", "fechar", "copiar", "wifi", "usuario", "chapeu", "olho", "rastro", "caveira", "boca"];
   var PI = Math.PI, TAU = PI * 2;
   var TINTA = "#1a0d33", LW = 8;
 
@@ -397,6 +397,20 @@ const Icone = (function() {
     g.fillStyle = "#ff4f9a"; g.beginPath(); C(g, -13, -10, 3.5); C(g, 17, -10, 3.5); g.fill();
     g.strokeStyle = TINTA; g.lineWidth = 4; g.beginPath(); g.moveTo(-8, 24); g.lineTo(-8, 34); g.moveTo(0, 25); g.lineTo(0, 36); g.moveTo(8, 24); g.lineTo(8, 34); g.stroke();
     meiaLua(g, 0, -10, 26, PI * 1.08, PI * 1.38, 5, false);
+  };
+  // v19.3: boca sorrindo (lábios rosa, dentes e língua) — o ícone da categoria Boca era a nota musical
+  D.boca = function(g) {
+    function labios(g) { g.moveTo(-46, -8); g.quadraticCurveTo(-24, -26, 0, -16); g.quadraticCurveTo(24, -26, 46, -8); g.quadraticCurveTo(30, 38, 0, 38); g.quadraticCurveTo(-30, 38, -46, -8); g.closePath(); }
+    cel(g, labios, "#ff5d8f", "#c2306a", { dx: 3, dy: 5 });
+    function dentro(g) { g.moveTo(-34, -4); g.quadraticCurveTo(0, 4, 34, -4); g.quadraticCurveTo(22, 26, 0, 26); g.quadraticCurveTo(-22, 26, -34, -4); g.closePath(); }
+    g.beginPath(); dentro(g); g.fillStyle = "#5a1030"; g.fill();
+    g.save(); g.beginPath(); dentro(g); g.clip();
+    g.fillStyle = "#ffffff"; g.fillRect(-30, -8, 60, 13);
+    g.strokeStyle = "#c8cdf0"; g.lineWidth = 2.5; g.beginPath(); g.moveTo(-10, -6); g.lineTo(-10, 5); g.moveTo(10, -6); g.lineTo(10, 5); g.stroke();
+    g.fillStyle = "#ff8fb0"; g.beginPath(); g.ellipse(0, 24, 18, 11, 0, 0, TAU); g.fill();
+    g.restore();
+    g.beginPath(); dentro(g); g.lineWidth = 4; g.strokeStyle = TINTA; g.stroke();
+    meiaLua(g, 0, 2, 34, PI * 1.12, PI * 1.32, 5, false);
   };
   // desconhecido: círculo neutro
   function neutro(g) { cel(g, function(g) { C(g, 0, 0, 38); }, "#b8c4ff", "#6f7cc8", { dx: 4, dy: 5 }); meiaLua(g, 0, 0, 28, PI * 1.1, PI * 1.4, 5, false); }

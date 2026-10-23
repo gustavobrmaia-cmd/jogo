@@ -318,7 +318,7 @@ TEXTOS.de = {
   sk_ouro: "Gold",
   sk_nenhum: "Keins",
   sk_bone: "Kappe",
-  sk_oculos: "Sonnenbrille",
+  sk_oculos: "Runde Brille",
   sk_orelhas_gato: "Katzenohren",
   sk_fone: "Kopfhörer",
   sk_cartola: "Zylinder",

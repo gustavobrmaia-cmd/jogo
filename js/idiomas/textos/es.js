@@ -318,7 +318,7 @@ TEXTOS.es = {
   sk_ouro: "Oro",
   sk_nenhum: "Ninguno",
   sk_bone: "Gorra",
-  sk_oculos: "Gafas de Sol",
+  sk_oculos: "Gafas redondas",
   sk_orelhas_gato: "Orejas de Gato",
   sk_fone: "Auriculares",
   sk_cartola: "Chistera",

@@ -1113,14 +1113,16 @@ const ArteCenarios = (function() {
       if (V.astro === "lua") { estrelas(g, 180, 81, S.top, 420, "#ffffff"); luaCrescente(g, 300, 120, 38, "#fff6e0"); }
       else astro(g, 1000, V.solY, 58, "#ffe45c", "#fff6b0", "#f08a24", "#fff0a0", .4);
       // mesas de arenito ao longe
-      [[90, 470, 200, 120], [1050, 460, 240, 130]].forEach((q, k) => {
+      // v19.3: base em 580 (atrás das dunas); antes acabava em 460–470 e aparecia céu embaixo (pareciam flutuar)
+      [[90, 580, 200, 230], [1050, 580, 240, 250]].forEach((q, k) => {
         poli(g, [q[0], q[1], q[0] + 20, q[1] - q[3], q[0] + q[2] - 20, q[1] - q[3], q[0] + q[2], q[1]]); g.fillStyle = T("#d4805a"); g.fill();
         poli(g, [q[0] + q[2] * .6, q[1] - q[3], q[0] + q[2] - 20, q[1] - q[3], q[0] + q[2], q[1], q[0] + q[2] * .6, q[1]]); g.fillStyle = T("#b0604a"); g.fill();
         g.fillStyle = T("#e8a070"); g.fillRect(q[0] + 14, q[1] - q[3], q[2] - 28, 10); for (let y = q[1] - q[3] + 34; y < q[1]; y += 26) { g.fillStyle = ca(TINTA, .2); g.fillRect(q[0] + 14, y, q[2] - 28, 4); }
         poli(g, [q[0], q[1], q[0] + 20, q[1] - q[3], q[0] + q[2] - 20, q[1] - q[3], q[0] + q[2], q[1]]); tracar(g, TINTA, 3);
       });
       // pirâmides
-      [[640, 500, 300, 220], [420, 520, 160, 110], [860, 520, 180, 130]].forEach(q => {
+      // v19.3: mesma ponta de antes, base descida até 580 (largura cresce junto para manter a inclinação)
+      [[640, 580, 409, 300], [420, 580, 247, 170], [860, 580, 263, 190]].forEach(q => {
         poli(g, [q[0] - q[2] / 2, q[1], q[0], q[1] - q[3], q[0] + q[2] / 2, q[1]]); g.fillStyle = T("#f2c878"); g.fill();
         poli(g, [q[0], q[1] - q[3], q[0] + q[2] / 2, q[1], q[0] + q[2] * .08, q[1]]); g.fillStyle = T("#c8904a"); g.fill();
         g.strokeStyle = ca(TINTA, .25); g.lineWidth = 2; for (let k = 1; k < 7; k++) { const yy = q[1] - q[3] * k / 7, hw = q[2] / 2 * (1 - k / 7); g.beginPath(); g.moveTo(q[0] - hw, yy); g.lineTo(q[0] + hw, yy); g.stroke(); }
@@ -1158,8 +1160,12 @@ const ArteCenarios = (function() {
     frente: function(g, est, t) { // linhas de areia correndo no sentido do vento + poeira rasteira
       const v = est.vento || 0, av = Math.abs(v); if (av < .02) return;
       const fs = [48, 80, 112].map(w => spr("faixaAreia" + w, w, 5, c => { rr(c, 1, 1, w - 2, 3, 1.5); c.fillStyle = "rgba(255,236,190,.85)"; c.fill(); }));
-      const dir = v > 0 ? 1 : -1, nn = 10 + Math.round(av * 22);
-      for (let k = 0; k < nn; k++) { const sp = 380 + (k % 5) * 90, x = mod(k * 173 + dir * t * sp * av, L + 160) - 80, y = ((k * 89) % 560) + 60 + Math.sin(t * 2 + k) * 6; g.drawImage(fs[k % 3], Math.round(x), Math.round(y)); }
+      // v19.3: a areia anda pela força do vento acumulada quadro a quadro (antes x = t * força: a força muda durante
+      // a rodada e as linhas davam saltos enormes, parecendo um vento rápido demais e bugado); também mais devagar
+      const dt = S.ventoT == null || t < S.ventoT ? 0 : Math.min(0.1, t - S.ventoT);
+      S.ventoT = t; S.ventoFase = (S.ventoFase || 0) + v * dt;
+      const nn = 10 + Math.round(av * 22);
+      for (let k = 0; k < nn; k++) { const sp = 240 + (k % 5) * 50, x = mod(k * 173 + S.ventoFase * sp, L + 160) - 80, y = ((k * 89) % 560) + 60 + Math.sin(t * 2 + k) * 6; g.drawImage(fs[k % 3], Math.round(x), Math.round(y)); }
       const pa = spr("poeira", L, 150, c => { c.fillStyle = vg(c, 0, 150, "rgba(235,190,120,0)", "rgba(235,190,120,.22)"); c.fillRect(0, 0, L, 150); });
       g.globalAlpha = Math.min(1, av * 1.6); g.drawImage(pa, 0, Math.round(est.altura - est.deslocY - 150)); g.globalAlpha = 1;
     }

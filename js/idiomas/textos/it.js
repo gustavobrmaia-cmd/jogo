@@ -318,7 +318,7 @@ TEXTOS.it = {
   sk_ouro: "Oro",
   sk_nenhum: "Nessuno",
   sk_bone: "Cappellino",
-  sk_oculos: "Occhiali da Sole",
+  sk_oculos: "Occhiali tondi",
   sk_orelhas_gato: "Orecchie da Gatto",
   sk_fone: "Cuffie",
   sk_cartola: "Cilindro",

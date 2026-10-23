@@ -670,8 +670,9 @@ function nivelBotTexto(nivel) { return Math.round(nivel * 9) + 1; }   // 1 a 10,
 //          roulette/weapon-start (a pessoa tem arma inicial), roulette/map (visible) e roulette/map-skip (interact).
 // Desenho: arte/roleta.js (Roleta.desenhar), chamado pelo desenho.js na fase "roleta".
 const ROLETA = {
-  rapida: { arma: 0.8, atraso: 0.1, seguraArma: 0.28, mapa: 0.62, seguraMapa: 0.25 },   // primeiras partidas: ~2 s
-  normal: { arma: 1.0, atraso: 0.14, seguraArma: 0.35, mapa: 0.8, seguraMapa: 0.3 }    // depois: ~2,6 s
+  // v19.3: o dono achou as roletas rápidas demais (dava para ver o resultado, mas não a roleta girando)
+  rapida: { arma: 1.3, atraso: 0.14, seguraArma: 0.45, mapa: 1.0, seguraMapa: 0.4 },    // primeiras partidas: ~3,3 s
+  normal: { arma: 1.5, atraso: 0.18, seguraArma: 0.5, mapa: 1.15, seguraMapa: 0.45 }   // depois: ~3,8 s
 };
 // posição (0 até n-1) da roleta: começa rápido e desacelera (cúbica)
 function posRoleta(t, dur, n) { const u = Math.min(1, Math.max(0, t / dur)); return (n - 1) * (1 - Math.pow(1 - u, 3)); }

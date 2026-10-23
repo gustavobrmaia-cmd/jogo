@@ -318,7 +318,7 @@ TEXTOS.pl = {
   sk_ouro: "Złoto",
   sk_nenhum: "Brak",
   sk_bone: "Czapka",
-  sk_oculos: "Okulary",
+  sk_oculos: "Okrągłe okulary",
   sk_orelhas_gato: "Kocie Uszy",
   sk_fone: "Słuchawki",
   sk_cartola: "Cylinder",

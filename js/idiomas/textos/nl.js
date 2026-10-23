@@ -318,7 +318,7 @@ TEXTOS.nl = {
   sk_ouro: "Goud",
   sk_nenhum: "Geen",
   sk_bone: "Pet",
-  sk_oculos: "Zonnebril",
+  sk_oculos: "Ronde bril",
   sk_orelhas_gato: "Kattenoren",
   sk_fone: "Koptelefoon",
   sk_cartola: "Hoge Hoed",

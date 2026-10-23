@@ -348,6 +348,13 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       (`PESOS_ROLETA` em combate.js; antes o peso era por arma e dava 82/17/0,8). Com a Sorte no máximo: 63/32/5.
   - v19.2: em pé com câmera, acima da arena o céu continua (cor da 1ª linha do fundo pronto, 6 faixas escurecendo
     para cima, estrelas se for escuro; `ceuAcima` em arte/cenarios.js). Antes era uma faixa lisa.
+  - v19.3 (bugs que o dono achou):
+    - o óculos antigo ("oculos") e o novo ("oculos_sol") tinham o mesmo nome; o antigo virou "Óculos redondos";
+    - a aba Boca usava o ícone de nota musical; agora tem o ícone `boca`;
+    - deserto: as mesas e as pirâmides acabavam antes das dunas e pareciam flutuar (base agora em 580);
+    - ventania: a areia andava `t × força` e dava saltos quando a força mudava; agora a fase é acumulada
+      quadro a quadro e mais devagar;
+    - roletas mais lentas (`ROLETA` em partida.js): ~3,3 s nas 5 primeiras partidas e ~3,8 s depois. O toque acelera.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

@@ -318,7 +318,7 @@ TEXTOS.fr = {
   sk_ouro: "Or",
   sk_nenhum: "Aucun",
   sk_bone: "Casquette",
-  sk_oculos: "Lunettes de Soleil",
+  sk_oculos: "Lunettes rondes",
   sk_orelhas_gato: "Oreilles de Chat",
   sk_fone: "Casque",
   sk_cartola: "Haut-de-forme",

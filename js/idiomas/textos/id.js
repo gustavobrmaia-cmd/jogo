@@ -318,7 +318,7 @@ TEXTOS.id = {
   sk_ouro: "Emas",
   sk_nenhum: "Tidak ada",
   sk_bone: "Topi",
-  sk_oculos: "Kacamata Hitam",
+  sk_oculos: "Kacamata bulat",
   sk_orelhas_gato: "Telinga Kucing",
   sk_fone: "Headphone",
   sk_cartola: "Topi Tinggi",

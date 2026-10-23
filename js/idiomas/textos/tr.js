@@ -318,7 +318,7 @@ TEXTOS.tr = {
   sk_ouro: "Altın",
   sk_nenhum: "Yok",
   sk_bone: "Şapka",
-  sk_oculos: "Güneş Gözlüğü",
+  sk_oculos: "Yuvarlak gözlük",
   sk_orelhas_gato: "Kedi Kulakları",
   sk_fone: "Kulaklık",
   sk_cartola: "Silindir Şapka",

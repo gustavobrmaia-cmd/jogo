@@ -318,7 +318,7 @@ TEXTOS.en = {
   sk_ouro: "Gold",
   sk_nenhum: "None",
   sk_bone: "Cap",
-  sk_oculos: "Sunglasses",
+  sk_oculos: "Round Glasses",
   sk_orelhas_gato: "Cat Ears",
   sk_fone: "Headphones",
   sk_cartola: "Top Hat",

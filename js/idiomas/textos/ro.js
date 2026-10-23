@@ -318,7 +318,7 @@ TEXTOS.ro = {
   sk_ouro: "Aur",
   sk_nenhum: "Niciunul",
   sk_bone: "Șapcă",
-  sk_oculos: "Ochelari de Soare",
+  sk_oculos: "Ochelari rotunzi",
   sk_orelhas_gato: "Urechi de Pisică",
   sk_fone: "Căști",
   sk_cartola: "Joben",

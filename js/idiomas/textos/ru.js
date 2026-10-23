@@ -318,7 +318,7 @@ TEXTOS.ru = {
   sk_ouro: "Золото",
   sk_nenhum: "Нет",
   sk_bone: "Кепка",
-  sk_oculos: "Очки",
+  sk_oculos: "Круглые очки",
   sk_orelhas_gato: "Кошачьи ушки",
   sk_fone: "Наушники",
   sk_cartola: "Цилиндр",

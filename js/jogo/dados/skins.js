@@ -20,7 +20,7 @@
 
 const CATEGORIAS_VISUAL = ["cor", "corpo", "olhos", "boca", "chapeu", "acessorio", "rastro", "ko", "emote"];
 // ícone de cada aba (nomes de Icone.NOMES)
-const ICONE_CATEGORIA = { cor: "pincel", corpo: "estrela", olhos: "olho", boca: "nota", chapeu: "chapeu", acessorio: "presente",
+const ICONE_CATEGORIA = { cor: "pincel", corpo: "estrela", olhos: "olho", boca: "boca", chapeu: "chapeu", acessorio: "presente",
   rastro: "rastro", ko: "explosao", emote: "coracao" };
 
 const SKINS = [
