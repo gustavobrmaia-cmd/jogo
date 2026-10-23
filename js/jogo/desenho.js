@@ -677,6 +677,7 @@ function nomeJogador(j, lado) {
     return lado === 1 ? t("voce") : t("bot") + " · " + t("nivel_curto", nivelBotTexto(nivel)) + estilo;
   }
   if (j.modo === "demo") return lado === 1 ? "BOT 1" : "BOT 2";
+  if (j.modo === "online") return lado === 1 ? t("voce") : t("on_rival");   // v19: cada aparelho se vê como o 1
   return t("jogador_n", lado);
 }
 

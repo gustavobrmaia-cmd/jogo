@@ -26,7 +26,7 @@ const MELHORIAS = [
 // Sorte do jogador 1 (0 a 1): nível de Sorte / máximo. Contrato com o combate (caixas de arma).
 // Igual ao PODER: não vale no 2 jogadores (nem na demonstração dos menus) -> 0.
 function sorteJogador() {
-  if (typeof jogo !== "undefined" && jogo && (jogo.modo === "2p" || jogo.demo) && estado === "jogo") return 0;
+  if (typeof jogo !== "undefined" && jogo && (jogo.modo === "2p" || jogo.modo === "online" || jogo.demo) && estado === "jogo") return 0;
   const n = save.poder && save.poder.sorte || 0;
   return Math.max(0, Math.min(1, n / 10));
 }

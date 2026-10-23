@@ -81,6 +81,7 @@ const Roleta = (function() {
   }
   function nomeDe(j, k) {
     if (j.modo === "2p") return t("jogador_n", k + 1);
+    if (j.modo === "online" && k === 1) return t("on_rival");
     if (k === 0) return t("voce_curto");
     return j.rival ? j.rival.d.nome : t("bot");
   }

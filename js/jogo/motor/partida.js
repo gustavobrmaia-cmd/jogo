@@ -11,7 +11,8 @@
 //               Quem terminou a luta com mais vida já começa um pouco na frente.
 //   "fimRodada" câmera lenta, ponto para quem venceu
 //   "fimPartida" comemoração e volta para as telas
-// Modos: "bot" (jogador 1 contra o bot), "2p" (dois no mesmo aparelho), "demo" (bot contra bot no fundo do menu)
+// Modos: "bot" (jogador 1 contra o bot), "2p" (dois no mesmo aparelho), "demo" (bot contra bot no fundo do menu),
+//        "online" (v19: dois aparelhos; js/rede/online.js)
 // =========================
 
 const RODADA = { intro: 1.0, introPrimeira: 1.7, luta: 45, fim: 2.1, quedaIntro: 1.1, quedaMax: 6, quedaFim: 1.6, fimPartida: 2.6, danoDobro: 10 };
@@ -269,7 +270,21 @@ function iniciarRodada() {
 }
 
 // ---------- um passo (1/60 s) ----------
+// v19: online (js/rede/online.js): o convidado não simula (manda os controles e desenha o que chega);
+// o anfitrião grava os efeitos do passo e manda o estado
 function atualizarJogo(dt) {
+  const j = jogo;
+  if (!j) return;
+  if (j.modo === "online" && typeof Online !== "undefined") {
+    if (!Rede.anfitriao) { Online.passoConvidado(dt); return; }
+    Online.antesDoPasso();
+    try { passoDaPartida(dt); } finally { Online.depoisDoPasso(); }
+    return;
+  }
+  passoDaPartida(dt);
+}
+
+function passoDaPartida(dt) {
   const j = jogo;
   if (!j) return;
   const M = j.M;
@@ -321,7 +336,7 @@ function atualizarJogo(dt) {
       j.vencedorRodada = vivos.length === 1 ? vivos[0].lado : 0;
       j.fase = "fimRodada"; j.tempoFase = 0;
       // ganhou a rodada contra o bot: moedas saem de onde ele caiu e voam para o placar (desenho.js)
-      if (!j.demo && j.modo !== "2p" && j.vencedorRodada === 1 && M.ko) j.chuva = { x: M.ko.x, y: M.ko.y, n: j.modo === "sobrevivencia" ? 8 : 6, t0: performance.now() };
+      if (!j.demo && j.modo !== "2p" && j.modo !== "online" && j.vencedorRodada === 1 && M.ko) j.chuva = { x: M.ko.x, y: M.ko.y, n: j.modo === "sobrevivencia" ? 8 : 6, t0: performance.now() };
       // v19: efeito de K.O. escolhido na personalização (de quem derrubou, se for pessoa)
       const vk = j.vencedorRodada && j.visuais ? j.visuais[j.vencedorRodada - 1] : null;
       if (!j.demo && M.ko && M.ko.humano && vk && vk.ko) efeitoKO(vk.ko, M.ko.x, M.ko.y, j.cores[j.vencedorRodada - 1]);
@@ -426,6 +441,8 @@ function passoMundo(j, M, controles, lento) {
 const PARADO = { esq: false, dir: false, pulo: false, segPulo: false, baixo: false, tiro: false, apertouTiro: false };
 
 function entradaHumana(j, b) {
+  // v19: no online, a bolinha 2 do anfitrião é a pessoa do outro aparelho
+  if (j === 2 && jogo && jogo.modo === "online" && typeof Online !== "undefined") return Online.entradaRemota(b);
   const apertouTiro = entrada.apertou(j, "tiro");
   entrada.apertou(j, "toque");
   // mira livre (mouse, analógico de mira no toque, analógico direito do controle) ou assistida (null)
@@ -599,8 +616,11 @@ function atualizarQueda(j) {
     if (bot) clicou = botClica(bot, q.t);
     else {
       // um clique/toque pode chegar como "tiro" e "toque" ao mesmo tempo: conta uma vez só
-      const a = entrada.apertou(k, "tiro"), b2 = entrada.apertou(k, "toque"), c = entrada.apertou(k, "pulo");
-      clicou = a || b2 || c;
+      if (k === 2 && j.modo === "online" && typeof Online !== "undefined") clicou = Online.cliqueRemoto();
+      else {
+        const a = entrada.apertou(k, "tiro"), b2 = entrada.apertou(k, "toque"), c = entrada.apertou(k, "pulo");
+        clicou = a || b2 || c;
+      }
     }
     if (!clicou) continue;
     if (k === 1) { q.toques1++; q.pos -= PASSO_QUEDA; q.pulso1 = 1; }

@@ -33,7 +33,7 @@ const Rede = (function() {
     const c = { id: id, sala: "", outro: "" };
     bc.onmessage = function(e) {
       const m = e.data;
-      if (m.sala !== c.sala && m.tipo !== "procura") return;
+      if (m.sala !== c.sala && m.tipo !== "procura" && m.tipo !== "anuncio" && !(m.tipo === "aceito" && m.para === id)) return;
       if (m.tipo === "procura" && c.sala && api.anfitriao && !c.outro && (m.sala === c.sala || (m.sala === "*" && c.publica))) {
         c.outro = m.de;
         bc.postMessage({ tipo: "aceito", sala: c.sala, de: id, para: m.de });
@@ -45,12 +45,24 @@ const Rede = (function() {
       } else if (m.tipo === "dado" && m.de === c.outro) {
         if (m.canal === "u" && Math.random() < 0.02) return;   // simula perda no canal rápido
         setTimeout(function() { receber(m.canal, m.obj); }, 30 + Math.random() * 20);   // simula atraso
+      } else if (m.tipo === "anuncio" && c.publica && api.anfitriao && !c.outro && m.de < id) {
+        // duas salas públicas esperando (igual à vigia da netlib): a de id maior sai e entra na outra
+        c.publica = false; api.anfitriao = false;
+        c.sala = m.sala;
+        c.esperando = function() {};
+        bc.postMessage({ tipo: "procura", sala: m.sala, de: id });
       } else if (m.tipo === "saiu" && m.de === c.outro) {
         caiu();
       }
     };
     c.criar = function(publica) {
       c.sala = String(1000 + Math.floor(Math.random() * 9000)); c.publica = publica;
+      if (publica) {
+        const anunciar = setInterval(function() {
+          if (!c.publica || c.outro || !api.anfitriao) { clearInterval(anunciar); return; }
+          bc.postMessage({ tipo: "anuncio", sala: c.sala, de: id });
+        }, 1000);
+      }
       return Promise.resolve(c.sala);
     };
     c.entrar = function(sala) {
@@ -58,6 +70,7 @@ const Rede = (function() {
       return new Promise(function(ok) {
         c.esperando = ok;
         bc.postMessage({ tipo: "procura", sala: sala, de: id });
+        setTimeout(function() { if (c.esperando) bc.postMessage({ tipo: "procura", sala: sala, de: id }); }, 700);
         setTimeout(function() { if (c.esperando) { c.esperando(false); c.esperando = null; } }, 1500);
       });
     };
@@ -153,19 +166,46 @@ const Rede = (function() {
       });
     }
     return abrirNet().then(function(n) { return n.list(); }).then(function(lista) {
-      const livres = (lista || []).filter(function(l) {
-        return l.public && !l.hasPassword && l.playerCount === 1 && l.customData && l.customData.v === VERSAO;
-      }).sort(function(a, b) { return (a.latency || 999) - (b.latency || 999); });
-      if (!livres.length) return api.criar(true);
+      const livres = salasLivres(lista);
+      if (!livres.length) return api.criar(true).then(function(c) { vigiar(); return c; });
       api.anfitriao = false;
       return net.join(livres[0].code).then(function(info) {
         if (info) { api.codigo = info.code; return info.code; }
-        return api.criar(true);
+        return api.criar(true).then(function(c) { vigiar(); return c; });
       });
     });
   };
+  function salasLivres(lista) {
+    return (lista || []).filter(function(l) {
+      return l.public && !l.hasPassword && l.playerCount === 1 && l.customData && l.customData.v === VERSAO && l.code !== api.codigo;
+    }).sort(function(a, b) { return (a.latency || 999) - (b.latency || 999); });
+  }
+  // duas pessoas procurando ao mesmo tempo criavam duas salas e esperavam para sempre: quem espera numa sala pública
+  // olha de 3 em 3 s se tem outra sala esperando, mais antiga que a sua; se tiver, sai da sua e entra nela
+  let vigia = null;
+  function vigiar() {
+    pararVigia();
+    vigia = setInterval(function() {
+      if (api.conectado || !api.anfitriao || !net) { pararVigia(); return; }
+      const minha = net.currentLobbyInfo;
+      net.list().then(function(lista) {
+        if (api.conectado || !api.anfitriao) return;
+        const outra = salasLivres(lista).filter(function(l) {
+          return !minha || !minha.createdAt || l.createdAt < minha.createdAt || (l.createdAt === minha.createdAt && l.code < minha.code);
+        })[0];
+        if (!outra) return;
+        pararVigia();
+        net.leave().then(function() { return net.join(outra.code); }).then(function(info) {
+          if (info) { api.anfitriao = false; api.codigo = info.code; }
+          else api.criar(true).then(vigiar);
+        }).catch(function() { api.criar(true).then(vigiar); });
+      }).catch(function() {});
+    }, 3000);
+  }
+  function pararVigia() { if (vigia) { clearInterval(vigia); vigia = null; } }
 
   api.sair = function() {
+    pararVigia();
     if (teste) teste.sair();
     if (net) { try { net.leave(); } catch (e) {} }
     par = null;

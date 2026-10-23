@@ -23,5 +23,8 @@ const CONFIG = {
   // munição contra a máquina (v18): x do jogador e do bot (o estilingue aparece bem menos)
   municaoJogador: 3,
   municaoBot: 1.5,
-  leve: false               // modo leve (celular/computador fraco): menos partículas e fundo dos menus a 30 qps
+  leve: false,              // modo leve (celular/computador fraco): menos partículas e fundo dos menus a 30 qps
+  // v19: id do jogo na Poki Networking Library (online). Pode trocar pelo id do jogo no painel do Poki;
+  // quem tem ids diferentes não se encontra (mudar o id separa as salas).
+  idRede: "254722a9-734e-4087-961b-92e9308b337f"
 };

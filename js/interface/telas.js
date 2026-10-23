@@ -22,7 +22,7 @@ let pendente = null;            // partida que acabou e espera a resposta do "co
 
 const TELAS = ["telaMenu", "telaModo", "telaIdiomas", "telaPausa", "telaContinuar",
   "telaOpcoes", "telaControles", "telaMissoes", "telaSkins", "telaRecompensa", "telaDiaria", "telaPoder",
-  "telaVisual", "telaLoja"];   // v19: personalização (interface/visual.js) e loja de armas (interface/loja.js)
+  "telaVisual", "telaLoja", "telaOnline"];   // v19: online (js/rede/online.js)   // v19: personalização (interface/visual.js) e loja de armas (interface/loja.js)
 let diariaVista = false;     // a recompensa diária abre sozinha uma vez por visita
 
 function mostrarTela(id) {
@@ -145,6 +145,7 @@ function idEventoRival(i, liga) { return (liga ? "l" + (liga + 1) + "-" : "") + 
 
 // ---------- fim da partida (chamado por partida.js) ----------
 function aoTerminarPartida(j) {
+  if (j.modo === "online") { Online.fimPartida(j); return; }   // v19: tela própria (revanche)
   entrada.ativa = false;
   Poki.jogando(false);
   if ((j.modo === "bot" || j.modo === "sobrevivencia") && j.vencedorPartida === 2 && !j.continuou && Poki.premiadoDisponivel()) {
@@ -354,6 +355,7 @@ function continuar() {
 
 function sairDaPartida() {
   if (jogo && !jogo.demo) Poki.medir("match", jogo.modo, "quit");
+  if (jogo && jogo.modo === "online") Online.sair();
   irParaMenu("");
 }
 
@@ -406,6 +408,7 @@ function montarTelas() {
     modoBot: function() { comecarPartida("bot"); },
     modoRivais: function() { comecarPartida("rivais"); },
     modo2p: function() { comecarPartida("2p"); },
+    modoOnline: function() { Online.acoes.modoOnline(); },
     lendaria: ativarLendaria,
     idiomas: function() { estado = "idiomas"; mostrarTela("telaIdiomas"); },
     voltar: function() { estado = "menu"; atualizarTextos(); mostrarTela("telaMenu"); },
@@ -442,7 +445,7 @@ function montarTelas() {
   document.querySelectorAll("[data-acao]").forEach(function(b) {
     b.addEventListener("click", function() {
       som("clique");
-      const fn = acoes[b.dataset.acao];
+      const fn = acoes[b.dataset.acao] || (typeof Online !== "undefined" && Online.acoes[b.dataset.acao]);
       if (fn) fn();
       b.blur();
     });

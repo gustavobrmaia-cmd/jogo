@@ -736,3 +736,21 @@ body.retrato #telaDiaria #btnFecharDiaria { font-size: 52px; min-width: 560px; }
 
 /* modo leve: sem as animações contínuas de fundo das telas (botões ainda respondem ao toque) */
 body.leve button.grande::after { animation: none; display: none; }
+
+/* v19: online (js/rede/online.js) */
+.modos button.modo.online { --c1: #5ce1e6; --c2: #1fb5c4; }
+.modo .selo.novo { background: #ff4f9a; }
+#telaOnline .caixa { min-width: 560px; }
+#telaOnline .onPlacar { font-size: 64px; font-weight: 900; margin: 4px 0; -webkit-text-stroke: 3px var(--tinta); paint-order: stroke fill; color: #fff; }
+#telaOnline .onCodigo { font-size: 72px; font-weight: 900; letter-spacing: 10px; margin: 6px 0 12px; padding: 6px 26px; color: #ffe75a;
+  background: rgba(26, 13, 51, 0.6); border: 4px solid var(--tinta); border-radius: 18px; -webkit-text-stroke: 3px var(--tinta); paint-order: stroke fill; }
+#telaOnline .onInput { font: 900 40px Nunito, system-ui; width: 300px; text-align: center; text-transform: uppercase; letter-spacing: 6px;
+  padding: 10px 14px; border: 4px solid var(--tinta); border-radius: 16px; background: #fff; color: #1a0d33; }
+#telaOnline .linha { display: flex; gap: 16px; justify-content: center; align-items: center; }
+body.retrato #telaOnline .caixa { min-width: 0; width: 92%; }
+body.retrato #telaOnline .onCodigo { font-size: 110px; }
+body.retrato #telaOnline .onInput { font-size: 64px; width: 520px; }
+/* v19: 5 modos (com o online) cabem deitado */
+body:not(.retrato) .modos { gap: 14px; width: 1236px; max-width: 1236px; }
+body:not(.retrato) .modos button.modo { flex: 1 1 0; width: auto; min-width: 0; box-sizing: border-box; padding-left: 10px; padding-right: 10px; }
+body:not(.retrato) .modos > button.modo:nth-child(5) { animation-delay: 0.28s; }

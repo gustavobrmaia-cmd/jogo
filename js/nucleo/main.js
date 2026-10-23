@@ -55,6 +55,7 @@ function passo(dt) {
     Progresso.atualizarAvisos(dt / 1000, typeof faixaPremio !== "undefined" && !!faixaPremio);
   } else if (estado === "pausa") {
     if (entrada.pausa()) continuar();
+    else if (jogo && jogo.modo === "online") atualizarJogo(dt);   // v19: o online não para na pausa (o outro continua)
   } else if (jogo && jogo.demo) {
     atualizarJogo(dt);     // luta de demonstração no fundo dos menus
   }

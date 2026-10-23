@@ -119,6 +119,12 @@
           <span class="selo" data-t="mesmo_aparelho"></span>
           <span class="dica" id="dica2p"></span>
         </button>
+        <button class="modo online" data-acao="modoOnline">
+          <span class="icone"><i data-ico="globo"></i></span>
+          <span class="nome" data-t="modo_online"></span>
+          <span class="selo novo" data-t="on_selo"></span>
+          <span class="dica" data-t="on_dica_modo"></span>
+        </button>
         <button class="modo surv" data-acao="modoSurv">
           <span class="icone"><i data-ico="fogo"></i></span>
           <span class="nome" data-t="sobrevivencia"></span>
@@ -127,6 +133,33 @@
       </div>
       <button class="premiado" data-acao="lendaria" id="btnLendaria"></button>
       <button data-acao="voltar" data-t="voltar" id="btnVoltarModo" class="voltar"></button>
+    </div>
+
+    <!-- v19: online (js/rede/online.js): procurar partida, sala com código e revanche -->
+    <div id="telaOnline" class="tela">
+      <div class="caixa">
+        <h2 class="placa" id="onTitulo"></h2>
+        <p class="onPlacar escondido" id="onPlacar"></p>
+        <p class="premioTxt escondido" id="onGanho"></p>
+        <p class="resultado" id="onStatus"></p>
+        <p class="onCodigo escondido" id="onCodigo"></p>
+        <div class="botoes" id="onInicio">
+          <button class="grande" data-acao="onRapida"><span class="ic"><i data-ico="raio"></i></span> <span data-t="on_rapida"></span></button>
+          <div class="linha">
+            <button data-acao="onCriar"><span class="ic"><i data-ico="casa"></i></span> <span data-t="on_criar"></span></button>
+            <button data-acao="onEntrar"><span class="ic"><i data-ico="usuario"></i></span> <span data-t="on_entrar"></span></button>
+          </div>
+        </div>
+        <div class="linha escondido" id="onLinhaCodigo">
+          <input id="onInput" class="onInput" maxlength="10" autocomplete="off" autocapitalize="characters" spellcheck="false">
+          <button class="grande" data-acao="onOk"><span class="ic"><i data-ico="play"></i></span></button>
+        </div>
+        <div class="botoes escondido" id="onFim">
+          <button class="grande" data-acao="onRevanche"><span class="ic"><i data-ico="repetir"></i></span> <span data-t="on_revanche"></span></button>
+        </div>
+        <button class="escondido" data-acao="onCancelar" id="onCancelar" data-t="on_cancelar"></button>
+        <button class="voltar" data-acao="onVoltar" id="onVoltar" data-t="menu"></button>
+      </div>
     </div>
 
     <!-- v19 (agente C): personalização — prévia grande animada, abas por categoria, equipar/comprar (interface/visual.js) -->
@@ -282,6 +315,8 @@
   <script src="js/interface/poder.js"></script>
   <script src="js/interface/visual.js"></script>
   <script src="js/interface/loja.js"></script>
+  <script src="js/rede/rede.js"></script>
+  <script src="js/rede/online.js"></script>
   <script src="js/nucleo/main.js"></script>
 </body>
 </html>
