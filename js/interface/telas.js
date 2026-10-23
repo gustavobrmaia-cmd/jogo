@@ -21,7 +21,7 @@ let lendariaPronta = false;     // assistiu o anúncio da Partida Lendária
 let pendente = null;            // partida que acabou e espera a resposta do "continuar"
 
 const TELAS = ["telaMenu", "telaModo", "telaIdiomas", "telaPausa", "telaContinuar",
-  "telaOpcoes", "telaControles", "telaMissoes", "telaSkins", "telaRecompensa", "telaDiaria", "telaPoder",
+  "telaOpcoes", "telaControles", "telaMissoes", "telaRecompensa", "telaDiaria", "telaPoder",
   "telaVisual", "telaLoja", "telaOnline"];   // v19: online (js/rede/online.js)   // v19: personalização (interface/visual.js) e loja de armas (interface/loja.js)
 let diariaVista = false;     // a recompensa diária abre sozinha uma vez por visita
 
@@ -362,7 +362,7 @@ function sairDaPartida() {
 // moedas no topo, selo de prêmios esperando e o botão de dobrar
 function atualizarMenuProgresso() {
   const txt = moedasHtml(save.moedas);
-  ["menuMoedas", "missoesMoedas", "skinsMoedas", "visualMoedas", "lojaMoedas"].forEach(function(id) { const e = el(id); if (e) e.innerHTML = txt; });
+  ["menuMoedas", "missoesMoedas", "visualMoedas", "lojaMoedas"].forEach(function(id) { const e = el(id); if (e) e.innerHTML = txt; });
   // v19: a loja de armas só aparece depois do começo (rival 5 vencido ou a 1ª tela de melhorias)
   const bl = el("btnLoja");
   if (bl) bl.classList.toggle("escondido", !Progresso.lojaLiberada());
@@ -456,13 +456,15 @@ function montarTelas() {
     if (e.repeat) return;
     // v19.6: as teclas de andar não param a roleta (quem já estava andando pulava a roleta sem ver)
     const andar = /^(KeyA|KeyD|KeyS|ArrowLeft|ArrowRight|ArrowDown|ArrowUp)$/.test(e.code);
-    if (estado === "jogo" && jogo && jogo.fase === "roleta" && !andar && e.code !== "Escape" && e.code !== "KeyP") acelerarRoleta();
+    // (no online, o convidado não mexe na roleta daqui: o toque dele vai pela rede e o anfitrião é quem para)
+    const convidado = jogo && jogo.modo === "online" && typeof Rede !== "undefined" && !Rede.anfitriao;
+    if (estado === "jogo" && jogo && jogo.fase === "roleta" && !andar && !convidado && e.code !== "Escape" && e.code !== "KeyP") acelerarRoleta();
     if (estado === "pausa" && (e.code === "Escape" || e.code === "KeyP")) continuar();
     else if (estado === "menu" && e.code === "Enter") abrirModo();
     else if (e.code === "Escape" && estado !== "jogo" && estado !== "pausa" && estado !== "recompensa") {
       // v19.6: ESC volta nos menus (Opções, Loja, Personalizar, Missões...): aperta o "Voltar" da tela aberta
       const tela = document.querySelector(".tela.aberta");
-      const v = tela && Array.from(tela.querySelectorAll("button.voltar, [data-acao='voltar'], [data-acao='voltarOpcoes'], [data-acao='fecharDiaria']"))
+      const v = tela && Array.from(tela.querySelectorAll("button.voltar, [data-acao='voltar'], [data-acao='voltarOpcoes'], [data-acao='fecharDiaria'], [data-acao='onCancelar']"))
         .filter(function(x) { return x.offsetParent !== null; })[0];
       if (v) v.click();
     }

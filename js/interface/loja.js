@@ -38,8 +38,9 @@ function abrirLoja() {
   montarLoja();
   mostrarTela("telaLoja");
   Poki.medir("shop", "open", "visible");
-  requestAnimationFrame(animarLoja);
+  if (!loopLoja) { loopLoja = true; requestAnimationFrame(animarLoja); }   // v19.9: um loop só (abrir 2x dobrava)
 }
+let loopLoja = false;
 
 function montarLoja() {
   const abas = el("lojaAbas");
@@ -110,7 +111,7 @@ el("btnLojaAcao").addEventListener("click", function() { acaoLoja(); this.blur()
 
 // prévia: a bolinha da pessoa segurando a arma, mirando de um lado para o outro, num pedestal com luz da raridade
 function animarLoja(agora) {
-  if (estado !== "loja") return;
+  if (estado !== "loja") { loopLoja = false; return; }
   requestAnimationFrame(animarLoja);
   const cv = el("lojaPrevia"), g = cv.getContext("2d"), tm = agora / 1000, a = ARMA[armaLoja];
   if (!a) return;

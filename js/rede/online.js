@@ -212,28 +212,30 @@ const Online = (function() {
     prontoEu = prontoOutro = false;
     ultimo.j = {}; ultimo.M = {}; ultimo.b = [{}, {}]; ultimaRodada = 0; seq = 0;
     ultimoEstado = performance.now();   // o relógio de queda começa do zero (na revanche ele vinha da tela de fim)
+    // v19.9: toques que sobraram da partida anterior não viram pulo/tiro na nova (na revanche o convidado zerava os
+    // contadores e o anfitrião não, e os toques dele sumiam até passar a conta antiga)
+    usados = { pc: entRemota.pc || 0, tc: entRemota.tc || 0, cc: entRemota.cc || 0 };
     save.partidas++;
     salvar();
-    novaPartida("online", {});
-    configurarOutro(jogo);
+    // v19.9: o visual, a cor e a arma inicial do convidado entram ANTES da 1ª rodada (antes eram aplicados depois e a
+    // roleta já tinha sido montada sem a arma inicial dele)
+    novaPartida("online", { outro: outro });
     entrarNoJogo();
     Rede.enviar("r", { k: "ini" });
     Poki.medir("match", "online", "start");
   }
   // o visual, a cor e a arma inicial do convidado ficam na bolinha 2
-  function configurarOutro(j) {
+  // chamado por partida.js (novaPartida, modo "online", só no anfitrião) antes de iniciarRodada
+  function configurarOutro(j, outro) {
     if (!outro) return;
     if (outro.visual) j.visuais[1] = Object.assign({}, VISUAL_PADRAO, outro.visual);
     const c = outro.cor;
     j.cores[1] = c && coresDiferentes(c, j.cores[0]) ? c : corDiferente(j.cores[0]);
     atualizarSkins(j);
     const a = outro.arma;
-    if (a && ARMA[a] && ["mina", "ceu", "torreta"].indexOf(ARMA[a].tipo) < 0) {
-      j.armaInicial[1] = a;
-      if (j.roleta && j.roleta.armas && j.roleta.armas[1]) j.roleta.armas[1] = { id: a, fixa: true, pos: 0, fita: [a] };
-      if (j.M) equipar(j.M.bolinhas[1], a);
-    }
+    if (a && ARMA[a] && ["mina", "ceu", "torreta"].indexOf(ARMA[a].tipo) < 0) j.armaInicial[1] = a;
   }
+  api.configurarOutro = configurarOutro;
   function entrarNoJogo() {
     api.ativo = true;
     estado = "jogo";
@@ -342,7 +344,7 @@ const Online = (function() {
       novaPartida("online", {});
       primeiroEstado = true;
       seq = 0;
-      cont.pc = cont.tc = cont.cc = 0;
+      // (os contadores de toque do convidado não zeram: só crescem durante a conexão; o anfitrião acompanha)
       fxVistos = 0;
       ultimoEstado = performance.now();
       entrarNoJogo();
@@ -374,6 +376,7 @@ const Online = (function() {
     pararBusca();
     tela = "conectado";
     seq = 0; passos = 0; usados = { pc: 0, tc: 0, cc: 0 };
+    cont.pc = cont.tc = cont.cc = 0;   // conexão nova: os dois lados começam a contar do zero
     entRemota = { esq: false, dir: false, sp: false, bx: false, t: false, pc: 0, tc: 0, cc: 0, m: null };
     status(t("on_conectando"));
     ola();
@@ -512,6 +515,7 @@ const Online = (function() {
         if (Rede.conectado) return;
         if (Rede.anfitriao) {
           if (como === "criar") {
+            tela = "sala";
             el("onCodigo").textContent = String(Rede.codigo).toUpperCase();
             el("onCodigo").classList.remove("escondido");
             status(t("on_sala"));
@@ -554,7 +558,11 @@ const Online = (function() {
         if (Rede.anfitriao && prontoOutro) comecar();
       });
     },
-    onVoltar: function() { pararBusca(); sair(); irParaMenu(""); },
+    onVoltar: function() {
+      // v19.9: digitando o código, "Voltar" volta para os botões do online (antes ia direto para o menu)
+      if (!el("onLinhaCodigo").classList.contains("escondido")) { mostrarBotoes("inicio"); status(t("on_dica")); return; }
+      pararBusca(); sair(); irParaMenu("");
+    },
     onBot: function() { pararBusca(); sair(); Eventos.botao("online-bot"); comecarPartida("bot"); }
   };
 

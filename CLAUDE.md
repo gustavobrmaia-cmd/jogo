@@ -411,6 +411,17 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       28% "MELHOR!". Antes a inicial travava a roleta e a pessoa perdia a chance de rara ou lendária.
     - **Partida rápida do online:** o botão "Jogar contra o bot" aparece aos 12 s (`BOT_DEPOIS`) e a busca continua por
       trás (evento `online/quick-bot`).
+  - v19.9 (revisão do Gemini, feita na v19.6; as 2 sugestões de jogabilidade dele já estavam na v19.8):
+    - **Online, outro jogador:** visual, cor e arma inicial do outro entram em `novaPartida("online", { outro })`
+      (`Online.configurarOutro`) ANTES da 1ª rodada. Antes eram aplicados depois e a roleta nascia sem a arma dele.
+    - **Online, roleta:** o toque do convidado para a roleta (`Online.cliqueRemoto` em `atualizarRoleta`). No convidado,
+      a tecla não mexe na roleta local.
+    - **Online, contadores de toque:** só zeram numa conexão nova. Na revanche o anfitrião acompanha a conta (antes o
+      convidado zerava e os toques dele sumiam).
+    - **Online, telas:** sala com código = tela "sala"; "Voltar" na digitação do código volta para os botões do online;
+      ESC cancela a busca.
+    - **Tela antiga:** `#telaSkins` saiu do HTML e do TELAS.
+    - **Loja:** um loop de animação só (`loopLoja`).
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

@@ -154,6 +154,8 @@ function novaPartida(modo, opcoes) {
   const ai = save.armaInicial;
   jogo.armaInicial = [!treino && (modo === "bot" || modo === "sobrevivencia" || modo === "online") && ai && typeof ARMA !== "undefined" && ARMA[ai] && (save.armas || []).indexOf(ai) >= 0 ? ai : null, null];
   escolherSkins(jogo);
+  // v19.9: online (anfitrião): visual, cor e arma inicial do outro aparelho já antes da 1ª rodada
+  if (modo === "online" && opcoes.outro && typeof Online !== "undefined") Online.configurarOutro(jogo, opcoes.outro);
   // rival: a cara dele (cor, corpo e acessório); se a skin do jogador tiver a mesma cor, o rival troca de cor
   if (rival) {
     const fixa = SKIN[rival.corpo] && SKIN[rival.corpo].cor !== "jogador" ? SKIN[rival.corpo].cor : rival.cor;
@@ -767,6 +769,8 @@ function atualizarRoleta(j) {
   // que sobravam do botão "Rivais" pulavam a roleta antes de a pessoa ver)
   let apertou = false;
   for (let k = 1; k <= 2; k++) if (entrada.apertou(k, "toque") || entrada.apertou(k, "tiro") || entrada.apertou(k, "pulo")) apertou = true;
+  // v19.9: no online o toque do convidado chega pela rede (antes só o anfitrião conseguia parar a roleta)
+  if (j.modo === "online" && typeof Online !== "undefined" && Online.cliqueRemoto()) apertou = true;
   if (apertou && ro.t >= 0.4) acelerarRoleta();
   ro.t += FIS.dt;
   ro.tEtapa += FIS.dt;
