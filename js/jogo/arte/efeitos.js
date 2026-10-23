@@ -9,11 +9,14 @@
 //  - faíscas (triângulos), cacos, confete e bolinhas = LOTES: 1 path e 1 fill por cor
 //  - textos = sprite em cache por (texto, cor), 1:1
 // Nenhum gradiente, blur ou "lighter" por quadro.
+// v19 (cartoon arcade): tudo com o contorno escuro e grosso do jogo (#1a0d33): fumaça, bola de fogo, estrelas,
+// chamas e cacos já saem contornados no sprite; faíscas, bolinhas, confete e anéis ganham o contorno num lote só
+// (uma forma escura um pouco maior por baixo), sem custo por partícula. K.O. com estrela de HQ e mais confete.
 // =========================
 
 const Efeitos = (function() {
   var MAX = 800;
-  var PI = Math.PI, PI2 = Math.PI * 2;
+  var PI = Math.PI, PI2 = Math.PI * 2, TINTA = "#1a0d33";
 
   // tipos de partícula
   var T_FUMACA = 0, T_FAISCA = 1, T_CACO = 2, T_CONFETE = 3, T_BIT = 4, T_ESTRELA = 5, T_FLASH = 6, T_CHAMA = 7, T_ANEL = 8, T_CRISTAL = 9;
@@ -83,14 +86,14 @@ const Efeitos = (function() {
     var k = est * 32 + lv, s = puffS[k];
     if (s) return s;
     var r = NIV_PUFF[lv], S = 2 * (r + 3), e = ESTILOS[est], c = criarCanvas(S, S), g = c.getContext("2d");
-    var lw = r < 7 ? 1.2 : 2;
+    var lw = r < 7 ? 1.8 : r < 16 ? 2.6 : 3.4;
     g.translate(S / 2, S / 2);
     g.beginPath(); g.arc(0, 0, r - lw / 2, 0, PI2); g.fillStyle = e[1]; g.fill();
     g.save(); g.clip();
     g.beginPath(); g.arc(-r * 0.14, -r * 0.17, r * 0.86, 0, PI2); g.fillStyle = e[0]; g.fill();
     g.restore();
     if (r >= 7) { g.beginPath(); g.ellipse(-r * 0.38, -r * 0.48, r * 0.27, r * 0.15, -0.7, 0, PI2); g.fillStyle = "rgba(255,255,255,0.22)"; g.fill(); }
-    g.beginPath(); g.arc(0, 0, r - lw / 2, 0, PI2); g.strokeStyle = e[2]; g.lineWidth = lw; g.stroke();
+    g.beginPath(); g.arc(0, 0, r - lw / 2, 0, PI2); g.strokeStyle = TINTA; g.lineWidth = lw; g.stroke();
     return (puffS[k] = { c: c, m: S / 2 });
   }
 
@@ -110,7 +113,7 @@ const Efeitos = (function() {
     forma(1); g.fillStyle = PB[id]; g.fill();
     g.save(); forma(1); g.clip(); g.fillStyle = PS[id]; g.beginPath(); g.moveTo(-R * 2, R * 2); g.lineTo(R * 2, -R * 2); g.lineTo(R * 2, R * 2); g.closePath(); g.fill(); g.restore();
     forma(0.5); g.fillStyle = PL[id]; g.fill();
-    forma(1); g.strokeStyle = PC[id]; g.lineWidth = R < 10 ? 1.2 : 2; g.lineJoin = "round"; g.stroke();
+    forma(1); g.strokeStyle = TINTA; g.lineWidth = R < 10 ? 1.8 : R < 30 ? 2.6 : 3.6; g.lineJoin = "round"; g.stroke();
     return (estrelaS[k] = { c: c, m: S / 2 });
   }
 
@@ -129,7 +132,7 @@ const Efeitos = (function() {
       g.arc(cx, base, w, 0, PI, false); g.closePath();
     }
     var cx = W / 2, w = W * 0.42, b = H - w * 0.3;
-    gota(cx, b, w, b * 0.98); g.fillStyle = "#ff6a1f"; g.fill(); g.strokeStyle = "#8e2418"; g.lineWidth = H < 12 ? 1.2 : 2; g.lineJoin = "round"; g.stroke();
+    gota(cx, b, w, b * 0.98); g.fillStyle = "#ff6a1f"; g.fill(); g.strokeStyle = TINTA; g.lineWidth = H < 12 ? 1.8 : 2.6; g.lineJoin = "round"; g.stroke();
     gota(cx + 0.5, b - 1, w * 0.62, b * 0.64); g.fillStyle = "#ffc22e"; g.fill();
     if (H >= 12) { gota(cx + 0.5, b - 1.5, w * 0.3, b * 0.3); g.fillStyle = "#fff3a6"; g.fill(); }
     return (chamaS[lv] = { c: c, w: W + 6, h: H + 6, cx: 3 + cx, base: 3 + b });
@@ -148,7 +151,7 @@ const Efeitos = (function() {
     var lista = [[0, 108, 15], [-0.62, 62, 10], [0.62, 62, 10], [-1.25, 40, 7], [1.25, 40, 7]];
     g.lineJoin = "round";
     for (var i = lista.length - 1; i >= 0; i--) {
-      espinho(lista[i][0], lista[i][1], lista[i][2]); g.fillStyle = "#ffb62e"; g.fill(); g.strokeStyle = "#c2481f"; g.lineWidth = 3; g.stroke();
+      espinho(lista[i][0], lista[i][1], lista[i][2]); g.fillStyle = "#ffb62e"; g.fill(); g.strokeStyle = TINTA; g.lineWidth = 4; g.stroke();
     }
     for (i = 0; i < 3; i++) { espinho(lista[i][0], lista[i][1] * 0.72, lista[i][2] * 0.62); g.fillStyle = "#fff0a0"; g.fill(); }
     g.beginPath(); g.arc(2, 0, 13, 0, PI2); g.fillStyle = "#fff"; g.fill();
@@ -166,7 +169,7 @@ const Efeitos = (function() {
     var lobos = [];
     for (i = 0; i < 9; i++) lobos.push({ a: i / 9 * PI2 + (pr() - 0.5) * 0.5, d: 0.40 + pr() * 0.22, r: 0.27 + pr() * 0.13 });
     fr = { s: S, m: S / 2, q: [] };
-    var lw = Math.max(1.6, R * 0.025);
+    var lw = Math.max(2.6, R * 0.05);
     for (q = 0; q < NQ; q++) {
       var u = q / (NQ - 1), c = criarCanvas(S, S), g = c.getContext("2d");
       g.translate(S / 2, S / 2);
@@ -175,7 +178,8 @@ const Efeitos = (function() {
       var alfa = u > 0.78 ? 1 - (u - 0.78) / 0.22 * 0.9 : 1;
       // anel de choque (traço que afina)
       g.globalAlpha = Math.pow(1 - u, 0.7);
-      g.beginPath(); g.arc(0, 0, R * (0.5 + 0.7 * suave(u)), 0, PI2); g.strokeStyle = "#fff6d6"; g.lineWidth = Math.max(1.2, R * 0.12 * (1 - u)); g.stroke();
+      g.beginPath(); g.arc(0, 0, R * (0.5 + 0.7 * suave(u)), 0, PI2); g.strokeStyle = TINTA; g.lineWidth = Math.max(1.2, R * 0.12 * (1 - u)) + 4; g.stroke();
+      g.strokeStyle = "#fff6d6"; g.lineWidth = Math.max(1.2, R * 0.12 * (1 - u)); g.stroke();
       g.globalAlpha = alfa;
       // bola de fogo: 4 camadas chapadas
       var lobosEsc = function(kk, dx, dy) {
@@ -188,7 +192,7 @@ const Efeitos = (function() {
         g.moveTo(0.5 * R * cr * kk + dx * R, dy * R); g.arc(dx * R, dy * R, 0.5 * R * cr * kk, 0, PI2);
       };
       lobosEsc(1, 0, 0); g.fillStyle = mix([226, 58, 38], [79, 58, 99], frio * 0.8); g.fill();
-      g.strokeStyle = mix([110, 26, 34], [48, 36, 70], frio); g.lineWidth = lw; g.lineJoin = "round"; g.stroke();
+      g.strokeStyle = TINTA; g.lineWidth = lw; g.lineJoin = "round"; g.stroke();
       lobosEsc(0.84, -0.04, -0.05); g.fillStyle = mix([255, 122, 31], [122, 74, 99], frio * 0.9); g.fill();
       if (calor > 0.15) { lobosEsc(0.78 * calor + 0.1, -0.07, -0.09); g.fillStyle = "#ffc233"; g.fill(); }
       if (calor > 0.4) { lobosEsc(0.5 * calor, -0.1, -0.12); g.fillStyle = "#fff4b0"; g.fill(); }
@@ -198,7 +202,7 @@ const Efeitos = (function() {
         g.globalAlpha = [1, 1, 0.85, 0.5][q];
         g.beginPath();
         for (i = 0; i < 16; i++) { var aa = i * PI / 8 + 0.2, rr2 = i % 2 ? rf * 0.5 : rf; g.lineTo(Math.cos(aa) * rr2, Math.sin(aa) * rr2); }
-        g.closePath(); g.fillStyle = "#fffbe6"; g.fill(); g.strokeStyle = "#ffb62e"; g.lineWidth = lw; g.stroke();
+        g.closePath(); g.fillStyle = "#fffbe6"; g.fill(); g.strokeStyle = TINTA; g.lineWidth = lw; g.stroke();
       }
       fr.q.push(c);
     }
@@ -297,6 +301,7 @@ const Efeitos = (function() {
     var lv = nivel(NIV_EXP, R * 0.94);
     EX[e] = x; EY[e] = y; EI[e] = 0; ED[e] = 0.5 + R * 0.0019; ENIV[e] = lv; EVAR[e] = rnd() < 0.5 ? 0 : 1; EVIVA[e] = 1;
     var k = R / 100;
+    estrelaP(x, y, Math.min(80, R * 0.9), C_BRANCO, 0.14, rnd());
     // fumaça (atrás da bola de fogo): puffs 2 tons que crescem e encolhem
     var nf = 5 + Math.round(R / 30);
     for (i = 0; i < nf; i++) {
@@ -328,12 +333,14 @@ const Efeitos = (function() {
   function estouro(x, y, cor) {
     var c = cid(cor || "#4dabf7"), i, a;
     var cl = cid(claro(cor || "#4dabf7"));
+    estrelaP(x, y, 80, C_AMARELO, 0.3, 0.2);
     estrelaP(x, y, 78, C_BRANCO, 0.22, 0.4);
     estrelaP(x, y, 54, c, 0.3, 0.8);
     anelP(x, y, 14, 96, 10, c, 0.45);
     anelP(x, y, 8, 62, 5, C_BRANCO, 0.34);
     for (i = 0; i < 10; i++) cacoP(x, y, rnd() * PI2, entre(120, 440), entre(0.6, 1.1), entre(6, 11), c, 520);
-    for (i = 0; i < 24; i++) {                                 // confete da cor da bolinha + brancos
+    for (i = 0; i < 6; i++) { a = i / 6 * PI2 + rnd() * 0.3; estrelaP(x, y, entre(12, 20), i % 2 ? C_AMARELO : C_BRANCO, entre(0.5, 0.8), rnd(), Math.cos(a) * entre(220, 380), Math.sin(a) * entre(220, 380)); }
+    for (i = 0; i < 34; i++) {                                 // confete da cor da bolinha + brancos
       a = rnd() * PI2;
       nova(T_CONFETE, x, y, Math.cos(a) * entre(80, 420), Math.sin(a) * entre(80, 420) - 90, entre(0.8, 1.5), entre(3.4, 5.6), 0, i % 3 === 0 ? C_BRANCO : (i % 3 === 1 ? c : cl), 360, 1.1, 1, rnd() * PI2, entre(-10, 10));
     }
@@ -344,10 +351,11 @@ const Efeitos = (function() {
     fumacaP(x + entre(-4, 4), y, entre(-10, 10), entre(-50, -28), entre(0.7, 1.1), 5, 11, 3, rnd() < 0.5 ? 0 : 1, 0.9, -12, 1.2);
   }
   function poeira(x, y) {
-    for (var i = 0; i < 5; i++) {
-      var s = i < 2 ? -1 : 1, v = entre(30, 110) * (i === 4 ? 0.3 : s);
-      fumacaP(x + entre(-8, 8), y + entre(-3, 0), v, entre(-22, -6), entre(0.3, 0.5), 3, entre(6, 10), 1.5, 2, 0.95, 0, 3);
+    for (var i = 0; i < 6; i++) {
+      var s = i % 2 ? -1 : 1, v = entre(50, 150) * s * (i > 3 ? 0.4 : 1);
+      fumacaP(x + s * entre(4, 12), y + entre(-3, 0), v, entre(-26, -8), entre(0.32, 0.55), 3, entre(7, 12), 2, 2, 1, 0, 3.2);
     }
+    for (i = 0; i < 4; i++) bitP(x + entre(-10, 10), y, -PI / 2 + (i % 2 ? -1 : 1) * entre(0.5, 1.2), entre(80, 160), entre(0.25, 0.4), entre(1.8, 2.6), C_CREME, 500);
   }
   function fagulhas(x, y, cor, qtd) {
     var c = cid(cor || "#ffd23f"), q = qtd || 6;
@@ -468,6 +476,14 @@ const Efeitos = (function() {
     }
     // 3. lotes: confete, bits, cristais, cacos, faíscas (1 fill por cor)
     if ((nc = coresDo(T_CONFETE)) > 0) {
+      ctx.beginPath();                                          // v19: contorno escuro de todo o confete (1 traço)
+      for (i = 0; i < n; i++) {
+        if (TIPO[i] !== T_CONFETE) continue;
+        u = VIDA[i] / VMAX[i]; var w0 = TAM[i] * (u < 0.25 ? u * 4 : 1), h0 = w0 * 0.55, f0 = Math.abs(Math.cos(ROT[i] * 1.3)) + 0.15, c0 = Math.cos(ROT[i]), s0 = Math.sin(ROT[i]);
+        var ax0 = c0 * w0, ay0 = s0 * w0, bx0 = -s0 * h0 * f0, by0 = c0 * h0 * f0;
+        ctx.moveTo(X[i] - ax0 - bx0, Y[i] - ay0 - by0); ctx.lineTo(X[i] + ax0 - bx0, Y[i] + ay0 - by0); ctx.lineTo(X[i] + ax0 + bx0, Y[i] + ay0 + by0); ctx.lineTo(X[i] - ax0 + bx0, Y[i] - ay0 + by0); ctx.closePath();
+      }
+      ctx.strokeStyle = TINTA; ctx.lineWidth = 2.4; ctx.lineJoin = "round"; ctx.stroke();
       for (k = 0; k < nc; k++) {
         c = lista[k]; ctx.fillStyle = PB[c]; ctx.beginPath();
         for (i = 0; i < n; i++) {
@@ -480,6 +496,13 @@ const Efeitos = (function() {
       }
     }
     if ((nc = coresDo(T_BIT)) > 0) {
+      ctx.fillStyle = TINTA; ctx.beginPath();                   // v19: contorno (bolinha escura maior por baixo, 1 fill)
+      for (i = 0; i < n; i++) {
+        if (TIPO[i] !== T_BIT) continue;
+        u = VIDA[i] / VMAX[i]; var rb0 = TAM[i] * (u < 0.3 ? u / 0.3 : 1) + 1.5;
+        ctx.moveTo(X[i] + rb0, Y[i]); ctx.arc(X[i], Y[i], rb0, 0, PI2);
+      }
+      ctx.fill();
       for (k = 0; k < nc; k++) {
         c = lista[k]; ctx.fillStyle = PB[c]; ctx.beginPath();
         for (i = 0; i < n; i++) {
@@ -506,7 +529,7 @@ const Efeitos = (function() {
         }
         if (pass === 0) { ctx.fillStyle = "#c9edff"; ctx.fill(); }
         else if (pass === 1) { ctx.fillStyle = "#7fc4f0"; ctx.fill(); }
-        else { ctx.strokeStyle = "#3f6fa8"; ctx.lineWidth = 1.5; ctx.lineJoin = "round"; ctx.stroke(); }
+        else { ctx.strokeStyle = TINTA; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.stroke(); }
       }
     }
     if ((nc = coresDo(T_CACO)) > 0) {
@@ -524,11 +547,22 @@ const Efeitos = (function() {
             else { ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.lineTo(x2, y2); ctx.closePath(); }
           }
           if (ps === 0) { ctx.fillStyle = PS[c]; ctx.fill(); } else if (ps === 1) { ctx.fillStyle = PL[c]; ctx.fill(); }
-          else { ctx.strokeStyle = PC[c]; ctx.lineWidth = 1.5; ctx.lineJoin = "round"; ctx.stroke(); }
+          else { ctx.strokeStyle = TINTA; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.stroke(); }
         }
       }
     }
     if ((nc = coresDo(T_FAISCA)) > 0) {
+      ctx.fillStyle = TINTA; ctx.beginPath();                   // v19: contorno de todas as faíscas (1 fill)
+      for (i = 0; i < n; i++) {
+        if (TIPO[i] !== T_FAISCA) continue;
+        var vx0 = VX[i], vy0 = VY[i], sp0 = Math.sqrt(vx0 * vx0 + vy0 * vy0);
+        if (sp0 < 4) continue;
+        u = VIDA[i] / VMAX[i];
+        var dx0 = vx0 / sp0, dy0 = vy0 / sp0, len0 = TAM[i] * (2.4 + sp0 * 0.032) * (0.25 + 0.75 * (u > 0.5 ? 1 : u * 2)) + 3, wd0 = TAM[i] * (0.35 + 0.65 * u) + 3;
+        var hx0 = X[i] + dx0 * wd0 * 0.5, hy0 = Y[i] + dy0 * wd0 * 0.5;
+        ctx.moveTo(hx0 - dx0 * len0, hy0 - dy0 * len0); ctx.lineTo(hx0 - dy0 * wd0 * 0.5, hy0 + dx0 * wd0 * 0.5); ctx.lineTo(hx0 + dy0 * wd0 * 0.5, hy0 - dx0 * wd0 * 0.5); ctx.closePath();
+      }
+      ctx.fill();
       for (k = 0; k < nc; k++) {
         c = lista[k]; ctx.fillStyle = PB[c]; ctx.beginPath();
         for (i = 0; i < n; i++) {
@@ -572,6 +606,7 @@ const Efeitos = (function() {
       var lw = ALFA[i] * Math.pow(1 - u, 1.2);
       if (lw < 0.4) continue;
       ctx.beginPath(); ctx.arc(X[i], Y[i], TAM[i] + (TAMF[i] - TAM[i]) * suave(u), 0, PI2);
+      ctx.strokeStyle = TINTA; ctx.lineWidth = lw + 3.5; ctx.stroke();
       ctx.strokeStyle = PB[CID[i]]; ctx.lineWidth = lw; ctx.stroke();
     }
     // 6. textos (1:1; escala só no "pop" do começo)

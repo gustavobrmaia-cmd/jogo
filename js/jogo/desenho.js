@@ -258,6 +258,14 @@ function desenharBolinhaNoMundo(ctx, j, M, b, o, tm) {
     }
     ctx.restore();
   }
+  // v19: rastro do pulo: linhas de velocidade atrás de quem sobe ou cai rápido (3 traços, 1 stroke)
+  if (!b.noChao && !M.cen.semGravidade && fantasma === 0 && Math.abs(b.vy || 0) > 7) {
+    const sp = Math.min(1, (Math.abs(b.vy) - 7) / 8), dv = b.vy > 0 ? -1 : 1;
+    ctx.save(); ctx.lineCap = "round"; ctx.globalAlpha = 0.6 * sp; ctx.beginPath();
+    for (let k = -1; k <= 1; k++) { const x = b.x + k * b.r * 0.55, y0 = b.y + dv * b.r * (0.95 - Math.abs(k) * 0.25); ctx.moveTo(x, y0 + dv * 5); ctx.lineTo(x - b.vx * 1.5, y0 + dv * (12 + 20 * sp) * (k ? 0.7 : 1)); }
+    ctx.strokeStyle = "#1a0d33"; ctx.lineWidth = 6.5; ctx.stroke(); ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3; ctx.stroke();
+    ctx.restore();
+  }
   if (temArte.bola) {
     if (!M.cen.semGravidade && !M.cen.inverte) ArteBolinha.sombra(ctx, b.x, chaoEmbaixo(M, b), b.r, chaoEmbaixo(M, b) - b.y - b.r);
     ArteBolinha.desenhar(ctx, d);
