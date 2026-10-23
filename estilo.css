@@ -156,10 +156,12 @@ button.grande {
   overflow: hidden;
 }
 button.grande::after {   /* reflexo passando */
-  content: ""; position: absolute; z-index: -1; top: -30%; bottom: -30%; width: 18%; left: -40%;
-  background: rgba(255, 255, 255, 0.55); transform: skewX(-18deg); animation: reflexo 2.8s ease-in-out infinite; pointer-events: none;
+  content: ""; position: absolute; z-index: -1; top: -30%; bottom: -30%; width: 18%; left: 0;
+  background: rgba(255, 255, 255, 0.55); transform: translateX(-230%) skewX(-18deg); animation: reflexo 2.8s ease-in-out infinite; pointer-events: none;
+  will-change: transform;
 }
-@keyframes reflexo { 0%, 62% { left: -40%; } 92%, 100% { left: 125%; } }
+/* v19: o reflexo anda por transform (antes animava "left": layout + pintura a cada quadro) */
+@keyframes reflexo { 0%, 62% { transform: translateX(-230%) skewX(-18deg); } 92%, 100% { transform: translateX(700%) skewX(-18deg); } }
 @keyframes pulsar { 50% { transform: scale(1.04) rotate(-0.8deg); } }
 button.grande:hover { animation: none; transform: translateY(-3px) scale(1.03) rotate(-1deg); }
 button.grande:active { animation: none; transform: translateY(8px) scale(0.98, 0.95); box-shadow: 0 1px 0 var(--sombra); }
