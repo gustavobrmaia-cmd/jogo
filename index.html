@@ -8,6 +8,7 @@
   <script src="https://game-cdn.poki.com/scripts/v2/poki-sdk.js"></script>
   <link rel="preload" href="fonte/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="estilo.css">
+  <link rel="stylesheet" href="estilo-v19c.css">
 </head>
 <body>
   <div id="tela">
@@ -128,6 +129,49 @@
       <button data-acao="voltar" data-t="voltar" id="btnVoltarModo" class="voltar"></button>
     </div>
 
+    <!-- v19 (agente C): personalização — prévia grande animada, abas por categoria, equipar/comprar (interface/visual.js) -->
+    <div id="telaVisual" class="tela vTela">
+      <div class="vTopo">
+        <h2 class="vTitulo" data-t="personalizar"></h2>
+        <div class="moedas vMoedas" id="visualMoedas"></div>
+      </div>
+      <div class="vCorpo">
+        <div class="vPrevia">
+          <canvas id="previaVisual" width="440" height="400"></canvas>
+          <p class="vNome" id="visualNome"></p>
+          <button class="vBotao" id="btnVisualAcao"></button>
+          <p class="vComo" id="visualComo"></p>
+        </div>
+        <div class="vLado">
+          <div class="vAbas" id="visualAbas"></div>
+          <div class="vGrade" id="visualGrade"></div>
+        </div>
+      </div>
+      <button data-acao="voltar" data-t="voltar" class="voltar"></button>
+    </div>
+
+    <!-- v19 (agente C): loja de armas e arma inicial (interface/loja.js) -->
+    <div id="telaLoja" class="tela vTela">
+      <div class="vTopo">
+        <h2 class="vTitulo" data-t="loja_armas"></h2>
+        <div class="moedas vMoedas" id="lojaMoedas"></div>
+      </div>
+      <div class="vCorpo">
+        <div class="vPrevia">
+          <canvas id="lojaPrevia" width="440" height="300"></canvas>
+          <p class="vNome" id="lojaNome"></p>
+          <div class="lInfo" id="lojaInfo"></div>
+          <button class="vBotao" id="btnLojaAcao"></button>
+          <div class="lInicial" id="lojaInicial"></div>
+        </div>
+        <div class="vLado">
+          <div class="vAbas" id="lojaAbas"></div>
+          <div class="vGrade" id="lojaGrade"></div>
+        </div>
+      </div>
+      <button data-acao="voltar" data-t="voltar" class="voltar"></button>
+    </div>
+
     <!-- Escolha do idioma (cada idioma com o nome na própria língua) -->
     <div id="telaIdiomas" class="tela">
       <h2 data-t="idioma"></h2>
@@ -223,6 +267,7 @@
   <script src="js/jogo/arte/cenarios.js"></script>
   <script src="js/jogo/arte/queda.js"></script>
   <script src="js/jogo/arte/bau.js"></script>
+  <script src="js/jogo/arte/roleta.js"></script>
   <script src="js/jogo/motor/fisica.js"></script>
   <script src="js/jogo/motor/combate.js"></script>
   <script src="js/jogo/motor/bot.js"></script>
@@ -235,6 +280,8 @@
   <script src="js/interface/menus.js"></script>
   <script src="js/interface/recompensa.js"></script>
   <script src="js/interface/poder.js"></script>
+  <script src="js/interface/visual.js"></script>
+  <script src="js/interface/loja.js"></script>
   <script src="js/nucleo/main.js"></script>
 </body>
 </html>

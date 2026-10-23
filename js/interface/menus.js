@@ -2,13 +2,11 @@
 
 // =========================
 // MENUS DE PROGRESSO E OPÇÕES
-// Opções (idioma, som, controles), troca de teclas, missões/semana/conquistas e skins (guarda-roupa + loja).
+// Opções (idioma, som, controles), troca de teclas e missões/semana/conquistas (v19: skins em interface/visual.js).
 // As listas são montadas em HTML (leve e acessível); as bolinhas das skins são desenhadas em canvas pequenos.
 // =========================
 
 let abaMissoes = "missoes";
-let abaSkins = "corpo";
-let skinEmFoco = null;
 
 function abrirOpcoes() {
   estado = "opcoes";
@@ -107,15 +105,15 @@ function cartao(titulo, prog, meta, moedas, estadoCartao, aoClicar, extra) {
   txt.appendChild(barra);
   c.appendChild(txt);
   const lado = document.createElement("div"); lado.className = "premio";
-  const m = document.createElement("div"); m.className = "valor"; m.textContent = moedas; lado.appendChild(m);
+  const m = document.createElement("div"); m.className = "valor"; m.innerHTML = moedas; lado.appendChild(m);   // v19: HTML (ícone da moeda)
   if (estadoCartao === "pronto") {
     const b = document.createElement("button"); b.className = "premiado pequeno"; b.textContent = t("resgatar");
     b.addEventListener("click", function() { aoClicar(); });
     lado.appendChild(b);
   } else if (estadoCartao === "feito") {
-    const ok = document.createElement("div"); ok.className = "ok"; ok.textContent = "✓"; lado.appendChild(ok);
+    const ok = document.createElement("div"); ok.className = "ok"; ok.innerHTML = Icone.html("ok"); lado.appendChild(ok);
   } else if (estadoCartao === "trocar") {
-    const b = document.createElement("button"); b.className = "pequeno"; b.textContent = "↻ " + t("trocar");
+    const b = document.createElement("button"); b.className = "pequeno"; b.innerHTML = Icone.html("repetir") + " " + escHtml(t("trocar"));
     b.addEventListener("click", function() { aoClicar(); });
     lado.appendChild(b);
   }
@@ -134,7 +132,7 @@ function montarMissoes() {
     save.missoes.forEach(function(m, i) {
       const titulo = t("mi_" + m.id, m.meta, m.cenario ? t("c_" + m.cenario) : "");
       const est = m.feito ? "pronto" : podeTrocar ? "trocar" : "";
-      lista.appendChild(cartao(titulo, m.prog, m.meta, "🪙 " + m.moedas, est, function() {
+      lista.appendChild(cartao(titulo, m.prog, m.meta, moedasHtml(m.moedas), est, function() {
         if (m.feito) { Progresso.resgatarMissao(i); som("pegar"); }
         else Progresso.trocarMissao(i);
         montarMissoes(); atualizarMenuProgresso();
@@ -149,7 +147,7 @@ function montarMissoes() {
     lista.appendChild(p);
     save.semana.desafios.forEach(function(d, i) {
       const est = d.resgatado ? "feito" : d.feito ? "pronto" : "";
-      lista.appendChild(cartao(t("de_" + d.id, d.meta), d.prog, d.meta, "🪙 " + d.moedas, est, function() {
+      lista.appendChild(cartao(t("de_" + d.id, d.meta), d.prog, d.meta, moedasHtml(d.moedas), est, function() {
         Progresso.resgatarDesafio(i); som("pegar"); montarMissoes(); atualizarMenuProgresso();
       }));
     });
@@ -167,7 +165,7 @@ function montarMissoes() {
     CONQUISTAS.forEach(function(cq) {
       const st = save.conquistas[cq.id];
       const est = st === "resgatada" ? "feito" : st === "feita" ? "pronto" : "";
-      const premio = "🪙 " + cq.moedas + (cq.skin ? " + " + t("sk_" + cq.skin) : "");
+      const premio = moedasHtml(cq.moedas) + (cq.skin ? " + " + escHtml(t("sk_" + cq.skin)) : "");
       lista.appendChild(cartao(t("co_" + cq.id), Progresso.valorStat(cq.stat), cq.meta, premio, est, function() {
         Progresso.resgatarConquista(cq.id); som("carta"); montarMissoes(); atualizarMenuProgresso();
       }, t("cod_" + cq.id, cq.meta)));
@@ -177,80 +175,10 @@ function montarMissoes() {
 }
 
 // ---------- skins ----------
-function abrirSkins(aba) {
-  estado = "skins";
-  abaSkins = aba || abaSkins;
-  Progresso.preparar();
-  montarSkins();
-  mostrarTela("telaSkins");
-}
-
-function corDoJogador() { return CORES_BOLINHAS[0]; }
-
-function desenharMiniSkin(cv, id) {
-  const g = cv.getContext("2d");
-  g.clearRect(0, 0, cv.width, cv.height);
-  const s = SKIN[id];
-  const corpo = s.tipo === "corpo" ? id : save.skinCorpo;
-  const ace = s.tipo === "acessorio" ? id : (s.tipo === "corpo" ? "nenhum" : save.skinAcessorio);
-  const r = cv.width * 0.3;
-  const cor = SKIN[corpo].cor !== "jogador" ? SKIN[corpo].cor : corDoJogador();
-  if (typeof ArteSkins !== "undefined") ArteSkins.miniatura(g, corpo, ace, cor, cv.width / 2, cv.height * 0.56, r, 0);
-  else { g.fillStyle = cor; g.beginPath(); g.arc(cv.width / 2, cv.height * 0.56, r, 0, 7); g.fill(); }
-}
-
-function montarSkins() {
-  document.querySelectorAll("#telaSkins .abas button").forEach(function(b) { b.classList.toggle("ativo", b.dataset.aba === abaSkins); });
-  const grade = el("gradeSkins");
-  grade.innerHTML = "";
-  const lista = abaSkins === "corpo" ? SKINS_CORPO : SKINS_ACESSORIO;
-  lista.forEach(function(s) {
-    const c = document.createElement("button");
-    const tem = Progresso.temSkin(s.id);
-    const usando = save.skinCorpo === s.id || save.skinAcessorio === s.id;
-    c.className = "skin r" + s.raridade + (usando ? " usando" : "") + (tem ? "" : " bloqueada");
-    const cv = document.createElement("canvas"); cv.width = cv.height = 110;
-    desenharMiniSkin(cv, s.id);
-    c.appendChild(cv);
-    const nome = document.createElement("div"); nome.className = "nome"; nome.textContent = t("sk_" + s.id); c.appendChild(nome);
-    const st = document.createElement("div"); st.className = "status";
-    if (usando) st.textContent = t("equipado");
-    else if (tem) st.textContent = t("equipar");
-    else if (s.preco) st.textContent = "🪙 " + s.preco;
-    else if (s.conquista) st.textContent = "🏆 " + t("co_" + s.conquista);
-    else if (s.semanal) st.textContent = "⭐ " + t("so_semanal");
-    c.appendChild(st);
-    c.addEventListener("click", function() {
-      skinEmFoco = s.id;
-      if (tem) { Progresso.equipar(s.id); som("clique"); Poki.medir("skin", s.id, "equip"); }
-      else if (s.preco && save.moedas >= s.preco) { if (Progresso.comprarSkin(s.id)) { Progresso.equipar(s.id); som("carta"); } }
-      else som("acerto");
-      montarSkins();
-      atualizarMenuProgresso();
-    });
-    grade.appendChild(c);
-  });
-  el("previaNome").textContent = t("sk_" + save.skinCorpo) + (save.skinAcessorio !== "nenhum" ? " + " + t("sk_" + save.skinAcessorio) : "");
-  atualizarMenuProgresso();
-}
-
-// prévia grande animada (chamada pelo loop enquanto a tela de skins está aberta)
-function desenharPreviaSkin(tempo) {
-  const cv = el("previaSkin");
-  const g = cv.getContext("2d");
-  g.clearRect(0, 0, cv.width, cv.height);
-  const corpo = save.skinCorpo, ace = save.skinAcessorio;
-  const cor = SKIN[corpo].cor !== "jogador" ? SKIN[corpo].cor : corDoJogador();
-  const y = cv.height * 0.56 + Math.sin(tempo * 2.2) * 6;
-  if (typeof ArteBolinha !== "undefined") ArteBolinha.sombra(g, cv.width / 2, cv.height * 0.9, 72, 40 - Math.sin(tempo * 2.2) * 6);
-  if (typeof ArteSkins !== "undefined") ArteSkins.miniatura(g, corpo, ace, cor, cv.width / 2, y, 80, tempo);
-  else { g.fillStyle = cor; g.beginPath(); g.arc(cv.width / 2, y, 80, 0, 7); g.fill(); }
-}
+// v19: a personalização (guarda-roupa + loja de visual) mudou para interface/visual.js (tela "telaVisual")
 
 // abas (data-aba) das duas telas
 document.querySelectorAll("#telaMissoes .abas button").forEach(function(b) {
   b.addEventListener("click", function() { som("clique"); abaMissoes = b.dataset.aba; montarMissoes(); });
 });
-document.querySelectorAll("#telaSkins .abas button").forEach(function(b) {
-  b.addEventListener("click", function() { som("clique"); abaSkins = b.dataset.aba; montarSkins(); });
-});
+

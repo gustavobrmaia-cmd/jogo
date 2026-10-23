@@ -3,6 +3,8 @@
 // =========================
 // PARTIDA E RODADAS
 // Partida: quem fizer CONFIG.pontosParaVencer pontos primeiro. Cada rodada é num cenário diferente:
+//   "roleta"    v19, só na 1ª rodada (menos no treino): roleta de ARMA de cada bolinha sem arma inicial e depois
+//               a roleta de MAPA (~2 s nas primeiras partidas; toque ou tecla acelera). Desenho: arte/roleta.js
 //   "intro"     ~1,3 s: nome do cenário, bolinhas aparecem (ninguém atira ainda)
 //   "luta"      45 s para derrotar o oponente
 //   "queda"     acabou o tempo e os dois estão vivos: queda de braço (quem clicar mais vence).
@@ -28,30 +30,41 @@ function embaralhar(lista) {
   return l;
 }
 
-// Skins: o jogador 1 usa a que escolheu; o oponente (bot ou jogador 2) ganha uma sorteada.
-// Skins de cor própria (ouro, galáxia...) trocam a cor da bolinha, e a do oponente sempre fica bem diferente.
+// Skins: o jogador 1 usa o visual que montou (v19: cor, corpo, olhos, boca, chapéu, acessório, rastro, K.O., emote);
+// o oponente (bot ou jogador 2) ganha um sorteado. Corpos de cor própria (ouro, galáxia...) trocam a cor da bolinha,
+// e a do oponente sempre fica bem diferente.
+// j.visuais = os visuais; j.skins = { corpo, acessorio } que o desenho usa (acessorio = chave das camadas, dados/skins.js)
+function sortearVisual() {
+  const v = Object.assign({}, VISUAL_PADRAO);
+  const um = function(tipo) { const l = SKINS_POR_TIPO[tipo]; return l[Math.floor(Math.random() * l.length)].id; };
+  v.corpo = um("corpo");
+  if (Math.random() < 0.5) v.chapeu = um("chapeu");
+  if (Math.random() < 0.15) v.olhos = um("olhos");
+  return v;
+}
 function escolherSkins(j) {
-  const sorteio = function() {
-    const c = SKINS_CORPO[Math.floor(Math.random() * SKINS_CORPO.length)].id;
-    const a = Math.random() < 0.5 ? "nenhum" : SKINS_ACESSORIO[1 + Math.floor(Math.random() * (SKINS_ACESSORIO.length - 1))].id;
-    return { corpo: c, acessorio: a };
-  };
-  const s1 = j.demo ? sorteio() : { corpo: save.skinCorpo || "classico", acessorio: save.skinAcessorio || "nenhum" };
-  let s2 = sorteio();
-  if (SKIN[s1.corpo] && SKIN[s1.corpo].cor !== "jogador") j.cores[0] = SKIN[s1.corpo].cor;
-  const fixa2 = SKIN[s2.corpo].cor !== "jogador" ? SKIN[s2.corpo].cor : null;
+  const v1 = j.demo ? sortearVisual() : Object.assign({}, VISUAL_PADRAO, save.visual || {});
+  const v2 = sortearVisual();
+  if (!j.demo) j.cores[0] = corDoVisual(v1);
+  else if (SKIN[v1.corpo] && SKIN[v1.corpo].cor !== "jogador") j.cores[0] = SKIN[v1.corpo].cor;
+  const fixa2 = SKIN[v2.corpo].cor !== "jogador" ? SKIN[v2.corpo].cor : null;
   if (fixa2 && coresDiferentes(fixa2, j.cores[0])) j.cores[1] = fixa2;
   else {
-    if (fixa2) s2.corpo = "classico";
+    if (fixa2) v2.corpo = "classico";
     if (!coresDiferentes(j.cores[1], j.cores[0])) j.cores[1] = corDiferente(j.cores[0]);
   }
-  j.skins = [s1, s2];
+  j.visuais = [v1, v2];
+  atualizarSkins(j);
+}
+function atualizarSkins(j) {
+  j.skins = j.visuais.map(function(v, k) { return { corpo: v.corpo, acessorio: chaveCamadas(v, k + 1) }; });
 }
 
 // Contra o bot o jogador tem sempre a mesma cor (a da prévia no menu) e o bot ganha uma bem diferente.
 // Antes as duas eram sorteadas e em ~21% das partidas ficavam parecidas (azul x ciano, rosa x rosa).
 function sortearCores(modo) {
-  const a = modo === "bot" || modo === "sobrevivencia" ? CORES_BOLINHAS[0] : embaralhar(CORES_BOLINHAS)[0];
+  // v19: a pessoa escolhe a cor na personalização (também no 2 jogadores: é a bolinha dela)
+  const a = modo !== "demo" ? corDoVisual(save.visual) : embaralhar(CORES_BOLINHAS)[0];
   return [a, corDiferente(a)];
 }
 function corDiferente(a) {
@@ -135,16 +148,18 @@ function novaPartida(modo, opcoes) {
     // tutorial desenhado da 1ª partida (atirar -> andar -> pular; desenho.js)
     tuto: modo === "bot" && save.partidas <= 1 ? { passo: null, tempo: 0, andou: 0, pulou: false } : null
   };
-  // v18.2: contra rival (menos o treino), a 1ª rodada começa com a pessoa escolhendo 1 de 3 armas (comum, rara, lendária)
-  // na abertura VS. O relatório do jogador de teste: até o 3º minuto a criança não decidia nada
-  if (rival && !treino && !opcoes.lendaria) { jogo.escolha = { armas: sortearEscolha(), sel: null, tSel: 0 }; Poki.medir("choice", "weapon", "visible"); }
+  // v19: arma inicial (comprada na loja): quem tem começa TODA rodada com ela (contra a máquina e no 2 jogadores;
+  // no 2 jogadores só o jogador 1, o dono do aparelho, tem loja). Treino e demonstração: nunca
+  const ai = save.armaInicial;
+  jogo.armaInicial = [!treino && modo !== "demo" && ai && typeof ARMA !== "undefined" && ARMA[ai] && (save.armas || []).indexOf(ai) >= 0 ? ai : null, null];
   escolherSkins(jogo);
   // rival: a cara dele (cor, corpo e acessório); se a skin do jogador tiver a mesma cor, o rival troca de cor
   if (rival) {
     const fixa = SKIN[rival.corpo] && SKIN[rival.corpo].cor !== "jogador" ? SKIN[rival.corpo].cor : rival.cor;
-    jogo.skins[1] = { corpo: rival.corpo, acessorio: rival.acessorio };
+    jogo.visuais[1] = visualDeAntigo(rival.corpo, rival.acessorio);
     if (coresDiferentes(fixa, jogo.cores[0])) jogo.cores[1] = fixa;
-    else { jogo.skins[1].corpo = "classico"; jogo.cores[1] = corDiferente(jogo.cores[0]); }
+    else { jogo.visuais[1].corpo = "classico"; jogo.cores[1] = corDiferente(jogo.cores[0]); }
+    atualizarSkins(jogo);
   }
   // prepara a cena da queda de braço já no começo da partida (as cores não mudam até o fim)
   if (modo !== "demo" && typeof ArteQueda !== "undefined" && ArteQueda.preparar) {
@@ -207,6 +222,10 @@ function iniciarRodada() {
   // os dois começam com a mesma arma (justo) e ela muda a cada rodada
   const arma = j.treino && j.rodada === 1 ? "rifle" : sortearArma(M, true);
   equipar(b1, arma); equipar(b2, arma);
+  // v19: quem tem arma inicial começa TODA rodada com ela; na 1ª rodada quem não tem ganha a da roleta (iniciarRoleta)
+  if (j.armaInicial) M.bolinhas.forEach(function(b, k) { if (j.armaInicial[k]) equipar(b, j.armaInicial[k]); });
+  // v19: rastro escolhido na personalização (o motor guarda os pontos; o desenho fica em arte/skins.js)
+  if (j.visuais && !j.demo) M.bolinhas.forEach(function(b, k) { const r = j.visuais[k].rastro; if (r) b.rastroFx = { id: r, vida: 0.42, pts: [], n: 0 }; });
   // 1ª partida da vida: dá para chegar perto de perder, mas não perder; o tiro do jogador pesa mais (rodada curta)
   // e as coisas aparecem aos poucos: rodada 1 só o rifle (sem acabar a munição), 2 entram as caixas de arma,
   // 3 entram as cartas, cada novidade com um "NOVO!" em cima (desenho.js)
@@ -244,6 +263,9 @@ function iniciarRodada() {
     som("rodada");
     if (estado === "jogo") Poki.jogando(true);   // a gameplay volta com a rodada nova
   }
+  // v19: na 1ª rodada (menos no treino) as roletas de arma e de mapa abrem a partida
+  j.depoisRoleta = false;
+  if (j.rodada === 1 && !j.demo && !j.treino && !j.continuou) iniciarRoleta(j, M);
 }
 
 // ---------- um passo (1/60 s) ----------
@@ -265,19 +287,21 @@ function atualizarJogo(dt) {
   if (j.fase === "queda") { atualizarQueda(j); return; }
   if (j.fase === "fimPartida") {
     passoMundo(j, M, false, 0.5);
+    festejar(j, M, j.vencedorPartida);
     if (j.tempoFase >= RODADA.fimPartida) terminarPartida();
     return;
   }
 
-  if (j.fase === "intro") {
+  if (j.fase === "roleta" || j.fase === "intro") {
     // v18.3: na abertura nada empurra para os lados (as esteiras da fábrica levavam as duas bolinhas até as paredes)
     const xs = [M.bolinhas[0].x, M.bolinhas[1].x];
     passoMundo(j, M, false, 1);
     M.bolinhas.forEach(function(b, k) { b.x = xs[k]; b.vx = 0; });
-    const es = j.rodada === 1 ? j.escolha : null;
-    // v18.3: escolhe sozinho em 2,4 s (era 3,6) e a carta virada fica 0,9 s à vista
-    j.durIntro = j.rodada === 1 ? (es ? (es.sel !== null ? Math.max(RODADA.introPrimeira, es.tSel + 0.9) : 3.3) : RODADA.introPrimeira) : RODADA.intro;
-    if (es && es.sel === null && j.tempoFase >= 2.4) escolherArma(Math.floor(Math.random() * 3), true);
+  }
+  if (j.fase === "roleta") { atualizarRoleta(j); return; }
+  if (j.fase === "intro") {
+    // v19: depois das roletas a abertura é curta (o VS do rival fica um pouco mais para dar tempo de ler)
+    j.durIntro = j.rodada === 1 ? (j.depoisRoleta ? (j.rival ? 0.95 : 0.6) : RODADA.introPrimeira) : RODADA.intro;
     if (j.tempoFase >= j.durIntro) {
       j.fase = "luta"; j.tempoFase = 0;
       if (!j.demo) som("lute");
@@ -298,6 +322,9 @@ function atualizarJogo(dt) {
       j.fase = "fimRodada"; j.tempoFase = 0;
       // ganhou a rodada contra o bot: moedas saem de onde ele caiu e voam para o placar (desenho.js)
       if (!j.demo && j.modo !== "2p" && j.vencedorRodada === 1 && M.ko) j.chuva = { x: M.ko.x, y: M.ko.y, n: j.modo === "sobrevivencia" ? 8 : 6, t0: performance.now() };
+      // v19: efeito de K.O. escolhido na personalização (de quem derrubou, se for pessoa)
+      const vk = j.vencedorRodada && j.visuais ? j.visuais[j.vencedorRodada - 1] : null;
+      if (!j.demo && M.ko && M.ko.humano && vk && vk.ko) efeitoKO(vk.ko, M.ko.x, M.ko.y, j.cores[j.vencedorRodada - 1]);
       if (!j.demo) Poki.jogando(false);      // pausa natural: a gameplay para até a próxima rodada
       return;
     }
@@ -307,6 +334,7 @@ function atualizarJogo(dt) {
   if (j.fase === "fimRodada") {
     // câmera lenta no começo do fim da rodada (mais longa e mais lenta num K.O.)
     passoMundo(j, M, true, M.ko ? (j.tempoFase < 1.1 ? 0.25 : 1) : (j.tempoFase < 0.7 ? 0.35 : 1));
+    festejar(j, M, j.vencedorRodada);
     if (j.tempoFase >= (j.M.ko ? RODADA.fim : 1.5)) fecharRodada(j);   // v18.2: sem K.O. (tempo, queda de braço) é mais curto
   }
 }
@@ -361,6 +389,7 @@ function passoMundo(j, M, controles, lento) {
     else if (b.evento === "bumper" && !M.mudo) som("mola");
     if (controles) usarArma(M, b, ent.tiro, ent.apertouTiro);
     atualizarEfeitos(M, b);
+    if (b.rastroFx) atualizarRastro(M, b);
   }
   separarBolinhas(M.bolinhas[0], M.bolinhas[1]);
   atualizarProjeteis(M);
@@ -610,27 +639,181 @@ function proximoNivelBot(nivel, desempenho, venceu, partidas) {
 }
 function nivelBotTexto(nivel) { return Math.round(nivel * 9) + 1; }   // 1 a 10, para mostrar
 
-// 3 armas para escolher: uma de cada raridade (sem minas e armas do céu, que confundem no começo)
-// v18.3: 3 cartas viradas ("?"): cada uma esconde uma arma sorteada (comum 55%, rara 35%, lendária 10%). Escolher às cegas
-// (com 3 opções à vista a pessoa sempre pegava a lendária: ficava forte demais)
-function sortearEscolha() {
-  const usadas = [];
-  return [0, 1, 2].map(function() {
-    const s = Math.random(), r = s < 0.10 ? 3 : s < 0.45 ? 2 : 1;
-    const l = ARMAS.filter(function(a) { return a.raridade === r && a.tipo !== "mina" && a.tipo !== "ceu" && usadas.indexOf(a.id) < 0; });
-    const id = l[Math.floor(Math.random() * l.length)].id;
-    usadas.push(id);
-    return id;
-  });
+// ---------- v19: ROLETAS da abertura (substituem as 3 cartas "?" da v18.3) ----------
+// 1º a roleta de ARMA (uma por bolinha sem arma inicial; as duas giram lado a lado e a 2ª para um pouco depois),
+// SÓ DEPOIS a de MAPA. A roleta só MOSTRA: a arma vem de sortearArma (com a Sorte da pessoa) e o mapa é o da regra
+// que já existia (mapas cruéis, casa do rival...). Nas primeiras partidas tudo fica em ~2 s (abertura longa espanta);
+// toque, clique ou tecla acelera (para na hora). Rodadas 2+: sem roleta — quem não tem arma inicial segue a regra
+// de antes (a mesma arma sorteada para os dois). Por quê: a rodada dura ~25 s e cada passagem de rodada já perde gente;
+// 1–2 s a mais em toda rodada pesariam mais que a graça da roleta (que fica no começo, onde a v18 já tinha a escolha).
+// Eventos: roulette/weapon (visible) e roulette/weapon-rN[-skip] (interact, N = raridade da arma da pessoa),
+//          roulette/weapon-start (a pessoa tem arma inicial), roulette/map (visible) e roulette/map-skip (interact).
+// Desenho: arte/roleta.js (Roleta.desenhar), chamado pelo desenho.js na fase "roleta".
+const ROLETA = {
+  rapida: { arma: 0.8, atraso: 0.1, seguraArma: 0.28, mapa: 0.62, seguraMapa: 0.25 },   // primeiras partidas: ~2 s
+  normal: { arma: 1.0, atraso: 0.14, seguraArma: 0.35, mapa: 0.8, seguraMapa: 0.3 }    // depois: ~2,6 s
+};
+// posição (0 até n-1) da roleta: começa rápido e desacelera (cúbica)
+function posRoleta(t, dur, n) { const u = Math.min(1, Math.max(0, t / dur)); return (n - 1) * (1 - Math.pow(1 - u, 3)); }
+
+// arma da roleta: sortearArma; a Sorte (melhoria) dá uma 2ª chance e fica a de raridade maior
+function sortearArmaRoleta(M, b) {
+  let id = sortearArma(M, true);
+  const sorte = b.lado === 1 && b.humano && jogo && jogo.modo !== "2p" && typeof sorteJogador === "function" ? sorteJogador() : 0;
+  if (sorte > 0 && Math.random() < sorte * 0.6) {
+    const outra = sortearArma(M, true);
+    if (ARMA[outra].raridade > ARMA[id].raridade) id = outra;
+  }
+  return id;
 }
-// i = 0, 1 ou 2 (toque, clique ou teclas 1/2/3: telas.js)
-function escolherArma(i, auto) {
-  const j = jogo, es = j && j.escolha;
-  if (!es || es.sel !== null || j.fase !== "intro" || j.rodada !== 1) return;
-  es.sel = i; es.tSel = j.tempoFase;
-  equipar(j.M.bolinhas[0], es.armas[i]);
-  som("pegar");
-  Poki.medir("choice", "weapon-r" + ARMA[es.armas[i]].raridade + (auto ? "-auto" : ""), "interact");
+// fita da roleta: n itens embaralhados terminando no resultado (sem repetir vizinhos)
+function fitaRoleta(lista, final, n) {
+  const f = [];
+  for (let i = 0; i < n - 1; i++) {
+    let x = lista[Math.floor(Math.random() * lista.length)];
+    if (f.length && x === f[f.length - 1]) x = lista[(lista.indexOf(x) + 1) % lista.length];
+    f.push(x);
+  }
+  if (f[n - 2] === final) f[n - 2] = lista[(lista.indexOf(final) + 1) % lista.length];
+  f.push(final);
+  return f;
+}
+
+function iniciarRoleta(j, M) {
+  const rapida = save.partidas <= 5, d = rapida ? ROLETA.rapida : ROLETA.normal;
+  const nomes = ARMAS.filter(function(a) { return a.raridade >= (M.lendaria ? 2 : 1) && a.tipo !== "mina" && a.tipo !== "ceu"; }).map(function(a) { return a.id; });
+  let k2 = 0;
+  const armas = M.bolinhas.map(function(b, k) {
+    if (j.armaInicial && j.armaInicial[k]) return { id: j.armaInicial[k], fixa: true, pos: 0, fita: [j.armaInicial[k]] };
+    const id = sortearArmaRoleta(M, b);
+    equipar(b, id);
+    const dur = d.arma + (k2++) * d.atraso;
+    return { id: id, fixa: false, dur: dur, fita: fitaRoleta(nomes, id, rapida ? 14 : 20), pos: 0, parou: false };
+  });
+  const gira = armas.some(function(a) { return !a.fixa; });
+  const fimArma = gira ? Math.max.apply(null, armas.map(function(a) { return a.fixa ? 0 : a.dur; })) : 0;
+  const mapas = CENARIOS.map(function(c) { return c.id; });
+  j.roleta = {
+    t: 0, rapida: rapida, armas: armas, etapa: gira ? "arma" : "mapa", tEtapa: 0,
+    fimArma: fimArma, seguraArma: d.seguraArma, durMapa: d.mapa, seguraMapa: d.seguraMapa,
+    mapa: { id: M.cen.id, fita: fitaRoleta(mapas, M.cen.id, rapida ? 11 : 15), pos: 0, parou: false },
+    pulou: false, ultimoTic: 0
+  };
+  j.fase = "roleta";
+  j.tempoFase = 0;
+  // a faixa de prêmios da partida anterior espera a roleta acabar (senão briga pela atenção)
+  if (typeof faixaPremio !== "undefined" && faixaPremio) { j.faixaVelho = faixaPremio.velho; faixaPremio.velho = j; }
+  if (gira) Poki.medir("roulette", "weapon", "visible");
+  else Poki.medir("roulette", "map", "visible");
+  if (j.armaInicial && j.armaInicial[0]) Poki.medir("roulette", "weapon-start", "visible");
+}
+
+function ticRoleta(ro, tom) {
+  if (ro.t - ro.ultimoTic < 0.045) return;
+  ro.ultimoTic = ro.t;
+  som("quique", tom);
+}
+
+function atualizarRoleta(j) {
+  const ro = j.roleta;
+  if (!ro) { j.fase = "intro"; j.tempoFase = 0; return; }
+  // toque, clique, pulo ou tiro (qualquer jogador) acelera
+  let apertou = false;
+  for (let k = 1; k <= 2; k++) if (entrada.apertou(k, "toque") || entrada.apertou(k, "tiro") || entrada.apertou(k, "pulo")) apertou = true;
+  if (apertou) acelerarRoleta();
+  ro.t += FIS.dt;
+  ro.tEtapa += FIS.dt;
+  if (ro.etapa === "arma") {
+    ro.armas.forEach(function(a, k) {
+      if (a.fixa || a.parou) return;
+      const p = posRoleta(ro.tEtapa, a.dur, a.fita.length);
+      if (Math.floor(p) > Math.floor(a.pos)) ticRoleta(ro, 0.8 + 0.6 * p / a.fita.length);
+      a.pos = p;
+      if (ro.tEtapa >= a.dur) {
+        a.parou = true; a.pos = a.fita.length - 1; a.tParou = ro.t;
+        const rar = ARMA[a.id].raridade;
+        som(rar >= 3 ? "vitoria_rodada" : "pegar");
+        if (rar >= 3) som("moeda");
+        if (k === 0 && M0humano(j)) Poki.medir("roulette", "weapon-r" + rar + (ro.pulou ? "-skip" : ""), "interact");
+      }
+    });
+    if (ro.tEtapa >= ro.fimArma + ro.seguraArma) { ro.etapa = "mapa"; ro.tEtapa = 0; som("carga"); Poki.medir("roulette", "map", "visible"); }
+  } else if (ro.etapa === "mapa") {
+    const m = ro.mapa;
+    if (!m.parou) {
+      const p = posRoleta(ro.tEtapa, ro.durMapa, m.fita.length);
+      if (Math.floor(p) > Math.floor(m.pos)) ticRoleta(ro, 0.7 + 0.5 * p / m.fita.length);
+      m.pos = p;
+      if (ro.tEtapa >= ro.durMapa) { m.parou = true; m.pos = m.fita.length - 1; m.tParou = ro.t; som("rodada"); }
+    }
+    if (ro.tEtapa >= ro.durMapa + ro.seguraMapa) fimRoleta(j);
+  }
+}
+function M0humano(j) { return j.M && j.M.bolinhas[0].humano; }
+
+// toque/tecla: a etapa que está girando para na hora; se já parou, passa para a próxima
+function acelerarRoleta() {
+  const j = jogo, ro = j && j.roleta;
+  if (!ro || j.fase !== "roleta") return;
+  if (!ro.pulou) { ro.pulou = true; if (ro.etapa === "mapa") Poki.medir("roulette", "map-skip", "interact"); }
+  if (ro.etapa === "arma") {
+    if (ro.tEtapa < ro.fimArma) ro.tEtapa = ro.fimArma;
+    else ro.tEtapa = ro.fimArma + ro.seguraArma;
+  } else if (ro.etapa === "mapa") {
+    if (ro.tEtapa < ro.durMapa) ro.tEtapa = ro.durMapa;
+    else ro.tEtapa = ro.durMapa + ro.seguraMapa;
+  }
+}
+
+function fimRoleta(j) {
+  j.roleta.etapa = "fim";
+  j.fase = "intro";
+  j.tempoFase = 0;
+  j.depoisRoleta = true;
+  if (typeof faixaPremio !== "undefined" && faixaPremio && faixaPremio.velho === j) faixaPremio.velho = j.faixaVelho;
+}
+
+// ---------- v19: rastro, efeito de K.O. e comemoração (personalização) ----------
+// rastro: o motor só guarda por onde a bolinha passou (o desenho é do ArteSkins); menos pontos no modo leve
+function atualizarRastro(M, b) {
+  const fx = b.rastroFx, pts = fx.pts;
+  for (let i = 0; i < pts.length; i++) pts[i].a += FIS.dt;
+  while (pts.length && pts[0].a > fx.vida) pts.shift();
+  const vel = Math.abs(b.vx) + Math.abs(b.vy);
+  if (!b.viva || vel < 1.6 || (M.passo % (CONFIG.leve ? 3 : 2))) return;
+  if (pts.length >= (CONFIG.leve ? 9 : 14)) pts.shift();
+  pts.push({ x: b.x, y: b.y, a: 0, s: fx.n++ });
+}
+
+// efeito extra no K.O. (com as partículas do Efeitos, por cima do estouro normal)
+function efeitoKO(id, x, y, cor) {
+  if (typeof Efeitos === "undefined") return;
+  const E = Efeitos;
+  switch (id) {
+    case "k_estrelas": E.acerto(x, y, "#ffd43b"); E.acerto(x - 40, y - 30, "#fff3bf"); E.acerto(x + 40, y - 20, "#ffd43b"); E.anel(x, y, "#ffd43b", 90); break;
+    case "k_fogos": ["#ff6b9d", "#4dabf7", "#ffd43b", "#51cf66"].forEach(function(c, i) { const a = i * 1.57 + 0.6; E.anel(x + Math.cos(a) * 60, y + Math.sin(a) * 50 - 30, c, 60); E.fagulhas(x + Math.cos(a) * 60, y + Math.sin(a) * 50 - 30, c, 8); }); break;
+    case "k_gelo": E.congelar(x, y); E.anel(x, y, "#a5d8ff", 100); E.fagulhas(x, y, "#e7f5ff", 12); break;
+    case "k_portal": E.teleporte(x, y, "#b197fc"); E.anel(x, y, "#9775fa", 120); E.anel(x, y, "#e5dbff", 70); break;
+    case "k_explosao": E.explosao(x, y, 95); E.tremer(14); break;
+    case "k_raio": E.anel(x, y, "#ffe066", 110); E.fagulhas(x, y, "#ffe066", 18); E.fagulhas(x, y, "#ffffff", 10); E.tremer(10); break;
+    case "k_moedas": E.fagulhas(x, y, "#fcc419", 22); E.anel(x, y, "#fcc419", 90); E.acerto(x, y - 30, "#fcc419"); break;
+    case "k_supernova": E.explosao(x, y, 120); E.anel(x, y, "#ffffff", 170); E.anel(x, y, "#ffd43b", 120); E.fagulhas(x, y, "#74c0fc", 14); E.fagulhas(x, y, "#ff6b9d", 14); E.tremer(18); break;
+  }
+}
+
+// comemoração de quem venceu (emote da personalização): dancinha, pulinhos ou pulão
+function festejar(j, M, lado) {
+  if (j.demo || !lado || !j.visuais) return;
+  const e = SKIN[j.visuais[lado - 1].emote];
+  const b = M.bolinhas[lado - 1];
+  if (!e || !b || !b.viva || j.tempoFase < 0.35) return;
+  const tf = j.tempoFase, g = typeof gravSinal === "function" ? gravSinal(M.cen, M.t) : 1;
+  if (b.festaFase !== j.fase) { b.festaFase = j.fase; b.proxFesta = 0; }
+  if (e.mov === "danca") { b.escalaX = 1 + 0.13 * Math.sin(tf * 16); b.escalaY = 2 - b.escalaX; }
+  else if (b.noChao && (!b.proxFesta || tf >= b.proxFesta)) {
+    b.vy = -(e.mov === "pulao" ? 10 : 6.5) * g;
+    b.proxFesta = tf + (e.mov === "pulao" ? 0.75 : 0.42);
+  }
 }
 
 function terminarPartida() {

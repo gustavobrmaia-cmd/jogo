@@ -23,7 +23,7 @@ function montarPainelPoder(alvo, aoComprar) {
     ["pcNivel", "pcIcone", "pcNome", "pcEfeito", "pcEstrelas", "pcPreco"].forEach(function(c) {
       const s = document.createElement("span"); s.className = c; b.appendChild(s);
     });
-    b.querySelector(".pcIcone").textContent = m.icone;
+    b.querySelector(".pcIcone").innerHTML = Icone.html(m.icone);
     b.addEventListener("click", function() {
       b.blur();
       if (!Poder.comprar(m.id)) { som("clique"); reanimar(b, "sem"); return; }
@@ -45,7 +45,7 @@ function montarPainelPoder(alvo, aoComprar) {
   // v15: mão apontando para o 1º cartão enquanto a 1ª melhoria é grátis (igual à mão do tutorial da luta);
   // v17: também na 1ª compra com moedas (classe comMao)
   const mao = document.createElement("span");
-  mao.className = "maoPoder"; mao.textContent = "👆";
+  mao.className = "maoPoder"; mao.innerHTML = Icone.html("mao");
   cartas.firstChild.appendChild(mao);
   alvo.appendChild(topo);
   alvo.appendChild(cartas);
@@ -65,8 +65,8 @@ function atualizarPainelPoder(alvo) {
   alvo.classList.toggle("comGratis", Poder.gratis());
   // v17: a grátis vem sozinha depois do rival 2; a mão continua apontando até a pessoa comprar a 1ª com moedas
   alvo.classList.toggle("comMao", !Poder.gratis() && (save.stats.melhorias || 0) < 2 && Poder.podeComprar("forca"));
-  alvo.querySelector(".poderValor").textContent = t("poder_n", Poder.valor(Poder.doJogador()));
-  alvo.querySelector(".poderMoedas").textContent = "🪙 " + save.moedas;
+  alvo.querySelector(".poderValor").innerHTML = Icone.html("raio") + " " + escHtml(t("poder_n", Poder.valor(Poder.doJogador())));
+  alvo.querySelector(".poderMoedas").innerHTML = moedasHtml(save.moedas);
   // dica curta: depois de perder ("melhore e volte mais forte") ou para quem ainda não comprou quase nada
   alvo.querySelector(".poderDica").textContent = Poder.gratis() ? t("escolha_gratis") : !pode ? "" : alvo.dataset.perdeu === "1" ? t("poder_dica") :
     (save.stats.melhorias || 0) < 3 ? t("poder_gaste") : "";
@@ -82,7 +82,7 @@ function atualizarPainelPoder(alvo) {
     est.dataset.faixa = faixa;
     est.innerHTML = '<span class="cheia">' + "★".repeat(cheias) + '</span><span class="vazia">' + "★".repeat(5 - cheias) + "</span>";
     const custo = Poder.custo(id);
-    b.querySelector(".pcPreco").textContent = max ? t("mel_max") : custo ? "🪙 " + custo : t("gratis");
+    b.querySelector(".pcPreco").innerHTML = max ? escHtml(t("mel_max")) : custo ? moedasHtml(custo) : escHtml(t("gratis"));
     b.classList.toggle("gratis", !max && !custo);
     b.classList.toggle("pode", Poder.podeComprar(id));
     b.classList.toggle("max", max);

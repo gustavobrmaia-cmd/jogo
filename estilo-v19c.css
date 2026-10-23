@@ -1,0 +1,125 @@
+/* =====================================================================================================
+   v19 (agente C): telas novas — PERSONALIZAÇÃO (#telaVisual), LOJA DE ARMAS (#telaLoja), cartão da SORTE e botão Loja.
+   Direção de arte v19: contorno escuro grosso (#1a0d33), sombra dura embaixo e "aperto" no clique, painéis com borda
+   dupla, títulos Nunito 900 com contorno e leve inclinação. Classes próprias (v...), sem mexer no estilo.css.
+   ===================================================================================================== */
+.vTela { justify-content: flex-start; padding: 18px 34px 16px; gap: 12px; }
+.vTopo { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.vTitulo {
+  font-size: 50px; font-weight: 900; color: #ffd43b; transform: rotate(-2deg);
+  -webkit-text-stroke: 9px #1a0d33; paint-order: stroke fill; text-shadow: 0 6px 0 #1a0d33;
+}
+.vTopo .moedas.vMoedas { position: static; }
+.vCorpo { width: 100%; flex: 1; min-height: 0; display: flex; gap: 22px; align-items: stretch; }
+
+/* painel com borda dupla */
+.vPrevia, .vLado {
+  position: relative; border-radius: 26px; background: #22164a;
+  border: 5px solid #1a0d33; box-shadow: 0 0 0 4px #6f4fd8, 0 0 0 9px #1a0d33, 0 12px 0 9px #1a0d33;
+  margin: 9px;
+}
+.vPrevia { width: 430px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 14px 14px; }
+.vPrevia canvas { width: 400px; height: auto; max-height: 340px; border-radius: 18px; background: radial-gradient(ellipse at 50% 60%, #4a2f9a 0%, #2a1a5e 70%); border: 4px solid #1a0d33; }
+.vPrevia canvas.comprou { animation: vComprou 0.5s ease-out; }
+@keyframes vComprou { 0% { transform: scale(1.06); filter: brightness(1.6); } 100% { transform: none; } }
+.vNome { font-size: 26px; font-weight: 900; color: #fff; -webkit-text-stroke: 5px #1a0d33; paint-order: stroke fill; min-height: 34px; }
+.vComo { font-size: 17px; font-weight: 800; color: #ffd8a8; min-height: 22px; max-width: 390px; line-height: 1.15; }
+.vRar { display: inline-block; font-size: 15px; padding: 3px 10px; border-radius: 999px; border: 3px solid #1a0d33; vertical-align: 4px; -webkit-text-stroke: 0; }
+.vRar.r1 { background: #748ffc; } .vRar.r2 { background: #339af0; } .vRar.r3 { background: #9775fa; } .vRar.r4 { background: #fab005; color: #3b1d00; }
+
+/* botão grande da ação (equipar / comprar / como ganhar) */
+button.vBotao {
+  min-width: 300px; font-size: 26px; padding: 10px 22px; color: #fff;
+  background: #5a5f8a; border: 4px solid #1a0d33; border-bottom-width: 10px; border-radius: 18px;
+}
+button.vBotao::before { display: none; }
+button.vBotao.pronto { background: linear-gradient(#8ce99a, #2f9e44); }
+button.vBotao.pode { background: linear-gradient(#ffe066, #fab005); color: #3b1d00; animation: pulsar 1.4s ease-in-out infinite; }
+button.vBotao.falta { background: #4a4e72; color: #ced4da; }
+button.vBotao:disabled { opacity: 0.9; }
+button.vBotao.sem { animation: semMoedas 0.35s; }
+button.vBotao:active:not(:disabled) { border-bottom-width: 4px; transform: translateY(6px); }
+
+.vLado { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+.vAbas { display: flex; flex-wrap: wrap; gap: 8px; }
+button.vAba {
+  min-width: 0; display: flex; align-items: center; gap: 6px; font-size: 18px; padding: 6px 12px;
+  background: #3b2d7a; border: 3px solid #1a0d33; border-bottom-width: 6px; border-radius: 14px;
+}
+button.vAba::before, button.vItem::before { display: none; }
+button.vAba .ico { width: 26px; height: 26px; }
+button.vAba.ativo { background: linear-gradient(#ffe066, #fab005); color: #3b1d00; outline: none; }
+.vGrade { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(116px, 1fr)); gap: 10px; padding: 4px 6px 10px; align-content: start; touch-action: pan-y; }
+.vGrade::-webkit-scrollbar { width: 10px; } .vGrade::-webkit-scrollbar-thumb { background: #6f4fd8; border-radius: 6px; }
+button.vItem {
+  position: relative; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 6px 4px 6px; font-size: 15px; border-radius: 16px; color: #fff;
+  background: #2f2566; border: 4px solid #1a0d33; border-bottom-width: 8px;
+  box-shadow: inset 0 0 0 3px var(--rar, #748ffc);
+}
+button.vItem.r1 { --rar: #748ffc; } button.vItem.r2 { --rar: #339af0; background: #233a74; }
+button.vItem.r3 { --rar: #9775fa; background: #3a2580; } button.vItem.r4 { --rar: #fab005; background: #4a3416; }
+button.vItem canvas { width: 84px; height: 84px; }
+button.vItem.bloqueado canvas { filter: saturate(0.65) brightness(0.88); }
+button.vItem.usando { box-shadow: inset 0 0 0 3px #69db7c, 0 0 0 4px #69db7c; }
+button.vItem.foco { box-shadow: inset 0 0 0 3px var(--rar, #748ffc), 0 0 0 4px #ffd43b; transform: translateY(-3px); }
+.vItemNome { font-size: 15px; font-weight: 900; line-height: 1.05; min-height: 32px; display: flex; align-items: center; text-align: center; }
+.vItemStatus { font-size: 13px; font-weight: 800; color: #ffe066; min-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+/* loja de armas */
+.lInfo { width: 100%; display: flex; flex-direction: column; gap: 4px; }
+.lBarra { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 900; }
+.lBarra span { width: 110px; text-align: right; }
+.lBarra i { flex: 1; height: 14px; border-radius: 8px; background: #1a0d33; border: 2px solid #1a0d33; overflow: hidden; }
+.lBarra b { display: block; height: 100%; border-radius: 6px; background: linear-gradient(#ffe066, #f59f00); }
+.lInicial { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; font-size: 17px; font-weight: 800; }
+.lInicial button.lTirar { font-size: 15px; padding: 4px 12px; min-width: 0; border-bottom-width: 4px; }
+.lInicial .lFalta { color: #ffd8a8; font-size: 15px; }
+button.lAba { font-size: 17px; }
+button.lAba.r2 { background: #3b4f7a; } button.lAba.r3 { background: #4b2f8a; } button.lAba.r4 { background: #6a4a10; }
+button.lAba.ativo { background: linear-gradient(#ffe066, #fab005); }
+button.lItem canvas { width: 90px; height: 90px; }
+
+/* botão Loja no menu e cartão da Sorte */
+button.botaoLoja, #telaMenu button.botaoLoja { position: relative; background: linear-gradient(180deg, #74c0fc 0%, #339af0 55%, #1c7ed6 100%); border-bottom-color: #0b4a8a; }
+/* com a Loja são 5 botões na linha do menu: deitado eles ficam mais estreitos para caber */
+body:not(.retrato) #telaMenu .linha:has(#btnLoja:not(.escondido)) { gap: 10px; }
+body:not(.retrato) #telaMenu .linha:has(#btnLoja:not(.escondido)) button { min-width: 0; padding-left: 16px; padding-right: 16px; font-size: 23px; }
+button.poderCarta[data-melhoria="sorte"] { background: linear-gradient(#63e6be, #099268); border-bottom-color: #064d38; }
+.pcIcone .ico { width: 1.25em; height: 1.25em; vertical-align: middle; }
+.maoPoder .ico { width: 1.1em; height: 1.1em; }
+/* 4 cartões de melhoria na tela de fim deitado: um pouco mais estreitos */
+#recPoder button.poderCarta { width: 150px; }
+#recPoder .pcNome { font-size: 17px; }
+#menuPoder button.poderCarta { width: 220px; }
+
+/* ---------- em pé (celular): coluna, prévia menor, grade de 4 ---------- */
+body.retrato .vTela { padding: 20px 22px 24px; gap: 16px; }
+body.retrato .vTitulo { font-size: 58px; }
+body.retrato .vCorpo { flex-direction: column; gap: 18px; }
+body.retrato .vCorpo { min-height: 0; }
+/* em pé a prévia fica à esquerda e o nome/botão à direita (prévia maior e sobra altura para a grade) */
+body.retrato .vPrevia { width: auto; padding: 12px 16px 16px; display: grid; grid-template-columns: auto 1fr; column-gap: 18px; row-gap: 10px; align-items: center; justify-items: center; align-content: center; }
+body.retrato .vPrevia canvas { width: 420px; max-height: none; grid-row: 1 / span 5; }
+body.retrato .vLado { flex: 1 1 0; min-height: 0; }
+body.retrato #menuPoder .poderCartas { flex-wrap: wrap; max-width: 600px; margin: 0 auto; row-gap: 16px; }
+body.retrato .vNome { font-size: 30px; }
+body.retrato .vComo { font-size: 20px; max-width: 700px; }
+body.retrato button.vBotao { min-width: 0; width: 100%; font-size: 32px; padding: 12px 20px; }
+body.retrato button.vAba { font-size: 22px; padding: 8px 14px; }
+body.retrato .vGrade { grid-template-columns: repeat(4, 1fr); }
+body.retrato button.vItem canvas { width: 104px; height: 104px; }
+body.retrato .vItemNome { font-size: 19px; min-height: 40px; }
+body.retrato .vItemStatus { font-size: 16px; }
+body.retrato .lBarra { font-size: 19px; }
+body.retrato .lInicial { font-size: 21px; }
+/* tela de fim em pé: 4 cartões cabem lado a lado (sem a frase, que nem cabia) */
+body.retrato #recPoder button.poderCarta { width: 214px; padding-left: 6px; padding-right: 6px; }
+body.retrato #recPoder .pcEfeito { display: none; }
+body.retrato #recPoder .pcNome { font-size: 24px; }
+body.retrato #menuPoder button.poderCarta { width: 270px; }
+body.retrato button.vItem, body.retrato button.vAba, body.retrato .lInicial button.lTirar { min-width: 0; }
+
+/* loja deitada: prévia mais baixa para a linha da arma inicial caber no painel */
+body:not(.retrato) #telaLoja .vPrevia { gap: 6px; }
+body:not(.retrato) #telaLoja .vPrevia canvas { width: auto; height: 236px; max-height: 236px; }

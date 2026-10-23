@@ -8,7 +8,7 @@
 
 function saveNovo() {
   return {
-    versao: 1,
+    versao: 2,        // v19: 2 (o save da v18 vem com 1 e é convertido em Progresso.preparar)
     idioma: "",       // vazio: segue o navegador
     mudo: false,
     partidas: 0,      // quantas partidas já começou (0 = primeira visita)
@@ -34,7 +34,12 @@ function saveNovo() {
     rival: 0,         // modo rivais: o próximo rival a enfrentar (0 a 9)
     liga: 0,          // modo rivais: 0 Bronze, 1 Prata, 2 Ouro, 3 Diamante, 4+ Mestre
     rivalAjuste: 0,   // modo rivais: o rival atual fica mais fraco a cada derrota (até -0,3); zera ao vencer
-    poder: { forca: 0, vida: 0, veloc: 0 },   // melhorias compradas (js/jogo/progresso/poder.js)
+    poder: { forca: 0, vida: 0, veloc: 0, sorte: 0 },   // melhorias compradas (js/jogo/progresso/poder.js; sorte desde a v19)
+    // v19: personalização completa (ids de js/jogo/dados/skins.js; "" = nada). skinCorpo/skinAcessorio continuam
+    // sendo gravados (espelho do corpo e do chapéu/acessório) para um save novo abrir numa versão antiga
+    visual: { cor: "cor_rosa", corpo: "classico", olhos: "", boca: "", chapeu: "", acessorio: "", rastro: "", ko: "", emote: "" },
+    armas: [],        // v19: armas compradas na loja (ids de ARMAS)
+    armaInicial: "",  // v19: arma com que a pessoa começa cada rodada ("" = a da roleta / a sorteada)
     qualidade: "auto" // "auto" | "alta" | "leve"
   };
 }
