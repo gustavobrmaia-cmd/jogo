@@ -281,6 +281,463 @@ const ArteCenarios = (function() {
     }
   };
 
+  // ---------- mais ajudantes (mapas do lote 2 em diante) ----------
+  function vg(g, y0, y1, c0, c1) { return lin(g, 0, y0, 0, y1, [[0, c0], [1, c1]]); }
+  // névoa em faixas chapadas (alfa subindo de y0 para y1)
+  function bruma(g, y0, y1, cor, a, n) { n = n || 4; const h = (y1 - y0) / n; for (let i = 0; i < n; i++) { g.fillStyle = ca(cor, a * (i + 1) / n); g.fillRect(-PAD, Math.round(y0 + i * h), L + PAD * 2, Math.ceil(h) + 1); } }
+  // rocha arredondada e irregular (superelipse com cantos moles)
+  function formaRocha(g, x, y, w, h, seed, jag) {
+    const r = rnd(seed), n = 16, cx = x + w / 2, cy = y + h / 2, p = [];
+    for (let i = 0; i < n; i++) { const a = i / n * TAU + .2, c = Math.cos(a), s = Math.sin(a), k = 1 - (jag == null ? .1 : jag) * r(); p.push(cx + Math.sign(c) * Math.pow(Math.abs(c), .55) * w / 2 * k, cy + Math.sign(s) * Math.pow(Math.abs(s), .55) * h / 2 * k); }
+    const m = i => { const a = i % n, b = (i + 1) % n; return [(p[a * 2] + p[b * 2]) / 2, (p[a * 2 + 1] + p[b * 2 + 1]) / 2]; };
+    g.beginPath(); const s0 = m(n - 1); g.moveTo(s0[0], s0[1]);
+    for (let i = 0; i < n; i++) { const q = m(i); g.quadraticCurveTo(p[i * 2], p[i * 2 + 1], q[0], q[1]); }
+    g.closePath();
+  }
+  // rocha cartoon: sombra dura embaixo-direita, corpo, luz em meia-lua em cima-esquerda e contorno grosso
+  function rocha(g, x, y, w, h, pal, seed, o) {
+    o = o || {};
+    formaRocha(g, x, y, w, h, seed, o.jag); g.fillStyle = pal.sombra; g.fill();
+    g.save(); formaRocha(g, x, y, w, h, seed, o.jag); g.clip();
+    formaRocha(g, x - w * .07, y - h * .12, w, h, seed, o.jag); g.fillStyle = pal.base; g.fill();
+    if (pal.luz) { g.fillStyle = pal.luz; g.beginPath(); g.ellipse(x + w * .3, y + h * .2, w * .26, h * .12, -.25, 0, TAU); g.fill(); }
+    if (o.extra) o.extra(g);
+    g.restore();
+    formaRocha(g, x, y, w, h, seed, o.jag); tracar(g, pal.cont || TINTA, o.lw || 3.5);
+  }
+  // cratera: borda clara embaixo, fundo escuro e contorno fino
+  function cratera(g, x, y, rx, ry, base, escura) {
+    g.fillStyle = clar(base, .35); g.beginPath(); g.ellipse(x, y + ry * .25, rx, ry, 0, 0, TAU); g.fill();
+    g.fillStyle = escura; g.beginPath(); g.ellipse(x, y, rx * .9, ry * .82, 0, 0, TAU); g.fill();
+    g.fillStyle = base; g.beginPath(); g.ellipse(x + rx * .12, y + ry * .2, rx * .7, ry * .55, 0, 0, TAU); g.fill();
+    g.beginPath(); g.ellipse(x, y + ry * .1, rx, ry * 1.05, 0, 0, TAU); tracar(g, ca(TINTA, .55), 1.6);
+  }
+  // contorno "por baixo": traça todas as formas com o dobro da largura e depois pinta por cima (só sobra a borda de fora)
+  function blobs(g, lista, cor, lw) {
+    g.beginPath(); lista.forEach(b => Cc(g, b[0], b[1], b[2])); tracar(g, TINTA, lw * 2);
+    g.beginPath(); lista.forEach(b => Cc(g, b[0], b[1], b[2])); g.fillStyle = cor; g.fill();
+  }
+  // neve fofa por cima de uma plataforma (bolotas com contorno por fora)
+  function neveTopo(g, x, y, w, cor, corS, seed) {
+    const r = rnd(seed), b = [];
+    for (let i = 4; i < w - 2; i += 13 + r() * 9) b.push([x + i, y + 3 - r() * 2, 6 + r() * 4]);
+    g.save(); g.beginPath(); g.rect(x - 8, y - 20, w + 16, 30); g.clip();
+    g.beginPath(); b.forEach(q => Cc(g, q[0], q[1], q[2])); rr(g, x + 1, y - 1, w - 2, 9, 4, true); tracar(g, TINTA, 5);
+    g.beginPath(); b.forEach(q => Cc(g, q[0], q[1], q[2])); rr(g, x + 1, y - 1, w - 2, 9, 4, true); g.fillStyle = corS; g.fill();
+    g.beginPath(); b.forEach(q => Cc(g, q[0] - 1.5, q[1] - 2, q[2] * .8)); g.fillStyle = cor; g.fill();
+    g.restore();
+  }
+  function flocoSpr(k, r, a) { return spr(k, r * 2 + 2, r * 2 + 2, function(g) { g.fillStyle = rad(g, r + 1, r + 1, r, [[0, "rgba(255,255,255," + a + ")"], [.55, "rgba(255,255,255," + a * .8 + ")"], [1, "rgba(255,255,255,0)"]]); g.fillRect(0, 0, r * 2 + 2, r * 2 + 2); }); }
+  function cristal(g, x, y, s, c0, c1, c2) {
+    g.save(); g.translate(x, y); g.scale(s, s);
+    [[-10, 0, -4, -34, 2, 0, c1], [0, 0, 8, -22, 14, 0, c0], [-16, 0, -15, -18, -6, 0, c2]].forEach(q => { poli(g, q.slice(0, 6)); g.fillStyle = q[6]; g.fill(); tracar(g, TINTA, 2.5 / s); });
+    g.fillStyle = "rgba(255,255,255,.8)"; poli(g, [-8, -4, -4, -30, -3, -4]); g.fill();
+    g.restore();
+  }
+  function igloo(g, x, y, s, aceso) {
+    g.save(); g.translate(x, y); g.scale(s, s);
+    if (aceso) halo(g, 0, -8, 70, "#ffcf70", .3, 4);
+    g.beginPath(); g.moveTo(-46, 0); g.arc(0, 0, 46, Math.PI, 0); g.closePath(); g.fillStyle = "#cfe4fa"; g.fill();
+    g.save(); g.clip(); g.fillStyle = "#ffffff"; C(g, -8, -8, 44); g.fill();
+    g.strokeStyle = "rgba(90,120,190,.45)"; g.lineWidth = 2;
+    for (let k = 1; k < 4; k++) { g.beginPath(); g.arc(0, 0, k * 12, Math.PI, 0); g.stroke(); }
+    for (let k = -3; k <= 3; k++) { g.beginPath(); g.moveTo(k * 11, -42); g.lineTo(k * 14 + 4, 0); g.stroke(); }
+    g.restore();
+    g.beginPath(); g.moveTo(-46, 0); g.arc(0, 0, 46, Math.PI, 0); g.closePath(); tracar(g, TINTA, 3.5);
+    g.beginPath(); g.moveTo(-13, 0); g.lineTo(-13, -10); g.arc(0, -10, 13, Math.PI, 0); g.lineTo(13, 0); g.closePath(); g.fillStyle = aceso ? "#ffc761" : "#3a4a8a"; g.fill(); tracar(g, TINTA, 3);
+    if (aceso) { g.fillStyle = "#fff0b8"; g.beginPath(); g.moveTo(-6, 0); g.lineTo(-6, -10); g.arc(0, -10, 6, Math.PI, 0); g.lineTo(6, 0); g.fill(); }
+    g.restore();
+  }
+
+  // =====================================================================================
+  // GELO — serra nevada, geleira, pinheiros e iglu (aurora | dia claro | nevasca)
+  // =====================================================================================
+  CEN.gelo = {
+    vars: {
+      aurora:  { ceu: ["#0b1040", "#121a58", "#1a2a74", "#24408e", "#3460a8", "#5a88c4"], k: .35, tint: "#26388e", estrelas: 150, aurora: 1, astro: "lua", neve: 50 },
+      dia:     { ceu: ["#3c9cff", "#56acff", "#72bdff", "#90ceff", "#b2e0ff", "#daf2ff"], k: 0, tint: "#ffffff", estrelas: 0, astro: "sol", neve: 26 },
+      nevasca: { ceu: ["#454a80", "#555c92", "#666ea4", "#7a82b4", "#8e96c2", "#a6aed2"], k: .32, tint: "#6c74ac", estrelas: 0, astro: null, neve: 100, bruma: .45, vento: 1 }
+    },
+    acima: V => V.ceu[0],
+    abaixo: V => [mix("#5aa6e6", V.tint, V.k * .5), mix("#3f84d0", V.tint, V.k * .5), mix("#2f64b0", V.tint, V.k * .5)],
+    pre: function(g, V) {
+      const T = (c, k) => mix(c, V.tint, (k == null ? 1 : k) * V.k);
+      ceu(g, 0, 520, V.ceu);
+      if (V.estrelas) estrelas(g, V.estrelas, 4, S.top, 330, "#e8f1ff");
+      if (V.aurora) [[170, "#2dffb0", .45, 1.1, 0], [240, "#4de0ff", .32, .8, 2.4], [130, "#ff7ad9", .26, 1.4, 4.1]].forEach(q => {
+        for (let x = -PAD; x < L + PAD; x += 8) {
+          const yy = q[0] + Math.sin(x / 190 * q[3] + q[4]) * 46 + Math.sin(x / 71 + q[4]) * 10, hh = 140 + Math.sin(x / 130 + q[4] * 2) * 50;
+          g.fillStyle = lin(g, 0, yy - hh, 0, yy + 20, [[0, ca(q[1], 0)], [.78, ca(q[1], q[2])], [.92, ca("#ffffff", q[2] * .7)], [1, ca(q[1], 0)]]); g.fillRect(x, yy - hh, 8, hh + 20);
+        }
+      });
+      if (V.astro === "sol") astro(g, 1010, 130, 44, "#fff1a8", "#fffbe0", "#f5b524", "#fff6c0", .35);
+      else if (V.astro === "lua") luaCrescente(g, 300, 130, 32, "#f2f4ff");
+      if (V.astro !== "lua") [[260, 110, 200], [700, 190, 160], [1180, 250, 150]].forEach(q => nuvem(g, q[0], q[1], q[2], T("#ffffff", .7), T("#dbe8ff", .7), T("#a8bce8", .7), 2.5));
+      montanhas(g, { y: 470, alt: 200, passo: 230, seed: 3, cor: T("#a4b8f2"), sombra: T("#7488d4"), neve: T("#ffffff", .4), neveS: ca("#8aa0e0", .6), bot: 620, cont: T("#5464b0"), contW: 2.5 });
+      if (V.bruma) bruma(g, 330, 520, "#c8d0f0", V.bruma);
+      montanhas(g, { y: 548, alt: 120, passo: 150, seed: 14, cor: T("#a8e4ff"), sombra: T("#6cb8ec"), neve: "#ffffff", neveS: ca("#9ad0f0", .6), bot: 680, cont: T("#3a78c0"), contW: 3 });
+      const r = rnd(9);
+      const h2 = camada(g, { seed: 12, y: 600, amp: 14, esc: 150, cor: T("#e4f4ff"), sombra: T("#b8dcf6"), luz: "#ffffff", bot: 720, cont: TINTA, contW: 3 });
+      for (let x = -10; x < L + 20; x += 46 + r() * 60) { const s = 54 + r() * 40; pinheiro(g, x, h2(x) + 6, s, T("#4aa8bc"), T("#2c6a90"), TINTA, "#ffffff"); }
+      if (V.bruma) bruma(g, 480, 640, "#d8e0f8", V.bruma * .6);
+      const h3 = camada(g, { seed: 6, y: 640, amp: 12, esc: 160, cor: T("#f6fcff", .5), sombra: T("#c4e2f8", .5), luz: "#ffffff", bot: 740, cont: TINTA, contW: 3 });
+      igloo(g, 1180, h3(1180) + 6, .9, V.k > .2);
+      [[560, 1], [700, .8], [70, 1.1]].forEach(q => cristal(g, q[0], h3(q[0]) + 12, q[1], T("#d8f4ff"), T("#8fd8ff"), T("#5ab0e8")));
+    },
+    pad: p => p.h > 40 ? [0, 16, 0, 0] : [8, 16, 8, 36],
+    plat: function(g, p, i, V) {
+      const T = (c, k) => mix(c, V.tint, (k == null ? .5 : k) * V.k), w = p.w, h = p.h, r = rnd(30 + i);
+      if (h > 40) {   // chão: gelo azul em camadas, com rachaduras e neve fofa em cima
+        g.fillStyle = T("#7ccdf6"); g.fillRect(0, 0, w, h + 40);
+        g.fillStyle = T("#55a8e6"); g.fillRect(0, 30, w, h + 10);
+        g.fillStyle = "rgba(255,255,255,.35)"; for (let x = 20; x < w; x += 70 + r() * 60) poli(g, [x, 10, x + 16, 10, x - 20, h + 40, x - 36, h + 40]), g.fill();
+        g.strokeStyle = ca("#ffffff", .6); g.lineWidth = 2; for (let k = 0; k < 12; k++) { const x = r() * w, y = 20 + r() * 30; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 10 + r() * 10, y + 6 + r() * 8); g.lineTo(x + 16 + r() * 16, y + 4); g.stroke(); }
+        g.fillStyle = TINTA; g.fillRect(0, 10, w, 3);
+        neveTopo(g, -10, 4, w + 20, T("#ffffff", .3), T("#d4e8fa", .3), 5 + i);
+        return;
+      }
+      for (let k = 0; k < Math.round(w / 34); k++) { // pingentes de gelo
+        const px = 12 + r() * (w - 24), len = 10 + r() * 20, wd = 4 + r() * 4;
+        poli(g, [px - wd, h - 3, px + wd, h - 3, px + 1, h + len]); g.fillStyle = T("#bfeaff"); g.fill(); tracar(g, TINTA, 2.2);
+      }
+      bloco(g, 0, 0, w, h, { topo: T("#e8f8ff"), base: T("#8fdcff"), sombra: T("#52a8ea"), luz: null }, { raio: 8, topoH: 6, lw: 3.5, extra: function(g) {
+        g.fillStyle = "rgba(255,255,255,.45)"; for (let x = 14; x < w; x += 46 + r() * 20) { poli(g, [x, 0, x + 10, 0, x - h * .6 + 10, h, x - h * .6, h]); g.fill(); }
+      } });
+      neveTopo(g, 2, 1, w - 4, T("#ffffff", .3), T("#d4e8fa", .3), 70 + i);
+    },
+    anim: function(g, p, i, est, t) { // brilhos nos cristais
+      const s = spr("brilhoGelo", 20, 20, c => { brilho4(c, 10, 10, 9, "#ffffff"); });
+      for (let k = 0; k < 2; k++) {
+        const ph = t * .9 + i * 1.7 + k * 3.1, a = Math.pow(Math.max(0, Math.sin(ph)), 3);
+        if (a < .02) continue; g.globalAlpha = a; g.drawImage(s, Math.round(p.x + p.w * (.15 + .7 * mod(Math.floor(ph / 3.14159) * .37 + i * .21 + k * .4, 1)) - 10), Math.round(p.y - 6));
+      }
+      g.globalAlpha = 1;
+    },
+    fundo: function(g, est, t, V) {
+      const f = [flocoSpr("f0", 2, .55), flocoSpr("f1", 3, .75), flocoSpr("f2", 5, .9)], n = leve() ? V.neve >> 1 : V.neve, vx = V.vento ? 70 : 0;
+      for (let k = 0; k < n; k++) {
+        const z = k % 3, v = 16 + z * 20 + (V.vento ? 30 : 0), x = mod(k * 97.3 + Math.sin(t * .6 + k) * (14 + z * 8) + t * (6 + z * 4 + vx), L + 20) - 10, y = mod(k * 61.7 + t * v, est.altura + 20) - 10 - est.deslocY;
+        g.drawImage(f[z], Math.round(x), Math.round(y));
+      }
+    },
+    frente: function(g, est, t, V) {
+      const f = flocoSpr("f2", 5, .9), n = V.vento ? 22 : 10;
+      for (let k = 0; k < n; k++) { const x = mod(k * 131 + Math.sin(t * .5 + k * 2) * 30 + t * (14 + (V.vento ? 110 : 0)), L + 40) - 20, y = mod(k * 83 + t * 52, est.altura + 40) - 20 - est.deslocY; g.drawImage(f, Math.round(x), Math.round(y)); }
+    }
+  };
+
+  // =====================================================================================
+  // LUA — chão de crateras, módulo lunar, Terra no céu (Terra | eclipse | nebulosa)
+  // =====================================================================================
+  function terra(g, x, y, r, eclipse) {
+    if (eclipse) {
+      halo(g, x, y, r * 2.6, "#ffb060", .5, 7);
+      C(g, x, y, r + 5); g.fillStyle = "#ffe0a0"; g.fill();
+      C(g, x, y, r); g.fillStyle = "#1a0f30"; g.fill(); tracar(g, "#ff9a50", 3);
+      g.fillStyle = "#2a1a48"; C(g, x - r * .3, y - r * .2, r * .25); g.fill();
+      return;
+    }
+    halo(g, x, y, r * 1.8, "#5ab8ff", .3, 5);
+    C(g, x, y, r); g.fillStyle = "#2f7ae0"; g.fill();
+    g.save(); C(g, x, y, r); g.clip();
+    g.fillStyle = "#4aa0ff"; C(g, x - r * .15, y - r * .18, r * .95); g.fill();
+    g.fillStyle = "#4ec46a"; [[-.35, -.2, .32, .22], [.25, .25, .3, .2], [.4, -.45, .18, .12], [-.1, .5, .22, .12]].forEach(q => { g.beginPath(); g.ellipse(x + q[0] * r, y + q[1] * r, q[2] * r, q[3] * r, .4, 0, TAU); g.fill(); });
+    g.fillStyle = "rgba(255,255,255,.85)"; [[-.2, -.55, .4, .07], [.1, .05, .5, .06], [-.4, .3, .3, .05]].forEach(q => { g.beginPath(); g.ellipse(x + q[0] * r, y + q[1] * r, q[2] * r, q[3] * r, -.2, 0, TAU); g.fill(); });
+    g.fillStyle = "rgba(20,10,60,.4)"; C(g, x + r * .35, y + r * .3, r * .95); g.fill();
+    g.restore();
+    C(g, x, y, r); tracar(g, TINTA, 3.5);
+    g.save(); g.beginPath(); g.arc(x, y, r * .72, Math.PI * 1.1, Math.PI * 1.42); tracar(g, "rgba(255,255,255,.75)", r * .1); g.restore();
+  }
+  function moduloLunar(g, x, y, s) {
+    g.save(); g.translate(x, y); g.scale(s, s);
+    g.lineWidth = 3; g.strokeStyle = TINTA; g.lineCap = "round";
+    [[-22, -18, -34, 0], [22, -18, 34, 0]].forEach(q => { g.beginPath(); g.moveTo(q[0], q[1]); g.lineTo(q[2], q[3]); g.stroke(); g.fillStyle = "#cfd6ee"; rr(g, q[2] - 7, -3, 14, 4, 2); g.fill(); g.stroke(); });
+    g.fillStyle = "#e8b440"; poli(g, [-26, -14, 26, -14, 22, -34, -22, -34]); g.fill(); tracar(g, TINTA, 3);
+    g.fillStyle = "#c48a28"; poli(g, [8, -14, 26, -14, 22, -34, 8, -34]); g.fill();
+    g.fillStyle = "#dfe4f4"; poli(g, [-16, -34, 16, -34, 20, -54, 0, -64, -20, -54]); g.fill(); tracar(g, TINTA, 3);
+    g.fillStyle = "#3a4a8a"; C(g, 0, -48, 7); g.fill(); tracar(g, TINTA, 2.5); g.fillStyle = "#8ad8ff"; C(g, -2, -50, 3); g.fill();
+    g.beginPath(); g.moveTo(14, -60); g.lineTo(22, -76); tracar(g, TINTA, 2.5);
+    g.restore();
+  }
+  CEN.lua = {
+    vars: {
+      terra:    { ceu: ["#05051a", "#080824", "#0c0e2e", "#111438", "#171b44", "#1e2350"], k: 0, tint: "#ffffff", terra: 1, neb: null },
+      eclipse:  { ceu: ["#10051f", "#180830", "#240c42", "#321152", "#421762", "#521e70"], k: .25, tint: "#7a2a90", terra: 2, neb: null },
+      nebulosa: { ceu: ["#040a20", "#08122c", "#0c1a3a", "#112248", "#172c56", "#1e3664"], k: .12, tint: "#3a6ab0", terra: 0, neb: ["#ff4fb0", "#4fb8ff", "#9a6aff"] }
+    },
+    acima: V => V.ceu[0],
+    abaixo: V => [mix("#8a88a8", V.tint, V.k * .5), mix("#706e90", V.tint, V.k * .5), mix("#5a587a", V.tint, V.k * .5)],
+    pre: function(g, V) {
+      const T = (c, k) => mix(c, V.tint, (k == null ? 1 : k) * V.k);
+      ceu(g, 0, 560, V.ceu);
+      if (V.neb) { const r = rnd(41); for (let i = 0; i < 9; i++) { const x = r() * L, y = 60 + r() * 330, rr2 = 120 + r() * 160, c = V.neb[i % 3]; g.fillStyle = rad(g, x, y, rr2, [[0, ca(c, .35)], [.5, ca(c, .14)], [1, ca(c, 0)]]); g.fillRect(x - rr2, y - rr2, rr2 * 2, rr2 * 2); } }
+      estrelas(g, 230, 11, S.top, 520, "#ffffff", 1);
+      if (V.terra) terra(g, 980, 150, 66, V.terra === 2);
+      else { C(g, 980, 150, 38); g.fillStyle = "#c8a0ff"; g.fill(); g.fillStyle = "#a070e0"; C(g, 990, 160, 34); g.fill(); C(g, 980, 150, 38); tracar(g, TINTA, 3); g.beginPath(); g.ellipse(980, 150, 70, 14, -.3, 0, TAU); tracar(g, "#ffd0f0", 4); }
+      montanhas(g, { y: 520, alt: 130, passo: 190, seed: 22, cor: T("#7a78a0"), sombra: T("#5a5880"), bot: 640, cont: TINTA, contW: 2.5 });
+      const h1 = camada(g, { seed: 28, y: 570, amp: 18, esc: 200, cor: T("#a8a6c4"), sombra: T("#8886a8"), luz: T("#e0e0f4"), bot: 700, cont: TINTA, contW: 3 });
+      const r = rnd(5);
+      for (let i = 0; i < 9; i++) { const x = r() * L, y = h1(x) + 24 + r() * 30; cratera(g, x, y, 24 + r() * 26, 7 + r() * 5, T("#a8a6c4"), T("#6a6890")); }
+      moduloLunar(g, 1120, h1(1120) + 12, 1);
+      g.beginPath(); g.moveTo(180, h1(180) + 10); g.lineTo(180, h1(180) - 48); tracar(g, TINTA, 3);
+      g.fillStyle = "#ff5a6a"; poli(g, [181, h1(180) - 48, 214, h1(180) - 42, 181, h1(180) - 30]); g.fill(); tracar(g, TINTA, 2.5);
+      const h2 = camada(g, { seed: 47, y: 632, amp: 10, esc: 140, cor: T("#c4c2dc"), sombra: T("#a4a2c2"), luz: "#f4f4ff", bot: 740, cont: TINTA, contW: 3 });
+      for (let i = 0; i < 7; i++) { const x = r() * L, y = h2(x) + 14 + r() * 10; cratera(g, x, y, 16 + r() * 16, 4 + r() * 3, T("#c4c2dc"), T("#8a88aa")); }
+    },
+    pad: p => p.h > 40 ? [0, 8, 0, 0] : [8, 8, 8, 30],
+    plat: function(g, p, i, V) {
+      const T = (c, k) => mix(c, V.tint, (k == null ? .5 : k) * V.k), w = p.w, h = p.h, r = rnd(50 + i);
+      if (h > 40) {
+        g.fillStyle = T("#b4b2cc"); g.fillRect(0, 0, w, h + 40); g.fillStyle = T("#9896b8"); g.fillRect(0, 26, w, h + 20);
+        for (let k = 0; k < 22; k++) cratera(g, r() * w, 18 + r() * (h - 10), 8 + r() * 18, 3 + r() * 3, T("#b4b2cc"), T("#77759a"));
+        g.fillStyle = T("#e2e2f2"); g.fillRect(0, 0, w, 8); g.fillStyle = TINTA; g.fillRect(0, 8, w, 3); g.fillRect(0, 0, w, 2);
+        return;
+      }
+      sombraPlat(g, w, h + 20, .3);
+      rocha(g, 0, -2, w, h + 14, { base: T("#bab8d4"), sombra: T("#8886aa"), luz: "rgba(255,255,255,.55)" }, 60 + i, { jag: .06, extra: function(g) {
+        for (let k = 0; k < Math.round(w / 40); k++) cratera(g, 14 + r() * (w - 28), h * .5 + r() * h * .5, 6 + r() * 8, 2 + r() * 2, T("#bab8d4"), T("#7a789e"));
+      } });
+      g.fillStyle = ca("#ffffff", .5); rr(g, 10, 1, w - 20, 3, 1.5); g.fill();
+    },
+    fundo: function(g, est, t) {
+      const e = spr("estLua", 12, 12, c => brilho4(c, 6, 6, 5.5, "#ffffff"));
+      for (let k = 0; k < 26; k++) { const a = .35 + .65 * Math.max(0, Math.sin(t * (1 + (k % 5) * .35) + k * 2.1)); g.globalAlpha = a; g.drawImage(e, Math.round((k * 487) % 1260 + 6), Math.round((k * 211) % 480 + 10)); }
+      g.globalAlpha = 1;
+      const sat = spr("satLua", 40, 20, c => { c.fillStyle = "#4a86ff"; rr(c, 2, 6, 12, 8, 1); c.fill(); tracar(c, TINTA, 2); rr(c, 26, 6, 12, 8, 1); c.fill(); tracar(c, TINTA, 2); c.fillStyle = "#dfe4f4"; rr(c, 14, 4, 12, 12, 3); c.fill(); tracar(c, TINTA, 2); });
+      const sx = mod(t * 14, L + 80) - 40, sy = 110 + Math.sin(t * .3) * 20; g.drawImage(sat, Math.round(sx - 20), Math.round(sy - 10)); if (Math.sin(t * 5) > 0) { g.fillStyle = "#ff6b6b"; g.fillRect(Math.round(sx - 2), Math.round(sy - 13), 4, 4); }
+      const c = mod(t, 11); if (c < .9) { const k = c / .9, x = 200 + k * 520, y = 50 + k * 200; g.strokeStyle = "rgba(255,255,255," + (1 - k) + ")"; g.lineWidth = 3; g.lineCap = "round"; g.beginPath(); g.moveTo(x, y); g.lineTo(x - 70 * (1 - k * .5), y - 28 * (1 - k * .5)); g.stroke(); }
+    }
+  };
+
+  // =====================================================================================
+  // VULCÃO — vulcão com rios de lava, basalto com brasa nas fendas (noite | cinzas | erupção)
+  // =====================================================================================
+  function brasa() { return spr("brasa", 12, 12, function(g) { g.fillStyle = rad(g, 6, 6, 6, [[0, "#fff6b0"], [.35, "#ffb040"], [1, "rgba(255,90,20,0)"]]); g.fillRect(0, 0, 12, 12); }); }
+  CEN.vulcao = {
+    vars: {
+      noite:   { ceu: ["#12051e", "#22082a", "#3a0c30", "#5a1430", "#7e1e2c", "#a83020"], k: .2, tint: "#4a0a40", fumaca: "#3a1838" },
+      cinzas:  { ceu: ["#4a3a4a", "#5e4652", "#76525a", "#905e5a", "#aa6e58", "#c88458"], k: .15, tint: "#6a5060", fumaca: "#5a4652" },
+      erupcao: { ceu: ["#3a0418", "#5c081c", "#86101c", "#b0201a", "#d8401a", "#f86a1e"], k: .1, tint: "#8a1010", fumaca: "#4a1020", erupcao: 1 }
+    },
+    fixo: false,
+    acima: V => V.ceu[0],
+    abaixo: () => ["#c82a0e", "#a8200c", "#86180a"],
+    pre: function(g, V) {
+      const T = (c, k) => mix(c, V.tint, (k == null ? 1 : k) * V.k);
+      ceu(g, 0, 520, V.ceu);
+      if (V.k > .15) estrelas(g, 40, 14, S.top, 200, "#ffd0b0");
+      const r = rnd(17);
+      // nuvens de fumaça carregadas (borda de baixo iluminada de laranja)
+      for (let i = 0; i < 7; i++) nuvem(g, r() * L, 40 + r() * 160, 220 + r() * 160, V.fumaca, mix(V.fumaca, "#000000", .3), mix(V.fumaca, "#ff6a30", .45), 2.5);
+      // o vulcão: cone com faces de luz e sombra, cratera brilhando e rios de lava
+      const vx = 640, vy = 200;
+      halo(g, vx, vy, 260, "#ff8a30", V.erupcao ? .55 : .35, 6);
+      if (V.erupcao) { g.fillStyle = "#ffcf5a"; for (let k = 0; k < 9; k++) { const a = -Math.PI / 2 + (k - 4) * .16, l = 90 + r() * 70; poli(g, [vx - 6, vy, vx + 6, vy, vx + Math.cos(a) * l, vy + Math.sin(a) * l]); g.fill(); } }
+      poli(g, [vx - 70, vy, vx + 70, vy, vx + 470, 600, vx - 470, 600]); g.fillStyle = T("#5a2a4a"); g.fill();
+      poli(g, [vx + 10, vy, vx + 70, vy, vx + 470, 600, vx + 120, 600]); g.fillStyle = T("#3e1a3a"); g.fill();
+      poli(g, [vx - 70, vy, vx + 70, vy, vx + 470, 600, vx - 470, 600]); tracar(g, TINTA, 3);
+      g.fillStyle = "#ffb03a"; g.beginPath(); g.ellipse(vx, vy, 70, 12, 0, 0, TAU); g.fill(); tracar(g, TINTA, 3); g.fillStyle = "#fff0a0"; g.beginPath(); g.ellipse(vx, vy - 2, 44, 5, 0, 0, TAU); g.fill();
+      [[-30, 1], [24, -1], [-8, .5]].forEach(q => { g.beginPath(); g.moveTo(vx + q[0], vy + 6); for (let y = vy + 6; y < 600; y += 20) g.lineTo(vx + q[0] + q[1] * (y - vy) * .5 + Math.sin(y / 30) * 10, y); tracar(g, "#ff7a22", 9); g.beginPath(); g.moveTo(vx + q[0], vy + 6); for (let y = vy + 6; y < 600; y += 20) g.lineTo(vx + q[0] + q[1] * (y - vy) * .5 + Math.sin(y / 30) * 10, y); tracar(g, "#ffd060", 3); });
+      // serras de basalto
+      montanhas(g, { y: 520, alt: 110, passo: 170, seed: 9, cor: T("#4a2040"), sombra: T("#331530"), bot: 680, cont: TINTA, contW: 3 });
+      const h2 = camada(g, { seed: 19, y: 590, amp: 22, esc: 120, cor: T("#3a1a34"), sombra: T("#28102a"), luz: T("#ff7a3a", .3), luzW: 3, bot: 760, cont: TINTA, contW: 3 });
+      g.strokeStyle = "#ff8a30"; g.lineWidth = 2.5; for (let k = 0; k < 14; k++) { const x = r() * L, y = h2(x) + 20 + r() * 50; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 12, y + 8); g.lineTo(x + 6, y + 18); g.stroke(); }
+    },
+    pad: () => [10, 10, 10, 30],
+    plat: function(g, p, i, V) {
+      const T = (c, k) => mix(c, V.tint, (k == null ? .4 : k) * V.k), w = p.w, h = p.h, r = rnd(90 + i);
+      sombraPlat(g, w, h + 18, .35);
+      // pedras de lava que pingam embaixo
+      for (let k = 0; k < Math.round(w / 60); k++) { const x = 16 + r() * (w - 32), l = 6 + r() * 12; poli(g, [x - 6, h - 3, x + 6, h - 3, x, h + l]); g.fillStyle = "#ff7a22"; g.fill(); tracar(g, TINTA, 2); }
+      bloco(g, 0, 0, w, h, { topo: T("#7a4a6a"), base: T("#4a2448"), sombra: T("#331834"), luz: "rgba(255,190,150,.35)" }, { raio: 8, lw: 3.5, extra: function(g) {
+        g.strokeStyle = "#ff8a30"; g.lineWidth = 2.5; g.lineJoin = "round";
+        for (let k = 0; k < Math.round(w / 55); k++) { const x = 14 + r() * (w - 28); g.beginPath(); g.moveTo(x, h * .3); g.lineTo(x + 3, h * .55); g.lineTo(x - 3, h * .75); g.lineTo(x + 1, h); g.moveTo(x + 3, h * .55); g.lineTo(x + 10, h * .7); g.stroke(); }
+        g.strokeStyle = "#ffe08a"; g.lineWidth = 1; g.stroke();
+      } });
+    },
+    fundo: function(g, est, t) {
+      const b = brasa(), n = leve() ? 22 : 46;
+      for (let k = 0; k < n; k++) { const v = 22 + (k % 5) * 12, x = mod(k * 137 + Math.sin(t * .8 + k * 1.3) * 26, L), y = est.altura - mod(k * 71 + t * v, est.altura + 40) - est.deslocY + 20; g.globalAlpha = .55 + .45 * Math.sin(t * 3 + k); g.drawImage(b, Math.round(x), Math.round(y)); }
+      g.globalAlpha = 1;
+      glow(g, "#ff9a30", 640, 200, 300, .14 + .09 * Math.sin(t * 2.2));
+    },
+    frente: function(g, est, t) {
+      const y0 = Math.round(est.lavaY), bot = est.altura - est.deslocY + 4;
+      const tile = (k, seed, c0, c1) => spr("lavaTile" + k, 320, 120, function(c) {
+        const r = rnd(seed); c.fillStyle = c1; c.fillRect(0, 0, 320, 120); c.fillStyle = c0; c.fillRect(0, 0, 320, 30);
+        for (let i = 0; i < 7; i++) { const x = 20 + r() * 280, y = 40 + r() * 64, rx = 14 + r() * 20; c.fillStyle = "#ffe07a"; c.beginPath(); c.ellipse(x, y + 2, rx + 3, 6.5, 0, 0, TAU); c.fill(); c.fillStyle = "#3d1226"; c.beginPath(); c.ellipse(x, y, rx, 5, 0, 0, TAU); c.fill(); tracar(c, TINTA, 2); c.fillStyle = "#6a2a40"; c.beginPath(); c.ellipse(x - rx * .2, y - 1.4, rx * .6, 2, 0, 0, TAU); c.fill(); }
+        c.strokeStyle = "#ffe08a"; c.lineWidth = 3; c.lineCap = "round"; for (let i = 0; i < 6; i++) { c.beginPath(); const x = r() * 320, y = 36 + r() * 70; c.moveTo(x, y); c.quadraticCurveTo(x + 12, y + 8 * (r() - .5), x + 26, y + 2); c.stroke(); }
+        const onda = x => 12 + Math.sin(x / 320 * TAU * 2) * 5 + Math.sin(x / 320 * TAU * 5) * 2;
+        c.globalCompositeOperation = "destination-out"; c.fillStyle = "#000"; c.beginPath(); c.moveTo(0, 0); c.lineTo(320, 0); for (let x = 320; x >= 0; x -= 8) c.lineTo(x, onda(x)); c.closePath(); c.fill();
+        c.globalCompositeOperation = "source-over"; c.beginPath(); for (let x = 0; x <= 320; x += 8) c[x ? "lineTo" : "moveTo"](x, onda(x) + 1.5); tracar(c, TINTA, 3.5);
+        c.beginPath(); for (let x = 0; x <= 320; x += 8) c[x ? "lineTo" : "moveTo"](x, onda(x) + 5); tracar(c, "#fff4b0", 3);
+      });
+      const brilhoL = spr("lavaGlow", L, 150, c => { c.fillStyle = vg(c, 0, 150, "rgba(255,120,40,0)", "rgba(255,120,40,.45)"); c.fillRect(0, 0, L, 150); });
+      g.drawImage(brilhoL, 0, y0 - 140);
+      g.fillStyle = "#c82a0e"; g.fillRect(0, y0 + 108, L, Math.max(0, bot - y0 - 108));
+      const off = mod(t * 14, 320), off2 = mod(-t * 9 + 120, 320);
+      const t1 = tile(0, 3, "#ffb14a", "#e8401a"), t2 = tile(1, 9, "#ff9a3a", "#c82a0e");
+      for (let x = -320 + off2; x < L; x += 320) g.drawImage(t2, Math.round(x), y0 - 8);
+      for (let x = -320 + off; x < L; x += 320) g.drawImage(t1, Math.round(x), y0);
+    }
+  };
+
+  // =====================================================================================
+  // ESPAÇO — nebulosa, planeta com anéis, asteroides de rocha (nebulosa roxa | aurora verde | gigante vermelha)
+  // =====================================================================================
+  function planeta(g, x, y, r, c0, c1, anel) {
+    halo(g, x, y, r * 1.7, c0, .22, 5);
+    if (anel) { g.beginPath(); g.ellipse(x, y, r * 2, r * .42, -.35, Math.PI, TAU); tracar(g, TINTA, 9); g.beginPath(); g.ellipse(x, y, r * 2, r * .42, -.35, Math.PI, TAU); tracar(g, anel, 5); }
+    C(g, x, y, r); g.fillStyle = c1; g.fill();
+    g.save(); C(g, x, y, r); g.clip(); C(g, x - r * .18, y - r * .2, r * .95); g.fillStyle = c0; g.fill();
+    g.fillStyle = ca("#ffffff", .2); for (let k = -2; k <= 2; k++) { g.beginPath(); g.ellipse(x, y + k * r * .32, r * 1.1, r * .07, -.35, 0, TAU); g.fill(); }
+    g.restore();
+    C(g, x, y, r); tracar(g, TINTA, 3.5);
+    if (anel) { g.beginPath(); g.ellipse(x, y, r * 2, r * .42, -.35, 0, Math.PI); tracar(g, TINTA, 9); g.beginPath(); g.ellipse(x, y, r * 2, r * .42, -.35, 0, Math.PI); tracar(g, anel, 5); }
+    g.save(); g.beginPath(); g.arc(x, y, r * .72, Math.PI * 1.1, Math.PI * 1.42); tracar(g, "rgba(255,255,255,.7)", r * .1); g.restore();
+  }
+  CEN.espaco = {
+    vars: {
+      roxa:     { ceu: ["#07031a", "#0d0626", "#140a34", "#1c0e42", "#24124e", "#2c165a"], neb: ["#b84dff", "#ff4fb0", "#5a6aff"], pl: ["#ffb86a", "#e0704a", "#ffe0a0"], k: 0 },
+      aurora:   { ceu: ["#020c18", "#041424", "#061c30", "#08243c", "#0a2c48", "#0c3454"], neb: ["#2dffb0", "#4de0ff", "#3a8aff"], pl: ["#c08bff", "#7a4ae0", "#e8d0ff"], k: 0 },
+      vermelha: { ceu: ["#14030c", "#200614", "#2e0a1c", "#3c0e22", "#4a1228", "#58182e"], neb: ["#ff6a3a", "#ffb040", "#ff3a6a"], pl: ["#6ad0ff", "#2a80d0", "#d0f4ff"], k: 0, sol: 1 }
+    },
+    acima: V => V.ceu[0], abaixo: V => [V.ceu[5], V.ceu[4], V.ceu[3]],
+    pre: function(g, V) {
+      ceu(g, 0, 720, V.ceu);
+      const r = rnd(64);
+      for (let i = 0; i < 12; i++) { const x = r() * L, y = S.top + r() * (S.bot - S.top), rr2 = 140 + r() * 200, c = V.neb[i % 3]; g.fillStyle = rad(g, x, y, rr2, [[0, ca(c, .32)], [.5, ca(c, .12)], [1, ca(c, 0)]]); g.fillRect(x - rr2, y - rr2, rr2 * 2, rr2 * 2); }
+      reticula(g, 0, 720, V.neb[0], .06, 18);
+      estrelas(g, 260, 21, S.top, S.bot, "#ffffff", 1);
+      for (let i = 0; i < 14; i++) brilho4(g, r() * L, S.top + r() * (S.bot - S.top), 4 + r() * 5, "#ffffff");
+      if (V.sol) { halo(g, 1180, 620, 300, "#ff7a3a", .45, 7); C(g, 1180, 620, 140); g.fillStyle = "#ff6a3a"; g.fill(); g.fillStyle = "#ffa050"; C(g, 1160, 600, 120); g.fill(); C(g, 1180, 620, 140); tracar(g, TINTA, 4); }
+      planeta(g, 790, 130, 58, V.pl[0], V.pl[1], V.pl[2]);
+      planeta(g, 470, 80, 24, V.neb[2], mix(V.neb[2], TINTA, .4), null);
+      planeta(g, 760, 600, 18, V.neb[1], mix(V.neb[1], TINTA, .4), null);
+    },
+    pad: () => [14, 14, 14, 22],
+    plat: function(g, p, i, V) {
+      const w = p.w, h = p.h, r = rnd(110 + i);
+      rocha(g, 0, 0, w, h, { base: "#8a78b8", sombra: "#5a4a8a", luz: "rgba(255,255,255,.45)" }, 120 + i * 7, { jag: .14, lw: 4, extra: function(g) {
+        for (let k = 0; k < 4; k++) cratera(g, 14 + r() * (w - 28), 18 + r() * (h - 30), 7 + r() * 9, 4 + r() * 4, "#8a78b8", "#4a3a78");
+        g.strokeStyle = V.neb[0]; g.lineWidth = 3; g.lineCap = "round"; g.beginPath(); const x = w * (.3 + r() * .4); g.moveTo(x, h * .3); g.lineTo(x + 10, h * .55); g.lineTo(x + 2, h * .8); g.stroke();
+      } });
+      // topo de pouso claro (onde se pisa)
+      g.fillStyle = "rgba(255,255,255,.35)"; rr(g, w * .2, 4, w * .6, 4, 2); g.fill();
+    },
+    fundo: function(g, est, t, V) {
+      const e = spr("estEsp", 14, 14, c => brilho4(c, 7, 7, 6.5, "#ffffff"));
+      for (let k = 0; k < 24; k++) { g.globalAlpha = .25 + .75 * Math.max(0, Math.sin(t * (.8 + (k % 4) * .4) + k * 1.9)); g.drawImage(e, Math.round((k * 541) % 1260 + 4), Math.round((k * 233) % 700)); }
+      g.globalAlpha = 1;
+      for (let k = 0; k < 4; k++) {   // pedrinhas distantes à deriva (escuras e pequenas: não parecem plataformas)
+        const s = 20 + (k % 2) * 10, sp = spr("ast" + k, s + 8, s + 8, c => { c.globalAlpha = .55; rocha(c, 4, 4, s, s * .8, { base: "#3e3668", sombra: "#2a2450" }, 60 + k, { lw: 2.5 }); });
+        const x = mod(k * 313 + t * (6 + k * 2.5), L + 140) - 70, y = mod(k * 191 + 90 + Math.sin(t * .25 + k) * 30, 640);
+        g.drawImage(sp, Math.round(x - (s + 8) / 2), Math.round(y - (s + 8) / 2));
+      }
+      const c = mod(t + 3, 9); if (c < .8) { const k = c / .8, x = 900 - k * 560, y = 60 + k * 190; g.strokeStyle = "rgba(255,255,255," + (1 - k) + ")"; g.lineWidth = 3; g.lineCap = "round"; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 90, y - 34); g.stroke(); }
+    }
+  };
+
+  // =====================================================================================
+  // LABORATÓRIO — sala de contenção: painéis, porta-cofre, tubos, monitores (normal | alerta vermelho | tóxico)
+  // =====================================================================================
+  function tuboLab(g, x, y, w, h, cor, nivel) {
+    g.fillStyle = "#2a2f52"; rr(g, x - 4, y - 14, w + 8, 16, 4); g.fill(); tracar(g, TINTA, 3); rr(g, x - 4, y + h - 2, w + 8, 16, 4); g.fill(); tracar(g, TINTA, 3);
+    g.fillStyle = ca("#c8f4ff", .25); g.fillRect(x, y, w, h);
+    g.fillStyle = cor; g.fillRect(x, y + h * (1 - nivel), w, h * nivel);
+    g.fillStyle = clar(cor, .5); g.fillRect(x, y + h * (1 - nivel), w, 5);
+    g.fillStyle = "rgba(255,255,255,.55)"; g.fillRect(x + 6, y + 6, 6, h - 12);
+    g.strokeStyle = TINTA; g.lineWidth = 3; g.strokeRect(x, y, w, h);
+  }
+  CEN.laboratorio = {
+    vars: {
+      normal: { luz: "#4de3d0", parede: "#3a4478", painel: "#4a5690", k: 0, tint: "#ffffff", liq: ["#4de3d0", "#7cff5b"] },
+      alerta: { luz: "#ff4d5a", parede: "#4a2a4e", painel: "#5c3462", k: .3, tint: "#8a1830", liq: ["#ff6a7a", "#ffb03a"], alerta: 1 },
+      toxico: { luz: "#9cff3a", parede: "#2a4440", painel: "#36584e", k: .2, tint: "#2a6a20", liq: ["#9cff3a", "#e0ff5a"] }
+    },
+    fixo: true,
+    acima: V => mix("#2a2f52", V.tint, V.k * .3), abaixo: V => [mix("#2a2f52", V.tint, V.k * .3), "#1e2240"],
+    pre: function(g, V) {
+      const T = (c, k) => mix(c, V.tint, (k == null ? 1 : k) * V.k);
+      g.fillStyle = V.parede; g.fillRect(-PAD, S.top, L + PAD * 2, S.bot - S.top);
+      // painéis da parede (borda dupla e rebites)
+      for (let x = -40; x < L + 40; x += 160) for (let y = 60; y < 660; y += 150) {
+        g.fillStyle = V.painel; rr(g, x + 8, y + 8, 144, 134, 10); g.fill(); tracar(g, mix(V.parede, TINTA, .5), 3);
+        g.fillStyle = clar(V.painel, .15); rr(g, x + 14, y + 14, 132, 8, 4); g.fill();
+        [[16, 130], [144, 130], [16, 20], [144, 20]].forEach(q => rebite(g, x + q[0], y + q[1], 3, T("#9aa4d0")));
+      }
+      // porta-cofre no meio
+      const cx = 640, cy = 360;
+      halo(g, cx, cy, 230, V.luz, .2, 5);
+      C(g, cx, cy, 160); g.fillStyle = "#5a6494"; g.fill(); tracar(g, TINTA, 5);
+      C(g, cx, cy, 130); g.fillStyle = "#7a84b8"; g.fill(); tracar(g, TINTA, 4);
+      for (let k = 0; k < 12; k++) { const a = k / 12 * TAU; rebite(g, cx + Math.cos(a) * 145, cy + Math.sin(a) * 145, 5, "#aab4e0"); }
+      C(g, cx, cy, 60); g.fillStyle = "#3a4478"; g.fill(); tracar(g, TINTA, 4);
+      for (let k = 0; k < 3; k++) { const a = k / 3 * TAU + .3; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(a) * 92, cy + Math.sin(a) * 92); tracar(g, TINTA, 14); g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(a) * 92, cy + Math.sin(a) * 92); tracar(g, "#c8d0f0", 8); }
+      C(g, cx, cy, 20); g.fillStyle = V.luz; g.fill(); tracar(g, TINTA, 3.5);
+      g.fillStyle = "#ffd23f"; g.font = "900 22px Nunito, system-ui"; g.textAlign = "center";
+      // tubos de líquido (bolhas animadas em fundo())
+      tuboLab(g, 70, 150, 76, 420, V.liq[0], .8); tuboLab(g, 1134, 150, 76, 420, V.liq[0], .7);
+      tuboLab(g, 220, 210, 40, 300, V.liq[1], .6); tuboLab(g, 1020, 210, 40, 300, V.liq[1], .75);
+      // monitores (o gráfico corre em fundo())
+      [[326, 156], [886, 156]].forEach(q => { g.fillStyle = "#1a1e3a"; rr(g, q[0] - 8, q[1] - 8, 164, 100, 10); g.fill(); tracar(g, TINTA, 4); g.fillStyle = "#0c2a30"; rr(g, q[0], q[1], 148, 84, 6); g.fill(); g.strokeStyle = ca(V.luz, .25); g.lineWidth = 1; for (let k = 1; k < 4; k++) { g.beginPath(); g.moveTo(q[0], q[1] + k * 21); g.lineTo(q[0] + 148, q[1] + k * 21); g.stroke(); } });
+      // canos no alto
+      [[90], [600]].forEach(() => {});
+      g.fillStyle = "#5a6494"; g.fillRect(-PAD, 70, L + PAD * 2, 18); g.strokeStyle = TINTA; g.lineWidth = 3; g.strokeRect(-PAD, 70, L + PAD * 2, 18);
+      for (let x = 40; x < L; x += 200) { g.fillStyle = "#8a94c8"; rr(g, x, 66, 18, 26, 4); g.fill(); tracar(g, TINTA, 2.5); }
+      // listras de alerta perto do chão e do teto
+      listrasAlerta(g, -PAD, 628, L + PAD * 2, 14, "#ffd23f", TINTA, 14); g.fillStyle = TINTA; g.fillRect(-PAD, 626, L + PAD * 2, 3);
+      listrasAlerta(g, -PAD, 78, L + PAD * 2, 0, "#ffd23f", TINTA, 14);
+      if (V.alerta) { g.fillStyle = "rgba(255,40,60,.12)"; g.fillRect(-PAD, S.top, L + PAD * 2, S.bot - S.top); }
+    },
+    pad: p => p.w > 1200 ? [0, 0, 0, 0] : [6, 6, 6, 14],
+    plat: function(g, p, i, V) {
+      const w = p.w, h = p.h;
+      if (w > 1200) {   // chão e teto: chapas de metal com rebites e borda clara do lado de dentro
+        const emCima = p.y < 100;
+        g.fillStyle = "#4a5488"; g.fillRect(0, 0, w, h); g.fillStyle = "#3a4274"; g.fillRect(0, emCima ? 0 : 20, w, h - 20);
+        for (let x = 0; x < w; x += 128) { g.strokeStyle = ca(TINTA, .6); g.lineWidth = 2.5; g.strokeRect(x + 2, 2, 124, h - 4); rebite(g, x + 12, emCima ? h - 12 : 12, 3, "#aab4e0"); rebite(g, x + 116, emCima ? h - 12 : 12, 3, "#aab4e0"); }
+        g.fillStyle = "#aab4e0"; g.fillRect(0, emCima ? h - 8 : 0, w, 8);
+        g.fillStyle = TINTA; g.fillRect(0, emCima ? h - 11 : 8, w, 3); g.fillRect(0, emCima ? h - 2 : 0, w, 2);
+        return;
+      }
+      sombraPlat(g, w, h + 8, .25);
+      bloco(g, 0, 0, w, h, { topo: "#c8d0f0", base: "#6a74b0", sombra: "#4a5288", luz: "rgba(255,255,255,.6)" }, { raio: 6, topoH: 7, lw: 3.5, extra: function(g) {
+        g.fillStyle = V.luz; rr(g, 14, h - 9, w - 28, 4, 2); g.fill();
+        for (let x = 24; x < w - 20; x += 60) rebite(g, x, h * .55, 2.5, "#aab4e0");
+      } });
+    },
+    anim: function(g, p, i, est, t, V) { // o lado "chão" (onde a gravidade puxa) acende na cor da sala
+      if (p.w < 1200) return;
+      const embaixo = p.y > 100, ativo = embaixo === (est.gravidade >= 0); if (!ativo) return;
+      const s = spr("faixaLab" + (embaixo ? 0 : 1), L, 30, c => { c.fillStyle = embaixo ? vg(c, 0, 30, ca(V.luz, 0), ca(V.luz, .55)) : vg(c, 0, 30, ca(V.luz, .55), ca(V.luz, 0)); c.fillRect(0, 0, L, 30); });
+      g.globalAlpha = .7 + .3 * Math.sin(t * 3); g.drawImage(s, 0, embaixo ? p.y - 30 : p.y + p.h); g.globalAlpha = 1;
+    },
+    fundo: function(g, est, t, V) {
+      const b = spr("bolhaLab", 10, 10, c => { C(c, 5, 5, 3.4); c.fillStyle = "rgba(255,255,255,.85)"; c.fill(); tracar(c, ca(TINTA, .5), 1.2); });
+      [[70, 76, 150, 420, .8], [1134, 76, 150, 420, .7], [220, 40, 210, 300, .6], [1020, 40, 210, 300, .75]].forEach(function(q, k) {
+        const topo = q[2] + q[3] * (1 - q[4]);
+        for (let m = 0; m < 4; m++) { const y = q[2] + q[3] - 14 - mod(t * (24 + m * 6) + m * 97 + k * 31, q[3] * q[4] - 10); if (y < topo) continue; g.drawImage(b, Math.round(q[0] + 8 + ((m * 29 + k * 11) % (q[1] - 22)) + Math.sin(t * 2 + m) * 3), Math.round(y)); }
+      });
+      g.strokeStyle = V.luz; g.lineWidth = 2.5; g.lineJoin = "round";
+      [[326, 156], [886, 156]].forEach(function(q, k) { g.beginPath(); for (let x = 0; x <= 148; x += 6) { const y = q[1] + 42 + Math.sin((x + t * 60) / (14 + k * 6)) * 14 * Math.sin(t + x / 40) + Math.sin((x - t * 40) / 7) * 5; g[x ? "lineTo" : "moveTo"](q[0] + x, y); } g.stroke(); });
+      glow(g, V.luz, 640, 360, 300, .12 + .08 * Math.sin(t * 2));
+      const al = V.alerta ? 4 : 1.5;
+      [[300, 96], [980, 96], [300, 616], [980, 616]].forEach(function(q, k) { const on = Math.floor(t * al + k * .5) % 2 === 0; g.fillStyle = on ? "#ff4d5a" : "#5a2a34"; C(g, q[0], q[1], 6); g.fill(); tracar(g, TINTA, 2); if (on) glow(g, "#ff4d5a", q[0], q[1], 40, .5); });
+    },
+    frente: function(g, est, t) {
+      const a = est.avisoInversao; if (!(a > .02)) return;
+      const pul = .55 + .45 * Math.sin(t * 12);
+      const fx = [0, 1].map(k => spr("faixaAviso" + k, L, 140, c => { c.fillStyle = k ? vg(c, 0, 140, "rgba(255,40,60,0)", "rgba(255,40,60,.6)") : vg(c, 0, 140, "rgba(255,40,60,.6)", "rgba(255,40,60,0)"); c.fillRect(0, 0, L, 140); }));
+      g.globalAlpha = a * pul; g.drawImage(fx[0], 0, -est.deslocY); g.drawImage(fx[1], 0, est.altura - est.deslocY - 140);
+      const dir = est.gravidade >= 0 ? -1 : 1;
+      const sa = [0, 1].map(k => spr("setaAviso" + k, 84, 74, c => { c.translate(42, 37); c.scale(1, k ? -1 : 1); c.translate(-42, -37); poli(c, [42, 6, 78, 46, 54, 46, 54, 68, 30, 68, 30, 46, 6, 46]); c.fillStyle = "#ff3d52"; c.fill(); tracar(c, TINTA, 4); c.fillStyle = "rgba(255,255,255,.5)"; poli(c, [42, 14, 62, 38, 42, 38]); c.fill(); }));
+      g.globalAlpha = a * pul * .9;
+      for (let k = 0; k < 3; k++) { const x = 100 + k * 500; for (let m = 0; m < 3; m++) g.drawImage(sa[dir < 0 ? 0 : 1], x, Math.round(mod(360 + dir * (t * 160 + m * 240), 720) - 60)); }
+      g.globalAlpha = 1;
+    }
+  };
+
   // =====================================================================================
   // genérico (enquanto um mapa não tem arte própria): céu, colinas e blocos simples
   // =====================================================================================
@@ -337,6 +794,7 @@ const ArteCenarios = (function() {
     const c = nova(L + PAD * 2, altura), g = c.getContext("2d"), d = defDe(cen);
     g.translate(PAD, S.dy);
     d.pre(g, S.V, cen);
+    if (S.bot > A + 40 && d.abaixo) { const ab = d.abaixo(S.V), hh = S.bot - (A + 40); for (let i = 0; i < ab.length; i++) { g.fillStyle = ab[i]; g.fillRect(-PAD, Math.round(A + 40 + hh * i / ab.length), L + PAD * 2, Math.ceil(hh / ab.length) + 2); } }
     cen.plataformas.forEach(function(p, i) { spritePlat(p, i, d); });
     aquecer(cen, d, altura);
     if (d.aquecer) d.aquecer(cen, S.V);
