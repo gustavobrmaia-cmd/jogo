@@ -568,5 +568,7 @@ TEXTOS.fr = {
   on_tentar: "RÉESSAYER",
   on_contra_bot: "Jouer contre le bot",
   // v19.6
-  proxima_partida: "PARTIE SUIVANTE"
+  proxima_partida: "PARTIE SUIVANTE",
+  // v19.8
+  roleta_melhor: "MIEUX !"
 };

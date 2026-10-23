@@ -568,5 +568,7 @@ TEXTOS.ru = {
   on_tentar: "ЕЩЁ РАЗ",
   on_contra_bot: "Играть с ботом",
   // v19.6
-  proxima_partida: "СЛЕДУЮЩИЙ МАТЧ"
+  proxima_partida: "СЛЕДУЮЩИЙ МАТЧ",
+  // v19.8
+  roleta_melhor: "ЛУЧШЕ!"
 };

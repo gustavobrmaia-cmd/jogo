@@ -568,5 +568,7 @@ TEXTOS.pl = {
   on_tentar: "SPRÓBUJ PONOWNIE",
   on_contra_bot: "Graj z botem",
   // v19.6
-  proxima_partida: "NASTĘPNY MECZ"
+  proxima_partida: "NASTĘPNY MECZ",
+  // v19.8
+  roleta_melhor: "LEPSZA!"
 };

@@ -404,6 +404,13 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       combate.js);
     - **C)** dano x0,87 nos rivais 2–5 da Bronze e nas 6 primeiras partidas do "Contra o bot" (`M.multInicio`).
       Simulação bot x bot nos rivais 2–4: luta média 9,5 s -> 13,2 s.
+  - v19.8:
+    - **Arma inicial na roleta:** quem tem arma inicial também gira na roleta da 1ª rodada. Se sair raridade MAIOR que
+      a inicial, a pessoa fica com ela nesta rodada (selo "MELHOR!", `roleta_melhor`, evento `roulette/weapon-upgrade`);
+      se não, a roleta para na inicial (selo "INICIAL"). Enquanto gira mostra "Arma inicial: X". Com uma inicial comum:
+      28% "MELHOR!". Antes a inicial travava a roleta e a pessoa perdia a chance de rara ou lendária.
+    - **Partida rápida do online:** o botão "Jogar contra o bot" aparece aos 12 s (`BOT_DEPOIS`) e a busca continua por
+      trás (evento `online/quick-bot`).
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

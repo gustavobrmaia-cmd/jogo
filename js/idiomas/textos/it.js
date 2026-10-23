@@ -568,5 +568,7 @@ TEXTOS.it = {
   on_tentar: "RIPROVA",
   on_contra_bot: "Gioca contro il bot",
   // v19.6
-  proxima_partida: "PROSSIMA PARTITA"
+  proxima_partida: "PROSSIMA PARTITA",
+  // v19.8
+  roleta_melhor: "MEGLIO!"
 };

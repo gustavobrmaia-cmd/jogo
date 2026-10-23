@@ -568,5 +568,7 @@ TEXTOS.id = {
   on_tentar: "COBA LAGI",
   on_contra_bot: "Main melawan bot",
   // v19.6
-  proxima_partida: "PERTANDINGAN BERIKUTNYA"
+  proxima_partida: "PERTANDINGAN BERIKUTNYA",
+  // v19.8
+  roleta_melhor: "LEBIH BAIK!"
 };

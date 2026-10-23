@@ -568,5 +568,7 @@ TEXTOS.ro = {
   on_tentar: "ÎNCEARCĂ DIN NOU",
   on_contra_bot: "Joacă împotriva botului",
   // v19.6
-  proxima_partida: "MECIUL URMĂTOR"
+  proxima_partida: "MECIUL URMĂTOR",
+  // v19.8
+  roleta_melhor: "MAI BUNĂ!"
 };

@@ -568,5 +568,7 @@ TEXTOS.es = {
   on_tentar: "REINTENTAR",
   on_contra_bot: "Jugar contra el bot",
   // v19.6
-  proxima_partida: "SIGUIENTE PARTIDA"
+  proxima_partida: "SIGUIENTE PARTIDA",
+  // v19.8
+  roleta_melhor: "¡MEJOR!"
 };

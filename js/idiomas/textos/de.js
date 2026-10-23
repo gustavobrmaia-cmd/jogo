@@ -568,5 +568,7 @@ TEXTOS.de = {
   on_tentar: "NOCHMAL",
   on_contra_bot: "Gegen den Bot spielen",
   // v19.6
-  proxima_partida: "NÄCHSTES SPIEL"
+  proxima_partida: "NÄCHSTES SPIEL",
+  // v19.8
+  roleta_melhor: "BESSER!"
 };

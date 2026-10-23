@@ -123,9 +123,12 @@ const Roleta = (function() {
       ctx.beginPath(); ctx.moveTo(sx + s * 26 * esc, y - 20 * esc); ctx.lineTo(sx - s * 6 * esc, y); ctx.lineTo(sx + s * 26 * esc, y + 20 * esc); ctx.closePath();
       ctx.fillStyle = "#ffd43b"; ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = ESC; ctx.lineJoin = "round"; ctx.stroke();
     }
-    // selo embaixo: "INICIAL" (travada) ou a raridade quando para
-    if (a.fixa) selo(ctx, x, y + jh / 2 + 6 * esc, t("arma_inicial_selo"), "#69db7c", esc);
-    else if (parado) { var rr = ARMA[a.id].raridade; selo(ctx, x, y + jh / 2 + 6 * esc, t("rar_arma_" + rr), COR_RAR[rr], esc * (idade < 0.2 ? 0.6 + idade * 2 : 1)); }
+    // selo embaixo: "INICIAL" (travada ou a roleta parou na inicial), "MELHOR!" (tirou melhor que a inicial) ou a raridade
+    var pop = esc * (idade < 0.2 ? 0.6 + idade * 2 : 1);
+    if (a.fixa || (parado && a.ini && !a.melhor)) selo(ctx, x, y + jh / 2 + 6 * esc, t("arma_inicial_selo"), "#40c057", a.fixa ? esc : pop);
+    else if (parado && a.melhor) selo(ctx, x, y + jh / 2 + 6 * esc, t("roleta_melhor"), "#f59f00", pop);
+    else if (parado) { var rr = ARMA[a.id].raridade; selo(ctx, x, y + jh / 2 + 6 * esc, t("rar_arma_" + rr), COR_RAR[rr], pop); }
+    else if (a.ini) texto(ctx, t("arma_inicial_e", t("a_" + a.ini)), x, y + jh / 2 + 18 * esc, Math.round(20 * esc), "#8ce99a", jw + 60 * esc);
   }
   function selo(ctx, x, y, s, cor, esc) {
     ctx.font = "900 " + Math.round(24 * esc) + FONTE_R;

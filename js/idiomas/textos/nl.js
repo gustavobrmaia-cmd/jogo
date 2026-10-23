@@ -568,5 +568,7 @@ TEXTOS.nl = {
   on_tentar: "OPNIEUW",
   on_contra_bot: "Speel tegen de bot",
   // v19.6
-  proxima_partida: "VOLGENDE POTJE"
+  proxima_partida: "VOLGENDE POTJE",
+  // v19.8
+  roleta_melhor: "BETER!"
 };

@@ -568,5 +568,7 @@ TEXTOS.en = {
   on_tentar: "TRY AGAIN",
   on_contra_bot: "Play against the bot",
   // v19.6
-  proxima_partida: "NEXT MATCH"
+  proxima_partida: "NEXT MATCH",
+  // v19.8
+  roleta_melhor: "UPGRADE!"
 };

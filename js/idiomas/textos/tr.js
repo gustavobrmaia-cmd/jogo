@@ -568,5 +568,7 @@ TEXTOS.tr = {
   on_tentar: "TEKRAR DENE",
   on_contra_bot: "Bota karşı oyna",
   // v19.6
-  proxima_partida: "SONRAKİ MAÇ"
+  proxima_partida: "SONRAKİ MAÇ",
+  // v19.8
+  roleta_melhor: "DAHA İYİ!"
 };

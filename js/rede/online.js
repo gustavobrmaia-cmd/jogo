@@ -451,8 +451,14 @@ const Online = (function() {
   // v19.5: a partida rápida procura por até 1 minuto (tempo na tela, globo girando, dá para cancelar a qualquer hora).
   // Erro de rede não desiste na hora: tenta de novo a cada 3 s. Sem ninguém: "Tentar de novo" ou "Jogar contra o bot".
   const ESPERA_RAPIDA = 60;
+  // v19.8: com pouca gente online, o botão "Jogar contra o bot" aparece já aos 12 s (a busca continua por trás)
+  const BOT_DEPOIS = 12;
   let busca = null;
-  function pararBusca() { if (busca) { clearInterval(busca.timer); clearTimeout(busca.tentar); busca = null; } el("onRoda").classList.add("escondido"); }
+  function pararBusca() {
+    if (busca) { clearInterval(busca.timer); clearTimeout(busca.tentar); busca = null; }
+    el("onRoda").classList.add("escondido");
+    el("onBotBusca").classList.add("escondido");
+  }
   function buscarRapida() {
     pararBusca();
     tela = "procurando";
@@ -463,6 +469,10 @@ const Online = (function() {
       if (busca !== b || Rede.conectado) return;
       const f = falta();
       status(t("on_procurando") + "  " + Math.floor(f / 60) + ":" + String(f % 60).padStart(2, "0"));
+      if (ESPERA_RAPIDA - f >= BOT_DEPOIS && el("onBotBusca").classList.contains("escondido")) {
+        el("onBotBusca").classList.remove("escondido");
+        Poki.medir("online", "quick-bot", "visible");
+      }
       if (f > 0) return;
       pararBusca();
       Rede.sair();

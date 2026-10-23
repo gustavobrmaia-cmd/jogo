@@ -725,11 +725,16 @@ function iniciarRoleta(j, M) {
   const nomes = ARMAS.filter(function(a) { return a.raridade >= (M.lendaria ? 2 : 1) && a.tipo !== "mina" && a.tipo !== "ceu" && a.tipo !== "torreta"; }).map(function(a) { return a.id; });
   let k2 = 0;
   const armas = M.bolinhas.map(function(b, k) {
-    if (j.armaInicial && j.armaInicial[k]) return { id: j.armaInicial[k], fixa: true, pos: 0, fita: [j.armaInicial[k]] };
-    const id = sortearArmaRoleta(M, b);
+    // v19.8: quem tem arma inicial também gira: se a roleta tirar uma arma de raridade MAIOR, fica com ela nesta rodada
+    // ("MELHOR!"); se não, a roleta para na própria arma inicial ("INICIAL"). Antes a inicial travava a roleta e a
+    // pessoa perdia a chance de rara (22%) e lendária (3%, mais a Sorte) em toda 1ª rodada
+    const ini = j.armaInicial && j.armaInicial[k];
+    const sorteada = sortearArmaRoleta(M, b);
+    const melhor = !!ini && ARMA[sorteada].raridade > ARMA[ini].raridade;
+    const id = ini && !melhor ? ini : sorteada;
     equipar(b, id);
     const dur = d.arma + (k2++) * d.atraso;
-    return { id: id, fixa: false, dur: dur, fita: fitaRoleta(nomes, id, rapida ? 14 : 20), pos: 0, parou: false };
+    return { id: id, fixa: false, ini: ini || null, melhor: melhor, dur: dur, fita: fitaRoleta(nomes, id, rapida ? 14 : 20), pos: 0, parou: false };
   });
   const gira = armas.some(function(a) { return !a.fixa; });
   const fimArma = gira ? Math.max.apply(null, armas.map(function(a) { return a.fixa ? 0 : a.dur; })) : 0;
@@ -746,7 +751,7 @@ function iniciarRoleta(j, M) {
   if (typeof faixaPremio !== "undefined" && faixaPremio) { j.faixaVelho = faixaPremio.velho; faixaPremio.velho = j; }
   if (gira) Poki.medir("roulette", "weapon", "visible");
   else Poki.medir("roulette", "map", "visible");
-  if (j.armaInicial && j.armaInicial[0]) Poki.medir("roulette", "weapon-start", "visible");
+  if (j.armaInicial && j.armaInicial[0]) Poki.medir("roulette", armas[0].melhor ? "weapon-upgrade" : "weapon-start", "visible");
 }
 
 function ticRoleta(ro, tom) {
