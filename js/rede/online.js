@@ -22,6 +22,8 @@ const Online = (function() {
   let alvo = null, antes = null, tAlvo = 0;   // convidado: posições para suavizar entre dois estados
   const cont = { pc: 0, tc: 0, cc: 0 };
   let primeiroEstado = true;
+  // v20: canal dos pacotes de jogo ("u" rápido; vira "r" se a rede do outro não deixar o rápido passar) e contagens
+  let canalJogo = "u", enviadosJogo = 0, recebidosJogo = 0, timerP2P = 0;
   let outroOculto = false;        // a aba do outro está escondida (o jogo dele para; não é queda de conexão)
 
   // ---------- serialização (anfitrião) ----------
@@ -278,7 +280,7 @@ const Online = (function() {
     prepararGravacao(); api.gravando = true;
     // v19.6: o anfitrião também tem tempo-limite: sem os controles do convidado por 6 s (40 s se ele escondeu a aba)
     // é queda. Antes ficava jogando contra uma bolinha parada se a rede caísse sem avisar
-    if (Rede.conectado && performance.now() - ultimoEstado > (outroOculto ? 40000 : 6000)) caiuConexao();
+    if (Rede.conectado && performance.now() - ultimoEstado > (outroOculto ? 40000 : 8000)) caiuConexao();
   };
   api.depoisDoPasso = function() {
     api.gravando = false;
@@ -292,7 +294,8 @@ const Online = (function() {
     diferenca(s, ultimo.j, cheio, { M: 1 });
     diferenca(s.M, ultimo.M, cheio, { bolinhas: 1 });
     s.M.bolinhas.forEach(function(b, i) { diferenca(b, ultimo.b[i], cheio, {}); });
-    Rede.enviar("u", { k: "s", n: ++seq, c: cheio ? 1 : 0, s: s, f: fila });
+    Rede.enviar(canalJogo, { k: "s", n: ++seq, c: cheio ? 1 : 0, s: s, f: canalJogo === "r" ? [] : fila });
+    enviadosJogo++;
     // efeitos não podem se perder: se o rápido perder o pacote, eles vão de novo no confiável
     if (fila.length) Rede.enviar("r", { k: "f", n: seq, f: fila });
     fila = [];
@@ -310,7 +313,8 @@ const Online = (function() {
     if (ent.pulo) cont.pc++;
     if (ent.apertouTiro) cont.tc++;
     if (toque || ent.apertouTiro || ent.pulo) cont.cc++;
-    Rede.enviar("u", { k: "e", esq: ent.esq, dir: ent.dir, sp: ent.segPulo, bx: ent.baixo, t: ent.tiro,
+    enviadosJogo++;
+    Rede.enviar(canalJogo, { k: "e", esq: ent.esq, dir: ent.dir, sp: ent.segPulo, bx: ent.baixo, t: ent.tiro,
       pc: cont.pc, tc: cont.tc, cc: cont.cc, m: typeof b.miraLivre === "number" ? Math.round(b.miraLivre * 1000) / 1000 : null });
     // entre dois estados (1/30 s) a bolinha anda do ponto antigo ao novo
     if (alvo && antes) {
@@ -322,19 +326,30 @@ const Online = (function() {
       });
     }
     // sem notícia do anfitrião: 6 s é queda; se ele só escondeu a aba, espera até 40 s
-    if (performance.now() - ultimoEstado > (outroOculto ? 40000 : 6000) && Rede.conectado) caiuConexao();
+    if (performance.now() - ultimoEstado > (outroOculto ? 40000 : 8000) && Rede.conectado) caiuConexao();
   };
 
   // ---------- mensagens ----------
   let fxVistos = 0;
   Rede.ao("msg", function(canal, m) {
     if (!m || !m.k) return;
+    ultimoEstado = performance.now();   // v20: qualquer mensagem (inclusive o "vivo" de 1 em 1 s) mostra que o outro está lá
+    if (m.k === "vivo") {
+      // v20: o outro conta quantos pacotes de jogo recebeu; se quase nada do canal rápido chega (rede que bloqueia),
+      // passa a mandar tudo pelo confiável (antes a partida caía em 6 s)
+      if (canalJogo === "u" && enviadosJogo > 90 && (m.n || 0) < enviadosJogo * 0.4) {
+        canalJogo = "r";
+        Poki.medir("online", "reliable", "reached");
+      }
+      return;
+    }
     if (m.k === "ola") {
       if (m.v !== 1) { status(t("on_versao")); return; }
       outro = m;
       if (Rede.anfitriao) { status(t("on_achou")); setTimeout(function() { if (Rede.conectado && tela !== "jogo") { tela = "jogo"; comecar(); } }, 700); }
     } else if (m.k === "e" && Rede.anfitriao) {
       entRemota = m;
+      recebidosJogo++;
       ultimoEstado = performance.now();
     } else if (m.k === "ini" && !Rede.anfitriao) {
       tela = "jogo";
@@ -350,6 +365,7 @@ const Online = (function() {
       entrarNoJogo();
       Poki.medir("match", "online", "start");
     } else if (m.k === "s" && !Rede.anfitriao) {
+      recebidosJogo++;
       if (m.n < seq) return;   // chegou fora de ordem
       if (!m.c && (primeiroEstado || (m.s.rodada !== undefined && jogo && m.s.rodada !== jogo.rodada))) return;
       seq = m.n;
@@ -373,6 +389,9 @@ const Online = (function() {
     }
   });
   Rede.ao("conectou", function() {
+    clearTimeout(timerP2P);
+    Poki.medir("online", "p2p", "complete");
+    canalJogo = "u"; enviadosJogo = 0; recebidosJogo = 0;
     pararBusca();
     tela = "conectado";
     seq = 0; passos = 0; usados = { pc: 0, tc: 0, cc: 0 };
@@ -382,6 +401,36 @@ const Online = (function() {
     ola();
   });
   Rede.ao("caiu", function() { caiuConexao(); });
+  setInterval(function() { if (Rede.conectado) Rede.enviar("r", { k: "vivo", n: recebidosJogo }); }, 1000);
+  // v20: achou alguém e a conexão com ele começou: se não fechar em 15 s, desiste dessa pessoa (na partida rápida
+  // procura outra). Os eventos online/p2p (start, complete, fail) mostram no painel onde a conexão para
+  Rede.ao("etapa", function(nome) {
+    if (nome !== "conectando" || Rede.conectado) return;
+    Poki.medir("online", "p2p", "start");
+    status(t("on_achou"));
+    clearTimeout(timerP2P);
+    timerP2P = setTimeout(function() { if (!Rede.conectado) falhaP2P("p2p-tempo"); }, 15000);
+  });
+  Rede.ao("erro", function(tipo) { if ((tipo === "p2p" || tipo === "rtc") && !Rede.conectado) falhaP2P(tipo); });
+  function falhaP2P(motivo) {
+    clearTimeout(timerP2P);
+    if (Rede.conectado) return;
+    Poki.medir("online", "p2p", "fail");
+    console.warn("online: conexão com o outro jogador falhou (" + motivo + ")");
+    // quem criou a sala com código continua nela, esperando (o amigo pode tentar de novo com o mesmo código)
+    if (tela === "sala" && Rede.anfitriao) { status(t("on_sala") + " (" + motivo + ")"); return; }
+    Rede.sair();
+    if (busca) {   // partida rápida: continua procurando outra pessoa
+      busca.erro = motivo;
+      clearTimeout(busca.tentar);
+      busca.tentar = setTimeout(busca.tentarDeNovo, 1000);
+      return;
+    }
+    if (tela === "inicio" || tela === "jogo" || tela === "fim") return;
+    tela = "inicio";
+    status(t("on_erro") + " (" + motivo + ")");
+    mostrarBotoes("inicio");
+  }
 
   function caiuConexao() {
     if (typeof ArteCenarios !== "undefined" && ArteCenarios.forcarVariacao) ArteCenarios.forcarVariacao(null);
@@ -494,6 +543,7 @@ const Online = (function() {
         if (falta() > 3) b.tentar = setTimeout(tentar, 3000);
       });
     }
+    b.tentarDeNovo = tentar;
     b.timer = setInterval(mostrar, 250);
     mostrar();
     tentar();

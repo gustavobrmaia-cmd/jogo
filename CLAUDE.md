@@ -422,6 +422,21 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       ESC cancela a busca.
     - **Tela antiga:** `#telaSkins` saiu do HTML e do TELAS.
     - **Loja:** um loop de animação só (`loopLoja`).
+  - **PFT v19.9** (23/10, 18:16, categoria Action Games): **PASSOU com 3m01**, 27% de engajados, FPS 58.
+    - Treino rodada 2 -> 3: 90% (v19.6: 80%; v18.3: 86%).
+    - Fim do treino -> rival 2: 79% (v19.6: 75%; v18.3: 82%).
+  - **META DO DONO para trocar a versão no Poki** (se a v18.3 do Web Fit for aprovada): média >= 3m30 e > 30% de
+    engajados num PFT.
+  - v20 (online não funcionou com amigos da faculdade, nem no PC nem no celular):
+    - **Etapas da conexão:** a rede emite a etapa "conectando" e o erro "p2p"/"rtc"; antes a tela ficava em
+      "Conectando..." para sempre.
+    - **Eventos:** `online/p2p` (start/complete/fail) e `online/reliable` (reached) mostram no painel onde a conexão para.
+    - **Tempo-limite da conexão com o outro:** 15 s. Na partida rápida procura outra pessoa; com código, quem criou a
+      sala continua nela.
+    - **Sinal de vida:** "vivo" de 1 em 1 s pelo canal confiável, com a contagem de pacotes de jogo recebidos. Se menos
+      de 40% chega pelo canal rápido, os pacotes de jogo passam a ir pelo confiável (`canalJogo`). Testado com
+      `?rede=teste&perda=100`: a partida funciona.
+    - **Tempo-limite de queda:** 8 s (era 6), contando qualquer mensagem.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

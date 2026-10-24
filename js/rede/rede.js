@@ -43,7 +43,9 @@ const Rede = (function() {
         if (c.esperando) { c.esperando(true); c.esperando = null; }
         conectou();
       } else if (m.tipo === "dado" && m.de === c.outro) {
-        if (m.canal === "u" && Math.random() < 0.02) return;   // simula perda no canal rápido
+        // simula perda no canal rápido (2%; com &perda=N na URL, N% — 100 = rede que bloqueia o canal rápido)
+        const pu = /[?&]perda=(\d+)/.exec(location.search), perda = pu ? +pu[1] / 100 : 0.02;
+        if (m.canal === "u" && Math.random() < perda) return;
         setTimeout(function() { receber(m.canal, m.obj); }, 30 + Math.random() * 20);   // simula atraso
       } else if (m.tipo === "anuncio" && c.publica && api.anfitriao && !c.outro && m.de < id) {
         // duas salas públicas esperando (igual à vigia da netlib): a de id maior sai e entra na outra
@@ -95,7 +97,11 @@ const Rede = (function() {
           if (par) return;
           par = p; conectou();
         });
-        net.on("disconnected", function(p) { if (par && p.id === par.id) caiu(); });
+        // v20: etapas da conexão com o outro aparelho (para a tela e para os eventos): "conectando" e erro "p2p" quando
+        // a conexão direta/relé não fecha (antes a tela ficava em "Conectando..." para sempre)
+        net.on("connecting", function() { if (!par) emitir("etapa", "conectando"); });
+        net.on("disconnected", function(p) { if (par && p.id === par.id) caiu(); else if (!par) emitir("erro", "p2p"); });
+        net.on("rtcerror", function() { if (!par) emitir("erro", "rtc"); });
         net.on("message", function(p, canal, dado) {
           if (!par || p.id !== par.id) return;
           let obj;
