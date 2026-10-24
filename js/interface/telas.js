@@ -461,7 +461,7 @@ function montarTelas() {
     const c = jogo && jogo.cartas;
     if (estado !== "jogo" || !c || c.sel !== null || !c.rects || jogo.fase !== "cartas") return;
     const r = cvJogo.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width * CONFIG.largura, y = (e.clientY - r.top) / r.height * cvJogo.height;
+    const x = (e.clientX - r.left) / r.width * CONFIG.largura, y = (e.clientY - r.top) / r.height * alturaTela;
     c.rects.forEach(function(q, i) { if (q && x >= q.x && x <= q.x + q.w && y >= q.y && y <= q.y + q.h) escolherCarta(i); });
   });
   window.addEventListener("keydown", function(e) {

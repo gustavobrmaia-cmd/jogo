@@ -58,7 +58,7 @@ js/
   nucleo/     config.js (ajustes), util.js (ferramentas), save.js (localStorage), main.js (tela e loop; carrega por último)
   poki/       poki.js (SDK e anúncios), eventos.js (Game Events)
   rede/       netlib.js (Poki Networking Library, v19), rede.js (conexão e salas), online.js (partida online)
-  idiomas/    idiomas.js (t(), detecção, troca)  +  textos/xx.js (os 12 idiomas)
+  idiomas/    idiomas.js (t(), detecção, troca)  +  textos/xx.js (15 idiomas; v20.7: + vi, uk, ja — texto novo vai em TODOS)
   sistemas/   audio.js (som sintetizado), entrada.js (teclado, toque, controle; 2 jogadores)
   interface/  telas.js (menu, escolha do modo, pausa, continuar; anúncios), menus.js, recompensa.js (fim da partida),
               poder.js (painel das melhorias: tela de fim e tela Melhorar)
@@ -495,6 +495,26 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     - **Parte 3 do plano (sobrevivência em blocos de 3 ondas, chefe a cada 6) NÃO foi feita:** mexe muito num modo fora
       do funil que o PFT mede (a queda é entre os rivais 2 e 4) e mudaria os números de onda. Fica para depois do PFT,
       se os eventos mostrarem gente jogando a sobrevivência.
+  - v20.7 (o dono: "a maior otimização possível" + 3 línguas). Medido com Playwright, CPU 4x mais lenta:
+    - **Resolução do canvas** (`resTela`, main.js `ajustarTela`): o desenho continua em 1280 x alturaTela lógicos, mas o
+      canvas tem só os pixels que a tela mostra (largura na tela x densidade, máx. 2; nunca acima de 1280). Em pé no
+      celular era 1280 x ~2840: 14 qps -> 27 qps (832 x 1847). `ctx.setTransform(resTela...)` no começo de cada quadro;
+      o toque/mouse usa `alturaTela` (não `canvas.height`). Na tela do aparelho a nitidez ficou igual;
+    - **Qualidade automática** (`vigiarQualidade`): no "auto", na luta, 2 medidas seguidas de 3 s abaixo de 45 qps descem
+      um degrau: 1º modo leve, 2º `CONFIG.resBaixa` (densidade 1,25; em pé 55 qps com a CPU 4x). Eventos perf/auto-light
+      e perf/auto-lowres;
+    - **Aquecimento em pedaços** (`ArteArmas.tarefasAquecer` + `filaAquecer` em main.js, requestIdleCallback): os 60
+      sprites de arma eram 1 bloco de ~0,65 s (CPU 4x) no começo da 1ª partida; agora ~65 pedaços nas folgas, rifle e
+      caixas primeiro. `caixaJusta` (armas.js) acha o recorte lendo 4 bytes por vez e parando nas bordas. Sprites iguais
+      pixel a pixel (comparado com a v20.6). Pior travada no começo: ~650 -> ~330 ms;
+    - **fundos.js** (modo escuro) trata a tela aberta na hora e o resto em lotes nas folgas;
+    - canvas `alpha: false`;
+    - **Versão para o Poki** (`ferramentas/construir.js`, `npm install` uma vez e `npm run construir` -> `dist/`): os 37
+      scripts do index viram `jogo.min.js` (esbuild; nomes globais mantidos), os carregados depois são minificados no
+      mesmo caminho (netlib com a licença), CSS num só. Abertura 273 -> 179 KB gzip, 42 -> 5 pedidos; no 4G lento a
+      partida aparece em 3,15 s (era 4,0). **O zip do Poki sai de `dist/`** (o repositório continua com o código legível);
+    - **Línguas novas: vietnamita (vi), ucraniano (uk) e japonês (ja)** (15 no total). Vietnamita com
+      `fonte/nunito-vietnamese.woff2` (13 KB, só baixa quem usa); japonês usa a fonte do sistema (a Nunito não tem kana).
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

@@ -127,7 +127,17 @@ const FundosSVG = (function() {
   }
 
   function iniciar() {
-    arvore(document.body);
+    // v20.7: tratar a página toda de uma vez custava ~30 ms bem na abertura. Agora: as telas abertas na hora e o resto
+    // em lotes nas folgas do navegador (a tela que abrir antes disso é tratada pelo observador, ao ganhar "aberta")
+    document.querySelectorAll(".tela.aberta").forEach(arvore);
+    const resto = Array.prototype.slice.call(document.body.getElementsByTagName("*"));
+    let i = 0;
+    const ocioso = typeof requestIdleCallback === "function";
+    (function lote(prazo) {
+      const ini = performance.now();
+      while (i < resto.length && (ocioso ? prazo.timeRemaining() > 3 : performance.now() - ini < 4)) tratar(resto[i++]);
+      if (i < resto.length) { if (ocioso) requestIdleCallback(lote, { timeout: 500 }); else setTimeout(lote, 30); }
+    })({ timeRemaining: function() { return 0; } });
     new MutationObserver(function(ms) {
       for (let i = 0; i < ms.length; i++) {
         const m = ms[i];

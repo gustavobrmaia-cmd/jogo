@@ -2,7 +2,7 @@
 
 // =========================
 // IDIOMAS
-// Português + inglês + os 10 idiomas mais fortes no público do Poki.
+// Português + inglês + os 10 idiomas mais fortes no público do Poki (v20.7: + vietnamita, ucraniano e japonês).
 // Cada idioma fica em js/idiomas/textos/xx.js (TEXTOS.xx = { chave: "texto" }) e só é baixado quem for usar:
 // o idioma escolhido + o inglês (reserva para qualquer texto que faltar).
 // No código: t("jogar"), t("pontos", 120) -> "Pontos: 120" ({0}, {1}... são trocados pelos valores).
@@ -21,7 +21,10 @@ const IDIOMAS = [
   { id: "tr", nome: "Türkçe" },
   { id: "ru", nome: "Русский" },
   { id: "ro", nome: "Română" },
-  { id: "id", nome: "Bahasa Indonesia" }
+  { id: "id", nome: "Bahasa Indonesia" },
+  { id: "vi", nome: "Tiếng Việt" },
+  { id: "uk", nome: "Українська" },
+  { id: "ja", nome: "日本語" }
 ];
 
 const TEXTOS = {};      // preenchido por js/idiomas/textos/xx.js

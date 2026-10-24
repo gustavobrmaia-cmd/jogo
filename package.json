@@ -1,0 +1,11 @@
+{
+  "name": "crazy-balls-duel",
+  "private": true,
+  "description": "Versão para o Poki: npm install (uma vez) e npm run construir -> dist/",
+  "scripts": {
+    "construir": "node ferramentas/construir.js"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.0"
+  }
+}

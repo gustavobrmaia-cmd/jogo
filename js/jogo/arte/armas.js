@@ -547,14 +547,27 @@ const ArteArmas = (function() {
     gb.globalCompositeOperation = "source-in"; gb.fillStyle = "#ffffff"; gb.fillRect(0, 0, w, h); gb.globalCompositeOperation = "source-over";
     g.globalAlpha = 0.32; g.drawImage(b, 0, 1.1 * E); g.globalAlpha = 1;
   }
+  // v20.7: caixa dos pixels com alfa > 12. Lê 4 bytes de uma vez e para no 1º pixel de cada borda (de cima, de baixo
+  // e, só entre essas linhas, dos lados): ~5x mais rápido que olhar pixel a pixel a imagem inteira (60 armas no começo)
+  function caixaJusta(d, w, h) {
+    const u = new Uint32Array(d.buffer, d.byteOffset, w * h), min = 13 * 16777216;   // alfa no byte de cima (little-endian)
+    const tem = function(i) { return (u[i] >>> 0) >= min; };
+    let y0 = 0, y1 = h - 1, x0 = 0, x1 = w - 1;
+    linha: for (; y0 < h; y0++) for (let x = 0, i = y0 * w; x < w; x++, i++) if (tem(i)) break linha;
+    if (y0 >= h) return [w, h, 0, 0];
+    baixo: for (; y1 > y0; y1--) for (let x = 0, i = y1 * w; x < w; x++, i++) if (tem(i)) break baixo;
+    esq: for (; x0 < w; x0++) for (let y = y0; y <= y1; y++) if (tem(y * w + x0)) break esq;
+    dir: for (; x1 > x0; x1--) for (let y = y0; y <= y1; y++) if (tem(y * w + x1)) break dir;
+    return [x0, y0, x1, y1];
+  }
   function spriteArma(id) {
     if (cache["w" + id]) return cache["w" + id];
     bg.setTransform(1, 0, 0, 1, 0, 0); bg.clearRect(0, 0, bruto.width, bruto.height);
     bg.setTransform(E, 0, 0, E, 100 * E, 120 * E);
     const ant = G; G = bg; W[id].d(); G = ant;
-    const w = bruto.width, h = bruto.height, d = bg.getImageData(0, 0, w, h).data, r = rarid(id), mg = Math.ceil((r === 3 ? 6.6 : r === 2 ? 5 : 2.4) * E) + 2;
-    let x0 = w, y0 = h, x1 = 0, y1 = 0;
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 12) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    const w = bruto.width, h = bruto.height, r = rarid(id), mg = Math.ceil((r === 3 ? 6.6 : r === 2 ? 5 : 2.4) * E) + 2;
+    const b = caixaJusta(bg.getImageData(0, 0, w, h).data, w, h);
+    let x0 = b[0], y0 = b[1], x1 = b[2], y1 = b[3];
     x0 = Math.max(0, x0 - mg); y0 = Math.max(0, y0 - mg); x1 = Math.min(w - 1, x1 + mg); y1 = Math.min(h - 1, y1 + mg);
     const c = cv(x1 - x0 + 1, y1 - y0 + 1); c.getContext("2d").drawImage(bruto, -x0, -y0);
     acabamento(c, r);
@@ -1348,6 +1361,16 @@ const ArteArmas = (function() {
     }
   }
 
+  // v20.7: o mesmo trabalho em pedaços, na ordem de uso (o rifle do treino, caixas e mão, depois as armas comuns, raras
+  // e lendárias, por fim projéteis e soltos). main.js roda um pedaço por vez nas folgas entre os quadros
+  function tarefasAquecer() {
+    const ids = Object.keys(W).sort(function(a, b) { return (a === "rifle" ? 0 : rarid(a)) - (b === "rifle" ? 0 : rarid(b)); });
+    const lista = [function() { spriteArma(ids[0]); maoSpr(); brSpr(); }, function() { [1, 2, 3].forEach(function(r) { caixaSpr(r); caixaSpr(r, true); paraSpr(r); }); for (let i = 0; i < 6; i++) caixaBrilho(i); }];
+    ids.slice(1).forEach(function(id) { lista.push(function() { spriteArma(id); }); });
+    lista.push(function() { ["cl_polvora", "cl_energia", "cl_gosma", "cap_bala", "cap_cartucho", "cap_grande", "cap_energia", "gosma", "pingo", "faisca", "banana", "bolha"].forEach(spSolto); });
+    if (typeof ARMAS !== "undefined") lista.push(function() { ARMAS.forEach(function(a) { if (PR[a.visual]) PR[a.visual](ctxAq(), { x: -999, y: -999, vx: 1, vy: 0, raio: a.raio || 4, t: 0, cor: "#ff5d73", timer01: 0 }); }); });
+    return lista;
+  }
   function aquecer() {
     Object.keys(W).forEach(spriteArma); maoSpr(); brSpr(); [1, 2, 3].forEach(function(r) { caixaSpr(r); caixaSpr(r, true); paraSpr(r); });
     for (let i = 0; i < 6; i++) caixaBrilho(i);
@@ -1359,7 +1382,7 @@ const ArteArmas = (function() {
 
   return {
     desenharNaMao: desenharNaMao, desenharProjetil: desenharProjetil, desenharFeixe: desenharFeixe, desenharAviso: desenharAviso,
-    desenharMeteoro: desenharMeteoro, icone: icone, desenharCaixa: desenharCaixa, pontaDoCano: pontaDoCano, aquecer: aquecer,
+    desenharMeteoro: desenharMeteoro, icone: icone, desenharCaixa: desenharCaixa, pontaDoCano: pontaDoCano, aquecer: aquecer, tarefasAquecer: tarefasAquecer,
     // v19
     disparo: disparo, soltar: soltar, desenharSoltos: desenharSoltos, desenharEstado: desenharEstado
   };

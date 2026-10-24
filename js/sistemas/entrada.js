@@ -85,7 +85,7 @@ const entrada = (function() {
   function canvasEl() { return document.getElementById("canvas"); }
   function posCanvas(cx, cy) {
     const r = canvasEl().getBoundingClientRect();
-    return { x: (cx - r.left) / r.width * CONFIG.largura, y: (cy - r.top) / r.height * canvasEl().height };
+    return { x: (cx - r.left) / r.width * CONFIG.largura, y: (cy - r.top) / r.height * alturaTela };   // v20.7: lógico (o canvas pode ter menos pixels)
   }
   window.addEventListener("mousemove", function(e) {
     if (performance.now() - ultimoToque < 1000) return;
