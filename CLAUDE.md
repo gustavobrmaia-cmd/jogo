@@ -515,6 +515,16 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       partida aparece em 3,15 s (era 4,0). **O zip do Poki sai de `dist/`** (o repositório continua com o código legível);
     - **Línguas novas: vietnamita (vi), ucraniano (uk) e japonês (ja)** (15 no total). Vietnamita com
       `fonte/nunito-vietnamese.woff2` (13 KB, só baixa quem usa); japonês usa a fonte do sistema (a Nunito não tem kana).
+  - **PFT v20.7** (sáb 24/10, 13:32): **2m56**, 27% engajados, FPS 59 (v18.3 de manhã 2m58; v19.9 às 18:16 3m01).
+    Histograma igual ao da v19.9 (0-1m ~172, 5m+ ~76): as mudanças da v20.x não mudaram o comportamento. Eventos:
+    - passagens quase 100% (terminou treino 347 -> rival 2 350; rival 2 ~168 -> rival 3 171; rival 3 ~109 -> rival 4 106);
+    - o vazamento é DURANTE a partida: ~16–17% saem a cada rodada desde a 1ª do treino (treino 630 -> 347; rival 2 só
+      2% perdem a partida). Saída por TEMPO, não por dificuldade (como o jogador de teste viu na v17.5);
+    - 34% saem antes de 1 minuto; 6% nem começam a partida depois de carregar;
+    - saem DURANTE o mapa: templo 14%, fliperama 11%, floresta 8,7%, fábrica 6,1%, campo 5,4%;
+    - 87% celular, 54% em pé; línguas novas: 11 pessoas (vi 5, uk 4, ja 2); online: 2 tentaram e falharam (p2p).
+  - v20.8: treino e rivais 2–3 sem templo e fliperama (sobram campo, fábrica e floresta); eles voltam como casa do
+    Rocky (rival 4) e da Nova (rival 5) e no resto da ordem do treino depois da 3ª rodada.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

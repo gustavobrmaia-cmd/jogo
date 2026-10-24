@@ -108,9 +108,12 @@ function novaPartida(modo, opcoes) {
   }
   // 1ª partida da vida ("treino"): campo e depois só mapas simples (sem cair, lava, água ou gravidade esquisita)
   const treino = !!opcoes.primeiraVez && modo === "bot";
+  // v20.8: templo (portais) e fliperama (bate-volta) só depois da 3ª rodada. No PFT da v20.7 saíam DURANTE o mapa 14% e
+  // 11% de quem jogava nele, contra 5–6% no campo e na fábrica e 9% na floresta (e quase ninguém perde no treino)
   if (treino) {
-    const simples = ["fabrica", "fliperama", "templo", "floresta"];
-    ordem = ["campo"].concat(embaralhar(simples), ordem.filter(function(id) { return id !== "campo" && simples.indexOf(id) < 0; }));
+    const simples = ["fabrica", "floresta"], depois = ["fliperama", "templo"];
+    ordem = ["campo"].concat(embaralhar(simples), embaralhar(depois),
+      ordem.filter(function(id) { return id !== "campo" && simples.indexOf(id) < 0 && depois.indexOf(id) < 0; }));
   }
   // modo rivais: a 1ª rodada é na casa do rival
   const rival = modo === "bot" && opcoes.rival !== undefined && opcoes.rival !== null ? RIVAIS[opcoes.rival] : null;
@@ -123,6 +126,9 @@ function novaPartida(modo, opcoes) {
     // v17: até o rival 3 também sem deserto (vento), gelo (escorrega) e laboratório (gravidade vira) — no v16 o jogador
     // perdia 41%, 42% e 35% das rodadas neles, contra 16–27% nos outros. Sobram campo, fábrica, floresta, fliperama, templo.
     if (opcoes.rival <= 2 && !(opcoes.liga > 0)) crueis.push("deserto", "gelo", "laboratorio");
+    // v20.8: rivais 2 e 3 também sem templo e fliperama (ver o treino acima): sobram campo, fábrica e floresta.
+    // Eles voltam como casa do Rocky (rival 4) e da Nova (rival 5)
+    if (opcoes.rival <= 2 && !(opcoes.liga > 0)) crueis.push("templo", "fliperama");
     ordem = ordem.filter(function(id) { return crueis.indexOf(id) < 0 || id === rival.casa; });
   }
   if (rival && !treino) ordem = [rival.casa].concat(ordem.filter(function(id) { return id !== rival.casa; }));
