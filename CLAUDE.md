@@ -484,6 +484,17 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       inicial (selo verde "Arma inicial: X"). Só a pessoa escolhe; o bot fica com a arma da rodada;
     - verso e frentes desenhados uma vez num canvas guardado; em pé as cartas são x1,5;
     - eventos iguais aos da v18.3: choice/weapon (visible), choice/weapon-rN[-auto], choice/weapon-upgrade|weapon-start.
+  - v20.6 (plano revisado pelo Gemini e pelo Claude; o dono pediu para fazer o melhor dele):
+    - **Bot lê a MIRA com atraso** (`oponentePercebido`: mira, recarga e origem da linha com no mínimo 0,18 s). No
+      nível máximo a reação é 0,08 s e ele saía da linha do sniper no mesmo quadro do flick. Só muda do nível ~0,76
+      para cima (rivais fortes); os rivais 1–5 já tinham reação maior que 0,18 s;
+    - **Bot não atira no reflexo** quando `preve >= 0,3` (nível ~0,28+); o fraco às vezes atira e o tiro volta.
+      Teste: nível 0,95 com reflexo 0 tiros em 2,5 s (148 sem); nível 0,1 atira igual;
+    - **Vibração** (`vibrar(ms)` em util.js, só com toque): golpe >= 20 de/em gente 18 ms, K.O. 30 ms, K.O. final
+      [30, 40, 60]; a queda de braço usa a mesma função. Na demo do menu nada vibra (`M.mudo`);
+    - **Parte 3 do plano (sobrevivência em blocos de 3 ondas, chefe a cada 6) NÃO foi feita:** mexe muito num modo fora
+      do funil que o PFT mede (a queda é entre os rivais 2 e 4) e mudaria os números de onda. Fica para depois do PFT,
+      se os eventos mostrarem gente jogando a sobrevivência.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

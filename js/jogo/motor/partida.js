@@ -646,7 +646,7 @@ function atualizarQueda(j) {
     if (k === 1) {
       q.toques1++; q.pos -= PASSO_QUEDA; q.pulso1 = 1;
       // v19.6: no celular cada toque vibra de leve
-      if (entrada.toque && !j.bots[0] && navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+      if (!j.bots[0]) vibrar(12);
     }
     else { q.toques2++; q.pos += PASSO_QUEDA; q.pulso2 = 1; }
     if (!j.demo) som("clique");

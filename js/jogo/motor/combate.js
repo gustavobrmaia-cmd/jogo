@@ -644,6 +644,8 @@ function causarDano(M, b, dano, atacante, nx, ny, empurra, fx, fy) {
     if (dano >= 4) Efeitos.texto(b.x, b.y - b.r - 8, "-" + Math.round(dano), dano >= 25 ? "#ffd43b" : "#ffffff", dano >= 25 ? 1.35 : undefined);
     if (dano >= 20) Efeitos.tremer(Math.min(10, dano / 5));
   }
+  // v20.6: golpe forte vibra no celular (em quem leva ou em quem deu, se for gente)
+  if (dano >= 20 && !M.mudo && (b.humano || (atacante && atacante !== b && atacante.humano))) vibrar(18);
   if (atacante && atacante !== b && atacante.humano) somJogo(M, "acerto_meu", tomAcerto);
   else if (b.humano) somJogo(M, "dor");
   else somJogo(M, "acerto");
@@ -665,6 +667,7 @@ function matar(M, b) {
     M.pausa = Math.max(M.pausa || 0, final ? 16 : 9);
     M.ko = { x: b.x, y: b.y, humano: !!matador.humano, perfeito: !(matador.danoRecebido > 0), final: final };
     if (typeof Efeitos !== "undefined") Efeitos.tremer(final ? 30 : 20);
+    if (matador.humano || b.humano) vibrar(final ? [30, 40, 60] : 30);   // v20.6 (substitui a do golpe no mesmo passo)
     if (final && matador.humano) somJogo(M, "explosao", 0.7);
     if (matador.humano) somJogo(M, "ko");
   }

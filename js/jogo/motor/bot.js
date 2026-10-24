@@ -146,7 +146,7 @@ function vulneravel(o) {
 
 // ---------- percepção ----------
 function lembrar(bot, o) {
-  bot.historico.push({ x: o.x, y: o.y, vx: o.vx, vy: o.vy, chao: o.noChao });
+  bot.historico.push({ x: o.x, y: o.y, vx: o.vx, vy: o.vy, chao: o.noChao, mira: o.mira, cad: o.cad });
   if (bot.historico.length > 40) bot.historico.shift();
 }
 // Onde o bot "acha" que o oponente está (com atraso de reação, projetado para frente)
@@ -157,7 +157,10 @@ function oponentePercebido(bot, o, M) {
   const k = Math.min(atraso, h.length);
   let x = s.x + s.vx * k, y = s.y + s.vy * k * 0.5;
   if (o.efeitos.fantasma > 0) { x += Math.sin(M.t * 3.1) * 90; y += Math.cos(M.t * 2.3) * 50; }
-  return { x: x, y: y, vx: s.vx, vy: s.vy, r: o.r, noChao: s.chao };
+  // v20.6: a MIRA do outro também chega com atraso, de no mínimo 0,18 s (gente). No nível máximo a reação é 0,08 s:
+  // desviar de tiro que já está voando tudo bem, mas sair da linha do sniper no mesmo quadro do flick, não
+  const am = Math.round(Math.max(bot.reacao, 0.18) / FIS.dt), sm = h[Math.max(0, h.length - 1 - am)] || o;
+  return { x: x, y: y, vx: s.vx, vy: s.vy, r: o.r, noChao: s.chao, mx: sm.x, my: sm.y, mira: sm.mira, cad: sm.cad };
 }
 
 // v19: previsão com a física de verdade: o oponente continua andando para o lado que anda (sem pular),
@@ -460,8 +463,8 @@ function decidir(bot, M, b, o, perc) {
   const esconder = (valorAtual < 0.35 && ameacaO > 0.6 && bot.tatica > 0.5) || (fraco && bot.cobre > 0.4) || (recarregando && bot.cobre > 0.6 && !vul);
   const pesoCobre = esconder ? 6 + 6 * bot.cobre : 0;
   // linha da mira do oponente (arma reta e pronta para atirar)
-  const leMira = o.viva && tiroReto(armaO) && o.cad < 0.25 && o.mira !== undefined && !(o.efeitos.congelado > 0) ? bot.leMira : 0;
-  const mcx = Math.cos(o.mira || 0), mcy = Math.sin(o.mira || 0), danoMira = armaO.dano * (armaO.qtd || 1);
+  const leMira = o.viva && tiroReto(armaO) && (perc.cad || 0) < 0.25 && perc.mira !== undefined && !(o.efeitos.congelado > 0) ? bot.leMira : 0;
+  const mcx = Math.cos(perc.mira || 0), mcy = Math.sin(perc.mira || 0), danoMira = armaO.dano * (armaO.qtd || 1);
   const torretas = torretasInimigas(M, b);
   escolherNavegacao(bot, M, b, valorAtual);
   const nav = bot.nav;
@@ -491,7 +494,7 @@ function decidir(bot, M, b, o, perc) {
       }
       // v19: sair da linha da mira (o oponente está apontando e a arma está pronta)
       if (leMira && k < 22 && (k & 1) === 0) {
-        const rx = s.x - o.x, ry = s.y - o.y, proj = rx * mcx + ry * mcy;
+        const rx = s.x - perc.mx, ry = s.y - perc.my, proj = rx * mcx + ry * mcy;
         if (proj > 0) { const dl = Math.abs(rx * mcy - ry * mcx); if (dl < s.r + 14) perigo += danoMira * leMira * 0.06 * (1 - dl / (s.r + 14)); }
       }
       if (torretas && (k & 3) === 0) for (let i = 0; i < torretas.length; i++) {
@@ -840,6 +843,8 @@ function pensarBot(bot, M, b) {
     if (M.t < (bot.proxTiro || 0)) ent.tiro = false;
     else bot.proxTiro = M.t + bot.folgaTiro * (0.7 + Math.random() * 0.6);
   }
+  // v20.6: o reflexo devolve o tiro. Bot esperto (preve >= 0,3, nível ~0,28+) segura; o fraco às vezes cai (é divertido)
+  if (ent.tiro && o.efeitos.reflexo > 0 && bot.preve >= 0.3 && a.tipo !== "mina" && a.tipo !== "torreta") ent.tiro = false;
   // tiro pesado (bazuca, laser, sniper...): avisa antes com "!" e uma linha vermelha, quando o jogador é humano.
   // Dá tempo de desviar — e desviar de um tiro avisado é das melhores sensações do jogo.
   if (ent.tiro && b.cad <= 0 && o.humano && armaPesada(a)) {

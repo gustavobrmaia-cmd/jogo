@@ -3,6 +3,10 @@
 // Pequenas ferramentas usadas em todo lugar
 function limitar(v, min, max) { return v < min ? min : v > max ? max : v; }
 function aleatorio(min, max) { return min + Math.random() * (max - min); }
+// v20.6: vibração curta no celular (o Safari do iPhone não tem: simplesmente não vibra)
+function vibrar(ms) {
+  if (typeof entrada !== "undefined" && entrada.toque && navigator.vibrate) { try { navigator.vibrate(ms); } catch (e) {} }
+}
 function el(id) { return document.getElementById(id); }
 
 // Retângulos se encostando ({x, y, w, h})
