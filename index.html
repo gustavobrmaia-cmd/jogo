@@ -119,7 +119,7 @@
           <span class="dica" id="dicaSurv"></span>
         </button>
       </div>
-      <button class="premiado" data-acao="lendaria" id="btnLendaria"></button>
+      <button class="anuncio" data-acao="lendaria" id="btnLendaria"></button>
       <button data-acao="voltar" data-t="voltar" id="btnVoltarModo" class="voltar"></button>
     </div>
 
@@ -236,7 +236,7 @@
           <canvas id="canvasBau" width="460" height="290"></canvas>
           <p class="premioTxt" id="recPremio"></p>
           <button class="grande" data-acao="abrirBau" id="btnAbrirBau"></button>
-          <button class="premiado" data-acao="outroBau" id="btnOutroBau"></button>
+          <button class="anuncio" data-acao="outroBau" id="btnOutroBau"></button>
         </div>
         <div id="recPoder" class="poderPainel escondido"></div>
       </div>
@@ -263,12 +263,15 @@
         <h2 class="placa" data-t="bot_venceu"></h2>
         <p class="info placar" id="contPlacar"></p>
         <div class="botoes">
-          <button class="premiado grande" data-acao="continuarPartida" data-t="continuar_anuncio"></button>
+          <!-- v21.1: regra do Poki: a opção normal (verde) do mesmo tamanho e ao lado do anúncio (roxo, com 🎬) -->
+          <div class="linhaCont">
+            <button class="grande padraoVerde" data-acao="naoContinuar" data-t="nao_obrigado"></button>
+            <button class="grande anuncio" data-acao="continuarPartida" id="btnContinuarAnuncio"></button>
+          </div>
           <p class="info pequena" id="contExplica"></p>
         </div>
         <p class="aviso" id="contAviso"></p>
       </div>
-      <button data-acao="naoContinuar" data-t="nao_obrigado" class="voltar"></button>
     </div>
   </div>
 

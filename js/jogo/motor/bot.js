@@ -50,7 +50,7 @@ function criarBot(lado, nivel, estilo) {
   // v19: "esperteza" — o que é JEITO de lutar (cobertura, finta, previsão, leitura da mira) cresce com o nível,
   // mas começa acima de zero: o bot fraco já parece esperto, só erra e demora mais.
   const esp = limitar((d - 0.1) / 0.6, 0, 1);
-  return {
+  const bot = {
     lado: lado,
     nivel: d,
     estilo: nomeEstilo, e: e,
@@ -89,6 +89,11 @@ function criarBot(lado, nivel, estilo) {
     grafo: null, grafoM: null, nav: null,
     prev: new Float32Array(2 * 64), prevOk: false
   };
+  // v21.1: teste A/B, grupo "b": bot simples (o jeito de lutar da v18.3; nível, mira e reação continuam iguais)
+  if (typeof save !== "undefined" && save.exp === "b") {
+    bot.preve = 0; bot.leMira = 0; bot.cobre = 0; bot.finta = 0.1; bot.combo = 0; bot.arcoAlto = false; bot.tabela = false;
+  }
+  return bot;
 }
 
 // ---------- valor das armas ----------

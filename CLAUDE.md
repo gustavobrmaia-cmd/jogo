@@ -543,6 +543,22 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       vai no ponto tocado (como o mouse) e atira enquanto o dedo está lá; anel na cor de quem joga no ponto. Os botões de
       baixo (andar, pular, atirar) continuam iguais; deitado e 2 jogadores não mudam. Teste "tocar no Bob e segurar 1,5 s":
       v20.9 a bolinha pulava e o Bob ficava em 100; v21 o Bob vai a 0.
+  - v21.1 (pesquisa sobre o Poki e os duelos que fazem sucesso; o acesso direto ao poki.com é bloqueado neste ambiente,
+    então veio da busca):
+    - Critério oficial do PFT: média > 3 min E >= 25% das 500 jogadas passando de 3 min (a v19.9 já passou). O Poki
+      sugere 5+ min e 65%+ de "conversion to play" antes de pedir revisão. A meta 3m30 / 30% é do dono;
+    - **Regra do anúncio premiado (revisão manual do Poki):** o botão do anúncio NUNCA verde e com o ícone de vídeo 🎬;
+      a opção normal é que é verde, do mesmo tamanho, ao lado ou acima; sempre existe a opção sem anúncio; anúncio
+      nunca obrigatório para avançar. O jogo estava ao contrário (anúncio verde com "play"). Agora: `button.anuncio`
+      (roxo) com `Icone "video"` (claquete) em Continuar, Partida Lendária e Abrir outro baú; na tela Continuar o
+      "Não, obrigado" é `.grande.padraoVerde` ao lado/acima (ESC também aperta ele). A v18.3 do Web Fit tem o jeito antigo;
+    - **TESTE A/B dentro do PFT** (como o Smash Room no blog de Game Events do Poki): `save.exp` sorteado 1 vez por jogador:
+      "a" = bot atual, "b" = bot simples (preve/leMira/cobre/combo 0, finta 0,1, sem arco alto e tabela; nível, mira e
+      reação iguais: o jeito de lutar da v18.3). Eventos: exp/bot-a|bot-b (visible, quantos em cada grupo) e
+      exp/bot-x-1m|3m|5m (reached). Comparar a fração que passa de 3 min em cada grupo (com ~250 por grupo só uma
+      diferença de ~8 pontos é confiável);
+    - duelos de sucesso no Poki (Rooftop Snipers, Getaway Shootout, Stickman Battle): 2 botões, física engraçada, rodadas
+      de segundos, revanche instantânea; celular em pé obrigatório (pedir para girar faz sair).
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

@@ -40,7 +40,11 @@ function saveNovo() {
     visual: { cor: "cor_rosa", corpo: "classico", olhos: "", boca: "", chapeu: "", acessorio: "", rastro: "", ko: "", emote: "" },
     armas: [],        // v19: armas compradas na loja (ids de ARMAS)
     armaInicial: "",  // v19: arma com que a pessoa começa cada rodada ("" = a da carta / a sorteada)
-    qualidade: "auto" // "auto" | "alta" | "leve"
+    qualidade: "auto", // "auto" | "alta" | "leve"
+    // v21.1: TESTE A/B (sorteado 1 vez por jogador, como o Smash Room do blog do Poki): "a" = bot atual (v19),
+    // "b" = bot simples (sem cobertura, sem sair da linha da mira, sem previsão/fintas/tabela, como o da v18.3).
+    // Eventos exp/bot-a|bot-b (visible) e exp/bot-x-1m|3m|5m (reached): quem passa de 3 min em cada grupo
+    exp: ""
   };
 }
 
@@ -57,6 +61,7 @@ function carregarSave() {
       save = base;
     }
   } catch (e) { /* sem armazenamento: segue com o save novo */ }
+  if (save.exp !== "a" && save.exp !== "b") { save.exp = Math.random() < 0.5 ? "a" : "b"; salvar(); }
 }
 
 function salvar() {

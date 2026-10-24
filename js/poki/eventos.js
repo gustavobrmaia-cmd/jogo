@@ -34,6 +34,8 @@ const Eventos = (function() {
       Poki.medir("playtime", nomeTempo(MARCAS[proximaMarca]), "reached");
       // v15: 3 e 5 min por idioma (qual público joga mais? os testes da noite, com mais espanhol, iam melhor)
       if (MARCAS[proximaMarca] === 180 || MARCAS[proximaMarca] === 300) Poki.medir("engaged", nomeTempo(MARCAS[proximaMarca]) + "-" + IDIOMA, "reached");
+      // v21.1: teste A/B do bot (save.exp): 1, 3 e 5 min de gameplay em cada grupo
+      if (MARCAS[proximaMarca] === 60 || MARCAS[proximaMarca] === 180 || MARCAS[proximaMarca] === 300) Poki.medir("exp", "bot-" + save.exp + "-" + nomeTempo(MARCAS[proximaMarca]), "reached");
       proximaMarca++;
     }
   }
@@ -45,6 +47,7 @@ const Eventos = (function() {
     Poki.medir("session", mobile ? "mobile" : "desktop", "start");
     if (mobile) Poki.medir("session", window.innerHeight > window.innerWidth ? "portrait" : "landscape", "start");
     Poki.medir("session", primeira ? "first-visit" : "returning", "start");
+    Poki.medir("exp", "bot-" + save.exp, "visible");   // v21.1: quantos jogadores em cada grupo do teste A/B
   }
 
   let primeira = false;

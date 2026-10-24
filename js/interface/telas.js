@@ -54,7 +54,7 @@ function atualizarBotaoLendaria() {
   const b = el("btnLendaria");
   if (lendariaPronta) { b.innerHTML = Icone.html("brilho") + " " + escHtml(t("lendaria_ativada")); b.disabled = true; b.classList.remove("escondido"); return; }
   b.disabled = false;
-  b.innerHTML = Icone.html("play") + " " + escHtml(t("lendaria_anuncio"));
+  b.innerHTML = Icone.html("video") + " " + escHtml(t("lendaria_anuncio"));
   b.classList.toggle("escondido", !Poki.premiadoDisponivel());
 }
 
@@ -156,6 +156,7 @@ function aoTerminarPartida(j) {
     el("contPlacar").textContent = surv ? t("onda_n", j.onda) : j.pontos[0] + " – " + j.pontos[1];
     el("contExplica").textContent = surv ? t("continuar_vida") : t("continuar_explica");
     el("contAviso").textContent = "";
+    el("btnContinuarAnuncio").innerHTML = Icone.html("video") + " " + escHtml(t("continuar_anuncio"));   // v21.1
     Eventos.oferta("continue", "visible");
     atualizarTextos();
     mostrarTela("telaContinuar");
@@ -472,7 +473,7 @@ function montarTelas() {
     else if (e.code === "Escape" && estado !== "jogo" && estado !== "pausa" && estado !== "recompensa") {
       // v19.6: ESC volta nos menus (Opções, Loja, Personalizar, Missões...): aperta o "Voltar" da tela aberta
       const tela = document.querySelector(".tela.aberta");
-      const v = tela && Array.from(tela.querySelectorAll("button.voltar, [data-acao='voltar'], [data-acao='voltarOpcoes'], [data-acao='fecharDiaria'], [data-acao='onCancelar']"))
+      const v = tela && Array.from(tela.querySelectorAll("button.voltar, [data-acao='voltar'], [data-acao='voltarOpcoes'], [data-acao='fecharDiaria'], [data-acao='onCancelar'], [data-acao='naoContinuar']"))
         .filter(function(x) { return x.offsetParent !== null; })[0];
       if (v) v.click();
     }

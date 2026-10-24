@@ -126,7 +126,7 @@ function atualizarBotoesRecompensa() {
   el("btnAbrirBau").textContent = rec.baus[rec.i] === "nivel" ? t("abrir_bau_nivel") : t("abrir_bau");
   const podeExtra = !faltam && rec.fase !== "sacudindo" && !rec.extraUsado && Poki.premiadoDisponivel();
   el("btnOutroBau").classList.toggle("escondido", !podeExtra);
-  el("btnOutroBau").innerHTML = Icone.html("play") + " " + escHtml(t("outro_bau"));
+  el("btnOutroBau").innerHTML = Icone.html("video") + " " + escHtml(t("outro_bau"));   // v21.1: 🎬 (regra do Poki)
   el("telaRecompensa").classList.toggle("comExtra", podeExtra);   // v17.5: o baú sobe para o botão caber no cartão
   textoRevanche(rec.cancelou ? 0 : rec.n || 0);
   if (podeExtra && !rec.ofertou) { rec.ofertou = true; Eventos.oferta("extra-chest", "visible"); }

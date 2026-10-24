@@ -18,7 +18,7 @@
 const Icone = (function() {
   var NOMES = ["moeda", "brilho", "raio", "ok", "trofeu", "presente", "nota", "som", "mudo", "estrela", "explosao",
     "coracao", "repetir", "robo", "casa", "mao", "celular", "alvo", "pincel", "engrenagem", "globo", "controle",
-    "dupla", "fogo", "bau", "cadeado", "trevo", "arma", "mapa", "loja", "roleta", "cartas", "coroa", "escudo", "relogio",
+    "dupla", "fogo", "bau", "cadeado", "trevo", "arma", "mapa", "loja", "roleta", "cartas", "video", "coroa", "escudo", "relogio",
     "seta", "voltar", "play", "fechar", "copiar", "wifi", "usuario", "chapeu", "olho", "rastro", "caveira", "boca"];
   var PI = Math.PI, TAU = PI * 2;
   var TINTA = "#1a0d33", LW = 8;
@@ -333,6 +333,16 @@ const Icone = (function() {
       g.restore();
     });
     meiaLua(g, -4, -14, 16, PI * 1.1, PI * 1.36, 4, false);
+  };
+  // v21.1: claquete (🎬), o ícone que o Poki pede nos botões de anúncio premiado
+  D.video = function(g) {
+    cel(g, function(g) { rr(g, -40, -10, 80, 50, 7); }, "#3b2f63", "#241a45", { dx: 4, dy: 5 });
+    g.save(); g.translate(-40, -12); g.rotate(-0.32);
+    cel(g, function(g) { rr(g, 0, -16, 80, 16, 4); }, "#ffffff", "#c8cdf0", { dx: 2, dy: 3, lw: 6 });
+    g.beginPath(); for (let i = 0; i < 4; i++) { g.moveTo(8 + i * 20, -16); g.lineTo(20 + i * 20, -16); g.lineTo(12 + i * 20, 0); g.lineTo(0 + i * 20, 0); g.closePath(); }
+    g.fillStyle = TINTA; g.fill(); g.restore();
+    g.fillStyle = "#ffffff"; g.beginPath(); for (let i = 0; i < 4; i++) { g.moveTo(-32 + i * 20, -8); g.lineTo(-22 + i * 20, -8); g.lineTo(-28 + i * 20, 4); g.lineTo(-38 + i * 20, 4); g.closePath(); } g.globalAlpha = 0.9; g.fill(); g.globalAlpha = 1;
+    cel(g, function(g) { g.moveTo(-8, 10); g.lineTo(14, 22); g.lineTo(-8, 34); g.closePath(); }, "#ff4f9a", "#c2185b", { dx: 1, dy: 2, lw: 5 });
   };
   D.coroa = function(g) {
     cel(g, function(g) { poli(g, [-42, -22, -22, 0, 0, -34, 22, 0, 42, -22, 36, 30, -36, 30]); }, "#ffd23f", "#e07b00", { dx: 5, dy: 6 });

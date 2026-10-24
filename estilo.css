@@ -174,6 +174,12 @@ button.grande:hover { animation: none; transform: translateY(-3px) scale(1.03) r
 button.grande:active { animation: none; transform: translateY(8px) scale(0.98, 0.95); box-shadow: 0 1px 0 var(--sombra); }
 button.grande .ic { filter: none; }
 button.premiado { --c1: #6cf094; --c2: #2fcb63; }
+/* v21.1: regra do Poki para anúncio premiado: o botão do anúncio NUNCA é verde e tem o ícone de vídeo; a opção normal
+   (sem anúncio) é que é verde, do mesmo tamanho, ao lado ou acima. .anuncio = roxo; .padraoVerde = a opção normal */
+button.anuncio { --c1: #b197fc; --c2: #7048e8; --ct: #ffffff; text-shadow: 0 3px 0 rgba(26, 13, 51, 0.5); }
+button.padraoVerde { --c1: #7cf5a2; --c2: #2fcb63; --ct: #ffffff; text-shadow: 0 3px 0 rgba(26, 13, 51, 0.5); }
+#telaContinuar .linhaCont { display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; }
+#telaContinuar .linhaCont button { min-width: 300px; }
 button.voltar {
   --c1: #5b4bb0; --c2: #46389a; --ct: #e9e4ff;
   min-width: 220px; font-size: 24px; padding: 10px 30px 12px; border-radius: 18px;
@@ -222,7 +228,7 @@ button.pequeno::before { height: 6px; top: 4px; left: 8px; }
   font-size: 60px; font-weight: 1000; line-height: 1; padding: 6px 34px 12px; border-radius: 22px;
   background: rgba(26, 13, 51, 0.5); border: 4px solid var(--tinta); text-shadow: 0 4px 0 var(--tinta);
 }
-#telaContinuar button.premiado.grande { --c1: #7cf5a2; --c2: #2fcb63; --ct: #ffffff; text-shadow: 0 3px 0 rgba(26, 13, 51, 0.5); box-shadow: 0 9px 0 var(--tinta), 0 16px 26px rgba(47, 158, 68, 0.35); }
+#telaContinuar button.grande { box-shadow: 0 9px 0 var(--tinta), 0 16px 26px rgba(26, 13, 51, 0.35); }
 #contExplica { max-width: 480px; }
 
 /* ---------- itens das telas entram pulando, um depois do outro ---------- */
