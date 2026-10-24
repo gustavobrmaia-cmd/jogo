@@ -166,7 +166,7 @@ const ArteBolinha = (function() {
   function escudo(R, q) { var k = R + "|" + q; return escudoS[k] || (escudoS[k] = criarEscudo(R, q)); }
 
   // aura de fúria: coroa de línguas de fogo com contorno
-  function criarAura(R, q, ouro) {
+  function criarAura(R, q, cores) {
     var h = R * 1.62, S = (h + 5 * q) * 2, n = 11;
     var c = criarCanvas(S, S), g = c.getContext("2d");
     g.translate(S / 2, S / 2);
@@ -181,12 +181,13 @@ const ArteBolinha = (function() {
     for (var i = 0; i < n; i++) {
       var a = i / n * PI2, rr = h * (i % 2 ? 0.86 : 1);
       lingua(a, R * 0.85, rr, 0.22);
-      g.fillStyle = ouro ? "#ffc61a" : "#ff3d3d"; g.fill(); g.strokeStyle = TINTA; g.lineWidth = lw * 0.9; g.lineJoin = "round"; g.stroke();
-      lingua(a, R * 0.9, R * 0.9 + (rr - R * 0.9) * 0.62, 0.12); g.fillStyle = ouro ? "#fff3a6" : "#ff9a2b"; g.fill();
+      g.fillStyle = cores ? cores[0] : "#ff3d3d"; g.fill(); g.strokeStyle = TINTA; g.lineWidth = lw * 0.9; g.lineJoin = "round"; g.stroke();
+      lingua(a, R * 0.9, R * 0.9 + (rr - R * 0.9) * 0.62, 0.12); g.fillStyle = cores ? cores[1] : "#ff9a2b"; g.fill();
     }
     return { c: c, m: S / 2 };
   }
-  function aura(R, q, ouro) { var k = R + "|" + q + (ouro ? "|o" : ""); return auraS[k] || (auraS[k] = criarAura(R, q, ouro)); }
+  // v21.6: cores = [língua, miolo] do super ligado (sem cores: a vermelha da fúria)
+  function aura(R, q, cores) { var k = R + "|" + q + (cores ? "|" + cores[0] : ""); return auraS[k] || (auraS[k] = criarAura(R, q, cores)); }
 
   // chama pequena (fogo em cima da cabeça): três camadas com contorno
   var chamaS = null;
@@ -521,8 +522,8 @@ const ArteBolinha = (function() {
     }
 
     // aura de fúria (atrás do corpo)
-    if (b.furia || b.superAtivo) {                            // v21.5: SUPER = a mesma aura, dourada (gira ao contrário)
-      var au = aura(R, q, !b.furia), am = au.m * sc * (1 + Math.sin(t * 14) * 0.04);
+    if (b.furia || b.superAtivo) {                            // v21.5: SUPER = a mesma aura, na cor do super (gira ao contrário)
+      var au = aura(R, q, b.furia ? null : [b.superAtivo.cor, b.superAtivo.cor2]), am = au.m * sc * (1 + Math.sin(t * 14) * 0.04);
       ctx.save(); ctx.rotate(t * (b.furia ? 1.4 : -1.8)); ctx.drawImage(au.c, -am, -am, am * 2, am * 2); ctx.restore();
     }
 

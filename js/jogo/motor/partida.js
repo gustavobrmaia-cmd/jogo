@@ -160,6 +160,9 @@ function novaPartida(modo, opcoes) {
   // v19: arma comprada na loja (save.armaInicial; o nome ficou). v21.4: virou a arma RESERVA (vem quando a munição acaba,
   // no lugar do estilingue: combate.js equiparReserva). Contra a máquina e no online (cada um com a sua). v19.6: no
   // 2 jogadores não vale (só o jogador 1 tinha, e a tela Melhorar diz que lá os dois são iguais)
+  // v21.6: super comprado na loja (contra a máquina e no online; no 2 jogadores os dois sorteiam os grátis)
+  const se = save.superEquip;
+  jogo.superEquip = [!treino && modo !== "2p" && se && typeof Progresso !== "undefined" && Progresso.temSuper(se) ? se : null, null];
   const ai = save.armaInicial;
   jogo.armaInicial = [!treino && (modo === "bot" || modo === "sobrevivencia" || modo === "online") && ai && typeof ARMA !== "undefined" && ARMA[ai] && (save.armas || []).indexOf(ai) >= 0 ? ai : null, null];
   escolherSkins(jogo);
@@ -275,6 +278,7 @@ function iniciarRodada() {
   // v21.3: RODADA MALUCA (como a série "Random" do Poki: algo muda a cada rodada)
   M.twist = escolherTwist(j);
   if (M.twist) aplicarTwist(M, M.twist);
+  b1.superId = escolherSuper(j, 0); b2.superId = escolherSuper(j, 1);
   b1.mira = 0; b2.mira = Math.PI;
   j.M = M;
   j.fase = "intro";
@@ -444,6 +448,7 @@ function passoMundo(j, M, controles, lento) {
   separarBolinhas(M.bolinhas[0], M.bolinhas[1]);
   atualizarProjeteis(M);
   atualizarAvisos(M);
+  atualizarSuper(M);
   if (controles) { atualizarItens(M); atualizarMeteorosDoCenario(M); }
   for (let i = M.feixes.length - 1; i >= 0; i--) {
     const f = M.feixes[i];
@@ -793,20 +798,27 @@ function fimCartas(j) {
 // chance de uma surpresa, nunca a mesma duas vezes seguidas. Não vale no treino, sobrevivência e demo. v21.4: vale no
 // online também (o anfitrião sorteia; M.twist, o tamanho das bolinhas e os efeitos vão no estado para o convidado).
 // Letreiro: desenho.js desenharTwist. Evento twist/<id> (start).
+// v21.6: mais malucas: metade agora mexe no MAPA (meteoros, raios, bolas gigantes caindo, gravidade da lua, ventania)
+// e a chance subiu de 50% para 60%
 const TWISTS = {
-  gigantes: { icone: "brilho", cor: "#ff8787" },
-  mini:     { icone: "alvo",   cor: "#74c0fc" },
-  turbo:    { icone: "raio",   cor: "#ffd43b" },
-  chuva:    { icone: "arma",   cor: "#b197fc" },
-  pulo:     { icone: "seta",   cor: "#8ce99a" }
+  gigantes:   { icone: "brilho",     cor: "#ff8787" },
+  mini:       { icone: "alvo",       cor: "#74c0fc" },
+  turbo:      { icone: "raio",       cor: "#ffd43b" },
+  chuva:      { icone: "arma",       cor: "#b197fc" },
+  pulo:       { icone: "seta",       cor: "#8ce99a" },
+  meteoros:   { icone: "s_meteoros", cor: "#ff922b" },
+  tempestade: { icone: "s_raios",    cor: "#fcc419" },
+  bolas:      { icone: "bola",       cor: "#4dabf7" },
+  lua:        { icone: "lua",        cor: "#d0bfff" },
+  vento:      { icone: "vento",      cor: "#a5d8ff" }
 };
 function escolherTwist(j) {
   if (j.demo || j.treino || j.modo === "sobrevivencia" || j.rodada < 2) return null;
   const r = j.rival;
   if (r && r.liga === 0 && r.i < 1) return null;
   if (j.modo === "bot" && !r && save.partidas <= 2) return null;
-  if (Math.random() >= 0.5) return null;
-  const lista = ["gigantes", "turbo", "chuva", "pulo"];
+  if (Math.random() >= 0.6) return null;
+  const lista = ["gigantes", "turbo", "chuva", "pulo", "meteoros", "tempestade", "bolas", "lua", "vento"];
   if (!r || r.liga > 0 || r.i >= 3) lista.push("mini");
   const ok = lista.filter(function(id) { return id !== j.ultimoTwist; });
   const id = ok[Math.floor(Math.random() * ok.length)];
@@ -814,10 +826,25 @@ function escolherTwist(j) {
   Poki.medir("twist", id, "start");
   return id;
 }
+// v21.6: o super de cada um na rodada (dados/supers.js). A pessoa usa o comprado na loja (save.superEquip); sem
+// nenhum, um dos 3 grátis sorteado a cada rodada. Cada rival tem o seu (os 3 primeiros da Bronze, os grátis).
+// Online: cada aparelho manda o seu (jogo.superEquip; online.js ola/configurarOutro). Treino: só o Dourado.
+function escolherSuper(j, k) {
+  const gratis = SUPERS_GRATIS[Math.floor(Math.random() * SUPERS_GRATIS.length)];
+  if (j.demo || j.treino) return "dourado";
+  if (j.superEquip && j.superEquip[k] && SUPER_DE[j.superEquip[k]]) return j.superEquip[k];
+  if (j.bots[k] && j.rival) {
+    const r = j.rival;
+    if (r.liga === 0 && r.i < 3) return SUPERS_GRATIS[r.i % SUPERS_GRATIS.length];
+    return SUPERS[(r.i * 3 + r.liga * 7) % SUPERS.length].id;
+  }
+  if (j.bots[k] && j.modo === "sobrevivencia") return SUPERS[Math.floor(Math.random() * SUPERS.length)].id;
+  return gratis;
+}
 function aplicarTwist(M, id) {
   M.bolinhas.forEach(function(b) {
-    if (id === "gigantes") b.r = FIS.raio * 1.35;
-    else if (id === "mini") b.r = FIS.raio * 0.75;
+    if (id === "gigantes") b.r = b.raioBase = FIS.raio * 1.35;
+    else if (id === "mini") b.r = b.raioBase = FIS.raio * 0.75;
     else if (id === "turbo") b.multVel = (b.multVel || 1) * 1.35;
     else if (id === "pulo") b.efeitos.super_pulo = 99;   // a rodada inteira (carta Super Pulo: pulo triplo e mais alto)
   });

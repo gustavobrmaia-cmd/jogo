@@ -79,6 +79,17 @@ button.lAba { font-size: 17px; }
 button.lAba.r2 { background: #3b4f7a; } button.lAba.r3 { background: #4b2f8a; } button.lAba.r4 { background: #6a4a10; }
 button.lAba.ativo { background: linear-gradient(#ffe066, #fab005); }
 button.lItem canvas { width: 90px; height: 90px; }
+/* v21.6: aba Supers da loja (cor de cada super em --cs) */
+button.lAba.lAbaSuper { background: linear-gradient(#b197fc, #7048e8); }
+button.lAba.lAbaSuper.ativo { background: linear-gradient(#ffe066, #fab005); }
+button.lAba .ico { width: 22px; height: 22px; vertical-align: -5px; }
+button.vItem.lSuper { --rar: var(--cs); background: #2b1d5c; box-shadow: inset 0 0 0 3px var(--cs); }
+button.vItem.lSuper.usando { box-shadow: inset 0 0 0 3px #69db7c, 0 0 0 4px #69db7c; }
+button.vItem.lSuper.foco { box-shadow: inset 0 0 0 3px var(--cs), 0 0 0 4px #ffd43b; }
+.vRar.lTipoSuper { background: var(--cs); color: #1a0d33; }
+.lDescSuper { margin: 2px 0; font-size: 16px; font-weight: 900; text-align: center; line-height: 1.25; }
+.lDescSuper.lComo { font-size: 14px; opacity: 0.8; }
+body.retrato .lDescSuper { font-size: 23px; } body.retrato .lDescSuper.lComo { font-size: 20px; }
 
 /* botão Loja no menu e cartão da Sorte */
 button.botaoLoja, #telaMenu button.botaoLoja { position: relative; background: linear-gradient(180deg, #74c0fc 0%, #339af0 55%, #1c7ed6 100%); border-bottom-color: #0b4a8a; }

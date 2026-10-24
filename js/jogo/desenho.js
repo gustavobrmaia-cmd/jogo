@@ -153,11 +153,21 @@ function desenharJogo(ctx) {
   }
 
   // 5. projéteis, minas e avisos do céu
+  if (M.buracos && M.buracos.length) desenharBuracos(ctx, M);   // v21.6: super Buraco Negro (atrás de tudo)
   for (let i = 0; i < M.proj.length; i++) {
     const p = M.proj[i];
     if (p.visual === "gancho") { const d = M.bolinhas[p.dono - 1]; p.donoX = d.x; p.donoY = d.y; }
+    // v21.6: bola de praia da Rodada Maluca (gira com a velocidade) e projéteis grandes dos supers (escala)
+    if (p.visual === "bola_praia") {
+      p.giro = (p.giro || 0) + (p.vx || 0) * 0.02;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.giro); Icone.desenhar(ctx, "bola", 0, 0, p.raio * 2.25); ctx.restore();
+      continue;
+    }
+    const esc = p.a && p.a.escala;
+    if (esc) { ctx.save(); ctx.translate(p.x, p.y); ctx.scale(esc, esc); ctx.translate(-p.x, -p.y); }
     if (temArte.armas) ArteArmas.desenharProjetil(ctx, p);
     else { ctx.fillStyle = p.cor; ctx.beginPath(); ctx.arc(p.x, p.y, p.raio, 0, 7); ctx.fill(); }
+    if (esc) ctx.restore();
   }
   for (let i = 0; i < M.avisos.length; i++) {
     const v = M.avisos[i];
@@ -170,6 +180,7 @@ function desenharJogo(ctx) {
 
   // 6. bolinhas e armas
   for (let k = 0; k < 2; k++) desenharBolinhaNoMundo(ctx, j, M, M.bolinhas[k], M.bolinhas[1 - k], M.t);
+  if (M.twist === "vento") desenharVento(ctx, M);   // v21.6
   if (M.voos && M.voos.length) desenharVoos(ctx, j, M);   // v21.3: K.O. voando
 
   // 7. lasers e raios
@@ -306,7 +317,7 @@ function desenharBolinhaNoMundo(ctx, j, M, b, o, tm) {
   if (!b.noChao && !M.cen.semGravidade) kv = Math.min(0.13, Math.abs(b.vy || 0) * 0.011);
   d.escalaX = (b.escalaX || 1) * (1 - kv * 0.6); d.escalaY = (b.escalaY || 1) * (1 + kv) * (gs < 0 ? -1 : 1);
   d.flash = b.flash || 0; d.escudo = ef.escudo > 0; d.fantasma = fantasma; d.congelado = ef.congelado > 0;
-  d.fogo = ef.fogo > 0; d.furia = ef.furia > 0; d.superAtivo = ef.super > 0; d.rapidez = ef.rapidez > 0; d.t = tm;
+  d.fogo = ef.fogo > 0; d.furia = ef.furia > 0; d.superAtivo = ef.super > 0 ? superDe(b) : null; d.rapidez = ef.rapidez > 0; d.t = tm;
   const sk = j.skins && j.skins[b.lado - 1];
   d.skin = sk ? sk.corpo : "classico"; d.acessorio = sk ? sk.acessorio : "nenhum";
   // rastro de velocidade (v14): quem está rápido (melhoria de Velocidade ou carta Rapidez) deixa "fantasmas" para trás
@@ -337,6 +348,12 @@ function desenharBolinhaNoMundo(ctx, j, M, b, o, tm) {
     ctx.globalAlpha = 1;
   }
   if (temArte.armas && ArteArmas.desenharEstado) ArteArmas.desenharEstado(ctx, b, tm);   // v19-b: bolha, gosma, inflado...
+  // v21.6: super de ataque pronto: o ícone dele pulando em cima da cabeça (sai no próximo tiro)
+  if (b.superPronto && j.fase === "luta") {
+    const S = superDe(b), pul = Math.abs(Math.sin(tm * 6)) * 8, yy = b.y - b.r - 44 - pul;
+    ctx.save(); ctx.globalAlpha = 0.85; ctx.fillStyle = S.cor; ctx.beginPath(); ctx.arc(b.x, yy, 21 + Math.sin(tm * 12) * 2, 0, 7); ctx.fill(); ctx.restore();
+    Icone.desenhar(ctx, "s_" + S.id, b.x, yy, 34);
+  }
   if (fantasma > 0) ctx.globalAlpha = 0.25;
   const a = ARMA[b.arma];
   const ang = a.tipo === "melee" || a.tipo === "mina" || a.tipo === "ceu" ? (b.dir > 0 ? 0 : Math.PI) : (b.mira === undefined ? 0 : b.mira);
@@ -1327,20 +1344,63 @@ function placarGrande(ctx, j, cx, y, alfa) {
 // ---------- painel de cada um no HUD (v17.5) ----------
 // Retrato da bolinha (com skin e acessório; a cara muda: dor, medo, feliz) num medalhão, nome, barra de vida com
 // degradê, brilho e marcas, estrelas do placar e a arma com a munição. Ocupa a mesma largura de antes (380).
-// v21.5: medidor de SUPER = anel dourado em volta do retrato (enche batendo e apanhando; cheio, brilha e pulsa)
+// v21.5: medidor de SUPER = anel em volta do retrato (enche batendo e apanhando). v21.6: na cor do super da rodada,
+// com o ícone dele no canto do retrato; cheio (ataque pronto) ou ligado (poder), o anel pisca
 function anelSuper(ctx, b, ax, ay, av, agora) {
-  const ativo = b.efeitos && b.efeitos.super > 0, f = ativo ? b.efeitos.super / SUPER.dur : Math.min(1, (b.super || 0) / 100);
-  const vis = b.superVis = b.superVis === undefined || ativo ? f : b.superVis + (f - b.superVis) * 0.2;
-  const r = av + 9;
+  const S = superDe(b), ativo = b.efeitos && b.efeitos.super > 0;
+  const f = ativo ? b.efeitos.super / (S.dur || 5) : b.superPronto ? 1 : Math.min(1, (b.super || 0) / 100);
+  const vis = b.superVis = b.superVis === undefined || ativo || b.superPronto ? f : b.superVis + (f - b.superVis) * 0.2;
+  const r = av + 9, pisca = ativo || b.superPronto;
   ctx.lineCap = "round";
   ctx.lineWidth = 8; ctx.strokeStyle = "#1a0d33"; ctx.beginPath(); ctx.arc(ax, ay, r, 0, 7); ctx.stroke();
   if (vis > 0.01) {
-    ctx.lineWidth = ativo ? 6 + Math.sin(agora * 16) * 1.5 : 5;
-    ctx.strokeStyle = ativo ? (Math.floor(agora * 10) % 2 ? "#fff3a6" : "#ffd43b") : vis > 0.8 ? "#ffd43b" : "#f5b700";
+    ctx.lineWidth = pisca ? 6 + Math.sin(agora * 16) * 1.5 : 5;
+    ctx.strokeStyle = pisca ? (Math.floor(agora * 10) % 2 ? S.cor2 : S.cor) : S.cor;
     ctx.beginPath(); ctx.arc(ax, ay, r, -Math.PI / 2, -Math.PI / 2 + vis * Math.PI * 2); ctx.stroke();
   }
   ctx.lineCap = "butt";
-  if (ativo) textoContorno(ctx, "SUPER", ax, ay + av + 22, 15, "#ffd43b", "center", 4);
+  const ic = pisca ? 30 + Math.sin(agora * 10) * 3 : 24;
+  ctx.fillStyle = "#1a0d33"; ctx.beginPath(); ctx.arc(ax + av * 0.78, ay + av * 0.72, ic * 0.58, 0, 7); ctx.fill();
+  Icone.desenhar(ctx, "s_" + S.id, ax + av * 0.78, ay + av * 0.72, ic);
+  if (ativo) textoContorno(ctx, "SUPER", ax, ay + av + 22, 15, S.cor, "center", 4);
+}
+
+// v21.6: buraco negro: disco escuro que cresce, espiral girando e anéis sendo sugados
+function desenharBuracos(ctx, M) {
+  for (let i = 0; i < M.buracos.length; i++) {
+    const h = M.buracos[i], u = Math.min(1, h.t / 0.35), fim = Math.max(0, (h.t - h.dur + 0.3) / 0.3);
+    const r = 62 * u * (1 + fim * 0.4) + Math.sin(h.t * 20) * 2;
+    ctx.save();
+    ctx.translate(h.x, h.y);
+    for (let k = 0; k < 3; k++) {
+      const q = 1 - ((h.t * 1.6 + k / 3) % 1);
+      ctx.globalAlpha = 0.5 * (1 - q) * u; ctx.strokeStyle = "#b197fc"; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(0, 0, r + q * 150, 0, 7); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#1a0d33"; ctx.beginPath(); ctx.arc(0, 0, r * 1.12, 0, 7); ctx.fill();
+    ctx.rotate(-h.t * 7);
+    Icone.desenhar(ctx, "s_buraco", 0, 0, r * 2);
+    ctx.restore();
+  }
+}
+
+// v21.6: ventania da Rodada Maluca: riscos brancos atravessando a tela no sentido do vento
+function desenharVento(ctx, M) {
+  const v = ventoTwist(M.t) / 0.3;
+  if (Math.abs(v) < 0.05) return;
+  ctx.save();
+  ctx.lineCap = "round"; ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 4;
+  ctx.globalAlpha = 0.55 * Math.min(1, Math.abs(v));
+  ctx.beginPath();
+  for (let k = 0; k < 16; k++) {
+    const vel = 500 + (k % 4) * 140, y = 40 + ((k * 97) % 600), L = 50 + (k % 3) * 30;
+    let x = ((k * 211 + M.t * vel) % (FIS.largura + 200)) - 100;
+    if (v < 0) x = FIS.largura - x;
+    ctx.moveTo(x, y); ctx.lineTo(x - Math.sign(v) * L, y);
+  }
+  ctx.stroke();
+  ctx.restore();
 }
 
 function painelJogador(ctx, j, b, x, y, lado) {

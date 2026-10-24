@@ -19,7 +19,10 @@ const Icone = (function() {
   var NOMES = ["moeda", "brilho", "raio", "ok", "trofeu", "presente", "nota", "som", "mudo", "estrela", "explosao",
     "coracao", "repetir", "robo", "casa", "mao", "celular", "alvo", "pincel", "engrenagem", "globo", "controle",
     "dupla", "fogo", "bau", "cadeado", "trevo", "arma", "mapa", "loja", "roleta", "cartas", "video", "coroa", "escudo", "relogio",
-    "seta", "voltar", "play", "fechar", "copiar", "wifi", "usuario", "chapeu", "olho", "rastro", "caveira", "boca"];
+    "seta", "voltar", "play", "fechar", "copiar", "wifi", "usuario", "chapeu", "olho", "rastro", "caveira", "boca",
+    // v21.6: supers e eventos da Rodada Maluca
+    "s_dourado", "s_turbo", "s_meteoros", "s_gigante", "s_vampiro", "s_intocavel", "s_raios", "s_canhao", "s_misseis",
+    "s_buraco", "bola", "lua", "vento"];
   var PI = Math.PI, TAU = PI * 2;
   var TINTA = "#1a0d33", LW = 8;
 
@@ -437,6 +440,96 @@ const Icone = (function() {
   };
   // desconhecido: círculo neutro
   function neutro(g) { cel(g, function(g) { C(g, 0, 0, 38); }, "#b8c4ff", "#6f7cc8", { dx: 4, dy: 5 }); meiaLua(g, 0, 0, 28, PI * 1.1, PI * 1.4, 5, false); }
+
+
+  // ---------- v21.6: supers e eventos da Rodada Maluca ----------
+  D.s_dourado = function(g) {    // estrela dourada pegando fogo
+    g.save(); g.translate(0, -8); g.scale(0.9, 0.9); cel(g, function(g) { chamaF(g, 1); }, "#ffb21f", "#e06a00", { dx: 4, dy: 4 }); g.restore();
+    cel(g, function(g) { estrelaP(g, 0, 10, 34, 15, 5); }, "#ffe45c", "#f5a524", { dx: 3, dy: 5 });
+    g.save(); g.strokeStyle = "rgba(255,255,255,0.88)"; g.lineWidth = 5; g.lineCap = "round"; g.beginPath(); g.moveTo(-10, 4); g.lineTo(-3, -8); g.stroke(); g.restore();
+  };
+  D.s_turbo = function(g) {      // duas setas ">>" ciano
+    [-16, 14].forEach(function(dx) {
+      cel(g, function(g) { poli(g, [dx - 22, -38, dx + 2, -38, dx + 30, 0, dx + 2, 38, dx - 22, 38, dx + 6, 0]); }, "#3bdcf0", "#1588b8", { dx: 3, dy: 5 });
+    });
+    g.save(); g.strokeStyle = "rgba(255,255,255,0.85)"; g.lineWidth = 5; g.lineCap = "round"; g.beginPath(); g.moveTo(-28, -30); g.lineTo(-12, -30); g.stroke(); g.restore();
+  };
+  D.s_meteoros = function(g) {   // pedra em chamas caindo na diagonal
+    g.save(); g.rotate(-PI * 0.75); g.translate(0, 10); cel(g, function(g) { chamaF(g, 1.05); }, "#ff6a2b", "#c9301f", { dx: 3, dy: 3 }); g.restore();
+    cel(g, function(g) { C(g, 14, 14, 24); }, "#8c6d5a", "#5a4032", { dx: 4, dy: 5 });
+    g.fillStyle = "#5a4032"; g.beginPath(); C(g, 8, 20, 6); C(g, 22, 8, 4); g.fill();
+    meiaLua(g, 14, 14, 16, PI * 1.05, PI * 1.4, 5);
+  };
+  D.s_gigante = function(g) {    // bolinha grande com setas para fora
+    cel(g, function(g) { C(g, 0, 4, 30); }, "#ff6b6b", "#c92a3a", { dx: 4, dy: 5 });
+    meiaLua(g, 0, 4, 21, PI * 1.05, PI * 1.4, 5);
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(function(d) {
+      g.save(); g.translate(d[0] * 36, d[1] * 34 + 4); g.rotate(Math.atan2(d[1], d[0]) + PI / 2);
+      cel(g, function(g) { poli(g, [0, -12, 11, 4, -11, 4]); }, "#ffffff", "#c8d6ff", { dx: 1, dy: 2, lw: 6 }); g.restore();
+    });
+  };
+  D.s_vampiro = function(g) {    // morcego roxo
+    cel(g, function(g) {
+      g.moveTo(0, -14); g.quadraticCurveTo(-18, -30, -46, -22); g.quadraticCurveTo(-36, -8, -40, 10); g.quadraticCurveTo(-26, 0, -18, 12);
+      g.quadraticCurveTo(-8, 4, 0, 20); g.quadraticCurveTo(8, 4, 18, 12); g.quadraticCurveTo(26, 0, 40, 10); g.quadraticCurveTo(36, -8, 46, -22);
+      g.quadraticCurveTo(18, -30, 0, -14); g.closePath();
+    }, "#9b4dde", "#5f1f9e", { dx: 3, dy: 5 });
+    g.fillStyle = "#fff"; g.beginPath(); C(g, -6, -6, 4); C(g, 6, -6, 4); g.fill();
+    g.fillStyle = "#ff4057"; g.beginPath(); poli(g, [-5, 6, -1, 6, -3, 13]); poli(g, [1, 6, 5, 6, 3, 13]); g.fill();
+  };
+  D.s_intocavel = function(g) {  // escudo branco e azul com brilho
+    cel(g, escudoF, "#f1f5ff", "#8fb4e8", { dx: 5, dy: 6 });
+    g.save(); g.scale(0.62, 0.62); g.translate(0, -2); g.beginPath(); escudoF(g); g.fillStyle = "#a5d8ff"; g.fill(); g.restore();
+    cel(g, function(g) { estrelaP(g, 0, 0, 16, 5, 4, -PI / 2); }, "#ffffff", "#c8d6ff", { dx: 1, dy: 2, lw: 5 });
+  };
+  D.s_raios = function(g) { g.save(); g.translate(-8, 4); g.scale(0.8, 0.8); D.raio(g); g.restore(); g.save(); g.translate(26, -14); g.scale(0.5, 0.5); D.raio(g); g.restore(); };
+  D.s_canhao = function(g) {     // bola de canhão com pavio aceso
+    linha(g, [18, -22, 26, -34, 36, -38], "#c9a36b", 5);
+    g.save(); g.translate(38, -40); g.scale(0.28, 0.28); D.explosao(g); g.restore();
+    cel(g, function(g) { C(g, -4, 8, 34); }, "#4a4e69", "#22223b", { dx: 4, dy: 5 });
+    meiaLua(g, -4, 8, 24, PI * 1.05, PI * 1.42, 6);
+  };
+  D.s_misseis = function(g) {    // míssil vermelho subindo na diagonal
+    g.save(); g.rotate(PI / 4);
+    g.save(); g.translate(0, 44); g.rotate(PI); g.scale(0.42, 0.5); D.fogo(g); g.restore();
+    cel(g, function(g) { poli(g, [-12, 32, -24, 40, -12, 14]); poli(g, [12, 32, 24, 40, 12, 14]); }, "#ffd23f", "#f08c00", { dx: 1, dy: 2, lw: 6 });
+    cel(g, function(g) { g.moveTo(-12, 34); g.lineTo(-12, -16); g.quadraticCurveTo(0, -48, 12, -16); g.lineTo(12, 34); g.closePath(); }, "#ff4d5e", "#b5172b", { dx: 3, dy: 3 });
+    g.fillStyle = "#fff"; g.fillRect(-12, 0, 24, 6);
+    g.restore();
+  };
+  D.s_buraco = function(g) {     // espiral roxa escura
+    cel(g, function(g) { C(g, 0, 0, 42); }, "#4b2a99", "#1f0f4d", { dx: 4, dy: 5 });
+    g.save(); g.lineCap = "round";
+    for (var k = 0; k < 3; k++) {
+      g.beginPath();
+      for (var i = 0; i <= 20; i++) { var u = i / 20, a = k * TAU / 3 + u * PI * 1.3, q = 36 - u * 30; if (i) g.lineTo(Math.cos(a) * q, Math.sin(a) * q); else g.moveTo(Math.cos(a) * q, Math.sin(a) * q); }
+      g.strokeStyle = "#b197fc"; g.lineWidth = 6; g.stroke();
+    }
+    g.restore();
+    g.fillStyle = TINTA; g.beginPath(); C(g, 0, 0, 10); g.fill();
+  };
+  D.bola = function(g) {         // bola de praia
+    cel(g, function(g) { C(g, 0, 2, 40); }, "#ffffff", "#c8d6ff", { dx: 4, dy: 6 });
+    var cores = ["#ff4d5e", "#ffd23f", "#35a8ff"];
+    g.save(); g.beginPath(); C(g, 0, 2, 36); g.clip();
+    for (var i = 0; i < 3; i++) { g.beginPath(); g.ellipse(0, 2, 13, 44, i * PI / 3, 0, TAU); g.fillStyle = cores[i]; g.globalAlpha = 0.95; g.fill(); }
+    g.restore();
+    g.beginPath(); C(g, 0, 2, 40); g.lineWidth = LW; g.strokeStyle = TINTA; g.stroke();
+    g.fillStyle = "#fff"; g.beginPath(); C(g, 0, 2, 8); g.fill();
+    meiaLua(g, 0, 2, 30, PI * 1.05, PI * 1.38, 6);
+  };
+  D.lua = function(g) {          // lua com crateras
+    cel(g, function(g) { C(g, 0, 0, 40); }, "#e9ecef", "#9aa5b8", { dx: 5, dy: 6 });
+    g.fillStyle = "#b8c1d1"; g.beginPath(); C(g, -12, -10, 9); C(g, 14, 12, 7); C(g, 12, -18, 5); g.fill();
+    meiaLua(g, 0, 0, 30, PI * 1.05, PI * 1.38, 6);
+  };
+  D.vento = function(g) {        // três rajadas com volta
+    [[-30, -22, 38], [-40, 0, 50], [-24, 22, 30]].forEach(function(l, i) {
+      g.beginPath(); g.moveTo(l[0], l[1]); g.lineTo(l[0] + l[2], l[1]);
+      if (i !== 2) g.arc(l[0] + l[2], l[1] - 9, 9, PI / 2, -PI * 0.9, true);
+      g.lineCap = "round"; g.strokeStyle = TINTA; g.lineWidth = 17; g.stroke(); g.strokeStyle = i === 1 ? "#ffffff" : "#a5d8ff"; g.lineWidth = 8; g.stroke();
+    });
+  };
 
   // ---------- API ----------
   function desenharVetor(ctx, nome, x, y, tam) {

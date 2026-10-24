@@ -42,8 +42,12 @@ function ventoEm(cen, t) {
   return limitar(Math.sin(2 * Math.PI * t / (2 * cen.vento.periodo)) * 2.5, -1, 1);
 }
 function gravidadeDe(cen) {
-  return FIS.grav * (cen.gravidade || 1) * (cen.semGravidade ? 0.22 : 1);
+  return FIS.grav * (cen.gravidade || 1) * (cen.semGravidade ? 0.22 : 1) * (twistAtual() === "lua" ? 0.55 : 1);
 }
+// v21.6: Rodada Maluca "lua" (gravidade baixa) e "vento" (ventania que troca de lado a cada 4 s) valem na rodada atual
+// (jogo.M.twist; o convidado do online também recebe, então a prévia da mira dele fica igual)
+function twistAtual() { return typeof jogo !== "undefined" && jogo && jogo.M ? jogo.M.twist : null; }
+function ventoTwist(t) { return twistAtual() === "vento" ? limitar(Math.sin(2 * Math.PI * t / 8) * 2.5, -1, 1) * 0.3 : 0; }
 
 // Posição de uma plataforma no tempo t (as que se movem vão e voltam suavemente).
 // Escreve em PX/PY para não criar objeto a cada chamada.
@@ -112,7 +116,7 @@ function moverBolinha(b, ent, cen, plats, t, bumpers) {
   const semControle = ef.congelado > 0 || ef.bolha > 0 || ef.escorrega > 0;
   const congelado = semControle;
   const grudado = ef.grudado > 0;
-  const mult = (b.multVel || 1) * (ef.rapidez > 0 ? 1.4 : 1) * (ef.lento > 0 ? 0.5 : 1) * (ef.mini > 0 ? 1.12 : 1) *
+  const mult = (b.multVel || 1) * (ef.rapidez > 0 ? 1.4 : 1) * (ef.super > 0 ? superDe(b).vel || 1 : 1) * (ef.lento > 0 ? 0.5 : 1) * (ef.mini > 0 ? 1.12 : 1) *
     (grudado ? 0.42 : 1) * (ef.inflado > 0 ? 0.82 : 1);
   const esq = !congelado && ent.esq, dir = !congelado && ent.dir;
   const input = (dir ? 1 : 0) - (esq ? 1 : 0);
@@ -128,6 +132,8 @@ function moverBolinha(b, ent, cen, plats, t, bumpers) {
   else k = cen.agua ? 0.08 : 0.13;
   b.vx += (alvo - b.vx) * k;
   if (cen.vento) b.vx += ventoEm(cen, t) * cen.vento.forca * (b.noChao ? 0.55 : 1);
+  const vt = ventoTwist(t);
+  if (vt) b.vx += vt * (b.noChao ? 0.55 : 1);
 
   // ---- pular ----
   if (b.puloCd > 0) b.puloCd -= FIS.dt;

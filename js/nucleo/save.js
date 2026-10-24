@@ -40,6 +40,8 @@ function saveNovo() {
     visual: { cor: "cor_rosa", corpo: "classico", olhos: "", boca: "", chapeu: "", acessorio: "", rastro: "", ko: "", emote: "" },
     armas: [],        // v19: armas compradas na loja (ids de ARMAS)
     armaInicial: "",  // v19: arma escolhida na loja. v21.4: é a arma RESERVA (quando a munição acaba; "" = estilingue)
+    supers: [],       // v21.6: supers comprados na loja (ids de SUPERS)
+    superEquip: "",   // v21.6: super escolhido ("" = um dos 3 grátis sorteado a cada rodada)
     qualidade: "auto", // "auto" | "alta" | "leve"
     // v21.1: TESTE A/B (sorteado 1 vez por jogador, como o Smash Room do blog do Poki): "a" = bot atual (v19),
     // "b" = bot simples (sem cobertura, sem sair da linha da mira, sem previsão/fintas/tabela, como o da v18.3).

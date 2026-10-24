@@ -589,6 +589,27 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     SOZINHO (sem botão novo): `efeitos.super` 5 s com dano x1,5 (`SUPER.mult`), aura dourada (a da fúria, `aura(R,q,ouro)`),
     "SUPER!" + "DANO x1,5!" (`super_dica` nos 15 idiomas), som `super` e vibração. HUD: anel dourado em volta do retrato
     (`desenho.js anelSuper`). `b.super` e `efeitos.super` vão no estado do online sem mudar nada. Zera a cada rodada.
+  - v21.6 — **SUPERS DIFERENTES + Rodada Maluca no mapa** (pedido do dono):
+    - `dados/supers.js`: 10 supers. "poder" (liga sozinho quando o medidor enche): Dourado (dano x1,5), Turbo (vel x1,45,
+      tiro 2x), Gigante (raio x1,55, dano x1,3, leva metade), Vampiro (dano x1,25, cura 60% do dano dado), Intocável
+      (nada pega por 4 s). "ataque" (fica PRONTO, ícone pulando em cima da cabeça, e sai no PRÓXIMO TIRO, sem botão
+      novo; `usarArma`): Chuva de Meteoros (7 que seguem o rival), Raios (4), Canhão Gigante (bala x3 que atravessa
+      tudo, explosão 150), Mísseis (4 teleguiados), Buraco Negro (puxa 2,2 s e explode; `M.buracos`).
+      Grátis: Dourado, Turbo, Meteoros — **sem super comprado, cada rodada sorteia 1 dos 3**. Preços 2.500–10.000.
+    - Ataques têm `superAtaque`: o dash não atravessa e o bot só "vê" o aviso do céu depois de 0,3 s (sem isso o bot
+      do rival 7 desviava de tudo: 0 de dano nos testes; agora 15–45).
+    - Quem tem qual (`partida.js escolherSuper`): a pessoa = `save.superEquip` (contra a máquina e online); rival da
+      Bronze 1–3 = os grátis; rivais depois = um fixo por rival; treino/demo = Dourado; 2p = grátis sorteados.
+      Online: o convidado manda o dele no "ola" (`sup`), vai em `jogo.superEquip`.
+    - Loja: 4ª aba "Supers" (`loja.js montarSupers/atualizarDestaqueSuper/previaSuper`), `save.supers`/`save.superEquip`,
+      `Progresso.temSuper/comprarSuper/equiparSuper`, eventos shop/buy-super-<id> e shop/super-<id>.
+    - HUD: anel na cor do super + ícone dele no canto do retrato. Aura da fúria na cor do super (`aura(R,q,cores)`).
+    - Ícones novos em icones.js: s_<id> dos supers, bola, lua, vento.
+    - Rodada Maluca: chance 50% -> 60% e 5 eventos NO MAPA: meteoros (reusa os do castelo, a cada ~1,7 s), tempestade
+      (raios perto dos dois), bolas (bolas de praia gigantes caindo e quicando, de ninguém; `a.rebate`), lua (gravidade
+      x0,55; `fisica.js gravidadeDe` lê `jogo.M.twist`), vento (ventania que vira a cada 4 s; `ventoTwist`, riscos na tela).
+    - Corrigido: a Rodada Maluca "gigantes"/"mini" não funcionava (atualizarEfeitos voltava o raio ao normal no passo
+      seguinte). Agora existe `b.raioBase`.
   - **TESTE A/B (`save.exp`) É TEMPORÁRIO:** depois do PFT, ficar só com o bot vencedor e tirar o sorteio e os eventos exp/*.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no

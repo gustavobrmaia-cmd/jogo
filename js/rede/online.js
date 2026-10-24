@@ -85,7 +85,7 @@ const Online = (function() {
   }
 
   // ---------- espelho e reconstrução (convidado) ----------
-  const PARES = { bolinhas: 1, pontos: 1, cores: 1, visuais: 1, skins: 1, armaInicial: 1, dano: 1, tiros: 1, acertos: 1, armas: 1 };
+  const PARES = { bolinhas: 1, pontos: 1, cores: 1, visuais: 1, skins: 1, armaInicial: 1, superEquip: 1, dano: 1, tiros: 1, acertos: 1, armas: 1 };
   const LADOS = { lado: 1, vencedorRodada: 1, vencedorPartida: 1, vencedor: 1 };
   function espelhar(v, chave) {
     if (Array.isArray(v)) {
@@ -206,7 +206,8 @@ const Online = (function() {
   // ---------- partida ----------
   function ola() {
     const ai = save.armaInicial && ARMA[save.armaInicial] && (save.armas || []).indexOf(save.armaInicial) >= 0 ? save.armaInicial : "";
-    Rede.enviar("r", { k: "ola", v: 1, visual: save.visual || null, cor: typeof corDoVisual === "function" ? corDoVisual(save.visual) : null, arma: ai });
+    const su = save.superEquip && typeof Progresso !== "undefined" && Progresso.temSuper(save.superEquip) ? save.superEquip : "";
+    Rede.enviar("r", { k: "ola", v: 1, visual: save.visual || null, cor: typeof corDoVisual === "function" ? corDoVisual(save.visual) : null, arma: ai, sup: su });
   }
 
   function comecar() {
@@ -236,6 +237,7 @@ const Online = (function() {
     atualizarSkins(j);
     const a = outro.arma;
     if (a && ARMA[a] && ["mina", "ceu", "torreta"].indexOf(ARMA[a].tipo) < 0) j.armaInicial[1] = a;
+    if (outro.sup && typeof SUPER_DE !== "undefined" && SUPER_DE[outro.sup]) j.superEquip[1] = outro.sup;   // v21.6
   }
   api.configurarOutro = configurarOutro;
   function entrarNoJogo() {

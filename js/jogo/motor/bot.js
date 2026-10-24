@@ -399,6 +399,8 @@ function ameacas(bot, M, b, H) {
   }
   for (let i = 0; i < M.avisos.length; i++) {
     const v = M.avisos[i];
+    // v21.6: o aviso de um SUPER de ataque o bot só "vê" depois de 0,3 s (senão sai andando de todos e o super não pega)
+    if (v.a.superAtaque && v.total - v.tempo < 0.3) continue;
     lista.push({ ceu: true, x: v.x, y: v.y, em: Math.round(v.tempo / FIS.dt), explode: v.a.explode + 10, dano: v.a.dano });
   }
   return lista;

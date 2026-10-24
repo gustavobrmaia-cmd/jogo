@@ -128,6 +128,8 @@ function usarArma(M, b, segurando, apertou) {
     if (o.viva && !(o.efeitos.fantasma > 0) && Math.abs(o.x - b.x) > 4) b.dir = o.x > b.x ? 1 : -1;
   }
   b.mira = calcularMira(M, b);
+  // v21.6: super de ATAQUE pronto: sai no próximo tiro (sem botão novo)
+  if (b.superPronto && (segurando || apertou) && !(b.carga > 0)) { lancarSuper(M, b); b.cad = Math.max(b.cad, 0.25); return; }
 
   // railgun: carrega um pouquinho antes de disparar
   if (b.carga > 0) {
@@ -160,7 +162,7 @@ function equiparReserva(b) {
 }
 
 function dispararArma(M, b, a) {
-  b.cad = a.cadencia;
+  b.cad = a.cadencia * (b.efeitos.super > 0 ? superDe(b).cad || 1 : 1);
   M.stats.tiros[b.lado - 1]++;
   const vezes = b.efeitos.tiro_duplo > 0 ? 2 : 1;
   const ang = b.mira;
@@ -237,7 +239,7 @@ function atualizarProjeteis(M) {
   const cen = M.cen, t = M.t;
   const sinal = gravSinal(cen, t);
   const g = gravidadeDe(cen) * sinal;
-  const vento = cen.vento ? ventoEm(cen, t) * cen.vento.forca : 0;
+  const vento = (cen.vento ? ventoEm(cen, t) * cen.vento.forca : 0) + ventoTwist(t);
   const lava = lavaY(cen, t);
   for (let i = 0; i < M.proj.length; i++) {
     const p = M.proj[i];
@@ -330,7 +332,7 @@ function atualizarProjeteis(M) {
       const dx = b.x - p.x, dy = b.y - p.y, rr = b.r + p.raio;
       if (dx * dx + dy * dy > rr * rr) continue;
       // v21.2: no dash o tiro atravessa (um anel branco marca o desvio)
-      if (b.dashT > 0) { p.hit[k] = 30; if (typeof Efeitos !== "undefined" && !M.mudo) Efeitos.anel(b.x, b.y, "#ffffff", b.r * 1.3); continue; }
+      if (b.dashT > 0 && !a.superAtaque) { p.hit[k] = 30; if (typeof Efeitos !== "undefined" && !M.mudo) Efeitos.anel(b.x, b.y, "#ffffff", b.r * 1.3); continue; }
       acertouBolinha(M, p, b, k);
       if (!p.vivo) break;
     }
@@ -361,6 +363,15 @@ function acertouBolinha(M, p, b, k) {
     return;
   }
   if (a.explode && !a.perfura) { explodirProjetil(M, p, b); return; }
+  // v21.6: bola da Rodada Maluca (de ninguém): empurra, tira um pouco e quica para longe
+  if (a.rebate) {
+    const lado = p.x < b.x ? 1 : -1;
+    causarDano(M, b, a.dano, null, lado * 0.8, -0.6, a.empurra, p.x, p.y);
+    p.vy = -Math.abs(p.vy) * 0.6 - 6; p.vx = -lado * (2.5 + Math.abs(p.vx) * 0.5);
+    p.hit[k] = 25;
+    somJogo(M, "mola");
+    return;
+  }
   const dono = M.bolinhas[p.dono - 1];
   const len = Math.sqrt(p.vx * p.vx + p.vy * p.vy) || 1;
   const vidaAntes = b.vida;
@@ -598,9 +609,12 @@ function explosao(M, x, y, raio, dano, dono, a, atingidoDireto) {
 // dano: furia dobra o dano de quem bate; escudo segura até 40
 function causarDano(M, b, dano, atacante, nx, ny, empurra, fx, fy) {
   if (b.dashT > 0 && atacante && atacante !== b) return;   // v21.2: no dash, golpe/explosão/laser de quem ataca não pega
+  // v21.6: super Intocável: nada pega (nem empurra); o tiro faz só um anel
+  if (b.efeitos.super > 0 && superDe(b).intocavel && atacante !== b) { if (dano > 0 && typeof Efeitos !== "undefined" && !M.mudo) Efeitos.anel(b.x, b.y, "#e7f5ff", b.r * 1.4); return; }
   if (!b.viva || dano <= 0 && !empurra) return;
   if (atacante && atacante !== b && atacante.efeitos.furia > 0) dano *= 2;
-  if (atacante && atacante !== b && atacante.efeitos.super > 0) dano *= SUPER.mult;
+  if (atacante && atacante !== b && atacante.efeitos.super > 0) dano *= superDe(atacante).dano || 1;
+  if (b.efeitos.super > 0 && superDe(b).defesa) dano /= superDe(b).defesa;
   if (atacante && atacante !== b && M.multDano) dano *= M.multDano;
   if (atacante && atacante.lado === 2 && M.multBot) dano *= M.multBot * tensao(M, b);
   if (atacante && atacante !== b && atacante.lado === 1 && M.multJogador) dano *= M.multJogador;
@@ -627,6 +641,7 @@ function causarDano(M, b, dano, atacante, nx, ny, empurra, fx, fy) {
   }
   b.vida -= dano;
   b.danoRecebido = (b.danoRecebido || 0) + dano;
+  if (atacante && atacante !== b && atacante.efeitos.super > 0 && superDe(atacante).cura) curar(M, atacante, dano * superDe(atacante).cura);
   if (atacante && atacante !== b) { b.ultimoAtacante = atacante.lado; b.ultimaArmaAtk = atacante.arma; }
   b.flash = 1;
   b.dor = 0.35;
@@ -676,31 +691,125 @@ function causarDano(M, b, dano, atacante, nx, ny, empurra, fx, fy) {
 }
 
 // v21.5: medidor de SUPER (o "especial" que enche dos duelos famosos: Basketball Stars, Bowmasters, Supreme Duelist).
-// Enche batendo e também apanhando (quem está perdendo chega lá: virada). Cheio, liga sozinho (sem botão novo):
-// 5 s com dano x1,5 e aura dourada. Contra o bot a pessoa enche mais rápido que ele.
-const SUPER = { dur: 5, mult: 1.5 };
+// Enche batendo e também apanhando (quem está perdendo chega lá: virada). Contra o bot a pessoa enche mais rápido.
+// v21.6: cada bolinha tem o seu super (b.superId; dados/supers.js; partida.js escolherSuper). "poder" liga sozinho
+// quando enche (efeitos.super = dur); "ataque" fica pronto (b.superPronto) e sai no próximo tiro (usarArma).
+function superDe(b) { return (typeof SUPER_DE !== "undefined" && SUPER_DE[b.superId]) || SUPER_DE.dourado; }
 function carregarSuper(M, a, b, dano) {
   const cb = M.contraBot;
   if (!(a.efeitos.super > 0)) ganharSuper(M, a, dano * (cb ? (a.humano ? 1 : 0.6) : 0.8));
   if (!(b.efeitos.super > 0) && b.vida > 0) ganharSuper(M, b, dano * (cb ? (b.humano ? 0.6 : 0.35) : 0.5));
 }
 function ganharSuper(M, b, n) {
+  if (b.superPronto) return;
   b.super = Math.min(100, (b.super || 0) + n);
-  if (b.super >= 100 && b.viva) ativarSuper(M, b);
+  if (b.super >= 100 && b.viva) encherSuper(M, b);
 }
-function ativarSuper(M, b) {
-  b.super = 0;
-  b.efeitos.super = SUPER.dur;
-  M.ultimoSuper = { lado: b.lado, t: M.t };
+function encherSuper(M, b) {
+  const S = superDe(b);
+  if (S.tipo === "poder") { ativarSuper(M, b, S); return; }
+  b.super = 100;
+  b.superPronto = true;
   if (typeof Efeitos !== "undefined") {
-    Efeitos.anel(b.x, b.y, "#ffd43b", 80);
-    Efeitos.anel(b.x, b.y, "#fff3a6", 50);
-    Efeitos.texto(b.x, b.y - b.r - 40, "SUPER!", "#ffd43b", 1.6);
-    if (b.humano) Efeitos.texto(b.x, b.y - b.r - 8, t("super_dica"), "#fff3a6", 0.9);
-    Efeitos.tremer(b.humano ? 7 : 4);
+    Efeitos.anel(b.x, b.y, S.cor, 70);
+    Efeitos.texto(b.x, b.y - b.r - 40, t("super_pronto"), S.cor, 1.3);
+  }
+  somJogo(M, "carga");
+  if (b.humano && !M.mudo) vibrar(20);
+}
+function anunciarSuper(M, b, S, dy) {
+  M.ultimoSuper = { lado: b.lado, id: S.id, t: M.t };
+  if (typeof Efeitos !== "undefined") {
+    Efeitos.anel(b.x, b.y, S.cor, 90);
+    Efeitos.anel(b.x, b.y, S.cor2, 55);
+    Efeitos.texto(b.x, b.y - b.r - (dy || 40), t("su_" + S.id) + "!", S.cor, 1.6);
+    Efeitos.tremer(b.humano ? 8 : 5);
   }
   somJogo(M, "super");
   if (b.humano && !M.mudo) vibrar([20, 30, 20]);
+}
+function ativarSuper(M, b, S) {
+  b.super = 0;
+  b.efeitos.super = S.dur;
+  anunciarSuper(M, b, S);
+  if (b.humano && typeof Efeitos !== "undefined") Efeitos.texto(b.x, b.y - b.r - 8, t("sd_" + S.id), S.cor2, 0.9);
+}
+
+// ataques: o alvo humano contra a máquina tem um pouco mais de aviso para fugir
+const SU_METEORO = { id: "su_meteoro", explode: 88, dano: 14, empurra: 10, visual: "meteoro", superAtaque: true };
+const SU_RAIO = { id: "su_raio", explode: 62, dano: 17, empurra: 7, visual: "relampago", superAtaque: true };
+// (superAtaque: o dash não atravessa; é o ataque especial, tem que dar medo)
+const SU_CANHAO = { id: "su_canhao", tipo: "bala", vel: 11, raio: 24, dano: 30, explode: 150, empurra: 16, atravessa: true, vida: 170, visual: "bala_canhao", escala: 3, superAtaque: true };
+const SU_MISSIL = { id: "su_missil", tipo: "bala", vel: 8.5, raio: 8, dano: 11, explode: 58, empurra: 8, teleguia: 0.085, vida: 240, visual: "missil", escala: 1.3, superAtaque: true };
+const SU_BURACO = { id: "su_buraco", explode: 135, dano: 28, empurra: 15, visual: "buraco" };
+function lancarSuper(M, b) {
+  const S = superDe(b), o = oponente(M, b);
+  b.superPronto = false;
+  b.super = 0;
+  anunciarSuper(M, b, S, 80);   // mais alto que o "SUPER PRONTO!" (que ainda pode estar na tela)
+  const folga = o.humano && M.contraBot ? 0.3 : 0;
+  const ag = M.superAgenda || (M.superAgenda = []);
+  if (S.id === "meteoros") {
+    // chuva que SEGUE o rival: cada meteoro mira onde ele está naquela hora (antes caíam todos no lugar do começo e o
+    // bot saía andando)
+    for (let i = 0; i < 7; i++) ag.push({ t: M.t + i * 0.2, tipo: "meteoro", lado: b.lado, k: i });
+  } else if (S.id === "raios") {
+    for (let i = 0; i < 4; i++) ag.push({ t: M.t + i * 0.42, tipo: "raio", lado: b.lado });
+  } else if (S.id === "misseis") {
+    for (let i = 0; i < 4; i++) ag.push({ t: M.t + i * 0.14, tipo: "missil", lado: b.lado, k: i });
+  } else if (S.id === "canhao") {
+    const ang = Math.atan2(o.y + o.vy * 8 - b.y, o.x + o.vx * 12 - b.x), boca = pontaDoCano(b, ang);
+    criarProjetil(M, b, SU_CANHAO, boca.x, boca.y, ang);
+    b.vx -= Math.cos(ang) * 7;
+    if (typeof Efeitos !== "undefined") { Efeitos.explosao(boca.x, boca.y, 40); Efeitos.tremer(12); }
+    somJogo(M, "s_canhao");
+  } else if (S.id === "buraco") {
+    (M.buracos || (M.buracos = [])).push({ x: limitar(o.x, 60, FIS.largura - 60), y: o.y - 20, t: 0, dur: 2.2 + folga, dono: b.lado });
+    somJogo(M, "s_ima");
+  }
+}
+// raios e mísseis saem um depois do outro; o buraco negro puxa o oponente e explode no fim
+function atualizarSuper(M) {
+  const ag = M.superAgenda;
+  if (ag && ag.length) {
+    for (let i = ag.length - 1; i >= 0; i--) {
+      const e = ag[i];
+      if (M.t < e.t) continue;
+      ag.splice(i, 1);
+      const b = M.bolinhas[e.lado - 1], o = oponente(M, b);
+      if (!b.viva || !o.viva) continue;
+      // mira onde o rival VAI estar quando cair (velocidade x tempo do aviso)
+      const esp = e.tipo === "raio" ? (o.humano && M.contraBot ? 0.6 : 0.36) : (o.humano && M.contraBot ? 0.8 : 0.5);
+      const xa = o.x + o.vx * esp * 60 * 0.85;
+      if (e.tipo === "raio") avisarCeu(M, e.lado, xa, o.y, esp, SU_RAIO);
+      else if (e.tipo === "meteoro") avisarCeu(M, e.lado, xa + (e.k % 3 - 1) * 40, o.y, esp, SU_METEORO);
+      else if (e.tipo === "missil") {
+        const ang = -Math.PI / 2 + (e.k - 1.5) * 0.45 * b.dir;
+        criarProjetil(M, b, SU_MISSIL, b.x, b.y - b.r - 4, ang);
+        somJogo(M, "s_missil");
+        if (typeof Efeitos !== "undefined") Efeitos.fumaca(b.x, b.y - b.r);
+      }
+    }
+  }
+  const bs = M.buracos;
+  if (!bs || !bs.length) return;
+  for (let i = bs.length - 1; i >= 0; i--) {
+    const h = bs[i];
+    h.t += FIS.dt;
+    const dono = M.bolinhas[h.dono - 1], o = oponente(M, dono);
+    if (o.viva && !(o.dashT > 0)) {
+      const dx = h.x - o.x, dy = h.y - o.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+      if (d < 420) {
+        const f = (o.humano && M.contraBot ? 0.75 : 0.95) * (1 - d / 420) * Math.min(1, h.t / 0.3);
+        o.vx += dx / d * f; o.vy += dy / d * f * 0.8 - (o.noChao ? 0.15 : 0);
+      }
+    }
+    if (h.t >= h.dur) {
+      bs.splice(i, 1);
+      explosao(M, h.x, h.y, SU_BURACO.explode, SU_BURACO.dano, dono, SU_BURACO);
+      if (typeof Efeitos !== "undefined") { Efeitos.anel(h.x, h.y, "#b197fc", 160); Efeitos.tremer(16); }
+    }
+  }
 }
 
 function matar(M, b) {
@@ -982,7 +1091,9 @@ function atualizarEfeitos(M, b) {
     if (ef.grudado > 0) ArteArmas.soltar("pingo", b.x + (Math.random() - 0.5) * b.r * 1.4, b.y + b.r * 0.6, 1);
     if (ef.escorrega > 0) ArteArmas.soltar("tonto", b.x, b.y - b.r - 8, 1);
   }
-  b.r = ef.mini > 0 ? FIS.raioMini : ef.inflado > 0 ? FIS.raioInflado : FIS.raio;
+  // v21.6: o tamanho parte do raio da rodada (Rodada Maluca gigantes/mini; antes este passo desfazia) e o super Gigante
+  const base = b.raioBase || FIS.raio, kr = ef.super > 0 ? superDe(b).raio || 1 : 1;
+  b.r = (ef.mini > 0 ? FIS.raioMini : ef.inflado > 0 ? FIS.raioInflado : FIS.raio) * base / FIS.raio * kr;
   if (b.flash > 0) b.flash = Math.max(0, b.flash - FIS.dt * 6);
   if (b.dor > 0) b.dor -= FIS.dt;
 }
@@ -1152,11 +1263,13 @@ function atualizarItens(M) {
   }
 }
 
-// Meteoros do castelo (de ninguém: acertam os dois)
+// Meteoros do castelo (de ninguém: acertam os dois). v21.6: também na Rodada Maluca "meteoros" (a cada ~1,7 s)
 function atualizarMeteorosDoCenario(M) {
-  if (!M.cen.meteoros) return;
+  atualizarEventosTwist(M);
+  const per = M.cen.meteoros || (M.twist === "meteoros" ? 1.7 : 0);
+  if (!per) return;
   if (M.t < M.proxMeteoro) return;
-  M.proxMeteoro = M.t + M.cen.meteoros * (0.8 + Math.random() * 0.4);
+  M.proxMeteoro = M.t + per * (0.8 + Math.random() * 0.4);
   // contra o bot, os meteoros miram mais no bot (70%) e, quando vêm na pessoa, avisam mais cedo
   // (no castelo o jogador perdia 67%: o bot desvia dos círculos vermelhos, gente quase não)
   const humano = M.bolinhas[0].humano && M.contraBot;
@@ -1171,3 +1284,29 @@ function atualizarMeteorosDoCenario(M) {
   avisarCeu(M, 0, x, y - 6, alvo.humano && M.contraBot ? 1.8 : 1.25, METEORO_CENARIO);
 }
 const METEORO_CENARIO = { id: "meteoro_cenario", explode: 72, dano: 22, empurra: 10, visual: "meteoro" };
+
+// v21.6: Rodada Maluca com coisa acontecendo no MAPA (o dono: "não só efeitos nas bolas"):
+// "tempestade" = raios caindo perto dos dois; "bolas" = bolas de praia gigantes caindo do céu e quicando (empurram)
+const RAIO_TWIST = { id: "raio_twist", explode: 48, dano: 14, empurra: 6, visual: "relampago" };
+const BOLA_TWIST = { id: "bola_ceu", tipo: "bala", vel: 2, grav: 0.45, raio: 27, dano: 7, empurra: 11, quica: 99, vida: 480, visual: "bola_praia", rebate: true };
+const DE_NINGUEM = { vx: 0, vy: 0, lado: 0, cor: "#ffffff" };
+function atualizarEventosTwist(M) {
+  const tw = M.twist;
+  if (tw !== "tempestade" && tw !== "bolas") return;
+  if (M.proxTwist === undefined) M.proxTwist = 1.2;
+  if (M.t < M.proxTwist) return;
+  const humano = M.bolinhas[0].humano && M.contraBot;
+  const alvo = M.bolinhas[humano ? (Math.random() < 0.65 ? 1 : 0) : (Math.random() < 0.5 ? 0 : 1)];
+  if (tw === "tempestade") {
+    M.proxTwist = M.t + 1.3 + Math.random() * 0.6;
+    avisarCeu(M, 0, alvo.x + (Math.random() - 0.5) * 300, alvo.y, alvo.humano && M.contraBot ? 1.25 : 0.95, RAIO_TWIST);
+  } else {
+    M.proxTwist = M.t + 1.7 + Math.random() * 0.8;
+    let n = 0;
+    for (let i = 0; i < M.proj.length; i++) if (M.proj[i].a === BOLA_TWIST && M.proj[i].vivo) n++;
+    if (n >= 4) return;
+    const x = limitar(alvo.x + (Math.random() - 0.5) * 420, 60, FIS.largura - 60);
+    criarProjetil(M, DE_NINGUEM, BOLA_TWIST, x, -40, Math.PI / 2 + (Math.random() - 0.5) * 0.8);
+    M.proj[M.proj.length - 1].giro = 0;
+  }
+}

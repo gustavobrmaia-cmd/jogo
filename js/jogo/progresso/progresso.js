@@ -229,6 +229,9 @@ const Progresso = (function() {
     if (!Array.isArray(save.armas)) save.armas = [];
     save.armas = save.armas.filter(function(id) { return typeof ARMA !== "undefined" && ARMA[id]; });
     if (save.armaInicial && save.armas.indexOf(save.armaInicial) < 0) save.armaInicial = "";
+    if (!Array.isArray(save.supers)) save.supers = [];
+    save.supers = save.supers.filter(function(id) { return typeof SUPER_DE !== "undefined" && SUPER_DE[id] && !SUPER_DE[id].gratis; });
+    if (save.superEquip && !temSuper(save.superEquip)) save.superEquip = "";
     espelhoAntigo();
   }
 
@@ -257,6 +260,27 @@ const Progresso = (function() {
     save.armaInicial = id || "";
     salvar();
     Poki.medir("shop", id ? "start-" + id : "start-none", "interact");
+    return true;
+  }
+
+  // ---------- supers (v21.6; aba Supers da loja) ----------
+  function precoSuper(id) { const s = SUPER_DE[id]; return s && !s.gratis ? s.preco : 0; }
+  function temSuper(id) { return save.supers.indexOf(id) >= 0; }
+  function comprarSuper(id) {
+    const p = precoSuper(id);
+    if (!p || temSuper(id) || save.moedas < p) return false;
+    save.moedas -= p;
+    save.supers.push(id);
+    save.superEquip = id;   // o comprado já vira o escolhido
+    salvar();
+    Poki.medir("shop", "buy-super-" + id, "interact");
+    return true;
+  }
+  function equiparSuper(id) {
+    if (id && !temSuper(id)) return false;
+    save.superEquip = id || "";
+    salvar();
+    Poki.medir("shop", "super-" + (id || "none"), "interact");
     return true;
   }
 
@@ -376,6 +400,7 @@ const Progresso = (function() {
     temSkin: temSkin, ganharSkin: ganharSkin, comprarSkin: comprarSkin, equipar: equipar, pendentes: pendentes,
     prepararVisual: prepararVisual, precoArma: precoArma, temArma: temArma, comprarArma: comprarArma, equiparArma: equiparArma,
     lojaLiberada: lojaLiberada, PRECO_ARMA: PRECO_ARMA,
+    precoSuper: precoSuper, temSuper: temSuper, comprarSuper: comprarSuper, equiparSuper: equiparSuper,
     moedasDaPartida: moedasDaPartida, ganharMoedas: ganharMoedas, avisos: avisos, atualizarAvisos: atualizarAvisos,
     xpParaSubir: xpParaSubir, ganharXP: ganharXP, xpDaPartida: xpDaPartida, abrirBau: abrirBau,
     DIARIAS: DIARIAS, diaDisponivel: diaDisponivel, pegarDiaria: pegarDiaria
