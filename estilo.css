@@ -139,7 +139,9 @@ button {
 }
 button::before {      /* brilho em meia-lua no canto de cima */
   content: ""; position: absolute; z-index: -1; left: 10px; top: 5px; width: 34%; height: 9px; max-width: 120px;
-  border-radius: 999px; background: rgba(255, 255, 255, 0.55); transform: rotate(-2deg);
+  border-radius: 999px; transform: rotate(-2deg);
+  /* imagem (e não cor) para o modo escuro automático do navegador não deixar o brilho cinza */
+  background: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Crect width='10' height='10' fill='white' fill-opacity='0.55'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
   pointer-events: none;
 }
 button:hover { filter: brightness(1.08); transform: translateY(-3px) rotate(-0.6deg); box-shadow: 0 10px 0 var(--sombra), inset 0 -5px 0 rgba(26, 13, 51, 0.16), 0 16px 22px rgba(8, 3, 25, 0.35); }

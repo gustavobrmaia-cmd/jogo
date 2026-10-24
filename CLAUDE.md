@@ -463,6 +463,13 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       - só troca para salas até 75 s mais velhas que a sua (mais velha que isso é de quem já saiu).
     - **Sala velha:** quando a vigia entra na sala de outro, também espera resposta por 12 s.
     - **Tela:** o relógio da busca mostra "Oponente encontrado!" enquanto conecta.
+  - v20.4 (modo escuro automático do navegador: Night mode do Brave, "dark mode" do Chrome/Samsung):
+    - o navegador escurece cores e degradês CLAROS do CSS (topo de botões e cartões ficava marrom) e inverte imagens
+      escuras; `js/interface/fundos.js` troca só os degradês/cores CLAROS de fundo por uma imagem SVG de faixas lisas
+      com as mesmas cores (um `<linearGradient>` no SVG ele também escurece). O brilho dos botões (`button::before` no
+      estilo.css) virou imagem pelo mesmo motivo. No modo normal nada muda;
+    - texto escuro (marrom dos botões amarelos) o navegador ainda clareia: tentei texto "pintado" com imagem e ele
+      inverte também. Testar com Playwright + CDP `Emulation.setAutoDarkModeOverride`.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;
