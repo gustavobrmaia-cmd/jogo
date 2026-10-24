@@ -578,5 +578,16 @@ TEXTOS.fr = {
   novo_cartas: "NOUVEAU : Cartes d'arme et 10 nouvelles armes !",
   novo_loja: "NOUVEAU : Boutique d'armes débloquée !",
   // v20.5
-  carta_lendaria: "L'une d'elles peut être LÉGENDAIRE !"
+  carta_lendaria: "L'une d'elles peut être LÉGENDAIRE !",
+  // v21.2
+  acao_dash: "Dash",
+  toque_dash: "DASH",
+  dica_dash: "{0} : DASH (esquive les tirs !)",
+  // v21.3
+  tw_titulo: "MANCHE FOLLE !",
+  tw_gigantes: "BOULES GÉANTES !",
+  tw_mini: "MINI BOULES !",
+  tw_turbo: "TURBO !",
+  tw_chuva: "PLUIE D'ARMES !",
+  tw_pulo: "SUPER SAUT !"
 };

@@ -273,6 +273,9 @@ function iniciarRodada() {
   if (j.treino && j.bots[1]) M.multBot *= 0.6;
   // primeiras partidas: mede onde a pessoa sai (rodada a rodada)
   if (j.modo === "bot" && save.partidas <= 2) Poki.medir("round", "m" + save.partidas + "-r" + j.rodada, "start");
+  // v21.3: RODADA MALUCA (como a série "Random" do Poki: algo muda a cada rodada)
+  M.twist = escolherTwist(j);
+  if (M.twist) aplicarTwist(M, M.twist);
   b1.mira = 0; b2.mira = Math.PI;
   j.M = M;
   j.fase = "intro";
@@ -344,7 +347,7 @@ function passoDaPartida(dt) {
   if (j.fase === "cartas") { atualizarCartas(j); return; }
   if (j.fase === "intro") {
     // depois das cartas a abertura é mais curta (o VS do rival fica um pouco mais para dar tempo de ler o prêmio)
-    j.durIntro = j.rodada === 1 ? (j.depoisCartas ? (j.rival ? 1.5 : 1.0) : RODADA.introPrimeira) : RODADA.intro;
+    j.durIntro = j.rodada === 1 ? (j.depoisCartas ? (j.rival ? 1.5 : 1.0) : RODADA.introPrimeira) : RODADA.intro + (M.twist ? 0.7 : 0);
     if (j.tempoFase >= j.durIntro) {
       j.fase = "luta"; j.tempoFase = 0;
       if (!j.demo) som("lute");
@@ -412,7 +415,7 @@ function passoMundo(j, M, controles, lento) {
     let ent;
     const bot = j.bots[k];
     if (!controles || !b.viva) ent = PARADO;
-    else if (bot) ent = pensarBot(bot, M, b);
+    else if (bot) { ent = pensarBot(bot, M, b); botDash(bot, M, b, ent); }
     else ent = entradaHumana(b.lado, b);
     b.ent = ent;
     const yAntes = b.vy;
@@ -430,6 +433,10 @@ function passoMundo(j, M, controles, lento) {
     else if (b.evento === "aterrissou" && typeof Efeitos !== "undefined" && Math.abs(yAntes) > 6) Efeitos.poeira(b.x, b.y + b.r * gravSinal(M.cen, M.t));
     else if (b.evento === "portal" && typeof Efeitos !== "undefined") Efeitos.teleporte(b.x, b.y, b.cor);
     else if (b.evento === "bumper" && !M.mudo) som("mola");
+    else if (b.evento === "dash") { if (!M.mudo) som("pulo", 1.6); if (typeof Efeitos !== "undefined") Efeitos.poeira(b.x, b.y + b.r * 0.6); }
+    // v21.2: rastro do dash (fantasmas que somem; desenho.js)
+    if (b.dashT > 0) { (b.dashFant || (b.dashFant = [])).push({ x: b.x, y: b.y, a: 0 }); if (b.dashFant.length > 6) b.dashFant.shift(); }
+    if (b.dashFant && b.dashFant.length) { for (let q = 0; q < b.dashFant.length; q++) b.dashFant[q].a += FIS.dt * 4; while (b.dashFant.length && b.dashFant[0].a >= 1) b.dashFant.shift(); }
     else if (b.evento === "preso" && b.humano && !M.mudo) { som("clique", 0.55); if (typeof ArteArmas !== "undefined" && ArteArmas.soltar) ArteArmas.soltar("pingo", b.x, b.y + b.r * 0.6, 3); }
     if (controles) usarArma(M, b, ent.tiro, ent.apertouTiro);
     atualizarEfeitos(M, b);
@@ -489,6 +496,7 @@ function entradaHumana(j, b) {
     pulo: entrada.apertou(j, "pulo"),
     segPulo: entrada.segurando(j, "pulo"),
     baixo: entrada.segurando(j, "baixo"),
+    dash: entrada.apertou(j, "dash"),
     tiro: entrada.segurando(j, "tiro") || apertouTiro,
     apertouTiro: apertouTiro
   };
@@ -509,6 +517,7 @@ function resgatar(M, b) {
 function animarBolinha(b, vyAntes) {
   if (b.escalaX === undefined) { b.escalaX = 1; b.escalaY = 1; b.piscar = 0; b.proxPiscar = 2 + Math.random() * 3; }
   if (b.evento === "pulo") { b.escalaX = 0.82; b.escalaY = 1.2; }
+  if (b.evento === "dash") { b.escalaX = 1.3; b.escalaY = 0.8; }
   if (b.evento === "aterrissou" && Math.abs(vyAntes) > 5) { b.escalaX = 1.25; b.escalaY = 0.78; }
   b.escalaX += (1 - b.escalaX) * 0.18;
   b.escalaY += (1 - b.escalaY) * 0.18;
@@ -776,6 +785,42 @@ function fimCartas(j) {
   j.tempoFase = 0;
   j.depoisCartas = true;
   if (typeof faixaPremio !== "undefined" && faixaPremio && faixaPremio.velho === j) faixaPremio.velho = j.faixaVelho;
+}
+
+// ---------- v21.3: RODADA MALUCA ----------
+// Os duelos mais jogados do Poki (Basket/Soccer/Boxing Random, da RHM) mudam alguma coisa a cada ponto. Aqui: a partir
+// da 2ª rodada do rival 2 (e no "Contra o bot" depois da 2ª partida, no 2 jogadores sempre), cada rodada tem 50% de
+// chance de uma surpresa, nunca a mesma duas vezes seguidas. Não vale no treino, online, sobrevivência e demo.
+// Letreiro: desenho.js desenharTwist. Evento twist/<id> (start).
+const TWISTS = {
+  gigantes: { icone: "brilho", cor: "#ff8787" },
+  mini:     { icone: "alvo",   cor: "#74c0fc" },
+  turbo:    { icone: "raio",   cor: "#ffd43b" },
+  chuva:    { icone: "arma",   cor: "#b197fc" },
+  pulo:     { icone: "seta",   cor: "#8ce99a" }
+};
+function escolherTwist(j) {
+  if (j.demo || j.treino || j.modo === "online" || j.modo === "sobrevivencia" || j.rodada < 2) return null;
+  const r = j.rival;
+  if (r && r.liga === 0 && r.i < 1) return null;
+  if (j.modo === "bot" && !r && save.partidas <= 2) return null;
+  if (Math.random() >= 0.5) return null;
+  const lista = ["gigantes", "turbo", "chuva", "pulo"];
+  if (!r || r.liga > 0 || r.i >= 3) lista.push("mini");
+  const ok = lista.filter(function(id) { return id !== j.ultimoTwist; });
+  const id = ok[Math.floor(Math.random() * ok.length)];
+  j.ultimoTwist = id;
+  Poki.medir("twist", id, "start");
+  return id;
+}
+function aplicarTwist(M, id) {
+  M.bolinhas.forEach(function(b) {
+    if (id === "gigantes") b.r = FIS.raio * 1.35;
+    else if (id === "mini") b.r = FIS.raio * 0.75;
+    else if (id === "turbo") b.multVel = (b.multVel || 1) * 1.35;
+    else if (id === "pulo") b.efeitos.super_pulo = 99;   // a rodada inteira (carta Super Pulo: pulo triplo e mais alto)
+  });
+  if (id === "chuva") { M.multCaixa = 0.35; M.proxCaixa = Math.min(M.proxCaixa, 0.8); }
 }
 
 // ---------- v19: rastro, efeito de K.O. e comemoração (personalização) ----------

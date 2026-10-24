@@ -578,5 +578,16 @@ TEXTOS.de = {
   novo_cartas: "NEU: Waffenkarten und 10 neue Waffen!",
   novo_loja: "NEU: Waffenladen freigeschaltet!",
   // v20.5
-  carta_lendaria: "Eine davon könnte LEGENDÄR sein!"
+  carta_lendaria: "Eine davon könnte LEGENDÄR sein!",
+  // v21.2
+  acao_dash: "Dash",
+  toque_dash: "DASH",
+  dica_dash: "{0}: DASH (weiche Schüssen aus!)",
+  // v21.3
+  tw_titulo: "VERRÜCKTE RUNDE!",
+  tw_gigantes: "RIESENKUGELN!",
+  tw_mini: "MINIKUGELN!",
+  tw_turbo: "TURBO!",
+  tw_chuva: "WAFFENREGEN!",
+  tw_pulo: "SUPERSPRUNG!"
 };

@@ -578,5 +578,16 @@ TEXTOS.ja = {
   novo_cartas: "NEW：武器カードと新武器10種！",
   novo_loja: "NEW：武器ショップ解放！",
   // v20.5
-  carta_lendaria: "どれかがレジェンドかも！"
+  carta_lendaria: "どれかがレジェンドかも！",
+  // v21.2
+  acao_dash: "ダッシュ",
+  toque_dash: "ダッシュ",
+  dica_dash: "{0}：ダッシュ（弾をよけよう！）",
+  // v21.3
+  tw_titulo: "クレイジーラウンド！",
+  tw_gigantes: "巨大ボール！",
+  tw_mini: "ミニボール！",
+  tw_turbo: "ターボ！",
+  tw_chuva: "武器の雨！",
+  tw_pulo: "スーパージャンプ！"
 };

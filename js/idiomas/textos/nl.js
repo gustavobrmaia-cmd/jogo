@@ -578,5 +578,16 @@ TEXTOS.nl = {
   novo_cartas: "NIEUW: Wapenkaarten en 10 nieuwe wapens!",
   novo_loja: "NIEUW: Wapenwinkel vrijgespeeld!",
   // v20.5
-  carta_lendaria: "Eén ervan kan LEGENDARISCH zijn!"
+  carta_lendaria: "Eén ervan kan LEGENDARISCH zijn!",
+  // v21.2
+  acao_dash: "Dash",
+  toque_dash: "DASH",
+  dica_dash: "{0}: DASH (ontwijk de schoten!)",
+  // v21.3
+  tw_titulo: "GEKKE RONDE!",
+  tw_gigantes: "REUZENBALLEN!",
+  tw_mini: "MINIBALLEN!",
+  tw_turbo: "TURBO!",
+  tw_chuva: "WAPENREGEN!",
+  tw_pulo: "SUPERSPRONG!"
 };

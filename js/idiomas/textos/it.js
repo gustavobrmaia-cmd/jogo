@@ -578,5 +578,16 @@ TEXTOS.it = {
   novo_cartas: "NUOVO: Carte arma e 10 armi nuove!",
   novo_loja: "NUOVO: Negozio di armi sbloccato!",
   // v20.5
-  carta_lendaria: "Una potrebbe essere LEGGENDARIA!"
+  carta_lendaria: "Una potrebbe essere LEGGENDARIA!",
+  // v21.2
+  acao_dash: "Scatto",
+  toque_dash: "SCATTO",
+  dica_dash: "{0}: SCATTO (schiva i colpi!)",
+  // v21.3
+  tw_titulo: "ROUND PAZZO!",
+  tw_gigantes: "PALLINE GIGANTI!",
+  tw_mini: "MINI PALLINE!",
+  tw_turbo: "TURBO!",
+  tw_chuva: "PIOGGIA DI ARMI!",
+  tw_pulo: "SUPER SALTO!"
 };

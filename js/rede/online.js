@@ -15,12 +15,12 @@ const Online = (function() {
   let tela = "inicio";            // inicio | procurando | sala | conectado | fim
   let outro = null;               // o "ola" do outro (visual, cor, arma inicial)
   let prontoEu = false, prontoOutro = false;
-  let entRemota = { esq: false, dir: false, sp: false, bx: false, t: false, pc: 0, tc: 0, cc: 0, m: null };
-  let usados = { pc: 0, tc: 0, cc: 0 };
+  let entRemota = { esq: false, dir: false, sp: false, bx: false, t: false, pc: 0, tc: 0, cc: 0, dc: 0, m: null };
+  let usados = { pc: 0, tc: 0, cc: 0, dc: 0 };
   let seq = 0, passos = 0, ultimoEstado = 0;
   let fila = [];                  // efeitos/sons do anfitrião desde o último envio
   let alvo = null, antes = null, tAlvo = 0;   // convidado: posições para suavizar entre dois estados
-  const cont = { pc: 0, tc: 0, cc: 0 };
+  const cont = { pc: 0, tc: 0, cc: 0, dc: 0 };   // v21.2: dc = dashes
   let primeiroEstado = true;
   // v20: canal dos pacotes de jogo ("u" rápido; vira "r" se a rede do outro não deixar o rápido passar) e contagens
   let canalJogo = "u", enviadosJogo = 0, recebidosJogo = 0, timerP2P = 0;
@@ -216,7 +216,7 @@ const Online = (function() {
     ultimoEstado = performance.now();   // o relógio de queda começa do zero (na revanche ele vinha da tela de fim)
     // v19.9: toques que sobraram da partida anterior não viram pulo/tiro na nova (na revanche o convidado zerava os
     // contadores e o anfitrião não, e os toques dele sumiam até passar a conta antiga)
-    usados = { pc: entRemota.pc || 0, tc: entRemota.tc || 0, cc: entRemota.cc || 0 };
+    usados = { pc: entRemota.pc || 0, tc: entRemota.tc || 0, cc: entRemota.cc || 0, dc: entRemota.dc || 0 };
     save.partidas++;
     salvar();
     // v19.9: o visual, a cor e a arma inicial do convidado entram ANTES da 1ª rodada (antes eram aplicados depois e a
@@ -252,10 +252,11 @@ const Online = (function() {
   api.entradaRemota = function(b) {
     const e = entRemota;
     b.miraLivre = typeof e.m === "number" ? e.m : null;
-    const pulo = e.pc > usados.pc, tiroAp = e.tc > usados.tc;
+    const pulo = e.pc > usados.pc, tiroAp = e.tc > usados.tc, dash = (e.dc || 0) > usados.dc;
     if (pulo) usados.pc++;
     if (tiroAp) usados.tc++;
-    return { esq: e.esq, dir: e.dir, pulo: pulo, segPulo: e.sp, baixo: e.bx, tiro: e.t || tiroAp, apertouTiro: tiroAp };
+    if (dash) usados.dc++;
+    return { esq: e.esq, dir: e.dir, pulo: pulo, segPulo: e.sp, baixo: e.bx, tiro: e.t || tiroAp, apertouTiro: tiroAp, dash: dash };
   };
   // anfitrião: cliques do convidado na queda de braço
   api.cliqueRemoto = function() {
@@ -311,11 +312,12 @@ const Online = (function() {
     const toque = entrada.apertou(1, "toque");
     const ent = entradaHumana(1, b);
     if (ent.pulo) cont.pc++;
+    if (ent.dash) cont.dc++;
     if (ent.apertouTiro) cont.tc++;
     if (toque || ent.apertouTiro || ent.pulo) cont.cc++;
     enviadosJogo++;
     Rede.enviar(canalJogo, { k: "e", esq: ent.esq, dir: ent.dir, sp: ent.segPulo, bx: ent.baixo, t: ent.tiro,
-      pc: cont.pc, tc: cont.tc, cc: cont.cc, m: typeof b.miraLivre === "number" ? Math.round(b.miraLivre * 1000) / 1000 : null });
+      pc: cont.pc, tc: cont.tc, cc: cont.cc, dc: cont.dc, m: typeof b.miraLivre === "number" ? Math.round(b.miraLivre * 1000) / 1000 : null });
     // entre dois estados (1/30 s) a bolinha anda do ponto antigo ao novo
     if (alvo && antes) {
       tAlvo = Math.min(1, tAlvo + dt / 1000 * 30);
@@ -383,7 +385,7 @@ const Online = (function() {
     } else if (m.k === "oculto") {
       outroOculto = !!m.v;
       ultimoEstado = performance.now();
-      if (m.v && Rede.anfitriao) entRemota = { esq: false, dir: false, sp: false, bx: false, t: false, pc: entRemota.pc, tc: entRemota.tc, cc: entRemota.cc, m: null };
+      if (m.v && Rede.anfitriao) entRemota = { esq: false, dir: false, sp: false, bx: false, t: false, pc: entRemota.pc, tc: entRemota.tc, cc: entRemota.cc, dc: entRemota.dc, m: null };
     } else if (m.k === "tchau") {
       caiuConexao();
     }
@@ -395,8 +397,8 @@ const Online = (function() {
     pararBusca();
     tela = "conectado";
     seq = 0; passos = 0; usados = { pc: 0, tc: 0, cc: 0 };
-    cont.pc = cont.tc = cont.cc = 0;   // conexão nova: os dois lados começam a contar do zero
-    entRemota = { esq: false, dir: false, sp: false, bx: false, t: false, pc: 0, tc: 0, cc: 0, m: null };
+    cont.pc = cont.tc = cont.cc = cont.dc = 0;   // conexão nova: os dois lados começam a contar do zero
+    entRemota = { esq: false, dir: false, sp: false, bx: false, t: false, pc: 0, tc: 0, cc: 0, dc: 0, m: null };
     status(t("on_conectando"));
     ola();
   });

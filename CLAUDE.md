@@ -559,6 +559,23 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       diferença de ~8 pontos é confiável);
     - duelos de sucesso no Poki (Rooftop Snipers, Getaway Shootout, Stickman Battle): 2 botões, física engraçada, rodadas
       de segundos, revanche instantânea; celular em pé obrigatório (pedir para girar faz sair).
+  - v21.2 — **DASH** (pedido do dono): arrancada curta (`DASH` em fisica.js: vel 17 px/passo, 0,16 s, recarga 1,1 s;
+    vale no ar, quase sem gravidade durante). Durante o dash os tiros ATRAVESSAM (combate.js, anel branco) e golpe/
+    explosão/laser de quem ataca não pega (`causarDano`). Controles: Shift/E (jogador 1) e Shift direito/K (jogador 2)
+    — ação nova "dash" em ACOES/TECLAS_PADRAO, save antigo com teclas trocadas ganha as de fábrica livres —, botão
+    direito do mouse, Y no controle e botão DASH no toque acima do analógico de andar (`posDash`/`toqueNoDash` em
+    desenho.js; escurece enquanto recarrega). Bot: `botDash` (bot.js) dá dash num tiro do outro que VAI acertar
+    (menor distância da reta): chance 57% no nível 0,95, 36% no 0,6, 17% no 0,3, 0 abaixo de 0,25 e no grupo "b" do
+    A/B. Online: contador `dc`. Rastro de fantasmas (`dashFant`), poeira e som. Dica "Shift / E: DASH (desvia dos
+    tiros!)" (`dica_dash`, `acao_dash`, `toque_dash` nos 15 idiomas);
+  - v21.3 — o que os duelos famosos do Poki têm e faltava aqui (pesquisa: série Random da RHM, Rooftop Snipers):
+    - **RODADA MALUCA** (partida.js `TWISTS`/`escolherTwist`/`aplicarTwist`): da 2ª rodada do rival 2 em diante
+      (no "Contra o bot" depois da 2ª partida; no 2 jogadores sempre; nunca no treino/online/sobrevivência), 50% das
+      rodadas têm uma surpresa, nunca a mesma seguida: bolinhas gigantes (r x1,35), mini (x0,75; só do rival 4 em
+      diante), turbo (vel x1,35), chuva de armas (caixas x0,35 do intervalo) e super pulo (a rodada toda). Letreiro
+      embaixo da faixa da abertura (`desenharTwist`; a abertura fica 0,7 s mais longa). Evento twist/<id>;
+    - **K.O. "boneco de pano"**: quem perde sai voando e girando com cara de dor (~0,8 s de jogo; `M.voos`,
+      `desenharVoos`) e só então estoura em confete.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

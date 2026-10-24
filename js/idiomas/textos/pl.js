@@ -578,5 +578,16 @@ TEXTOS.pl = {
   novo_cartas: "NOWOŚĆ: Karty broni i 10 nowych broni!",
   novo_loja: "NOWOŚĆ: Sklep z bronią odblokowany!",
   // v20.5
-  carta_lendaria: "Jedna może być LEGENDARNA!"
+  carta_lendaria: "Jedna może być LEGENDARNA!",
+  // v21.2
+  acao_dash: "Zryw",
+  toque_dash: "ZRYW",
+  dica_dash: "{0}: ZRYW (unikaj strzałów!)",
+  // v21.3
+  tw_titulo: "SZALONA RUNDA!",
+  tw_gigantes: "OLBRZYMIE KULKI!",
+  tw_mini: "MINI KULKI!",
+  tw_turbo: "TURBO!",
+  tw_chuva: "DESZCZ BRONI!",
+  tw_pulo: "SUPERSKOK!"
 };

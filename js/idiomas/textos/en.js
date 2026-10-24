@@ -578,5 +578,16 @@ TEXTOS.en = {
   novo_cartas: "NEW: Weapon cards and 10 new weapons!",
   novo_loja: "NEW: Weapon shop unlocked!",
   // v20.5
-  carta_lendaria: "One of them could be LEGENDARY!"
+  carta_lendaria: "One of them could be LEGENDARY!",
+  // v21.2
+  acao_dash: "Dash",
+  toque_dash: "DASH",
+  dica_dash: "{0}: DASH (dodge the shots!)",
+  // v21.3
+  tw_titulo: "CRAZY ROUND!",
+  tw_gigantes: "GIANT BALLS!",
+  tw_mini: "MINI BALLS!",
+  tw_turbo: "TURBO!",
+  tw_chuva: "WEAPON RAIN!",
+  tw_pulo: "SUPER JUMP!"
 };

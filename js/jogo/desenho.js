@@ -53,6 +53,14 @@ function layoutTela(j) {
 }
 // fração da altura da tela acima da qual um toque no lado de dentro é pulo (entrada.js)
 function limitePuloToque() { return layoutTela.L ? layoutTela.L.limitePulo : 0.45; }
+// v21.2: botão de dash no toque: acima do analógico de andar (polegar esquerdo)
+function posDash(L) { return { x: 0.14 * CONFIG.largura, y: L.yBaixo - (L.emPe ? 320 : 170), r: 62 * (L.emPe ? 1.8 : 1) }; }
+function toqueNoDash(fx, fy) {
+  const L = layoutTela.L;
+  if (!L || !jogo || jogo.demo || jogo.modo === "2p") return false;
+  const p = posDash(L), dx = fx * CONFIG.largura - p.x, dy = fy * L.H - p.y;
+  return dx * dx + dy * dy < p.r * p.r * 1.6;
+}
 // v21: em pé com a câmera, um toque NA ARENA (acima dos controles) é "atirar ali" (entrada.js tipo "alvo"). Antes, todo
 // o lado direito acima dos botões era pulo e o esquerdo era andar: a criança tocava no rival e a bolinha pulava
 function toqueNaArena(fy) {
@@ -162,6 +170,7 @@ function desenharJogo(ctx) {
 
   // 6. bolinhas e armas
   for (let k = 0; k < 2; k++) desenharBolinhaNoMundo(ctx, j, M, M.bolinhas[k], M.bolinhas[1 - k], M.t);
+  if (M.voos && M.voos.length) desenharVoos(ctx, j, M);   // v21.3: K.O. voando
 
   // 7. lasers e raios
   for (let i = 0; i < M.feixes.length; i++) {
@@ -231,8 +240,46 @@ function plataformasSimples(ctx, M) {
 }
 
 // Descritor que a ArteBolinha desenha
+// v21.3: K.O. "boneco de pano": a bolinha voa girando com cara de dor (~0,8 s de jogo) e estoura em confete no fim
+function desenharVoos(ctx, j, M) {
+  for (let i = M.voos.length - 1; i >= 0; i--) {
+    const v = M.voos[i], s = Math.max(0, (j.tempoReal - v.t0) * 60);
+    const x = v.x + v.vx * s, y = v.y + (v.vy * s + 0.5 * 0.55 * s * s) * v.g, rot = v.vr * s;
+    if (s > 50 || y > FIS.altura + 120 || y < -400) {
+      if (!v.estourou && typeof Efeitos !== "undefined") Efeitos.estouro(limitar(x, 20, FIS.largura - 20), limitar(y, 20, FIS.altura - 20), v.cor);
+      M.voos.splice(i, 1); continue;
+    }
+    if (!temArte.bola) continue;
+    const sk = j.skins && j.skins[v.lado - 1];
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+    ArteBolinha.desenhar(ctx, { x: 0, y: 0, r: v.r, cor: v.cor, olharX: 0, olharY: 0, expressao: "dor", piscar: 0, t: M.t,
+      escalaX: 1, escalaY: v.g < 0 ? -1 : 1, flash: 0, fantasma: 0, skin: sk ? sk.corpo : "classico", acessorio: sk ? sk.acessorio : "nenhum" });
+    ctx.restore();
+  }
+}
+// v21.3: letreiro da RODADA MALUCA (em cima da abertura e no 1º segundo da luta)
+function desenharTwist(ctx, j, M, L, cx, meio) {
+  const tw = TWISTS[M.twist]; if (!tw) return;
+  const em = L.emPe, k = em ? 1.4 : 1;
+  const tf = j.fase === "intro" ? j.tempoFase : j.durIntro + j.tempoFase;
+  const entra = Math.min(1, tf / 0.25), sai = Math.min(1, Math.max(0, (j.durIntro + 1.4 - tf) / 0.3));
+  const y = (j.abBaixo || meio + 120) + 70 * k;
+  const pul = 1 + 0.05 * Math.sin(tf * 10);
+  ctx.save(); ctx.globalAlpha *= sai; ctx.translate(cx, y); ctx.scale(k * pul * (0.6 + 0.4 * entra), k * pul * (0.6 + 0.4 * entra));
+  letreiro(ctx, t("tw_titulo"), 0, -44, 26, "#ffffff", CONFIG.largura / k - 80);
+  if (typeof Icone !== "undefined") Icone.desenhar(ctx, tw.icone, -230, 4, 54);
+  letreiro(ctx, t("tw_" + M.twist), 20, 18, 52, tw.cor, CONFIG.largura / k - 260);
+  ctx.restore();
+}
+
 function desenharBolinhaNoMundo(ctx, j, M, b, o, tm) {
   if (!b.viva) return;
+  // v21.2: rastro do dash: fantasmas na cor da bolinha que somem
+  if (b.dashFant && b.dashFant.length) {
+    ctx.save(); ctx.fillStyle = b.cor;
+    for (let q = 0; q < b.dashFant.length; q++) { const f = b.dashFant[q]; ctx.globalAlpha = 0.32 * (1 - f.a); ctx.beginPath(); ctx.arc(f.x, f.y, b.r * (1 - 0.25 * f.a), 0, 7); ctx.fill(); }
+    ctx.restore();
+  }
   const ef = b.efeitos;
   const fantasma = ef.fantasma > 0 ? 0.82 : 0;
   // expressão (v19): feliz quando vence, triste quando perde, tonta congelada, dor ao apanhar, medo com pouca vida,
@@ -719,6 +766,7 @@ function desenharHud(ctx, j, M, L) {
   const meio = mundoParaTela(0, FIS.altura * 0.42).y;
   // abertura da rodada (v17.5): faixa com o mapa; contra rival na 1ª rodada, o "VS" com os retratos
   if (j.fase === "intro") desenharAbertura(ctx, j, M, L, cx, meio);
+  if (M.twist && (j.fase === "intro" || (j.fase === "luta" && j.tempoFase < 1.4))) desenharTwist(ctx, j, M, L, cx, meio);   // v21.3
   else if (j.fase === "cartas" && typeof CartasArma !== "undefined") CartasArma.desenhar(ctx, j, M, L, cx, meio);   // v20.5: cartas de arma
   // textos do meio (LUTE, K.O., placar): em pé ficam 40% maiores (a tela do celular é estreita)
   const ke = em ? 1.4 : 1, largura = CONFIG.largura / ke - 60;   // largura que cabe (alguns idiomas são longos)
@@ -960,6 +1008,7 @@ function desenharAbertura(ctx, j, M, L, cx, meio) {
   const abre = tf < 0.22 ? voltaMola(tf / 0.22) : 1, fecha = Math.min(1, Math.max(0, (dur - tf) / 0.2));
   const cor = temArte.cen && ArteCenarios.corDestaque ? ArteCenarios.corDestaque(M.cen.id) : "#ffd43b";
   const W = CONFIG.largura / esc + 120, h = vs ? 130 : 108;
+  j.abBaixo = y + baixo * esc;   // v21.3: o letreiro da RODADA MALUCA vai logo abaixo do bloco da abertura
   ctx.save();
   ctx.translate(cx, y); ctx.scale(esc, esc);
   ctx.globalAlpha = fecha;
@@ -1451,25 +1500,32 @@ function desenharControlesToque(ctx, j, H, L) {
   const zonas = j.modo === "2p"
     ? [{ x: 0.13, y: yBaixo, tipo: "stick", j: 1 }, { x: 0.39, y: yBaixo, tipo: "mira", j: 1 }, { x: 0.39, y: yCima, tipo: "pulo", j: 1 },
        { x: 0.61, y: yBaixo, tipo: "mira", j: 2 }, { x: 0.61, y: yCima, tipo: "pulo", j: 2 }, { x: 0.87, y: yBaixo, tipo: "stick", j: 2 }]
-    : [{ x: 0.14, y: yBaixo, tipo: "stick", j: 1 }, { x: 0.86, y: yBaixo, tipo: "mira", j: 1 }, { x: 0.86, y: yCima, tipo: "pulo", j: 1 }];
+    : [{ x: 0.14, y: yBaixo, tipo: "stick", j: 1 }, { x: 0.86, y: yBaixo, tipo: "mira", j: 1 }, { x: 0.86, y: yCima, tipo: "pulo", j: 1 },
+       { x: 0.14, y: posDash(L).y, tipo: "dash", j: 1 }];   // v21.2
   const abertos = entrada.analogicos();
   // v20.9: o analógico de tiro diz "ATIRAR" (era "MIRAR": para criança, mirar não é atirar)
-  const nomes = { stick: "toque_mover", mira: "toque_tiro", pulo: "toque_pulo" };
+  const nomes = { stick: "toque_mover", mira: "toque_tiro", pulo: "toque_pulo", dash: "toque_dash" };
   zonas.forEach(function(z) {
     const cor = j.cores[z.j - 1];
     const x = z.x * CONFIG.largura;
     const usando = abertos.some(function(d) { return d.jogador === z.j && d.tipo === z.tipo; });
     const r = Math.round((z.tipo === "stick" ? 84 : z.tipo === "mira" ? 76 : 62) * k);
     const s = spriteToque(z.tipo, cor, r, t(nomes[z.tipo]));
-    const aperta = z.tipo === "pulo" && usando;
+    const aperta = (z.tipo === "pulo" || z.tipo === "dash") && usando;
     ctx.globalAlpha = aperta ? 0.95 : usando ? 0.22 : 0.62;
     const e = aperta ? 0.92 : 1;
     ctx.drawImage(s, x - s.width / 2 * e, z.y - s.height / 2 * e, s.width * e, s.height * e);
     if (aperta) { ctx.globalAlpha = 0.35; ctx.fillStyle = cor; ctx.beginPath(); ctx.arc(x, z.y, r * e - 4, 0, 7); ctx.fill(); }
+    // v21.2: dash recarregando: a parte que falta escurece (como um relógio)
+    const eu = j.M && j.M.bolinhas[z.j - 1];
+    if (z.tipo === "dash" && eu && eu.dashCd > 0) {
+      ctx.globalAlpha = 0.55; ctx.fillStyle = "rgba(12,8,30,0.9)"; ctx.beginPath(); ctx.moveTo(x, z.y);
+      ctx.arc(x, z.y, r - 2, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, eu.dashCd / DASH.recarga)); ctx.closePath(); ctx.fill();
+    }
   });
   // analógicos que estão sendo usados
   abertos.forEach(function(d) {
-    if (d.tipo === "pulo") return;
+    if (d.tipo === "pulo" || d.tipo === "dash") return;
     if (d.tipo === "alvo") {   // v21: tocou na arena: anel no ponto onde o tiro vai
       ctx.globalAlpha = 0.85; ctx.lineWidth = 10; ctx.strokeStyle = j.cores[d.jogador - 1];
       ctx.beginPath(); ctx.arc(d.fx * CONFIG.largura, d.fy * H, 46 + 6 * Math.sin(j.tempoFase * 14), 0, 7); ctx.stroke();
@@ -1509,6 +1565,8 @@ function spriteToque(tipo, cor, r, rotulo) {
     g.beginPath();
     if (tipo === "stick") {
       for (let s = -1; s <= 1; s += 2) { g.moveTo(m + s * 44 * u, m - 15 * u); g.lineTo(m + s * 59 * u, m); g.lineTo(m + s * 44 * u, m + 15 * u); }
+    } else if (tipo === "dash") {   // v21.2: duas setas ">>"
+      for (let s = 0; s < 2; s++) { const ox = (s - 0.5) * 18 * u; g.moveTo(m + ox - 8 * u, yi - 14 * u); g.lineTo(m + ox + 8 * u, yi); g.lineTo(m + ox - 8 * u, yi + 14 * u); }
     } else if (tipo === "mira") {
       g.moveTo(m + 15 * u, yi); g.arc(m, yi, 15 * u, 0, 7);
       g.moveTo(m - 26 * u, yi); g.lineTo(m - 9 * u, yi); g.moveTo(m + 9 * u, yi); g.lineTo(m + 26 * u, yi);

@@ -75,7 +75,8 @@ function dicaTeclas(solo) {
   const tk = entrada.teclas();
   const n = function(j, a) { return nomeTecla(tk[j][a][0]); };
   const n2 = function(j, a) { return tk[j][a][1] ? " / " + nomeTecla(tk[j][a][1]) : ""; };
-  if (solo) return t("dica_bot_v3", n(1, "esquerda") + " " + n(1, "direita"), n(1, "pulo") + n2(1, "pulo"), n(1, "tiro"));
+  if (solo) return t("dica_bot_v3", n(1, "esquerda") + " " + n(1, "direita"), n(1, "pulo") + n2(1, "pulo"), n(1, "tiro")) +
+    "\n" + t("dica_dash", n(1, "dash") + n2(1, "dash"));   // v21.2
   return t("dica_2p_v3", n(1, "esquerda") + " " + n(1, "direita") + " " + n(1, "pulo") + " + " + n(1, "tiro"),
     n(2, "esquerda") + " " + n(2, "direita") + " " + n(2, "pulo") + " + " + n(2, "tiro"));
 }

@@ -96,7 +96,11 @@ function maxPulos(b, cen) {
   return b.efeitos.super_pulo > 0 ? 3 : 2;
 }
 
-// Um passo de física. ent = { esq, dir, pulo (apertou agora), segPulo (segurando), baixo }
+// v21.2: DASH — arrancada curta para o lado (vale no ar); durante ela os tiros ATRAVESSAM a bolinha (combate.js) e o
+// dano de quem ataca não pega. vel em px por passo (andar é 6,2), dur e recarga em segundos.
+const DASH = { vel: 17, dur: 0.16, recarga: 1.1 };
+
+// Um passo de física. ent = { esq, dir, pulo (apertou agora), segPulo (segurando), baixo, dash (apertou agora) }
 // Devolve eventos simples em b.evento: "pulo", "aterrissou", "lava", "caiu", "portal", "bumper" (ou "")
 function moverBolinha(b, ent, cen, plats, t, bumpers) {
   b.evento = "";
@@ -140,6 +144,13 @@ function moverBolinha(b, ent, cen, plats, t, bumpers) {
       b.vy = -FIS.puloDuplo * sinal * forca; b.pulos = Math.max(b.pulos, 1) + 1; b.evento = "pulo";
     }
   }
+  // ---- dash ----
+  if (b.dashCd > 0) b.dashCd -= FIS.dt;
+  if (!congelado && !grudado && ent.dash && !(b.dashCd > 0)) {
+    b.dashDir = input || b.dir || 1; b.dashT = DASH.dur; b.dashCd = DASH.recarga; b.evento = "dash";
+    if (!cen.semGravidade && !cen.agua && b.vy * sinal > 0) b.vy = 0;   // no ar: para de cair um instante
+  }
+  if (b.dashT > 0) { b.dashT -= FIS.dt; b.vx = b.dashDir * DASH.vel * (cen.agua ? 0.6 : 1); }
   b.segurouPulo = ent.segPulo;
   // soltou o pulo cedo: pulo mais baixo (dá controle fino)
   // (v19: menos quando foi o tornado que jogou para cima)
@@ -158,7 +169,7 @@ function moverBolinha(b, ent, cen, plats, t, bumpers) {
     // presa numa bolha: sobe devagar balançando (a gravidade não vale)
     b.vy += (-1.5 * sinal - b.vy) * 0.08;
     b.vx *= 0.94;
-  } else b.vy += g * (ef.inflado > 0 ? 0.45 : 1);
+  } else b.vy += g * (ef.inflado > 0 ? 0.45 : 1) * (b.dashT > 0 ? 0.15 : 1);
   if (cen.agua) { b.vx *= 0.975; b.vy *= 0.955; }
   if (cen.semGravidade) { b.vx *= 0.99; b.vy *= 0.985; }
   b.vy = limitar(b.vy, -FIS.quedaMax, FIS.quedaMax);

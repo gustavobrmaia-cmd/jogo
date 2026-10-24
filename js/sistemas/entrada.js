@@ -16,10 +16,11 @@
 // Gamepad: 1º controle = jogador 1, 2º = jogador 2. Analógico direito mira e atira; gatilhos atiram.
 // =========================
 
-const ACOES = ["esquerda", "direita", "pulo", "baixo", "tiro"];
+const ACOES = ["esquerda", "direita", "pulo", "baixo", "tiro", "dash"];
+// v21.2: dash = Shift/E (jogador 1; também o botão direito do mouse) e Shift direito/K (jogador 2)
 const TECLAS_PADRAO = {
-  1: { esquerda: ["KeyA"], direita: ["KeyD"], pulo: ["Space", "KeyW"], baixo: ["KeyS"], tiro: ["KeyF", "KeyG"] },
-  2: { esquerda: ["ArrowLeft"], direita: ["ArrowRight"], pulo: ["ArrowUp"], baixo: ["ArrowDown"], tiro: ["KeyL", "Enter", "Numpad0"] }
+  1: { esquerda: ["KeyA"], direita: ["KeyD"], pulo: ["Space", "KeyW"], baixo: ["KeyS"], tiro: ["KeyF", "KeyG"], dash: ["ShiftLeft", "KeyE"] },
+  2: { esquerda: ["ArrowLeft"], direita: ["ArrowRight"], pulo: ["ArrowUp"], baixo: ["ArrowDown"], tiro: ["KeyL", "Enter", "Numpad0"], dash: ["ShiftRight", "KeyK"] }
 };
 
 // Nome curto de uma tecla para mostrar na tela (ex.: "KeyA" -> "A", "ArrowLeft" -> "←")
@@ -44,7 +45,19 @@ const entrada = (function() {
   let ultimoToque = 0;
   let esperandoTecla = null;                // troca de tecla: function(code) que recebe a próxima tecla
 
-  function teclas() { return (typeof save !== "undefined" && save.teclas && save.teclas[1]) ? save.teclas : TECLAS_PADRAO; }
+  function teclas() {
+    if (!(typeof save !== "undefined" && save.teclas && save.teclas[1])) return TECLAS_PADRAO;
+    // v21.2: save com teclas trocadas de antes do dash: a ação nova vem com as teclas de fábrica (se estiverem livres)
+    [1, 2].forEach(function(j) {
+      ACOES.forEach(function(a) {
+        if (save.teclas[j][a]) return;
+        const usadas = [];
+        [1, 2].forEach(function(jj) { Object.keys(save.teclas[jj]).forEach(function(aa) { (save.teclas[jj][aa] || []).forEach(function(c) { if (c) usadas.push(c); }); }); });
+        save.teclas[j][a] = TECLAS_PADRAO[j][a].filter(function(c) { return usadas.indexOf(c) < 0; });
+      });
+    });
+    return save.teclas;
+  }
   function refazerMapa() {
     mapa = {};
     const tk = teclas();
@@ -96,6 +109,7 @@ const entrada = (function() {
   window.addEventListener("mousedown", function(e) {
     if (!api.ativa || e.target !== canvasEl()) return;
     if (performance.now() - ultimoToque < 1000) return;   // clique "fantasma" que o celular gera depois do toque
+    if (e.button === 2) { apertos[1].add("dash"); return; }   // v21.2: botão direito = dash
     if (e.button !== 0) return;
     const p = posCanvas(e.clientX, e.clientY);
     mouse.x = p.x; mouse.y = p.y; mouse.ultimoUso = performance.now(); mouse.usado = true;
@@ -133,18 +147,21 @@ const entrada = (function() {
       let tipo = z[1] === "mira" && fy < (typeof limitePuloToque === "function" ? limitePuloToque() : 0.45) ? "pulo" : z[1];
       // v21: em pé com a câmera, tocar na arena (acima dos controles) atira naquele ponto (desenho.js toqueNaArena)
       if (api.solo && typeof toqueNaArena === "function" && toqueNaArena(fy)) tipo = "alvo";
+      // v21.2: botão de dash (acima do analógico de andar; desenho.js toqueNoDash)
+      if (api.solo && typeof toqueNoDash === "function" && toqueNoDash(fx, fy)) tipo = "dash";
       const d = { jogador: z[0], tipo: tipo, x0: t2.clientX, y0: t2.clientY, dx: 0, dy: 0, pulou: false,
                   escala: r.width / CONFIG.largura, fx: fx, fy: fy };
       dedos.set(t2.identifier, d);
       if (tipo === "mira" || tipo === "alvo") apertos[d.jogador].add("tiro");
       if (tipo === "pulo") apertos[d.jogador].add("pulo");
+      if (tipo === "dash") apertos[d.jogador].add("dash");
       apertos[d.jogador].add("toque");
     }
   }
   function moveu(e) {
     for (const t2 of e.changedTouches) {
       const d = dedos.get(t2.identifier);
-      if (!d || d.tipo === "pulo") continue;
+      if (!d || d.tipo === "pulo" || d.tipo === "dash") continue;
       if (d.tipo === "alvo") {   // o ponto do tiro acompanha o dedo
         const r = canvasEl().getBoundingClientRect();
         d.fx = (t2.clientX - r.left) / r.width; d.fy = (t2.clientY - r.top) / r.height;
@@ -197,7 +214,8 @@ const entrada = (function() {
       const v = {
         esquerda: ax < -0.35 || b(14), direita: ax > 0.35 || b(15),
         pulo: b(0) || b(12) || b(4), baixo: ay > 0.6 || b(13),
-        tiro: b(2) || b(1) || b(5) || b(7) || b(6) || miraForte
+        tiro: b(2) || b(1) || b(5) || b(7) || b(6) || miraForte,
+        dash: b(3)   // v21.2: Y / triângulo
       };
       Object.keys(v).forEach(function(a) { alvo[a] = alvo[a] || v[a]; });
       start = start || b(9);

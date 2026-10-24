@@ -578,5 +578,16 @@ TEXTOS.ro = {
   novo_cartas: "NOU: Cărți de arme și 10 arme noi!",
   novo_loja: "NOU: Magazinul de arme deblocat!",
   // v20.5
-  carta_lendaria: "Una poate fi LEGENDARĂ!"
+  carta_lendaria: "Una poate fi LEGENDARĂ!",
+  // v21.2
+  acao_dash: "Dash",
+  toque_dash: "DASH",
+  dica_dash: "{0}: DASH (eschivează gloanțele!)",
+  // v21.3
+  tw_titulo: "RUNDĂ NEBUNĂ!",
+  tw_gigantes: "BILE URIAȘE!",
+  tw_mini: "MINI BILE!",
+  tw_turbo: "TURBO!",
+  tw_chuva: "PLOAIE DE ARME!",
+  tw_pulo: "SUPERSALT!"
 };

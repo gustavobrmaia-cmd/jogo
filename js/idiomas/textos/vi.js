@@ -578,5 +578,16 @@ TEXTOS.vi = {
   novo_cartas: "MỚI: Thẻ vũ khí và 10 vũ khí mới!",
   novo_loja: "MỚI: Đã mở cửa hàng vũ khí!",
   // v20.5
-  carta_lendaria: "Một trong số đó có thể là HUYỀN THOẠI!"
+  carta_lendaria: "Một trong số đó có thể là HUYỀN THOẠI!",
+  // v21.2
+  acao_dash: "Lướt",
+  toque_dash: "LƯỚT",
+  dica_dash: "{0}: LƯỚT (né đạn!)",
+  // v21.3
+  tw_titulo: "HIỆP ĐIÊN RỒ!",
+  tw_gigantes: "BÓNG KHỔNG LỒ!",
+  tw_mini: "BÓNG TÍ HON!",
+  tw_turbo: "TĂNG TỐC!",
+  tw_chuva: "MƯA VŨ KHÍ!",
+  tw_pulo: "SIÊU NHẢY!"
 };

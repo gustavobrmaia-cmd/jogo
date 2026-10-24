@@ -578,5 +578,16 @@ TEXTOS.id = {
   novo_cartas: "BARU: Kartu senjata dan 10 senjata baru!",
   novo_loja: "BARU: Toko senjata terbuka!",
   // v20.5
-  carta_lendaria: "Salah satunya bisa LEGENDARIS!"
+  carta_lendaria: "Salah satunya bisa LEGENDARIS!",
+  // v21.2
+  acao_dash: "Dash",
+  toque_dash: "DASH",
+  dica_dash: "{0}: DASH (hindari tembakan!)",
+  // v21.3
+  tw_titulo: "RONDE GILA!",
+  tw_gigantes: "BOLA RAKSASA!",
+  tw_mini: "BOLA MINI!",
+  tw_turbo: "TURBO!",
+  tw_chuva: "HUJAN SENJATA!",
+  tw_pulo: "LOMPAT SUPER!"
 };

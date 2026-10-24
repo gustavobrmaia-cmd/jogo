@@ -80,6 +80,7 @@ function criarBot(lado, nivel, estilo) {
     // e o bot fraco não "caça" o jogador (sem relógio de paciência)
     graca: Math.round(lerp(4, 0, Math.min(1, d / 0.5))),
     caca: d >= 0.35,
+    dash: d < 0.25 ? 0 : lerp(0.15, 0.6, (d - 0.25) / 0.75),   // v21.2: chance de dar dash num tiro que vem perto
     historico: [],                          // posições passadas do oponente (para o atraso de reação)
     plano: null, proxDecisao: 0, passosPlano: 0,
     proxClique: 0.3 + Math.random() * 0.3,
@@ -91,7 +92,7 @@ function criarBot(lado, nivel, estilo) {
   };
   // v21.1: teste A/B, grupo "b": bot simples (o jeito de lutar da v18.3; nível, mira e reação continuam iguais)
   if (typeof save !== "undefined" && save.exp === "b") {
-    bot.preve = 0; bot.leMira = 0; bot.cobre = 0; bot.finta = 0.1; bot.combo = 0; bot.arcoAlto = false; bot.tabela = false;
+    bot.preve = 0; bot.leMira = 0; bot.cobre = 0; bot.finta = 0.1; bot.combo = 0; bot.arcoAlto = false; bot.tabela = false; bot.dash = 0;
   }
   return bot;
 }
@@ -775,6 +776,22 @@ function conferirDesvios(bot, M, b) {
 }
 
 // ---------- o que o bot aperta neste passo ----------
+// v21.2: o bot dá dash para desviar de um tiro do outro que está chegando (decide 1 vez por tiro; o forte desvia mais)
+function botDash(bot, M, b, ent) {
+  if (!(bot.dash > 0) || !b.viva || b.dashCd > 0 || b.dashT > 0) return;
+  for (let i = 0; i < M.proj.length; i++) {
+    const p = M.proj[i];
+    if (!p.vivo || p.dono === b.lado || (!p.vx && !p.vy)) continue;
+    const dx = b.x - p.x, dy = b.y - p.y, vv = p.vx * p.vx + p.vy * p.vy, rv = p.vx * dx + p.vy * dy;
+    if (dx * dx + dy * dy > 170 * 170 || rv <= 0 || p.dashVistoPor === b.lado) continue;
+    // só tiro que vai acertar: a menor distância da reta do tiro até a bolinha
+    const s2 = rv / vv, ex = dx - p.vx * s2, ey = dy - p.vy * s2;
+    if (ex * ex + ey * ey > (b.r + (p.raio || 4) + 8) * (b.r + (p.raio || 4) + 8)) continue;
+    p.dashVistoPor = b.lado;   // decide 1 vez por tiro
+    if (Math.random() < bot.dash) { ent.dash = true; return; }
+  }
+}
+
 function pensarBot(bot, M, b) {
   const o = oponente(M, b);
   // rodada nova: zera o que era da rodada anterior. Os tempos (hesitouAte...) são do relógio da rodada (M.t),

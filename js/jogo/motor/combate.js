@@ -320,6 +320,8 @@ function atualizarProjeteis(M) {
       if (p.hit[k] > 0) { p.hit[k]--; continue; }
       const dx = b.x - p.x, dy = b.y - p.y, rr = b.r + p.raio;
       if (dx * dx + dy * dy > rr * rr) continue;
+      // v21.2: no dash o tiro atravessa (um anel branco marca o desvio)
+      if (b.dashT > 0) { p.hit[k] = 30; if (typeof Efeitos !== "undefined" && !M.mudo) Efeitos.anel(b.x, b.y, "#ffffff", b.r * 1.3); continue; }
       acertouBolinha(M, p, b, k);
       if (!p.vivo) break;
     }
@@ -586,6 +588,7 @@ function explosao(M, x, y, raio, dano, dono, a, atingidoDireto) {
 
 // dano: furia dobra o dano de quem bate; escudo segura até 40
 function causarDano(M, b, dano, atacante, nx, ny, empurra, fx, fy) {
+  if (b.dashT > 0 && atacante && atacante !== b) return;   // v21.2: no dash, golpe/explosão/laser de quem ataca não pega
   if (!b.viva || dano <= 0 && !empurra) return;
   if (atacante && atacante !== b && atacante.efeitos.furia > 0) dano *= 2;
   if (atacante && atacante !== b && M.multDano) dano *= M.multDano;
@@ -665,7 +668,12 @@ function matar(M, b) {
   if (!b.viva) return;
   b.vida = 0;
   b.viva = false;
-  if (typeof Efeitos !== "undefined") { Efeitos.estouro(b.x, b.y, b.cor); Efeitos.tremer(12); }
+  // v21.3: K.O. "boneco de pano": quem perde sai voando girando e só estoura no fim do voo (desenho.js desenharVoos).
+  // Nos duelos famosos do Poki (Rooftop Snipers, série Random) a física engraçada do K.O. é metade da graça
+  if (typeof Efeitos !== "undefined") Efeitos.tremer(12);
+  const mat = M.bolinhas[b.lado === 1 ? 1 : 0], lado = b.x === mat.x ? (Math.random() < 0.5 ? -1 : 1) : Math.sign(b.x - mat.x);
+  (M.voos || (M.voos = [])).push({ lado: b.lado, x: b.x, y: b.y, r: b.r, cor: b.cor, vx: lado * (4.5 + Math.random() * 3), vy: -13 - Math.random() * 3,
+    vr: lado * (0.22 + Math.random() * 0.12), t0: typeof jogo !== "undefined" && jogo ? jogo.tempoReal : 0, g: gravSinal(M.cen, M.t), estourou: false });
   somJogo(M, "estouro");
   // golpe final: pausa maior, K.O. e câmera lenta com zoom em quem caiu (desenho.js)
   const matador = M.bolinhas[b.lado === 1 ? 1 : 0];
@@ -1036,7 +1044,7 @@ function pontoSobrePlataforma(M, folgaY) {
 function atualizarItens(M) {
   // caixas: a primeira aos 1,5 s, depois a cada ~4 s (no máximo 2 no mapa)
   if (M.t >= M.proxCaixa) {
-    M.proxCaixa = M.t + 3.2 + Math.random() * 1.5;
+    M.proxCaixa = M.t + (3.2 + Math.random() * 1.5) * (M.multCaixa || 1);   // v21.3: chuva de armas = 0,35
     if (M.caixas.length < 2) {
       // v18: jogador no estilingue contra a máquina: a caixa cai perto dele e de mais baixo
       const perto = semArma(M);

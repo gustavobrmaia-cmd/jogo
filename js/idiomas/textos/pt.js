@@ -578,5 +578,16 @@ TEXTOS.pt = {
   novo_cartas: "NOVO: Cartas de arma e 10 armas novas!",
   novo_loja: "NOVO: Loja de armas liberada!",
   // v20.5
-  carta_lendaria: "Uma delas pode ser LENDÁRIA!"
+  carta_lendaria: "Uma delas pode ser LENDÁRIA!",
+  // v21.2
+  acao_dash: "Dash",
+  toque_dash: "DASH",
+  dica_dash: "{0}: DASH (desvia dos tiros!)",
+  // v21.3
+  tw_titulo: "RODADA MALUCA!",
+  tw_gigantes: "BOLINHAS GIGANTES!",
+  tw_mini: "MINI BOLINHAS!",
+  tw_turbo: "TURBO!",
+  tw_chuva: "CHUVA DE ARMAS!",
+  tw_pulo: "SUPER PULO!"
 };

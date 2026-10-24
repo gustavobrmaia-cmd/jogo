@@ -578,5 +578,16 @@ TEXTOS.tr = {
   novo_cartas: "YENİ: Silah kartları ve 10 yeni silah!",
   novo_loja: "YENİ: Silah dükkanı açıldı!",
   // v20.5
-  carta_lendaria: "Biri EFSANEVİ olabilir!"
+  carta_lendaria: "Biri EFSANEVİ olabilir!",
+  // v21.2
+  acao_dash: "Atılma",
+  toque_dash: "ATIL",
+  dica_dash: "{0}: ATILMA (atışlardan kaç!)",
+  // v21.3
+  tw_titulo: "ÇILGIN TUR!",
+  tw_gigantes: "DEV TOPLAR!",
+  tw_mini: "MİNİ TOPLAR!",
+  tw_turbo: "TURBO!",
+  tw_chuva: "SİLAH YAĞMURU!",
+  tw_pulo: "SÜPER ZIPLAMA!"
 };
