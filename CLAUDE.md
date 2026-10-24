@@ -437,6 +437,13 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       de 40% chega pelo canal rápido, os pacotes de jogo passam a ir pelo confiável (`canalJogo`). Testado com
       `?rede=teste&perda=100`: a partida funciona.
     - **Tempo-limite de queda:** 8 s (era 6), contando qualquer mensagem.
+  - v20.1 (online com amigos: "sala não encontrada" no código e a partida rápida não achava ninguém):
+    - **Código da sala:** o servidor da netlib (github.com/poki/netlib, `internal/util/identifiers.go`) gera os códigos
+      curtos em MAIÚSCULAS (2-9 e A-Z sem I, L, O, Q, U) e diferencia maiúsculas. O jogo passava o código para minúsculas
+      no `join`, e toda entrada por código falhava. Agora usa `toUpperCase()`. O erro "lobby-not-found" mostra "Sala
+      não encontrada".
+    - **Sala velha:** salas de quem fechou o jogo ficam um tempo na lista. Entrou numa sala e ninguém respondeu em
+      12 s: a sala vai para `Rede.evitar` e a partida rápida procura outra (antes ficava esperando para sempre).
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

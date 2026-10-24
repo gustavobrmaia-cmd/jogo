@@ -160,7 +160,9 @@ const Rede = (function() {
       teste = teste || Cabo();
       return teste.entrar(codigo);
     }
-    return abrirNet().then(function(n) { return n.join(String(codigo).trim().toLowerCase()); })
+    // v20.1: o servidor gera os códigos curtos em MAIÚSCULAS (2-9 e A-Z sem I, L, O, Q, U) e diferencia maiúsculas;
+    // antes o jogo passava o código para minúsculas e TODA entrada por código dava "sala não encontrada"
+    return abrirNet().then(function(n) { return n.join(String(codigo).trim().toUpperCase()); })
       .then(function(info) { if (info) api.codigo = info.code; return !!info; });
   };
 
@@ -183,9 +185,12 @@ const Rede = (function() {
       });
     });
   };
+  // v20.1: salas em que já entramos e ninguém respondeu (de quem fechou o jogo; ficam um tempo na lista do servidor)
+  const evitar = {};
+  api.evitar = function(codigo) { if (codigo) evitar[codigo] = 1; };
   function salasLivres(lista) {
     return (lista || []).filter(function(l) {
-      return l.public && !l.hasPassword && l.playerCount === 1 && l.customData && l.customData.v === VERSAO && l.code !== api.codigo;
+      return l.public && !l.hasPassword && l.playerCount === 1 && l.customData && l.customData.v === VERSAO && l.code !== api.codigo && !evitar[l.code];
     }).sort(function(a, b) { return (a.latency || 999) - (b.latency || 999); });
   }
   // duas pessoas procurando ao mesmo tempo criavam duas salas e esperavam para sempre: quem espera numa sala pública

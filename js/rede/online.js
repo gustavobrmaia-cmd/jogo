@@ -412,6 +412,15 @@ const Online = (function() {
     timerP2P = setTimeout(function() { if (!Rede.conectado) falhaP2P("p2p-tempo"); }, 15000);
   });
   Rede.ao("erro", function(tipo) { if ((tipo === "p2p" || tipo === "rtc") && !Rede.conectado) falhaP2P(tipo); });
+  // entrou numa sala: se o dono não responder em 12 s, a sala é evitada e conta como falha de conexão
+  function esperarResposta(codigo) {
+    clearTimeout(timerP2P);
+    timerP2P = setTimeout(function() {
+      if (Rede.conectado) return;
+      Rede.evitar(codigo);
+      falhaP2P("sem-resposta");
+    }, 12000);
+  }
   function falhaP2P(motivo) {
     clearTimeout(timerP2P);
     if (Rede.conectado) return;
@@ -535,7 +544,10 @@ const Online = (function() {
     }
     function tentar() {
       if (busca !== b) return;
-      Rede.rapida().catch(function(e) {
+      Rede.rapida().then(function() {
+        // v20.1: entrou na sala de alguém e ninguém respondeu em 12 s (sala velha de quem já saiu): evita e procura outra
+        if (busca === b && !Rede.anfitriao && !Rede.conectado) esperarResposta(Rede.codigo);
+      }).catch(function(e) {
         if (busca !== b) return;
         b.erro = String(e && e.message || e && e.type || e || "erro").slice(0, 30);
         console.warn("online: partida rápida falhou (" + b.erro + "), tentando de novo");
@@ -562,6 +574,7 @@ const Online = (function() {
       return p.then(function(r) {
         if (tela !== "procurando") return;
         if (como === "entrar" && !r) { status(t("on_nao_achou")); mostrarBotoes("inicio"); tela = "inicio"; Rede.sair(); return; }
+        if (como === "entrar" && !Rede.conectado) esperarResposta(Rede.codigo);
         if (Rede.conectado) return;
         if (Rede.anfitriao) {
           if (como === "criar") {
@@ -575,7 +588,11 @@ const Online = (function() {
     }).catch(function(e) {
       ocupado = false;
       tela = "inicio";
-      status(t("on_erro") + " (" + String(e && e.message || e && e.type || e || "erro").slice(0, 30) + ")");
+      Rede.sair();
+      // código que não existe: o servidor responde com erro "lobby-not-found" (não é falha de rede)
+      const cod = String(e && (e.code || e.message) || e || "erro");
+      if (/not.?found/i.test(cod)) status(t("on_nao_achou"));
+      else status(t("on_erro") + " (" + cod.slice(0, 30) + ")");
       mostrarBotoes("inicio");
     });
   }
