@@ -36,9 +36,12 @@ function layoutTela(j) {
   L.limitePulo = 0.45;                                  // toque no lado de dentro acima disso (fração da altura) = pulo
   if (L.emPe && j && !j.demo && j.modo !== "2p") {
     const base = H - 760, topo = 150;
-    const zMax = Math.min(1.8, (base - topo - 250) / FIS.altura);
+    // v21: câmera bem mais perto (zoom 1,75–2,2; era 1,3–1,8). Com a arena inteira na largura as bolinhas tinham ~23–32 px
+    // num celular de 412 px e ~40% da tela era céu vazio (jogador de teste). Agora a arena ocupa a faixa de cima e,
+    // quando os dois não cabem, a câmera fica com VOCÊ e o outro vira uma seta na beirada (desenharSetasForaDaTela)
+    const zMax = Math.min(2.2, (base - topo - 250) / FIS.altura);
     if (zMax >= 1.1) {
-      L.cam = true; L.base = base; L.zMax = zMax; L.zMin = Math.min(1.3, zMax);   // v18: era 1,15 (bolinhas com 16–25 px no celular)
+      L.cam = true; L.base = base; L.zMax = zMax; L.zMin = Math.min(1.75, zMax);   // v18: 1,15 -> 1,3; v21: 1,75
       L.hudTopo = topo;
       L.yPulo = H - 640;
       L.limitePulo = (H - 470) / H;
@@ -50,6 +53,12 @@ function layoutTela(j) {
 }
 // fração da altura da tela acima da qual um toque no lado de dentro é pulo (entrada.js)
 function limitePuloToque() { return layoutTela.L ? layoutTela.L.limitePulo : 0.45; }
+// v21: em pé com a câmera, um toque NA ARENA (acima dos controles) é "atirar ali" (entrada.js tipo "alvo"). Antes, todo
+// o lado direito acima dos botões era pulo e o esquerdo era andar: a criança tocava no rival e a bolinha pulava
+function toqueNaArena(fy) {
+  const L = layoutTela.L;
+  return !!(L && L.cam && jogo && !jogo.demo && jogo.modo !== "2p" && fy * L.H < L.base - 20);
+}
 
 const camera = { z: 1, x: 0, oy: 0, M: null };
 function atualizarCamera(j, M, L) {
@@ -63,7 +72,11 @@ function atualizarCamera(j, M, L) {
   const nova = c.M !== M;
   c.z = nova ? zAlvo : c.z + (zAlvo - c.z) * 0.05;
   const larg = CONFIG.largura / c.z;
-  const xAlvo = limitar((x0 + x1) / 2 - larg / 2, 0, CONFIG.largura - larg);
+  let xAlvo = (x0 + x1) / 2 - larg / 2;
+  // v21: a sua bolinha (índice 0: contra a máquina e, espelhado, no online) fica sempre a uma boa distância da beirada
+  const eu = M.bolinhas[0];
+  if (eu && eu.viva) { const mg = Math.min(larg * 0.24, 210); xAlvo = limitar(xAlvo, eu.x - larg + mg, eu.x - mg); }
+  xAlvo = limitar(xAlvo, 0, CONFIG.largura - larg);
   c.x = nova ? xAlvo : limitar(c.x + (xAlvo - c.x) * 0.1, 0, CONFIG.largura - larg);
   c.oy = L.base - FIS.altura * c.z;
   c.M = M;
@@ -392,8 +405,9 @@ function desenharSetasForaDaTela(ctx, M) {
     const p = mundoParaTela(b.x, b.y), r = b.r * camera.z;
     const lado = p.x < -r * 0.3 ? -1 : p.x > CONFIG.largura + r * 0.3 ? 1 : 0;
     if (!lado) continue;
-    const x = lado < 0 ? 46 : CONFIG.largura - 46, y = limitar(p.y, camera.oy + 40, camera.oy + FIS.altura * camera.z - 40);
-    const pulso = 1 + 0.08 * Math.sin(M.t * 8);
+    // v21: em pé a seta tem o dobro do tamanho (com a câmera mais perto o outro sai da tela bem mais vezes)
+    const g = 2, x = lado < 0 ? 46 * g : CONFIG.largura - 46 * g, y = limitar(p.y, camera.oy + 40 * g, camera.oy + FIS.altura * camera.z - 40 * g);
+    const pulso = g * (1 + 0.08 * Math.sin(M.t * 8));
     ctx.save();
     ctx.translate(x, y); ctx.scale(lado * pulso, pulso);
     ctx.beginPath(); ctx.moveTo(26, 0); ctx.lineTo(-14, -28); ctx.lineTo(-14, 28); ctx.closePath();
@@ -1456,6 +1470,11 @@ function desenharControlesToque(ctx, j, H, L) {
   // analógicos que estão sendo usados
   abertos.forEach(function(d) {
     if (d.tipo === "pulo") return;
+    if (d.tipo === "alvo") {   // v21: tocou na arena: anel no ponto onde o tiro vai
+      ctx.globalAlpha = 0.85; ctx.lineWidth = 10; ctx.strokeStyle = j.cores[d.jogador - 1];
+      ctx.beginPath(); ctx.arc(d.fx * CONFIG.largura, d.fy * H, 46 + 6 * Math.sin(j.tempoFase * 14), 0, 7); ctx.stroke();
+      return;
+    }
     const cor = j.cores[d.jogador - 1];
     const bx = d.fx * CONFIG.largura, by = d.fy * H;
     ctx.globalAlpha = 0.5;

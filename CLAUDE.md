@@ -535,6 +535,14 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     - o analógico de tiro diz "ATIRAR"/"SHOOT" (`toque_tiro`; era "MIRAR"/"AIM");
     - ficou para depois (do relatório): em pé a bolinha fica na beirada e ~40% da tela é céu vazio (câmera); recompensa
       do treino passa batida em 2–3 s; parado 45 s sem nada acontecer na rodada 1 do treino; tocar no rival faz pular.
+  - v21 (o dono pediu tudo para chegar em 3m30; 54% jogam EM PÉ no celular):
+    - **Câmera em pé mais perto** (desenho.js `layoutTela`/`atualizarCamera`): zoom 1,75–2,2 (era 1,3–1,8); bolinha de
+      ~32 -> ~40 px de diâmetro num celular de 412 px. A sua bolinha (índice 0) fica sempre a >= 24% da largura da
+      beirada; o outro, fora da tela, vira uma seta na cor dele (`desenharSetasForaDaTela`, agora 2x maior);
+    - **Tocar na arena = atirar ali** (em pé com câmera; `toqueNaArena` em desenho.js, tipo "alvo" em entrada.js): a mira
+      vai no ponto tocado (como o mouse) e atira enquanto o dedo está lá; anel na cor de quem joga no ponto. Os botões de
+      baixo (andar, pular, atirar) continuam iguais; deitado e 2 jogadores não mudam. Teste "tocar no Bob e segurar 1,5 s":
+      v20.9 a bolinha pulava e o Bob ficava em 100; v21 o Bob vai a 0.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

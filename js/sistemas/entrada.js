@@ -108,7 +108,7 @@ const entrada = (function() {
   function mouseAtivo() { return mouse.usado || mouse.segurando; }
 
   // ---- toque ----
-  // dedos: id -> { jogador, tipo: "stick" | "mira", x0, y0, dx, dy, pulou, escala, fx, fy }
+  // dedos: id -> { jogador, tipo: "stick" | "mira" | "pulo" | "alvo" (v21: tocou na arena, em pé), x0, y0, dx, dy, pulou, escala, fx, fy }
   const dedos = new Map();
 
   // contra o bot: esquerda = andar, direita = mira/tiro.  2 jogadores: [andar J1 | mira J1 | mira J2 | andar J2]
@@ -130,11 +130,13 @@ const entrada = (function() {
       const fy = (t2.clientY - r.top) / r.height;
       const z = zona(fx);
       // lado de dentro: em cima = botão de pulo, embaixo = analógico de mira (em pé: a linha fica logo acima do analógico)
-      const tipo = z[1] === "mira" && fy < (typeof limitePuloToque === "function" ? limitePuloToque() : 0.45) ? "pulo" : z[1];
+      let tipo = z[1] === "mira" && fy < (typeof limitePuloToque === "function" ? limitePuloToque() : 0.45) ? "pulo" : z[1];
+      // v21: em pé com a câmera, tocar na arena (acima dos controles) atira naquele ponto (desenho.js toqueNaArena)
+      if (api.solo && typeof toqueNaArena === "function" && toqueNaArena(fy)) tipo = "alvo";
       const d = { jogador: z[0], tipo: tipo, x0: t2.clientX, y0: t2.clientY, dx: 0, dy: 0, pulou: false,
                   escala: r.width / CONFIG.largura, fx: fx, fy: fy };
       dedos.set(t2.identifier, d);
-      if (tipo === "mira") apertos[d.jogador].add("tiro");
+      if (tipo === "mira" || tipo === "alvo") apertos[d.jogador].add("tiro");
       if (tipo === "pulo") apertos[d.jogador].add("pulo");
       apertos[d.jogador].add("toque");
     }
@@ -143,6 +145,11 @@ const entrada = (function() {
     for (const t2 of e.changedTouches) {
       const d = dedos.get(t2.identifier);
       if (!d || d.tipo === "pulo") continue;
+      if (d.tipo === "alvo") {   // o ponto do tiro acompanha o dedo
+        const r = canvasEl().getBoundingClientRect();
+        d.fx = (t2.clientX - r.left) / r.width; d.fy = (t2.clientY - r.top) / r.height;
+        continue;
+      }
       d.dx = (t2.clientX - d.x0) / d.escala;
       d.dy = (t2.clientY - d.y0) / d.escala;
       const lim = 90;
@@ -223,7 +230,7 @@ const entrada = (function() {
     if (a === "tiro" && j === 1 && mouse.segurando) return true;
     for (const d of dedos.values()) {
       if (d.jogador !== j) continue;
-      if (d.tipo === "mira") { if (a === "tiro") return true; continue; }
+      if (d.tipo === "mira" || d.tipo === "alvo") { if (a === "tiro") return true; continue; }
       if (d.tipo === "pulo") { if (a === "pulo") return true; continue; }
       if (a === "esquerda" && d.dx < -16) return true;
       if (a === "direita" && d.dx > 16) return true;
@@ -236,6 +243,8 @@ const entrada = (function() {
   // Para onde o jogador j está mirando. null = mira assistida (o jogo escolhe).
   // { ang } = ângulo pronto (toque/controle)   { x, y } = ponto na tela (mouse, em coordenadas do canvas)
   function mira(j) {
+    // v21: dedo na arena (em pé): mira no ponto tocado (coordenadas lógicas da tela, como o mouse)
+    for (const d of dedos.values()) if (d.jogador === j && d.tipo === "alvo") return { x: d.fx * CONFIG.largura, y: d.fy * alturaTela };
     for (const d of dedos.values()) {
       if (d.jogador === j && d.tipo === "mira" && d.dx * d.dx + d.dy * d.dy > 22 * 22) return { ang: Math.atan2(d.dy, d.dx) };
     }
