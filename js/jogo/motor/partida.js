@@ -268,6 +268,9 @@ function iniciarRodada() {
   }
   // contra o bot: o bot fraco também bate mais fraco (nível 1 tira ~70% do dano normal)
   if (j.modo === "bot" && j.bots[1]) M.multBot = lerp(0.45, 1, Math.min(1, j.bots[1].nivel / 0.45));
+  // v20.9: no treino o Bob bate 40% menos (o jogador de teste viu a vida cair de 100 para 48 em 2,5 s logo depois do 1º
+  // acerto: o treino é para aprender, a vida mínima já impede perder, mas o susto espanta)
+  if (j.treino && j.bots[1]) M.multBot *= 0.6;
   // primeiras partidas: mede onde a pessoa sai (rodada a rodada)
   if (j.modo === "bot" && save.partidas <= 2) Poki.medir("round", "m" + save.partidas + "-r" + j.rodada, "start");
   b1.mira = 0; b2.mira = Math.PI;

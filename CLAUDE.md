@@ -525,6 +525,16 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     - 87% celular, 54% em pé; línguas novas: 11 pessoas (vi 5, uk 4, ja 2); online: 2 tentaram e falharam (p2p).
   - v20.8: treino e rivais 2–3 sem templo e fliperama (sobram campo, fábrica e floresta); eles voltam como casa do
     Rocky (rival 4) e da Nova (rival 5) e no resto da ordem do treino depois da 3ª rodada.
+  - v20.9 (agente jogador de teste, 1º minuto, 10 sessões; relatório em scratchpad/agente1min/relatorio/relatorio.md):
+    - **Mira assistida virava para o lado errado:** no toque, segurar o botão de tiro sem arrastar não dá mira livre e o
+      tiro ia para o lado em que a bolinha andou por último; o Bob do treino gruda nas costas e 78–84% do tempo de tiro
+      ia no vazio (uma rodada de 45 s sem acerto). Agora (combate.js `usarArma`) gente atirando sem mira livre vira
+      para o oponente na hora do tiro. Teste "andou um pouco e segurou o tiro": antes 5 s com o Bob em 100; agora 100 ->
+      20 em 1 s. No treino a mira assistida de gente pega até ~57° (Bob numa plataforma acima);
+    - no treino o Bob bate 40% menos (`M.multBot *= 0.6`; a vida caía de 100 para 48 em 2,5 s depois do 1º acerto);
+    - o analógico de tiro diz "ATIRAR"/"SHOOT" (`toque_tiro`; era "MIRAR"/"AIM");
+    - ficou para depois (do relatório): em pé a bolinha fica na beirada e ~40% da tela é céu vazio (câmera); recompensa
+      do treino passa batida em 2–3 s; parado 45 s sem nada acontecer na rodada 1 do treino; tocar no rival faz pular.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

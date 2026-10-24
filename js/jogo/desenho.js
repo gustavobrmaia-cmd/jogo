@@ -1439,7 +1439,8 @@ function desenharControlesToque(ctx, j, H, L) {
        { x: 0.61, y: yBaixo, tipo: "mira", j: 2 }, { x: 0.61, y: yCima, tipo: "pulo", j: 2 }, { x: 0.87, y: yBaixo, tipo: "stick", j: 2 }]
     : [{ x: 0.14, y: yBaixo, tipo: "stick", j: 1 }, { x: 0.86, y: yBaixo, tipo: "mira", j: 1 }, { x: 0.86, y: yCima, tipo: "pulo", j: 1 }];
   const abertos = entrada.analogicos();
-  const nomes = { stick: "toque_mover", mira: "toque_mira", pulo: "toque_pulo" };
+  // v20.9: o analógico de tiro diz "ATIRAR" (era "MIRAR": para criança, mirar não é atirar)
+  const nomes = { stick: "toque_mover", mira: "toque_tiro", pulo: "toque_pulo" };
   zonas.forEach(function(z) {
     const cor = j.cores[z.j - 1];
     const x = z.x * CONFIG.largura;

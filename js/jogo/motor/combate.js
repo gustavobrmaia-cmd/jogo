@@ -86,7 +86,8 @@ function calcularMira(M, b) {
     return b.dir > 0 ? angCanvas : Math.PI - angCanvas;
   }
   const alvo = Math.atan2(dy, dx);
-  const lim = M.cen.semGravidade ? ANG_ASSIST * 1.4 : ANG_ASSIST;
+  // v20.9: no treino a ajuda é maior para gente (~57°): pega o Bob numa plataforma logo acima
+  const lim = ANG_ASSIST * (M.cen.semGravidade ? 1.4 : 1) * (b.humano && typeof jogo !== "undefined" && jogo && jogo.treino ? 1.6 : 1);
   return Math.abs(difAng(alvo, base)) < lim ? alvo : base;
 }
 
@@ -118,6 +119,14 @@ function usarArma(M, b, segurando, apertou) {
   b.feixeLigado = false;
   if (!b.viva || b.efeitos.congelado > 0) { b.carga = 0; return; }
   let a = ARMA[b.arma];
+  // v20.9: gente atirando SEM mira livre (segurar o botão de tiro no toque sem arrastar, F/espaço no teclado) vira para
+  // o oponente na hora do tiro. Antes o tiro ia para o lado em que a bolinha andou por último: o jogador de teste viu o
+  // Bob do treino grudar nas costas da criança e 78–84% do tempo de tiro ir no vazio (uma rodada inteira sem acerto).
+  // Andando sem atirar, a bolinha continua virada para onde anda. O bot sempre tem mira livre (não muda nada nele).
+  if ((segurando || apertou) && b.humano && (b.miraLivre === null || b.miraLivre === undefined) && a.tipo !== "mina" && a.tipo !== "ceu" && a.tipo !== "torreta") {
+    const o = oponente(M, b);
+    if (o.viva && !(o.efeitos.fantasma > 0) && Math.abs(o.x - b.x) > 4) b.dir = o.x > b.x ? 1 : -1;
+  }
   b.mira = calcularMira(M, b);
 
   // railgun: carrega um pouquinho antes de disparar
