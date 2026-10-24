@@ -147,7 +147,16 @@ function usarArma(M, b, segurando, apertou) {
 function gastar(b, n) {
   if (b.municao === Infinity || b.efeitos.municao > 0) return;
   b.municao -= n;
-  if (b.municao <= 0) equipar(b, "estilingue");
+  if (b.municao <= 0) equiparReserva(b);
+}
+// v21.4: a arma comprada na loja é a arma RESERVA (o dono: "funciona igual o estilingue"): quando a munição acaba vem
+// ela, com munição infinita, no lugar do estilingue. Sem arma comprada: estilingue. (jogo.armaInicial: partida.js)
+function equiparReserva(b) {
+  const j = typeof jogo !== "undefined" ? jogo : null, r = j && j.armaInicial && j.armaInicial[b.lado - 1];
+  if (!r || !ARMA[r]) { equipar(b, "estilingue"); return; }
+  equipar(b, r);
+  b.municao = Infinity;
+  if (b.humano && !j.demo && typeof Efeitos !== "undefined") Efeitos.texto(b.x, b.y - b.r - 30, t("pegou_arma", t("a_" + r)), "#8ce99a", 1.2);
 }
 
 function dispararArma(M, b, a) {

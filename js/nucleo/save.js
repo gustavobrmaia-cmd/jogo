@@ -39,7 +39,7 @@ function saveNovo() {
     // sendo gravados (espelho do corpo e do chapéu/acessório) para um save novo abrir numa versão antiga
     visual: { cor: "cor_rosa", corpo: "classico", olhos: "", boca: "", chapeu: "", acessorio: "", rastro: "", ko: "", emote: "" },
     armas: [],        // v19: armas compradas na loja (ids de ARMAS)
-    armaInicial: "",  // v19: arma com que a pessoa começa cada rodada ("" = a da carta / a sorteada)
+    armaInicial: "",  // v19: arma escolhida na loja. v21.4: é a arma RESERVA (quando a munição acaba; "" = estilingue)
     qualidade: "auto", // "auto" | "alta" | "leve"
     // v21.1: TESTE A/B (sorteado 1 vez por jogador, como o Smash Room do blog do Poki): "a" = bot atual (v19),
     // "b" = bot simples (sem cobertura, sem sair da linha da mira, sem previsão/fintas/tabela, como o da v18.3).

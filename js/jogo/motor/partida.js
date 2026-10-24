@@ -157,8 +157,9 @@ function novaPartida(modo, opcoes) {
     // tutorial desenhado da 1ª partida (atirar -> andar -> pular; desenho.js)
     tuto: modo === "bot" && save.partidas <= 1 ? { passo: null, tempo: 0, andou: 0, pulou: false } : null
   };
-  // v19: arma inicial (comprada na loja): quem tem começa TODA rodada com ela. Contra a máquina e no online (cada um
-  // com a sua). v19.6: no 2 jogadores não vale (só o jogador 1 tinha, e a tela Melhorar diz que lá os dois são iguais)
+  // v19: arma comprada na loja (save.armaInicial; o nome ficou). v21.4: virou a arma RESERVA (vem quando a munição acaba,
+  // no lugar do estilingue: combate.js equiparReserva). Contra a máquina e no online (cada um com a sua). v19.6: no
+  // 2 jogadores não vale (só o jogador 1 tinha, e a tela Melhorar diz que lá os dois são iguais)
   const ai = save.armaInicial;
   jogo.armaInicial = [!treino && (modo === "bot" || modo === "sobrevivencia" || modo === "online") && ai && typeof ARMA !== "undefined" && ARMA[ai] && (save.armas || []).indexOf(ai) >= 0 ? ai : null, null];
   escolherSkins(jogo);
@@ -242,8 +243,6 @@ function iniciarRodada() {
   // os dois começam com a mesma arma (justo) e ela muda a cada rodada
   const arma = j.treino && j.rodada === 1 ? "rifle" : sortearArma(M, true);
   equipar(b1, arma); equipar(b2, arma);
-  // v19: quem tem arma inicial começa TODA rodada com ela; na 1ª rodada a carta escolhida pode trocar (iniciarCartas)
-  if (j.armaInicial) M.bolinhas.forEach(function(b, k) { if (j.armaInicial[k]) equipar(b, j.armaInicial[k]); });
   // v19: rastro escolhido na personalização (o motor guarda os pontos; o desenho fica em arte/skins.js)
   if (j.visuais && !j.demo) M.bolinhas.forEach(function(b, k) { const r = j.visuais[k].rastro; if (r) b.rastroFx = { id: r, vida: 0.42, pts: [], n: 0 }; });
   // 1ª partida da vida: dá para chegar perto de perder, mas não perder; o tiro do jogador pesa mais (rodada curta)
@@ -726,7 +725,8 @@ function iniciarCartas(j, M) {
   const b = M.bolinhas[0], armas = [];
   for (let n = 0; armas.length < 3 && n < 60; n++) { const id = sortearArmaCarta(M, b); if (armas.indexOf(id) < 0) armas.push(id); }
   while (armas.length < 3) armas.push(armas[armas.length - 1]);
-  j.cartas = { t: 0, armas: armas, ini: j.armaInicial && j.armaInicial[0] || null, sel: null, tSel: 0, auto: false,
+  // v21.4: a arma da loja não é mais a inicial (é a reserva): a carta escolhida vale sempre (ini fica null)
+  j.cartas = { t: 0, armas: armas, ini: null, sel: null, tSel: 0, auto: false,
     foco: 1, melhor: false, final: null, deu: 0, revelou: false, outras: false, rects: null, mx: -1, my: -1 };
   j.fase = "cartas";
   j.tempoFase = 0;
@@ -790,7 +790,8 @@ function fimCartas(j) {
 // ---------- v21.3: RODADA MALUCA ----------
 // Os duelos mais jogados do Poki (Basket/Soccer/Boxing Random, da RHM) mudam alguma coisa a cada ponto. Aqui: a partir
 // da 2ª rodada do rival 2 (e no "Contra o bot" depois da 2ª partida, no 2 jogadores sempre), cada rodada tem 50% de
-// chance de uma surpresa, nunca a mesma duas vezes seguidas. Não vale no treino, online, sobrevivência e demo.
+// chance de uma surpresa, nunca a mesma duas vezes seguidas. Não vale no treino, sobrevivência e demo. v21.4: vale no
+// online também (o anfitrião sorteia; M.twist, o tamanho das bolinhas e os efeitos vão no estado para o convidado).
 // Letreiro: desenho.js desenharTwist. Evento twist/<id> (start).
 const TWISTS = {
   gigantes: { icone: "brilho", cor: "#ff8787" },
@@ -800,7 +801,7 @@ const TWISTS = {
   pulo:     { icone: "seta",   cor: "#8ce99a" }
 };
 function escolherTwist(j) {
-  if (j.demo || j.treino || j.modo === "online" || j.modo === "sobrevivencia" || j.rodada < 2) return null;
+  if (j.demo || j.treino || j.modo === "sobrevivencia" || j.rodada < 2) return null;
   const r = j.rival;
   if (r && r.liga === 0 && r.i < 1) return null;
   if (j.modo === "bot" && !r && save.partidas <= 2) return null;

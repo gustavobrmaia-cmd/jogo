@@ -1,8 +1,9 @@
 "use strict";
 
 // =========================
-// LOJA DE ARMAS (v19): compra armas com moedas e escolhe a ARMA INICIAL (começa toda rodada com ela, contra a
-// máquina e no 2 jogadores; quem não tem arma inicial ganha a da carta escolhida na 1ª rodada).
+// LOJA DE ARMAS (v19): compra armas com moedas e escolhe uma delas. v21.4: ela é a ARMA RESERVA (vem com munição
+// infinita quando a munição acaba, no lugar do estilingue; combate.js equiparReserva), contra a máquina e no online.
+// (No save continua save.armaInicial e as chaves de texto arma_inicial_*, só os textos mudaram.)
 // Só aparece depois que o novato passou pelo começo (Progresso.lojaLiberada: rival 5 vencido ou já viu a tela das
 // melhorias — o fluxo direto entre os rivais 1–5 não pode ganhar uma parada nova).
 // Preços: Progresso.PRECO_ARMA (por raridade). Abas por raridade; o destaque mostra a bolinha da pessoa segurando a

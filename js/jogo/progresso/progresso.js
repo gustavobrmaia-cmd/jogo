@@ -235,7 +235,9 @@ const Progresso = (function() {
   // ---------- loja de armas (v19) ----------
   // Preço por raridade, medido com a economia da v18.3 (scratchpad/v19/trab-c/economia.js): uma vitória contra rival
   // da Bronze dá ~150–230 moedas (partida + prêmio do rival + baú). Comum ~2 vitórias, rara ~5, lendária ~14.
-  const PRECO_ARMA = [0, 350, 900, 2600];
+  // v21.4: o dono pediu as boas MUITO caras (a arma comprada virou reserva com munição infinita; não pode ficar apelão).
+  // Os 10 rivais da Bronze dão ~1.100 moedas de prêmio (~1.500–2.500 com missões e baús): lendária = 3–4 ligas
+  const PRECO_ARMA = [0, 400, 3000, 9000];
   function precoArma(id) { const a = ARMA[id]; return a ? PRECO_ARMA[a.raridade] || 0 : 0; }
   function temArma(id) { return save.armas.indexOf(id) >= 0; }
   // a loja só aparece depois que o novato passou pelo começo (rival 5 vencido ou já viu a tela das melhorias)

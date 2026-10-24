@@ -576,6 +576,14 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       embaixo da faixa da abertura (`desenharTwist`; a abertura fica 0,7 s mais longa). Evento twist/<id>;
     - **K.O. "boneco de pano"**: quem perde sai voando e girando com cara de dor (~0,8 s de jogo; `M.voos`,
       `desenharVoos`) e só então estoura em confete.
+  - v21.4 (dono): **a arma da loja virou ARMA RESERVA** ("funciona igual o estilingue"): ninguém começa a rodada com ela;
+    quando a munição acaba vem ela com munição INFINITA no lugar do estilingue (combate.js `equiparReserva`, com o nome
+    dela em verde em cima da bolinha). Sem arma comprada: estilingue. Vale contra a máquina e no online (cada um a sua).
+    As cartas da 1ª rodada valem sempre (sem a comparação "MELHOR!" com a inicial: `j.cartas.ini` = null). Textos da
+    loja: "Usar como reserva", "Reserva: X (vem quando a munição acaba)" (chaves arma_inicial_* nos 15 idiomas; o save
+    continua `save.armaInicial`). **Preços: comum 400, rara 3.000, lendária 9.000** (eram 350/900/2.600; o dono quer as
+    boas muito caras para não ficar apelão). **Rodada Maluca também no online** (o anfitrião sorteia; tudo vai no estado).
+  - **TESTE A/B (`save.exp`) É TEMPORÁRIO:** depois do PFT, ficar só com o bot vencedor e tirar o sorteio e os eventos exp/*.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;
