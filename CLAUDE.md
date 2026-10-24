@@ -456,6 +456,13 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     - **3) Carregamento adiado:** queda.js, roleta.js, rede.js e online.js saíram do index.html e carregam 1,5 s depois
       de abrir (`carregarAdiados` no main.js). "Online" no menu espera o carregamento. Loja e personalização continuam
       no começo: a loja cria o botão do menu quando carrega.
+  - v20.3 (partida rápida: "Oponente encontrado" piscava e a partida não começava; a sala com código já funcionava):
+    - **Vigia** (procura sala mais antiga a cada 3 s):
+      - antes continuava rodando com alguém entrando na sala e largava a sala no meio da conexão;
+      - agora para no evento "connecting" (`entrando`) e quando a sala tem 2 pessoas;
+      - só troca para salas até 75 s mais velhas que a sua (mais velha que isso é de quem já saiu).
+    - **Sala velha:** quando a vigia entra na sala de outro, também espera resposta por 12 s.
+    - **Tela:** o relógio da busca mostra "Oponente encontrado!" enquanto conecta.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

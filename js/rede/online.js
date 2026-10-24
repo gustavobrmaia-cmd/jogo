@@ -405,7 +405,9 @@ const Online = (function() {
   // v20: achou alguém e a conexão com ele começou: se não fechar em 15 s, desiste dessa pessoa (na partida rápida
   // procura outra). Os eventos online/p2p (start, complete, fail) mostram no painel onde a conexão para
   Rede.ao("etapa", function(nome) {
+    if (nome === "entrou") { if (busca && !Rede.conectado) esperarResposta(Rede.codigo); return; }
     if (nome !== "conectando" || Rede.conectado) return;
+    if (busca) busca.achou = true;
     Poki.medir("online", "p2p", "start");
     status(t("on_achou"));
     clearTimeout(timerP2P);
@@ -431,6 +433,7 @@ const Online = (function() {
     Rede.sair();
     if (busca) {   // partida rápida: continua procurando outra pessoa
       busca.erro = motivo;
+      busca.achou = false;
       clearTimeout(busca.tentar);
       busca.tentar = setTimeout(busca.tentarDeNovo, 1000);
       return;
@@ -529,7 +532,7 @@ const Online = (function() {
     function mostrar() {
       if (busca !== b || Rede.conectado) return;
       const f = falta();
-      status(t("on_procurando") + "  " + Math.floor(f / 60) + ":" + String(f % 60).padStart(2, "0"));
+      status((b.achou ? t("on_achou") : t("on_procurando")) + "  " + Math.floor(f / 60) + ":" + String(f % 60).padStart(2, "0"));
       if (ESPERA_RAPIDA - f >= BOT_DEPOIS && el("onBotBusca").classList.contains("escondido")) {
         el("onBotBusca").classList.remove("escondido");
         Poki.medir("online", "quick-bot", "visible");

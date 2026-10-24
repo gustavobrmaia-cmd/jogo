@@ -99,8 +99,10 @@ const Rede = (function() {
         });
         // v20: etapas da conexão com o outro aparelho (para a tela e para os eventos): "conectando" e erro "p2p" quando
         // a conexão direta/relé não fecha (antes a tela ficava em "Conectando..." para sempre)
-        net.on("connecting", function() { if (!par) emitir("etapa", "conectando"); });
-        net.on("disconnected", function(p) { if (par && p.id === par.id) caiu(); else if (!par) emitir("erro", "p2p"); });
+        // v20.3: alguém entrou na minha sala e está conectando: a vigia para (antes ela podia largar a sala no meio da
+        // conexão para entrar numa sala mais antiga — "oponente encontrado" piscava e a partida não começava)
+        net.on("connecting", function() { if (!par) { entrando = true; pararVigia(); emitir("etapa", "conectando"); } });
+        net.on("disconnected", function(p) { if (par && p.id === par.id) caiu(); else if (!par) { entrando = false; emitir("erro", "p2p"); } });
         net.on("rtcerror", function() { if (!par) emitir("erro", "rtc"); });
         net.on("message", function(p, canal, dado) {
           if (!par || p.id !== par.id) return;
@@ -195,21 +197,29 @@ const Rede = (function() {
   }
   // duas pessoas procurando ao mesmo tempo criavam duas salas e esperavam para sempre: quem espera numa sala pública
   // olha de 3 em 3 s se tem outra sala esperando, mais antiga que a sua; se tiver, sai da sua e entra nela
-  let vigia = null;
+  let vigia = null, entrando = false;
   function vigiar() {
     pararVigia();
+    entrando = false;
     vigia = setInterval(function() {
-      if (api.conectado || !api.anfitriao || !net) { pararVigia(); return; }
+      if (api.conectado || !api.anfitriao || !net || entrando) { pararVigia(); return; }
       const minha = net.currentLobbyInfo;
+      if (minha && minha.playerCount > 1) return;   // alguém já entrou na minha sala
       net.list().then(function(lista) {
-        if (api.conectado || !api.anfitriao) return;
+        if (api.conectado || !api.anfitriao || entrando) return;
+        // só salas mais antigas que a minha, mas não muito (até 75 s: a partida rápida desiste em 60 s; mais velha que
+        // isso é de quem já saiu). Os dois horários são do servidor
+        const t0 = minha && minha.createdAt ? Date.parse(minha.createdAt) : NaN;
         const outra = salasLivres(lista).filter(function(l) {
-          return !minha || !minha.createdAt || l.createdAt < minha.createdAt || (l.createdAt === minha.createdAt && l.code < minha.code);
+          if (!minha || !minha.createdAt) return true;
+          const t = Date.parse(l.createdAt);
+          const maisVelha = l.createdAt < minha.createdAt || (l.createdAt === minha.createdAt && l.code < minha.code);
+          return maisVelha && !(t0 - t > 75000);
         })[0];
         if (!outra) return;
         pararVigia();
         net.leave().then(function() { return net.join(outra.code); }).then(function(info) {
-          if (info) { api.anfitriao = false; api.codigo = info.code; }
+          if (info) { api.anfitriao = false; api.codigo = info.code; emitir("etapa", "entrou"); }
           else api.criar(true).then(vigiar);
         }).catch(function() { api.criar(true).then(vigiar); });
       }).catch(function() {});
@@ -219,6 +229,7 @@ const Rede = (function() {
 
   api.sair = function() {
     pararVigia();
+    entrando = false;
     if (teste) teste.sair();
     if (net) { try { net.leave(); } catch (e) {} }
     par = null;
