@@ -589,5 +589,7 @@ TEXTOS.es = {
   tw_mini: "¡MINI BOLAS!",
   tw_turbo: "¡TURBO!",
   tw_chuva: "¡LLUVIA DE ARMAS!",
-  tw_pulo: "¡SÚPER SALTO!"
+  tw_pulo: "¡SÚPER SALTO!",
+  // v21.5
+  super_dica: "¡DAÑO x1,5!"
 };

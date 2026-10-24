@@ -589,5 +589,7 @@ TEXTOS.vi = {
   tw_mini: "BÓNG TÍ HON!",
   tw_turbo: "TĂNG TỐC!",
   tw_chuva: "MƯA VŨ KHÍ!",
-  tw_pulo: "SIÊU NHẢY!"
+  tw_pulo: "SIÊU NHẢY!",
+  // v21.5
+  super_dica: "SÁT THƯƠNG x1,5!"
 };

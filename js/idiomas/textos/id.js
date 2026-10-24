@@ -589,5 +589,7 @@ TEXTOS.id = {
   tw_mini: "BOLA MINI!",
   tw_turbo: "TURBO!",
   tw_chuva: "HUJAN SENJATA!",
-  tw_pulo: "LOMPAT SUPER!"
+  tw_pulo: "LOMPAT SUPER!",
+  // v21.5
+  super_dica: "DAMAGE x1,5!"
 };

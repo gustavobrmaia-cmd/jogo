@@ -589,5 +589,7 @@ TEXTOS.tr = {
   tw_mini: "MİNİ TOPLAR!",
   tw_turbo: "TURBO!",
   tw_chuva: "SİLAH YAĞMURU!",
-  tw_pulo: "SÜPER ZIPLAMA!"
+  tw_pulo: "SÜPER ZIPLAMA!",
+  // v21.5
+  super_dica: "HASAR x1,5!"
 };

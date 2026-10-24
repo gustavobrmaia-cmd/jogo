@@ -589,5 +589,7 @@ TEXTOS.pl = {
   tw_mini: "MINI KULKI!",
   tw_turbo: "TURBO!",
   tw_chuva: "DESZCZ BRONI!",
-  tw_pulo: "SUPERSKOK!"
+  tw_pulo: "SUPERSKOK!",
+  // v21.5
+  super_dica: "OBRAŻENIA x1,5!"
 };

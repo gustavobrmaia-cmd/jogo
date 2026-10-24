@@ -600,6 +600,7 @@ function causarDano(M, b, dano, atacante, nx, ny, empurra, fx, fy) {
   if (b.dashT > 0 && atacante && atacante !== b) return;   // v21.2: no dash, golpe/explosão/laser de quem ataca não pega
   if (!b.viva || dano <= 0 && !empurra) return;
   if (atacante && atacante !== b && atacante.efeitos.furia > 0) dano *= 2;
+  if (atacante && atacante !== b && atacante.efeitos.super > 0) dano *= SUPER.mult;
   if (atacante && atacante !== b && M.multDano) dano *= M.multDano;
   if (atacante && atacante.lado === 2 && M.multBot) dano *= M.multBot * tensao(M, b);
   if (atacante && atacante !== b && atacante.lado === 1 && M.multJogador) dano *= M.multJogador;
@@ -638,6 +639,7 @@ function causarDano(M, b, dano, atacante, nx, ny, empurra, fx, fy) {
   if (atacante && atacante !== b) {
     M.stats.dano[atacante.lado - 1] += dano;
     M.stats.acertos[atacante.lado - 1]++;
+    carregarSuper(M, atacante, b, dano);
   }
   // ---- sensação de acerto ("juice") ----
   let tomAcerto = 1;
@@ -671,6 +673,34 @@ function causarDano(M, b, dano, atacante, nx, ny, empurra, fx, fy) {
   else if (b.humano) somJogo(M, "dor");
   else somJogo(M, "acerto");
   if (b.vida <= 0) matar(M, b);
+}
+
+// v21.5: medidor de SUPER (o "especial" que enche dos duelos famosos: Basketball Stars, Bowmasters, Supreme Duelist).
+// Enche batendo e também apanhando (quem está perdendo chega lá: virada). Cheio, liga sozinho (sem botão novo):
+// 5 s com dano x1,5 e aura dourada. Contra o bot a pessoa enche mais rápido que ele.
+const SUPER = { dur: 5, mult: 1.5 };
+function carregarSuper(M, a, b, dano) {
+  const cb = M.contraBot;
+  if (!(a.efeitos.super > 0)) ganharSuper(M, a, dano * (cb ? (a.humano ? 1 : 0.6) : 0.8));
+  if (!(b.efeitos.super > 0) && b.vida > 0) ganharSuper(M, b, dano * (cb ? (b.humano ? 0.6 : 0.35) : 0.5));
+}
+function ganharSuper(M, b, n) {
+  b.super = Math.min(100, (b.super || 0) + n);
+  if (b.super >= 100 && b.viva) ativarSuper(M, b);
+}
+function ativarSuper(M, b) {
+  b.super = 0;
+  b.efeitos.super = SUPER.dur;
+  M.ultimoSuper = { lado: b.lado, t: M.t };
+  if (typeof Efeitos !== "undefined") {
+    Efeitos.anel(b.x, b.y, "#ffd43b", 80);
+    Efeitos.anel(b.x, b.y, "#fff3a6", 50);
+    Efeitos.texto(b.x, b.y - b.r - 40, "SUPER!", "#ffd43b", 1.6);
+    if (b.humano) Efeitos.texto(b.x, b.y - b.r - 8, t("super_dica"), "#fff3a6", 0.9);
+    Efeitos.tremer(b.humano ? 7 : 4);
+  }
+  somJogo(M, "super");
+  if (b.humano && !M.mudo) vibrar([20, 30, 20]);
 }
 
 function matar(M, b) {

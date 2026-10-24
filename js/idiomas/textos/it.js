@@ -589,5 +589,7 @@ TEXTOS.it = {
   tw_mini: "MINI PALLINE!",
   tw_turbo: "TURBO!",
   tw_chuva: "PIOGGIA DI ARMI!",
-  tw_pulo: "SUPER SALTO!"
+  tw_pulo: "SUPER SALTO!",
+  // v21.5
+  super_dica: "DANNO x1,5!"
 };

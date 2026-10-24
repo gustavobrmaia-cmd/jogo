@@ -589,5 +589,7 @@ TEXTOS.ja = {
   tw_mini: "ミニボール！",
   tw_turbo: "ターボ！",
   tw_chuva: "武器の雨！",
-  tw_pulo: "スーパージャンプ！"
+  tw_pulo: "スーパージャンプ！",
+  // v21.5
+  super_dica: "ダメージ x1.5!"
 };

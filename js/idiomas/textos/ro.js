@@ -589,5 +589,7 @@ TEXTOS.ro = {
   tw_mini: "MINI BILE!",
   tw_turbo: "TURBO!",
   tw_chuva: "PLOAIE DE ARME!",
-  tw_pulo: "SUPERSALT!"
+  tw_pulo: "SUPERSALT!",
+  // v21.5
+  super_dica: "DAUNE x1,5!"
 };

@@ -583,6 +583,12 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     loja: "Usar como reserva", "Reserva: X (vem quando a munição acaba)" (chaves arma_inicial_* nos 15 idiomas; o save
     continua `save.armaInicial`). **Preços: comum 400, rara 3.000, lendária 9.000** (eram 350/900/2.600; o dono quer as
     boas muito caras para não ficar apelão). **Rodada Maluca também no online** (o anfitrião sorteia; tudo vai no estado).
+  - v21.5 — **medidor de SUPER** (o "especial" que enche dos duelos famosos: Basketball Stars, Bowmasters, Supreme
+    Duelist). `combate.js` `carregarSuper`/`ativarSuper`: enche com o dano dado e também com o recebido (virada);
+    contra o bot a pessoa ganha 1x o dano dado e 0,6x o recebido, o bot 0,6x/0,35x; 2p/online 0,8x/0,5x. Cheio, liga
+    SOZINHO (sem botão novo): `efeitos.super` 5 s com dano x1,5 (`SUPER.mult`), aura dourada (a da fúria, `aura(R,q,ouro)`),
+    "SUPER!" + "DANO x1,5!" (`super_dica` nos 15 idiomas), som `super` e vibração. HUD: anel dourado em volta do retrato
+    (`desenho.js anelSuper`). `b.super` e `efeitos.super` vão no estado do online sem mudar nada. Zera a cada rodada.
   - **TESTE A/B (`save.exp`) É TEMPORÁRIO:** depois do PFT, ficar só com o bot vencedor e tirar o sorteio e os eventos exp/*.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no

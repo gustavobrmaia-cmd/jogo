@@ -589,5 +589,7 @@ TEXTOS.nl = {
   tw_mini: "MINIBALLEN!",
   tw_turbo: "TURBO!",
   tw_chuva: "WAPENREGEN!",
-  tw_pulo: "SUPERSPRONG!"
+  tw_pulo: "SUPERSPRONG!",
+  // v21.5
+  super_dica: "SCHADE x1,5!"
 };

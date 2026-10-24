@@ -589,5 +589,7 @@ TEXTOS.fr = {
   tw_mini: "MINI BOULES !",
   tw_turbo: "TURBO !",
   tw_chuva: "PLUIE D'ARMES !",
-  tw_pulo: "SUPER SAUT !"
+  tw_pulo: "SUPER SAUT !",
+  // v21.5
+  super_dica: "DÉGÂTS x1,5 !"
 };

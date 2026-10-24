@@ -291,7 +291,7 @@ function desenharBolinhaNoMundo(ctx, j, M, b, o, tm) {
   else if (ef.congelado > 0 || ef.lento > 0.5) expr = "tonto";
   else if (b.dor > 0) expr = "dor";
   else if (b.vida < 25) expr = "medo";
-  else if (ef.furia > 0 || b.recuoAnim > 0.2 || b.golpe > 0 || b.avisando || (b.humano && b.ent && b.ent.tiro)) expr = "bravo";
+  else if (ef.furia > 0 || ef.super > 0 || b.recuoAnim > 0.2 || b.golpe > 0 || b.avisando || (b.humano && b.ent && b.ent.tiro)) expr = "bravo";
   const ox = o.x - b.x, oy = o.y - b.y, od = Math.sqrt(ox * ox + oy * oy) || 1;
   const d = b.desc || (b.desc = {});
   d.x = b.x; d.y = b.y; d.r = b.r; d.cor = b.cor; d.vx = b.vx; d.vy = b.vy;
@@ -306,7 +306,7 @@ function desenharBolinhaNoMundo(ctx, j, M, b, o, tm) {
   if (!b.noChao && !M.cen.semGravidade) kv = Math.min(0.13, Math.abs(b.vy || 0) * 0.011);
   d.escalaX = (b.escalaX || 1) * (1 - kv * 0.6); d.escalaY = (b.escalaY || 1) * (1 + kv) * (gs < 0 ? -1 : 1);
   d.flash = b.flash || 0; d.escudo = ef.escudo > 0; d.fantasma = fantasma; d.congelado = ef.congelado > 0;
-  d.fogo = ef.fogo > 0; d.furia = ef.furia > 0; d.rapidez = ef.rapidez > 0; d.t = tm;
+  d.fogo = ef.fogo > 0; d.furia = ef.furia > 0; d.superAtivo = ef.super > 0; d.rapidez = ef.rapidez > 0; d.t = tm;
   const sk = j.skins && j.skins[b.lado - 1];
   d.skin = sk ? sk.corpo : "classico"; d.acessorio = sk ? sk.acessorio : "nenhum";
   // rastro de velocidade (v14): quem está rápido (melhoria de Velocidade ou carta Rapidez) deixa "fantasmas" para trás
@@ -1327,6 +1327,22 @@ function placarGrande(ctx, j, cx, y, alfa) {
 // ---------- painel de cada um no HUD (v17.5) ----------
 // Retrato da bolinha (com skin e acessório; a cara muda: dor, medo, feliz) num medalhão, nome, barra de vida com
 // degradê, brilho e marcas, estrelas do placar e a arma com a munição. Ocupa a mesma largura de antes (380).
+// v21.5: medidor de SUPER = anel dourado em volta do retrato (enche batendo e apanhando; cheio, brilha e pulsa)
+function anelSuper(ctx, b, ax, ay, av, agora) {
+  const ativo = b.efeitos && b.efeitos.super > 0, f = ativo ? b.efeitos.super / SUPER.dur : Math.min(1, (b.super || 0) / 100);
+  const vis = b.superVis = b.superVis === undefined || ativo ? f : b.superVis + (f - b.superVis) * 0.2;
+  const r = av + 9;
+  ctx.lineCap = "round";
+  ctx.lineWidth = 8; ctx.strokeStyle = "#1a0d33"; ctx.beginPath(); ctx.arc(ax, ay, r, 0, 7); ctx.stroke();
+  if (vis > 0.01) {
+    ctx.lineWidth = ativo ? 6 + Math.sin(agora * 16) * 1.5 : 5;
+    ctx.strokeStyle = ativo ? (Math.floor(agora * 10) % 2 ? "#fff3a6" : "#ffd43b") : vis > 0.8 ? "#ffd43b" : "#f5b700";
+    ctx.beginPath(); ctx.arc(ax, ay, r, -Math.PI / 2, -Math.PI / 2 + vis * Math.PI * 2); ctx.stroke();
+  }
+  ctx.lineCap = "butt";
+  if (ativo) textoContorno(ctx, "SUPER", ax, ay + av + 22, 15, "#ffd43b", "center", 4);
+}
+
 function painelJogador(ctx, j, b, x, y, lado) {
   const w = 380, av = 31;
   const x0 = lado > 0 ? x : x - w;
@@ -1350,6 +1366,7 @@ function painelJogador(ctx, j, b, x, y, lado) {
   ctx.fillStyle = tom(b.cor, -0.6); ctx.beginPath(); ctx.arc(ax, ay, av, 0, 7); ctx.fill();
   ctx.lineWidth = 4; ctx.strokeStyle = pouca ? "rgba(255,77,94," + (0.6 + 0.4 * Math.sin(agora * 10)) + ")" : b.cor;
   ctx.beginPath(); ctx.arc(ax, ay, av - 1, 0, 7); ctx.stroke();
+  anelSuper(ctx, b, ax, ay, av, agora);
   const sk = j.skins && j.skins[b.lado - 1];
   const rt = retrato(b.cor, sk && sk.corpo, sk && sk.acessorio, ex, 22, lado);
   ctx.drawImage(rt.c, Math.round(ax - rt.m), Math.round(ay - rt.m - rt.dy + 3));

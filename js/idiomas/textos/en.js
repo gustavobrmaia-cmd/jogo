@@ -589,5 +589,7 @@ TEXTOS.en = {
   tw_mini: "MINI BALLS!",
   tw_turbo: "TURBO!",
   tw_chuva: "WEAPON RAIN!",
-  tw_pulo: "SUPER JUMP!"
+  tw_pulo: "SUPER JUMP!",
+  // v21.5
+  super_dica: "DAMAGE x1.5!"
 };

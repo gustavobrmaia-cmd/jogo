@@ -589,5 +589,7 @@ TEXTOS.pt = {
   tw_mini: "MINI BOLINHAS!",
   tw_turbo: "TURBO!",
   tw_chuva: "CHUVA DE ARMAS!",
-  tw_pulo: "SUPER PULO!"
+  tw_pulo: "SUPER PULO!",
+  // v21.5
+  super_dica: "DANO x1,5!"
 };

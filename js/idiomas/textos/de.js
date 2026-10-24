@@ -589,5 +589,7 @@ TEXTOS.de = {
   tw_mini: "MINIKUGELN!",
   tw_turbo: "TURBO!",
   tw_chuva: "WAFFENREGEN!",
-  tw_pulo: "SUPERSPRUNG!"
+  tw_pulo: "SUPERSPRUNG!",
+  // v21.5
+  super_dica: "SCHADEN x1,5!"
 };
