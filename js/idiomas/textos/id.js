@@ -399,7 +399,7 @@ TEXTOS.id = {
   arma_inicial_e: "Senjata awal: {0}",
   arma_inicial_selo: "AWAL",
   arma_inicial_usando: "Senjata awalmu",
-  sem_arma_inicial: "Tanpa senjata awal: roda yang memilih",
+  sem_arma_inicial: "Tanpa senjata awal: kamu pilih kartu",
   faltam_moedas: "Kurang {0} koin",
   so_bau: "Hanya di peti",
   so_bau_longo: "Hanya dari peti",
@@ -572,9 +572,11 @@ TEXTOS.id = {
   // v19.8
   roleta_melhor: "LEBIH BAIK!",
   // v20.2
-  libera_roleta: "Menang untuk membuka: RODA + 10 SENJATA BARU!",
+  libera_cartas: "Menang untuk membuka: KARTU SENJATA + 10 SENJATA BARU!",
   libera_loja: "Menang untuk membuka: TOKO SENJATA!",
   loja_em: "Toko senjata dalam {0} kemenangan",
-  novo_roleta: "BARU: Roda senjata dan 10 senjata baru!",
-  novo_loja: "BARU: Toko senjata terbuka!"
+  novo_cartas: "BARU: Kartu senjata dan 10 senjata baru!",
+  novo_loja: "BARU: Toko senjata terbuka!",
+  // v20.5
+  carta_lendaria: "Salah satunya bisa LEGENDARIS!"
 };

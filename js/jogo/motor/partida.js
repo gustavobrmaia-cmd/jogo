@@ -3,8 +3,8 @@
 // =========================
 // PARTIDA E RODADAS
 // Partida: quem fizer CONFIG.pontosParaVencer pontos primeiro. Cada rodada é num cenário diferente:
-//   "roleta"    v19, só na 1ª rodada (menos no treino): roleta de ARMA de cada bolinha sem arma inicial e depois
-//               a roleta de MAPA (~2 s nas primeiras partidas; toque ou tecla acelera). Desenho: arte/roleta.js
+//   "cartas"    v20.5, só na 1ª rodada contra a máquina (a partir do rival 3): 3 cartas viradas, a pessoa escolhe uma
+//               (sozinha em 3 s). Desenho: arte/cartas_arma.js
 //   "intro"     ~1,3 s: nome do cenário, bolinhas aparecem (ninguém atira ainda)
 //   "luta"      45 s para derrotar o oponente
 //   "queda"     acabou o tempo e os dois estão vivos: queda de braço (quem clicar mais vence).
@@ -236,7 +236,7 @@ function iniciarRodada() {
   // os dois começam com a mesma arma (justo) e ela muda a cada rodada
   const arma = j.treino && j.rodada === 1 ? "rifle" : sortearArma(M, true);
   equipar(b1, arma); equipar(b2, arma);
-  // v19: quem tem arma inicial começa TODA rodada com ela; na 1ª rodada quem não tem ganha a da roleta (iniciarRoleta)
+  // v19: quem tem arma inicial começa TODA rodada com ela; na 1ª rodada a carta escolhida pode trocar (iniciarCartas)
   if (j.armaInicial) M.bolinhas.forEach(function(b, k) { if (j.armaInicial[k]) equipar(b, j.armaInicial[k]); });
   // v19: rastro escolhido na personalização (o motor guarda os pontos; o desenho fica em arte/skins.js)
   if (j.visuais && !j.demo) M.bolinhas.forEach(function(b, k) { const r = j.visuais[k].rastro; if (r) b.rastroFx = { id: r, vida: 0.42, pts: [], n: 0 }; });
@@ -279,12 +279,13 @@ function iniciarRodada() {
     som("rodada");
     if (estado === "jogo") Poki.jogando(true);   // a gameplay volta com a rodada nova
   }
-  // v19: na 1ª rodada (menos no treino) as roletas de arma e de mapa abrem a partida.
-  // v19.7: só a partir do rival 3. No PFT da v19.6 a passagem treino -> rival 2 (onde a roleta aparecia pela 1ª vez)
-  // perdeu 7 pontos a mais que na v18.3 (75% x 82%); os rivais 1 e 2 começam direto, como na v18.3
-  j.depoisRoleta = false;
-  const semRoleta = j.rival && j.rival.liga === 0 && j.rival.i < 2;
-  if (j.rodada === 1 && !j.demo && !j.treino && !j.continuou && !semRoleta) iniciarRoleta(j, M);
+  // v20.5: as cartas de arma abrem a 1ª rodada contra a máquina (o dono tirou as roletas). Como a roleta (v19.7), só a
+  // partir do rival 3: no PFT da v19.6 a passagem treino -> rival 2 perdeu 7 pontos quando ganhou a roleta; os rivais
+  // 1 e 2 começam direto, e vencer o 2 "libera" as cartas (desbloqueioRival)
+  j.depoisCartas = false;
+  const semCartas = j.rival && j.rival.liga === 0 && j.rival.i < 2;
+  if (j.rodada === 1 && !j.demo && !j.treino && !j.continuou && !semCartas && (j.modo === "bot" || j.modo === "sobrevivencia") &&
+      typeof CartasArma !== "undefined") iniciarCartas(j, M);
 }
 
 // ---------- um passo (1/60 s) ----------
@@ -325,17 +326,16 @@ function passoDaPartida(dt) {
     return;
   }
 
-  if (j.fase === "roleta" || j.fase === "intro") {
+  if (j.fase === "cartas" || j.fase === "intro") {
     // v18.3: na abertura nada empurra para os lados (as esteiras da fábrica levavam as duas bolinhas até as paredes)
     const xs = [M.bolinhas[0].x, M.bolinhas[1].x];
     passoMundo(j, M, false, 1);
     M.bolinhas.forEach(function(b, k) { b.x = xs[k]; b.vx = 0; });
   }
-  if (j.fase === "roleta") { atualizarRoleta(j); return; }
+  if (j.fase === "cartas") { atualizarCartas(j); return; }
   if (j.fase === "intro") {
-    // v19: depois das roletas a abertura é curta (o VS do rival fica um pouco mais para dar tempo de ler)
-    // v19.6: o VS do rival 0,95 -> 1,4 s (o teste viu que ninguém lia o prêmio do rival em 1 s)
-    j.durIntro = j.rodada === 1 ? (j.depoisRoleta ? (j.rival ? 1.4 : 0.6) : RODADA.introPrimeira) : RODADA.intro;
+    // depois das cartas a abertura é mais curta (o VS do rival fica um pouco mais para dar tempo de ler o prêmio)
+    j.durIntro = j.rodada === 1 ? (j.depoisCartas ? (j.rival ? 1.5 : 1.0) : RODADA.introPrimeira) : RODADA.intro;
     if (j.tempoFase >= j.durIntro) {
       j.fase = "luta"; j.tempoFase = 0;
       if (!j.demo) som("lute");
@@ -683,146 +683,89 @@ function proximoNivelBot(nivel, desempenho, venceu, partidas) {
 }
 function nivelBotTexto(nivel) { return Math.round(nivel * 9) + 1; }   // 1 a 10, para mostrar
 
-// ---------- v19: ROLETAS da abertura (substituem as 3 cartas "?" da v18.3) ----------
-// 1º a roleta de ARMA (uma por bolinha sem arma inicial; as duas giram lado a lado e a 2ª para um pouco depois),
-// SÓ DEPOIS a de MAPA. A roleta só MOSTRA: a arma vem de sortearArma (com a Sorte da pessoa) e o mapa é o da regra
-// que já existia (mapas cruéis, casa do rival...). Nas primeiras partidas tudo fica em ~2 s (abertura longa espanta);
-// toque, clique ou tecla acelera (para na hora). Rodadas 2+: sem roleta — quem não tem arma inicial segue a regra
-// de antes (a mesma arma sorteada para os dois). Por quê: a rodada dura ~25 s e cada passagem de rodada já perde gente;
-// 1–2 s a mais em toda rodada pesariam mais que a graça da roleta (que fica no começo, onde a v18 já tinha a escolha).
-// Eventos: roulette/weapon (visible) e roulette/weapon-rN[-skip] (interact, N = raridade da arma da pessoa),
-//          roulette/weapon-start (a pessoa tem arma inicial), roulette/map (visible) e roulette/map-skip (interact).
-// Desenho: arte/roleta.js (Roleta.desenhar), chamado pelo desenho.js na fase "roleta".
-const ROLETA = {
-  // v19.3: o dono achou as roletas rápidas demais (dava para ver o resultado, mas não a roleta girando)
-  rapida: { arma: 1.3, atraso: 0.14, seguraArma: 0.45, mapa: 1.0, seguraMapa: 0.4 },    // primeiras partidas: ~3,3 s
-  normal: { arma: 1.5, atraso: 0.18, seguraArma: 0.5, mapa: 1.15, seguraMapa: 0.45 }   // depois: ~3,8 s
-};
-// posição (0 até n-1) da roleta: começa rápido e desacelera (cúbica)
-function posRoleta(t, dur, n) { const u = Math.min(1, Math.max(0, t / dur)); return (n - 1) * (1 - Math.pow(1 - u, 3)); }
+// ---------- v20.5: CARTAS DE ARMA da abertura (no lugar das roletas da v19) ----------
+// 3 cartas viradas; cada uma esconde uma arma (sortearArmaCarta: comum 75%, rara 22%, lendária 3%, mais a Sorte; sem
+// repetir). A pessoa escolhe às cegas: toque/clique na carta, teclas 1/2/3, ou ←/→ e pulo/tiro. Sem escolha em 3 s,
+// uma ao acaso. A escolhida vira; logo depois as outras se revelam (o "quase" da lendária). Com ARMA INICIAL: se a carta
+// for de raridade MAIOR, a pessoa fica com ela nesta rodada ("MELHOR!"); se não, continua com a inicial.
+// Só a pessoa escolhe: o bot fica com a arma sorteada da rodada. Eventos (os mesmos da v18.3): choice/weapon (visible),
+// choice/weapon-rN[-auto] (interact) e, com arma inicial, choice/weapon-upgrade ou weapon-start.
+// Desenho: arte/cartas_arma.js (CartasArma.desenhar), chamado pelo desenho.js na fase "cartas".
+const ESCOLHA_CARTA = { guarda: 0.45, auto: 3.0, vira: 0.3, outras: 0.5, fim: 1.45, pula: 0.6 };
 
-// arma da roleta: sortearArma; a Sorte (melhoria) dá uma 2ª chance e fica a de raridade maior
-function sortearArmaRoleta(M, b) {
+// arma de uma carta: sortearArma; a Sorte (melhoria) dá uma 2ª chance e fica a de raridade maior
+function sortearArmaCarta(M, b) {
   let id = sortearArma(M, true, true);
-  const sorte = b.lado === 1 && b.humano && jogo && jogo.modo !== "2p" && typeof sorteJogador === "function" ? sorteJogador() : 0;
+  const sorte = b.humano && typeof sorteJogador === "function" ? sorteJogador() : 0;
   if (sorte > 0 && Math.random() < sorte * 0.6) {
     const outra = sortearArma(M, true, true);
     if (ARMA[outra].raridade > ARMA[id].raridade) id = outra;
   }
   return id;
 }
-// fita da roleta: n itens embaralhados terminando no resultado (sem repetir vizinhos)
-function fitaRoleta(lista, final, n) {
-  const f = [];
-  for (let i = 0; i < n - 1; i++) {
-    let x = lista[Math.floor(Math.random() * lista.length)];
-    if (f.length && x === f[f.length - 1]) x = lista[(lista.indexOf(x) + 1) % lista.length];
-    f.push(x);
-  }
-  if (f[n - 2] === final) f[n - 2] = lista[(lista.indexOf(final) + 1) % lista.length];
-  f.push(final);
-  return f;
-}
 
-function iniciarRoleta(j, M) {
-  const rapida = save.partidas <= 5, d = rapida ? ROLETA.rapida : ROLETA.normal;
-  const nomes = ARMAS.filter(function(a) { return a.raridade >= (M.lendaria ? 2 : 1) && a.tipo !== "mina" && a.tipo !== "ceu" && a.tipo !== "torreta"; }).map(function(a) { return a.id; });
-  let k2 = 0;
-  const armas = M.bolinhas.map(function(b, k) {
-    // v19.8: quem tem arma inicial também gira: se a roleta tirar uma arma de raridade MAIOR, fica com ela nesta rodada
-    // ("MELHOR!"); se não, a roleta para na própria arma inicial ("INICIAL"). Antes a inicial travava a roleta e a
-    // pessoa perdia a chance de rara (22%) e lendária (3%, mais a Sorte) em toda 1ª rodada
-    const ini = j.armaInicial && j.armaInicial[k];
-    const sorteada = sortearArmaRoleta(M, b);
-    const melhor = !!ini && ARMA[sorteada].raridade > ARMA[ini].raridade;
-    const id = ini && !melhor ? ini : sorteada;
-    equipar(b, id);
-    const dur = d.arma + (k2++) * d.atraso;
-    return { id: id, fixa: false, ini: ini || null, melhor: melhor, dur: dur, fita: fitaRoleta(nomes, id, rapida ? 14 : 20), pos: 0, parou: false };
-  });
-  const gira = armas.some(function(a) { return !a.fixa; });
-  const fimArma = gira ? Math.max.apply(null, armas.map(function(a) { return a.fixa ? 0 : a.dur; })) : 0;
-  const mapas = CENARIOS.map(function(c) { return c.id; });
-  j.roleta = {
-    t: 0, rapida: rapida, armas: armas, etapa: gira ? "arma" : "mapa", tEtapa: 0,
-    fimArma: fimArma, seguraArma: d.seguraArma, durMapa: d.mapa, seguraMapa: d.seguraMapa,
-    mapa: { id: M.cen.id, fita: fitaRoleta(mapas, M.cen.id, rapida ? 11 : 15), pos: 0, parou: false },
-    pulou: false, ultimoTic: 0
-  };
-  j.fase = "roleta";
+function iniciarCartas(j, M) {
+  const b = M.bolinhas[0], armas = [];
+  for (let n = 0; armas.length < 3 && n < 60; n++) { const id = sortearArmaCarta(M, b); if (armas.indexOf(id) < 0) armas.push(id); }
+  while (armas.length < 3) armas.push(armas[armas.length - 1]);
+  j.cartas = { t: 0, armas: armas, ini: j.armaInicial && j.armaInicial[0] || null, sel: null, tSel: 0, auto: false,
+    foco: 1, melhor: false, final: null, deu: 0, revelou: false, outras: false, rects: null, mx: -1, my: -1 };
+  j.fase = "cartas";
   j.tempoFase = 0;
-  // a faixa de prêmios da partida anterior espera a roleta acabar (senão briga pela atenção)
+  entrada.limparApertos();
+  // a faixa de prêmios da partida anterior espera as cartas (senão briga pela atenção)
   if (typeof faixaPremio !== "undefined" && faixaPremio) { j.faixaVelho = faixaPremio.velho; faixaPremio.velho = j; }
-  if (gira) Poki.medir("roulette", "weapon", "visible");
-  else Poki.medir("roulette", "map", "visible");
-  if (j.armaInicial && j.armaInicial[0]) Poki.medir("roulette", armas[0].melhor ? "weapon-upgrade" : "weapon-start", "visible");
+  Poki.medir("choice", "weapon", "visible");
 }
 
-function ticRoleta(ro, tom) {
-  if (ro.t - ro.ultimoTic < 0.045) return;
-  ro.ultimoTic = ro.t;
-  som("quique", tom);
-}
-
-function atualizarRoleta(j) {
-  const ro = j.roleta;
-  if (!ro) { j.fase = "intro"; j.tempoFase = 0; return; }
-  // toque, clique, pulo ou tiro (qualquer jogador) PARA a roleta. v19.6: nos primeiros 0,4 s nada conta (os toques
-  // que sobravam do botão "Rivais" pulavam a roleta antes de a pessoa ver)
-  let apertou = false;
-  for (let k = 1; k <= 2; k++) if (entrada.apertou(k, "toque") || entrada.apertou(k, "tiro") || entrada.apertou(k, "pulo")) apertou = true;
-  // v19.9: no online o toque do convidado chega pela rede (antes só o anfitrião conseguia parar a roleta)
-  if (j.modo === "online" && typeof Online !== "undefined" && Online.cliqueRemoto()) apertou = true;
-  if (apertou && ro.t >= 0.4) acelerarRoleta();
-  ro.t += FIS.dt;
-  ro.tEtapa += FIS.dt;
-  if (ro.etapa === "arma") {
-    ro.armas.forEach(function(a, k) {
-      if (a.fixa || a.parou) return;
-      const p = posRoleta(ro.tEtapa, a.dur, a.fita.length);
-      if (Math.floor(p) > Math.floor(a.pos)) ticRoleta(ro, 0.8 + 0.6 * p / a.fita.length);
-      a.pos = p;
-      if (ro.tEtapa >= a.dur) {
-        a.parou = true; a.pos = a.fita.length - 1; a.tParou = ro.t;
-        const rar = ARMA[a.id].raridade;
-        som(rar >= 3 ? "vitoria_rodada" : "pegar");
-        if (rar >= 3) som("moeda");
-        if (k === 0 && M0humano(j)) Poki.medir("roulette", "weapon-r" + rar + (ro.pulou ? "-skip" : ""), "interact");
-      }
-    });
-    if (ro.tEtapa >= ro.fimArma + ro.seguraArma) { ro.etapa = "mapa"; ro.tEtapa = 0; som("carga"); Poki.medir("roulette", "map", "visible"); }
-  } else if (ro.etapa === "mapa") {
-    const m = ro.mapa;
-    if (!m.parou) {
-      const p = posRoleta(ro.tEtapa, ro.durMapa, m.fita.length);
-      if (Math.floor(p) > Math.floor(m.pos)) ticRoleta(ro, 0.7 + 0.5 * p / m.fita.length);
-      m.pos = p;
-      if (ro.tEtapa >= ro.durMapa) { m.parou = true; m.pos = m.fita.length - 1; m.tParou = ro.t; som("rodada"); }
-    }
-    if (ro.tEtapa >= ro.durMapa + ro.seguraMapa) fimRoleta(j);
+function atualizarCartas(j) {
+  const c = j.cartas;
+  if (!c) { j.fase = "intro"; j.tempoFase = 0; return; }
+  c.t += FIS.dt;
+  // as cartas chegam uma a uma (o desenho usa o mesmo tempo)
+  if (c.deu < 3 && c.t >= 0.12 + c.deu * 0.09) { som("quique", 0.9 + 0.2 * c.deu); c.deu++; }
+  // gasta os apertos todo passo (um clique antigo não vale depois)
+  const esq = entrada.apertou(1, "esquerda"), dir = entrada.apertou(1, "direita");
+  const ok = entrada.apertou(1, "pulo") | entrada.apertou(1, "tiro") | entrada.apertou(1, "toque");
+  if (c.sel === null) {
+    if (c.t < ESCOLHA_CARTA.guarda) return;
+    if (esq && c.foco > 0) { c.foco--; som("quique", 1.3); }
+    if (dir && c.foco < 2) { c.foco++; som("quique", 1.3); }
+    if (ok) escolherCarta(c.foco);
+    else if (c.t >= ESCOLHA_CARTA.auto) escolherCarta(Math.floor(Math.random() * 3), true);
+    return;
   }
-}
-function M0humano(j) { return j.M && j.M.bolinhas[0].humano; }
-
-// toque/tecla: a etapa que está girando para na hora; se já parou, passa para a próxima
-function acelerarRoleta() {
-  const j = jogo, ro = j && j.roleta;
-  if (!ro || j.fase !== "roleta" || ro.t < 0.4) return;
-  if (!ro.pulou) { ro.pulou = true; if (ro.etapa === "mapa") Poki.medir("roulette", "map-skip", "interact"); }
-  if (ro.etapa === "arma") {
-    if (ro.tEtapa < ro.fimArma) ro.tEtapa = ro.fimArma;
-    else ro.tEtapa = ro.fimArma + ro.seguraArma;
-  } else if (ro.etapa === "mapa") {
-    if (ro.tEtapa < ro.durMapa) ro.tEtapa = ro.durMapa;
-    else ro.tEtapa = ro.durMapa + ro.seguraMapa;
+  const d = c.t - c.tSel;
+  if (!c.revelou && d >= ESCOLHA_CARTA.vira / 2) {
+    c.revelou = true;
+    const rar = ARMA[c.armas[c.sel]].raridade;
+    if (rar >= 3) { som("vitoria_rodada"); som("moeda"); }
+    else som(rar === 2 ? "moeda" : "pegar");
   }
+  if (!c.outras && d >= ESCOLHA_CARTA.outras + ESCOLHA_CARTA.vira / 2) { c.outras = true; som("quique", 0.7); }
+  if (ok && d >= ESCOLHA_CARTA.pula) c.t = c.tSel + ESCOLHA_CARTA.fim;
+  if (c.t - c.tSel >= ESCOLHA_CARTA.fim) fimCartas(j);
 }
 
-function fimRoleta(j) {
-  j.roleta.etapa = "fim";
+// i = 0, 1 ou 2 (toque/clique na carta e teclas 1/2/3: telas.js; ←/→ e pulo/tiro: atualizarCartas)
+function escolherCarta(i, auto) {
+  const j = jogo, c = j && j.cartas;
+  if (!c || j.fase !== "cartas" || c.sel !== null || !(i >= 0 && i <= 2)) return;
+  if (!auto && c.t < ESCOLHA_CARTA.guarda) return;
+  const id = c.armas[i], rar = ARMA[id].raridade;
+  c.sel = i; c.tSel = c.t; c.auto = !!auto; c.foco = i;
+  c.melhor = !!c.ini && rar > ARMA[c.ini].raridade;
+  c.final = c.ini && !c.melhor ? c.ini : id;
+  equipar(j.M.bolinhas[0], c.final);
+  som("clique");
+  Poki.medir("choice", "weapon-r" + rar + (auto ? "-auto" : ""), "interact");
+  if (c.ini) Poki.medir("choice", c.melhor ? "weapon-upgrade" : "weapon-start", "interact");
+}
+
+function fimCartas(j) {
   j.fase = "intro";
   j.tempoFase = 0;
-  j.depoisRoleta = true;
+  j.depoisCartas = true;
   if (typeof faixaPremio !== "undefined" && faixaPremio && faixaPremio.velho === j) faixaPremio.velho = j.faixaVelho;
 }
 

@@ -399,7 +399,7 @@ TEXTOS.de = {
   arma_inicial_e: "Startwaffe: {0}",
   arma_inicial_selo: "START",
   arma_inicial_usando: "Deine Startwaffe",
-  sem_arma_inicial: "Keine Startwaffe: das Rad wählt",
+  sem_arma_inicial: "Keine Startwaffe: du wählst eine Karte",
   faltam_moedas: "Noch {0} Münzen",
   so_bau: "Nur in Truhen",
   so_bau_longo: "Gibt es nur in Truhen",
@@ -572,9 +572,11 @@ TEXTOS.de = {
   // v19.8
   roleta_melhor: "BESSER!",
   // v20.2
-  libera_roleta: "Gewinne und schalte frei: WAFFENRAD + 10 NEUE WAFFEN!",
+  libera_cartas: "Gewinne und schalte frei: WAFFENKARTEN + 10 NEUE WAFFEN!",
   libera_loja: "Gewinne und schalte frei: WAFFENLADEN!",
   loja_em: "Waffenladen in {0} Siegen",
-  novo_roleta: "NEU: Waffenrad und 10 neue Waffen!",
-  novo_loja: "NEU: Waffenladen freigeschaltet!"
+  novo_cartas: "NEU: Waffenkarten und 10 neue Waffen!",
+  novo_loja: "NEU: Waffenladen freigeschaltet!",
+  // v20.5
+  carta_lendaria: "Eine davon könnte LEGENDÄR sein!"
 };

@@ -399,7 +399,7 @@ TEXTOS.ro = {
   arma_inicial_e: "Armă de start: {0}",
   arma_inicial_selo: "START",
   arma_inicial_usando: "Arma ta de start",
-  sem_arma_inicial: "Fără armă de start: alege roata",
+  sem_arma_inicial: "Fără armă de start: alegi o carte",
   faltam_moedas: "Mai trebuie {0} monede",
   so_bau: "Doar în cufere",
   so_bau_longo: "Iese doar din cufere",
@@ -572,9 +572,11 @@ TEXTOS.ro = {
   // v19.8
   roleta_melhor: "MAI BUNĂ!",
   // v20.2
-  libera_roleta: "Câștigă și deblochează: RULETA + 10 ARME NOI!",
+  libera_cartas: "Câștigă și deblochează: CĂRȚI DE ARME + 10 ARME NOI!",
   libera_loja: "Câștigă și deblochează: MAGAZINUL DE ARME!",
   loja_em: "Magazinul de arme în {0} victorii",
-  novo_roleta: "NOU: Ruleta de arme și 10 arme noi!",
-  novo_loja: "NOU: Magazinul de arme deblocat!"
+  novo_cartas: "NOU: Cărți de arme și 10 arme noi!",
+  novo_loja: "NOU: Magazinul de arme deblocat!",
+  // v20.5
+  carta_lendaria: "Una poate fi LEGENDARĂ!"
 };

@@ -399,7 +399,7 @@ TEXTOS.nl = {
   arma_inicial_e: "Startwapen: {0}",
   arma_inicial_selo: "START",
   arma_inicial_usando: "Jouw startwapen",
-  sem_arma_inicial: "Geen startwapen: het rad kiest",
+  sem_arma_inicial: "Geen startwapen: jij kiest een kaart",
   faltam_moedas: "Nog {0} munten nodig",
   so_bau: "Alleen in kisten",
   so_bau_longo: "Alleen uit kisten",
@@ -572,9 +572,11 @@ TEXTOS.nl = {
   // v19.8
   roleta_melhor: "BETER!",
   // v20.2
-  libera_roleta: "Win en speel vrij: RAD + 10 NIEUWE WAPENS!",
+  libera_cartas: "Win en speel vrij: WAPENKAARTEN + 10 NIEUWE WAPENS!",
   libera_loja: "Win en speel vrij: WAPENWINKEL!",
   loja_em: "Wapenwinkel over {0} overwinningen",
-  novo_roleta: "NIEUW: Wapenrad en 10 nieuwe wapens!",
-  novo_loja: "NIEUW: Wapenwinkel vrijgespeeld!"
+  novo_cartas: "NIEUW: Wapenkaarten en 10 nieuwe wapens!",
+  novo_loja: "NIEUW: Wapenwinkel vrijgespeeld!",
+  // v20.5
+  carta_lendaria: "Eén ervan kan LEGENDARISCH zijn!"
 };

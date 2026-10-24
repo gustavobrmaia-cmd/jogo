@@ -399,7 +399,7 @@ TEXTOS.fr = {
   arma_inicial_e: "Arme de départ : {0}",
   arma_inicial_selo: "DÉPART",
   arma_inicial_usando: "Ton arme de départ",
-  sem_arma_inicial: "Pas d'arme de départ : la roue choisit",
+  sem_arma_inicial: "Pas d'arme de départ : tu choisis une carte",
   faltam_moedas: "Encore {0} pièces",
   so_bau: "Coffre seulement",
   so_bau_longo: "Seulement dans les coffres",
@@ -572,9 +572,11 @@ TEXTOS.fr = {
   // v19.8
   roleta_melhor: "MIEUX !",
   // v20.2
-  libera_roleta: "Gagne pour débloquer : ROULETTE + 10 NOUVELLES ARMES !",
+  libera_cartas: "Gagne pour débloquer : CARTES D'ARME + 10 NOUVELLES ARMES !",
   libera_loja: "Gagne pour débloquer : BOUTIQUE D'ARMES !",
   loja_em: "Boutique d'armes dans {0} victoires",
-  novo_roleta: "NOUVEAU : Roulette d'armes et 10 nouvelles armes !",
-  novo_loja: "NOUVEAU : Boutique d'armes débloquée !"
+  novo_cartas: "NOUVEAU : Cartes d'arme et 10 nouvelles armes !",
+  novo_loja: "NOUVEAU : Boutique d'armes débloquée !",
+  // v20.5
+  carta_lendaria: "L'une d'elles peut être LÉGENDAIRE !"
 };

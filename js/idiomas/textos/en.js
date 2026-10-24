@@ -399,7 +399,7 @@ TEXTOS.en = {
   arma_inicial_e: "Starter weapon: {0}",
   arma_inicial_selo: "STARTER",
   arma_inicial_usando: "Your starter weapon",
-  sem_arma_inicial: "No starter weapon: the wheel picks",
+  sem_arma_inicial: "No starter weapon: you pick a card",
   faltam_moedas: "{0} more coins needed",
   so_bau: "Chest only",
   so_bau_longo: "Only from chests",
@@ -572,9 +572,11 @@ TEXTOS.en = {
   // v19.8
   roleta_melhor: "UPGRADE!",
   // v20.2
-  libera_roleta: "Win to unlock: WEAPON SPIN + 10 NEW WEAPONS!",
+  libera_cartas: "Win to unlock: WEAPON CARDS + 10 NEW WEAPONS!",
   libera_loja: "Win to unlock: WEAPON SHOP!",
   loja_em: "Weapon shop in {0} wins",
-  novo_roleta: "NEW: Weapon spin and 10 new weapons!",
-  novo_loja: "NEW: Weapon shop unlocked!"
+  novo_cartas: "NEW: Weapon cards and 10 new weapons!",
+  novo_loja: "NEW: Weapon shop unlocked!",
+  // v20.5
+  carta_lendaria: "One of them could be LEGENDARY!"
 };

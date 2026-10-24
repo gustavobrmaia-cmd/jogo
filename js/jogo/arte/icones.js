@@ -18,7 +18,7 @@
 const Icone = (function() {
   var NOMES = ["moeda", "brilho", "raio", "ok", "trofeu", "presente", "nota", "som", "mudo", "estrela", "explosao",
     "coracao", "repetir", "robo", "casa", "mao", "celular", "alvo", "pincel", "engrenagem", "globo", "controle",
-    "dupla", "fogo", "bau", "cadeado", "trevo", "arma", "mapa", "loja", "roleta", "coroa", "escudo", "relogio",
+    "dupla", "fogo", "bau", "cadeado", "trevo", "arma", "mapa", "loja", "roleta", "cartas", "coroa", "escudo", "relogio",
     "seta", "voltar", "play", "fechar", "copiar", "wifi", "usuario", "chapeu", "olho", "rastro", "caveira", "boca"];
   var PI = Math.PI, TAU = PI * 2;
   var TINTA = "#1a0d33", LW = 8;
@@ -320,6 +320,19 @@ const Icone = (function() {
     cel(g, function(g) { C(g, 0, 0, 9); }, "#ffffff", "#c8cdf0", { dx: 1, dy: 2, lw: 5 });
     cel(g, function(g) { poli(g, [-9, -46, 9, -46, 0, -30]); }, "#ff4057", "#b81a3a", { dx: 1, dy: 2, lw: 5 });
     meiaLua(g, 0, 0, 25, PI * 1.1, PI * 1.36, 4, false);
+  };
+  // v20.5: três cartas em leque (as cartas de arma da abertura): as de trás viradas, a da frente com a estrela
+  D.cartas = function(g) {
+    [[-20, 4, -0.34], [20, 4, 0.34], [0, -4, 0]].forEach(function(q, i) {
+      g.save(); g.translate(q[0], q[1]); g.rotate(q[2]);
+      cel(g, function(g) { rr(g, -21, -31, 42, 60, 8); }, "#ffd23f", "#e07b00", { dx: 2, dy: 3, lw: 6 });
+      g.beginPath(); rr(g, -14, -24, 28, 46, 5); g.fillStyle = i < 2 ? "#5427d1" : "#6f40f2"; g.fill();
+      if (i === 2) {
+        g.beginPath(); estrelaP(g, 0, -1, 13, 6, 5); g.fillStyle = "#ffd23f"; g.fill(); g.lineWidth = 4; g.strokeStyle = TINTA; g.lineJoin = "round"; g.stroke();
+      } else { g.beginPath(); C(g, 0, -1, 7); g.fillStyle = "#ffd23f"; g.fill(); }
+      g.restore();
+    });
+    meiaLua(g, -4, -14, 16, PI * 1.1, PI * 1.36, 4, false);
   };
   D.coroa = function(g) {
     cel(g, function(g) { poli(g, [-42, -22, -22, 0, 0, -34, 22, 0, 42, -22, 36, 30, -36, 30]); }, "#ffd23f", "#e07b00", { dx: 5, dy: 6 });

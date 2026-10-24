@@ -98,9 +98,9 @@ function quadro(agora) {
 }
 
 // ---------- v20.2: o que não é usado no começo carrega depois que o jogo abriu ----------
-// queda de braço (só se a rodada chegar ao fim do tempo), roletas (a partir do rival 3) e online (só pelo menu).
+// queda de braço (só se a rodada chegar ao fim do tempo), cartas de arma (a partir do rival 3) e online (só pelo menu).
 // Em ordem: online.js usa o rede.js. Quem precisa antes espera (telas.js: modoOnline).
-const ADIADOS = ["js/jogo/arte/queda.js", "js/jogo/arte/roleta.js", "js/rede/rede.js", "js/rede/online.js"];
+const ADIADOS = ["js/jogo/arte/queda.js", "js/jogo/arte/cartas_arma.js", "js/rede/rede.js", "js/rede/online.js"];
 let adiados = null;
 function carregarAdiados() {
   if (!adiados) adiados = ADIADOS.reduce(function(p, src) {

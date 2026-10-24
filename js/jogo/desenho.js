@@ -705,7 +705,7 @@ function desenharHud(ctx, j, M, L) {
   const meio = mundoParaTela(0, FIS.altura * 0.42).y;
   // abertura da rodada (v17.5): faixa com o mapa; contra rival na 1ª rodada, o "VS" com os retratos
   if (j.fase === "intro") desenharAbertura(ctx, j, M, L, cx, meio);
-  else if (j.fase === "roleta" && typeof Roleta !== "undefined") Roleta.desenhar(ctx, j, M, L, cx, meio);   // v19 (agente C): roletas de arma e mapa
+  else if (j.fase === "cartas" && typeof CartasArma !== "undefined") CartasArma.desenhar(ctx, j, M, L, cx, meio);   // v20.5: cartas de arma
   // textos do meio (LUTE, K.O., placar): em pé ficam 40% maiores (a tela do celular é estreita)
   const ke = em ? 1.4 : 1, largura = CONFIG.largura / ke - 60;   // largura que cabe (alguns idiomas são longos)
   ctx.save();
@@ -797,8 +797,8 @@ function desenharHud(ctx, j, M, L) {
   // v16: prêmios da partida anterior (fluxo contínuo, sem a tela de fim): faixa que pula e some em ~4 s
   let topoFaixa = null;   // v17: os avisos de conquista sobem para cima da faixa (antes ficavam por cima dela)
   if (typeof faixaPremio !== "undefined" && faixaPremio && j !== faixaPremio.velho && estado === "jogo" &&
-      // v19.6: espera a roleta e o VS (antes aparecia por cima dos dois: 4 camadas de texto em ~1 s)
-      !(j.rodada === 1 && (j.fase === "roleta" || (j.fase === "intro" && j.depoisRoleta)))) {
+      // v19.6: espera as cartas e o VS (antes aparecia por cima dos dois: 4 camadas de texto em ~1 s)
+      !(j.rodada === 1 && (j.fase === "cartas" || (j.fase === "intro" && j.depoisCartas)))) {
     if (!faixaPremio.t0) faixaPremio.t0 = performance.now() / 1000;
     const tf = performance.now() / 1000 - faixaPremio.t0;
     // v17: com a melhoria grátis (destaque) a faixa fica mais tempo
@@ -980,8 +980,7 @@ function desenharAbertura(ctx, j, M, L, cx, meio) {
       letreiroIcone(ctx, "raio", String(pR), 335, 98, 30, j.cores[1]);
     }
     // mapa e o que ele tem de diferente numa linha só; prêmio numa pílula dourada
-    // v19.6: depois da roleta de mapa o nome do mapa já foi mostrado: o VS fica só com o rival e o prêmio
-    if (!j.depoisRoleta) linhaMapa(ctx, M.cen.id, cor, 0, 100, 30, 24, 520);
+    linhaMapa(ctx, M.cen.id, cor, 0, 100, 30, 24, 520);
     const pr = textoPremioRival(j.rival.i, j.rival.liga);
     ctx.font = "900 24" + FONTE;
     const wp = Math.min(620, ctx.measureText(pr).width);

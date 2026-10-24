@@ -453,7 +453,7 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       Ao vencer, comemora na faixa (fluxo direto) ou numa ficha da tela de fim: `novo_roleta` / `novo_loja`.
     - **2) Pausas ~25% menores:** `RODADA.fim` 2,1 -> 1,7; sem K.O. 1,5 -> 1,2 (`RODADA.semKo`); abertura das rodadas
       2+ 1,0 -> 0,8; fim da partida 2,6 -> 2,1.
-    - **3) Carregamento adiado:** queda.js, roleta.js, rede.js e online.js saíram do index.html e carregam 1,5 s depois
+    - **3) Carregamento adiado:** queda.js, roleta.js (v20.5: cartas_arma.js), rede.js e online.js saíram do index.html e carregam 1,5 s depois
       de abrir (`carregarAdiados` no main.js). "Online" no menu espera o carregamento. Loja e personalização continuam
       no começo: a loja cria o botão do menu quando carrega.
   - v20.3 (partida rápida: "Oponente encontrado" piscava e a partida não começava; a sala com código já funcionava):
@@ -470,6 +470,20 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       estilo.css) virou imagem pelo mesmo motivo. No modo normal nada muda;
     - texto escuro (marrom dos botões amarelos) o navegador ainda clareia: tentei texto "pintado" com imagem e ele
       inverte também. Testar com Playwright + CDP `Emulation.setAutoDarkModeOverride`.
+  - v20.5 (o dono: "tira a roleta totalmente e coloca as cartas de novo, muito mais bonitas e refinadas; se escolher uma
+    arma melhor do que a que comprou, vai automaticamente"). AS ROLETAS (arma e mapa) SAÍRAM; `arte/roleta.js` apagado:
+    - **Cartas de arma** (fase "cartas", `iniciarCartas`/`atualizarCartas`/`escolherCarta`/`ESCOLHA_CARTA` em partida.js;
+      desenho em `arte/cartas_arma.js`, carregado com os adiados): na 1ª rodada contra a máquina ("bot" e 1ª onda da
+      sobrevivência; não no 2 jogadores nem no online), a partir do rival 3 como a roleta (vencer o rival 2 "libera":
+      `libera_cartas` / `novo_cartas`, ícone `cartas`);
+    - 3 cartas viradas com "?"; cada uma esconde uma arma (`sortearArmaCarta`: 75/22/3 + Sorte, sem repetir). Toque ou
+      clique na carta, teclas 1/2/3, ou ←/→ e pulo/tiro (a em foco tem aro amarelo; o mouse por cima muda o foco).
+      Sozinha em 3 s (barrinha). A escolhida vira; 0,5 s depois as outras viram, apagadas (o "quase"). Rara/lendária:
+      raios girando, lendária com brilhinhos. Um toque depois de 0,6 s pula para o VS (que agora volta a mostrar o mapa);
+    - **Arma inicial:** a carta de raridade MAIOR que a inicial fica nesta rodada (selo "MELHOR!"); se não, fica a
+      inicial (selo verde "Arma inicial: X"). Só a pessoa escolhe; o bot fica com a arma da rodada;
+    - verso e frentes desenhados uma vez num canvas guardado; em pé as cartas são x1,5;
+    - eventos iguais aos da v18.3: choice/weapon (visible), choice/weapon-rN[-auto], choice/weapon-upgrade|weapon-start.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

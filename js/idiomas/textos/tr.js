@@ -399,7 +399,7 @@ TEXTOS.tr = {
   arma_inicial_e: "Başlangıç silahı: {0}",
   arma_inicial_selo: "BAŞLANGIÇ",
   arma_inicial_usando: "Başlangıç silahın",
-  sem_arma_inicial: "Başlangıç silahı yok: çark seçer",
+  sem_arma_inicial: "Başlangıç silahı yok: bir kart seçersin",
   faltam_moedas: "{0} altın daha lazım",
   so_bau: "Sadece sandıkta",
   so_bau_longo: "Sadece sandıklardan çıkar",
@@ -572,9 +572,11 @@ TEXTOS.tr = {
   // v19.8
   roleta_melhor: "DAHA İYİ!",
   // v20.2
-  libera_roleta: "Kazan ve aç: ÇARK + 10 YENİ SİLAH!",
+  libera_cartas: "Kazan ve aç: SİLAH KARTLARI + 10 YENİ SİLAH!",
   libera_loja: "Kazan ve aç: SİLAH DÜKKANI!",
   loja_em: "Silah dükkanı {0} galibiyet sonra",
-  novo_roleta: "YENİ: Silah çarkı ve 10 yeni silah!",
-  novo_loja: "YENİ: Silah dükkanı açıldı!"
+  novo_cartas: "YENİ: Silah kartları ve 10 yeni silah!",
+  novo_loja: "YENİ: Silah dükkanı açıldı!",
+  // v20.5
+  carta_lendaria: "Biri EFSANEVİ olabilir!"
 };

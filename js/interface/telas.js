@@ -190,8 +190,8 @@ function finalizarPartida(j) {
     if (venceu) save.vitorias++; else save.derrotas++;
     j.resultadoRival = { venceu: venceu, i: r.i, liga: r.liga, nome: r.d.nome, moedas: 0, campeao: false };
     if (venceu) {
-      // v20.2: desbloqueio comemorado (roleta + armas novas depois do rival 2; loja depois do rival 5)
-      j.resultadoRival.libera = r.liga === 0 && r.i === 1 ? "roleta" : r.liga === 0 && r.i === 4 && !Progresso.lojaLiberada() ? "loja" : null;
+      // v20.2: desbloqueio comemorado (cartas de arma + armas novas depois do rival 2; loja depois do rival 5)
+      j.resultadoRival.libera = r.liga === 0 && r.i === 1 ? "cartas" : r.liga === 0 && r.i === 4 && !Progresso.lojaLiberada() ? "loja" : null;
       const premio = premioRival(r.i, r.liga);
       Progresso.ganharMoedas(premio);
       j.resultadoRival.moedas = premio;
@@ -455,14 +455,18 @@ function montarTelas() {
     });
   });
 
-  // v19: roletas da abertura: qualquer tecla acelera (toque e clique chegam pela entrada, partida.js atualizarRoleta)
+  // v20.5: cartas de arma da abertura: toque/clique na carta ou teclas 1/2/3 (←/→ e pulo/tiro: partida.js atualizarCartas)
+  const cvJogo = document.getElementById("canvas");
+  cvJogo.addEventListener("pointerdown", function(e) {
+    const c = jogo && jogo.cartas;
+    if (estado !== "jogo" || !c || c.sel !== null || !c.rects || jogo.fase !== "cartas") return;
+    const r = cvJogo.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width * CONFIG.largura, y = (e.clientY - r.top) / r.height * cvJogo.height;
+    c.rects.forEach(function(q, i) { if (q && x >= q.x && x <= q.x + q.w && y >= q.y && y <= q.y + q.h) escolherCarta(i); });
+  });
   window.addEventListener("keydown", function(e) {
     if (e.repeat) return;
-    // v19.6: as teclas de andar não param a roleta (quem já estava andando pulava a roleta sem ver)
-    const andar = /^(KeyA|KeyD|KeyS|ArrowLeft|ArrowRight|ArrowDown|ArrowUp)$/.test(e.code);
-    // (no online, o convidado não mexe na roleta daqui: o toque dele vai pela rede e o anfitrião é quem para)
-    const convidado = jogo && jogo.modo === "online" && typeof Rede !== "undefined" && !Rede.anfitriao;
-    if (estado === "jogo" && jogo && jogo.fase === "roleta" && !andar && !convidado && e.code !== "Escape" && e.code !== "KeyP") acelerarRoleta();
+    if (estado === "jogo" && jogo && jogo.fase === "cartas" && /^(Digit|Numpad)[123]$/.test(e.code)) escolherCarta(+e.code.slice(-1) - 1);
     if (estado === "pausa" && (e.code === "Escape" || e.code === "KeyP")) continuar();
     else if (estado === "menu" && e.code === "Enter") abrirModo();
     else if (e.code === "Escape" && estado !== "jogo" && estado !== "pausa" && estado !== "recompensa") {

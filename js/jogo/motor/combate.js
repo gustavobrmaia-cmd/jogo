@@ -952,7 +952,8 @@ function pegarCarta(M, b, id) {
 // ---------- caixas de arma e cartas no mapa ----------
 // v19.7: as 10 armas novas da v19 (ficam fora das caixas e do começo da rodada quando M.soClassicas)
 const ARMAS_V19 = { banana: 1, boliche: 1, bomba_grude: 1, disco: 1, gosma: 1, ima: 1, inflador: 1, tornado: 1, torreta: 1, vampiro: 1 };
-// v19: roleta da 1ª rodada (o dono pediu as raras mais difíceis): comum 75%, rara 22%, lendária 3%
+// v19: roleta da 1ª rodada (o dono pediu as raras mais difíceis): comum 75%, rara 22%, lendária 3%.
+// v20.5: vale para cada carta de arma da abertura (partida.js sortearArmaCarta)
 const PESOS_ROLETA = [0, 75, 22, 3];
 function sortearArma(M, inicio, roleta) {
   // pesos por raridade; a "Partida Lendária" só tem raras e lendárias

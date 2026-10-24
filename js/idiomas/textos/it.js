@@ -399,7 +399,7 @@ TEXTOS.it = {
   arma_inicial_e: "Arma iniziale: {0}",
   arma_inicial_selo: "INIZIALE",
   arma_inicial_usando: "La tua arma iniziale",
-  sem_arma_inicial: "Nessuna arma iniziale: sceglie la ruota",
+  sem_arma_inicial: "Nessuna arma iniziale: scegli una carta",
   faltam_moedas: "Mancano {0} monete",
   so_bau: "Solo nei forzieri",
   so_bau_longo: "Esce solo dai forzieri",
@@ -572,9 +572,11 @@ TEXTOS.it = {
   // v19.8
   roleta_melhor: "MEGLIO!",
   // v20.2
-  libera_roleta: "Vinci e sblocca: RUOTA + 10 ARMI NUOVE!",
+  libera_cartas: "Vinci e sblocca: CARTE ARMA + 10 ARMI NUOVE!",
   libera_loja: "Vinci e sblocca: NEGOZIO DI ARMI!",
   loja_em: "Negozio di armi tra {0} vittorie",
-  novo_roleta: "NUOVO: Ruota delle armi e 10 armi nuove!",
-  novo_loja: "NUOVO: Negozio di armi sbloccato!"
+  novo_cartas: "NUOVO: Carte arma e 10 armi nuove!",
+  novo_loja: "NUOVO: Negozio di armi sbloccato!",
+  // v20.5
+  carta_lendaria: "Una potrebbe essere LEGGENDARIA!"
 };

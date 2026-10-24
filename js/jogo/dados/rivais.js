@@ -48,10 +48,10 @@ function nomeLiga(liga) {
 
 // o que se ganha vencendo o rival i: o acessório dele (se ainda não tiver) ou só as moedas
 // v20.2: o que vencer este rival libera (a "isca" para jogar o próximo). No PFT da v19.9 metade saía entre os rivais 2
-// e 4, sem saber que a roleta, as armas novas e a loja vinham logo depois. null = nada
+// e 4, sem saber que as cartas de arma, as armas novas e a loja vinham logo depois. null = nada
 function desbloqueioRival(i, liga) {
   if (liga) return null;
-  if (i === 1) return { icone: "roleta", texto: t("libera_roleta") };
+  if (i === 1) return { icone: "cartas", texto: t("libera_cartas") };
   if (i >= 2 && i <= 4 && !(typeof Progresso !== "undefined" && Progresso.lojaLiberada())) return { icone: "loja", texto: i === 4 ? t("libera_loja") : t("loja_em", 5 - i) };
   return null;
 }

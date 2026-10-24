@@ -2,7 +2,7 @@
 
 // =========================
 // LOJA DE ARMAS (v19): compra armas com moedas e escolhe a ARMA INICIAL (começa toda rodada com ela, contra a
-// máquina e no 2 jogadores; quem não tem arma inicial ganha a da roleta na 1ª rodada).
+// máquina e no 2 jogadores; quem não tem arma inicial ganha a da carta escolhida na 1ª rodada).
 // Só aparece depois que o novato passou pelo começo (Progresso.lojaLiberada: rival 5 vencido ou já viu a tela das
 // melhorias — o fluxo direto entre os rivais 1–5 não pode ganhar uma parada nova).
 // Preços: Progresso.PRECO_ARMA (por raridade). Abas por raridade; o destaque mostra a bolinha da pessoa segurando a
@@ -87,7 +87,7 @@ function atualizarDestaqueLoja() {
   const ini = el("lojaInicial");
   ini.innerHTML = "";
   const txt = document.createElement("span");
-  txt.innerHTML = save.armaInicial ? Icone.html("arma") + " " + escHtml(t("arma_inicial_e", t("a_" + save.armaInicial))) : Icone.html("roleta") + " " + escHtml(t("sem_arma_inicial"));
+  txt.innerHTML = save.armaInicial ? Icone.html("arma") + " " + escHtml(t("arma_inicial_e", t("a_" + save.armaInicial))) : Icone.html("cartas") + " " + escHtml(t("sem_arma_inicial"));
   ini.appendChild(txt);
   if (save.armaInicial) {
     const tirar = document.createElement("button"); tirar.className = "pequeno lTirar"; tirar.textContent = t("tirar");

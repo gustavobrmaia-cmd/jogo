@@ -399,7 +399,7 @@ TEXTOS.es = {
   arma_inicial_e: "Arma inicial: {0}",
   arma_inicial_selo: "INICIAL",
   arma_inicial_usando: "Tu arma inicial",
-  sem_arma_inicial: "Sin arma inicial: elige la ruleta",
+  sem_arma_inicial: "Sin arma inicial: eliges una carta",
   faltam_moedas: "Faltan {0} monedas",
   so_bau: "Solo en cofres",
   so_bau_longo: "Solo sale en cofres",
@@ -572,9 +572,11 @@ TEXTOS.es = {
   // v19.8
   roleta_melhor: "¡MEJOR!",
   // v20.2
-  libera_roleta: "¡Gana y desbloquea: RULETA + 10 ARMAS NUEVAS!",
+  libera_cartas: "¡Gana y desbloquea: CARTAS DE ARMA + 10 ARMAS NUEVAS!",
   libera_loja: "¡Gana y desbloquea: TIENDA DE ARMAS!",
   loja_em: "Tienda de armas en {0} victorias",
-  novo_roleta: "NUEVO: ¡Ruleta de armas y 10 armas nuevas!",
-  novo_loja: "NUEVO: ¡Tienda de armas desbloqueada!"
+  novo_cartas: "NUEVO: ¡Cartas de arma y 10 armas nuevas!",
+  novo_loja: "NUEVO: ¡Tienda de armas desbloqueada!",
+  // v20.5
+  carta_lendaria: "¡Una puede ser LEGENDARIA!"
 };

@@ -39,7 +39,7 @@ function saveNovo() {
     // sendo gravados (espelho do corpo e do chapéu/acessório) para um save novo abrir numa versão antiga
     visual: { cor: "cor_rosa", corpo: "classico", olhos: "", boca: "", chapeu: "", acessorio: "", rastro: "", ko: "", emote: "" },
     armas: [],        // v19: armas compradas na loja (ids de ARMAS)
-    armaInicial: "",  // v19: arma com que a pessoa começa cada rodada ("" = a da roleta / a sorteada)
+    armaInicial: "",  // v19: arma com que a pessoa começa cada rodada ("" = a da carta / a sorteada)
     qualidade: "auto" // "auto" | "alta" | "leve"
   };
 }

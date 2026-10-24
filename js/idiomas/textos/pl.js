@@ -399,7 +399,7 @@ TEXTOS.pl = {
   arma_inicial_e: "Broń startowa: {0}",
   arma_inicial_selo: "START",
   arma_inicial_usando: "Twoja broń startowa",
-  sem_arma_inicial: "Bez broni startowej: losuje koło",
+  sem_arma_inicial: "Bez broni startowej: wybierasz kartę",
   faltam_moedas: "Brakuje {0} monet",
   so_bau: "Tylko w skrzyniach",
   so_bau_longo: "Tylko ze skrzyń",
@@ -572,9 +572,11 @@ TEXTOS.pl = {
   // v19.8
   roleta_melhor: "LEPSZA!",
   // v20.2
-  libera_roleta: "Wygraj i odblokuj: KOŁO + 10 NOWYCH BRONI!",
+  libera_cartas: "Wygraj i odblokuj: KARTY BRONI + 10 NOWYCH BRONI!",
   libera_loja: "Wygraj i odblokuj: SKLEP Z BRONIĄ!",
   loja_em: "Sklep z bronią za {0} zwycięstwa",
-  novo_roleta: "NOWOŚĆ: Koło broni i 10 nowych broni!",
-  novo_loja: "NOWOŚĆ: Sklep z bronią odblokowany!"
+  novo_cartas: "NOWOŚĆ: Karty broni i 10 nowych broni!",
+  novo_loja: "NOWOŚĆ: Sklep z bronią odblokowany!",
+  // v20.5
+  carta_lendaria: "Jedna może być LEGENDARNA!"
 };

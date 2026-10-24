@@ -14,7 +14,7 @@
 // =========================
 
 // icone = nome em Icone.NOMES (v19: sem emoji). base/mult = preço do 1º nível e quanto ele cresce (padrão 40 e x1,28)
-// v19: SORTE — não entra no PODER (não é força de luta): a roleta de arma da abertura puxa mais raras/lendárias,
+// v19: SORTE — não entra no PODER (não é força de luta): as cartas de arma da abertura puxam mais raras/lendárias,
 // os baús vêm melhores e as caixas de arma usam sorteJogador() (combate.js). Mais cara e cresce mais rápido.
 const MELHORIAS = [
   { id: "forca", icone: "explosao", cor: "#ff8787", passo: 0.10, max: 25 },
