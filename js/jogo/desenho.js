@@ -929,7 +929,8 @@ function desenharAbertura(ctx, j, M, L, cx, meio) {
   const dur = j.durIntro || (j.rodada === 1 ? RODADA.introPrimeira : RODADA.intro), tf = j.tempoFase;
   const vs = !!(j.rival && j.rodada === 1);
   const escolha = vs && j.escolha ? j.escolha : null;
-  const cima = vs ? 95 : 60, baixo = vs ? (escolha ? 370 : j.lendaria ? 215 : 195) : (j.lendaria ? 145 : 112);   // quanto o bloco ocupa
+  const libera = vs && !j.lendaria && typeof desbloqueioRival === "function" ? desbloqueioRival(j.rival.i, j.rival.liga) : null;
+  const cima = vs ? 95 : 60, baixo = vs ? (escolha ? 370 : j.lendaria ? 215 : 195 + (libera ? 36 : 0)) : (j.lendaria ? 145 : 112);   // quanto o bloco ocupa
   let y = meio;
   // (decidido no começo da abertura, para o bloco não pular quando um aviso some)
   if (j.lotadoRodada !== j.rodada) {
@@ -988,7 +989,11 @@ function desenharAbertura(ctx, j, M, L, cx, meio) {
     ctx.lineWidth = 2.5; ctx.strokeStyle = "rgba(255,212,59,0.8)"; ctx.stroke();
     textoCaber(ctx, pr, 0, 146, 24, "#ffd43b", 620);
     if (j.lendaria) textoIcones(ctx, "brilho", t("lendaria"), 0, 192, 26, "#ffd43b");
-    else trilhaRivais(ctx, j, 0, 180, entra(0.2));
+    else {
+      // v20.2: o que vencer este rival libera, em verde, entre o prêmio e a trilha
+      if (libera) textoIcones(ctx, libera.icone, libera.texto, 0, 192, 26, "#8ce99a");
+      trilhaRivais(ctx, j, 0, libera ? 216 : 180, entra(0.2));
+    }
     if (escolha) desenharEscolha(ctx, j, escolha, cx, y, esc, entra(0.25), tf);
   } else {
     const surv = j.modo === "sobrevivencia";

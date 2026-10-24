@@ -97,6 +97,18 @@ function quadro(agora) {
   requestAnimationFrame(quadro);
 }
 
+// ---------- v20.2: o que não é usado no começo carrega depois que o jogo abriu ----------
+// queda de braço (só se a rodada chegar ao fim do tempo), roletas (a partir do rival 3) e online (só pelo menu).
+// Em ordem: online.js usa o rede.js. Quem precisa antes espera (telas.js: modoOnline).
+const ADIADOS = ["js/jogo/arte/queda.js", "js/jogo/arte/roleta.js", "js/rede/rede.js", "js/rede/online.js"];
+let adiados = null;
+function carregarAdiados() {
+  if (!adiados) adiados = ADIADOS.reduce(function(p, src) {
+    return p.then(function() { return carregarScript(src).catch(function(e) { console.warn(e); }); });
+  }, Promise.resolve());
+  return adiados;
+}
+
 // ---------- começo ----------
 (function iniciar() {
   carregarSave();
@@ -134,5 +146,6 @@ function quadro(agora) {
       Promise.resolve();
     if (typeof desenharLogo === "function") protegido(desenharLogo);   // v19: bolinhas do logo do menu
     fonte.then(function() { aquecer.forEach(function(f, i) { setTimeout(function() { protegido(f); }, 300 + i * 250); }); });
+    setTimeout(carregarAdiados, 1500);
   });
 })();

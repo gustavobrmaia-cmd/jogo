@@ -570,5 +570,11 @@ TEXTOS.pl = {
   // v19.6
   proxima_partida: "NASTĘPNY MECZ",
   // v19.8
-  roleta_melhor: "LEPSZA!"
+  roleta_melhor: "LEPSZA!",
+  // v20.2
+  libera_roleta: "Wygraj i odblokuj: KOŁO + 10 NOWYCH BRONI!",
+  libera_loja: "Wygraj i odblokuj: SKLEP Z BRONIĄ!",
+  loja_em: "Sklep z bronią za {0} zwycięstwa",
+  novo_roleta: "NOWOŚĆ: Koło broni i 10 nowych broni!",
+  novo_loja: "NOWOŚĆ: Sklep z bronią odblokowany!"
 };

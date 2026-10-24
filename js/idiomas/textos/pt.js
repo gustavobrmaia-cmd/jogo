@@ -570,5 +570,11 @@ TEXTOS.pt = {
   // v19.6
   proxima_partida: "PRÓXIMA PARTIDA",
   // v19.8
-  roleta_melhor: "MELHOR!"
+  roleta_melhor: "MELHOR!",
+  // v20.2
+  libera_roleta: "Vença e libere: ROLETA + 10 ARMAS NOVAS!",
+  libera_loja: "Vença e libere: LOJA DE ARMAS!",
+  loja_em: "Loja de armas em {0} vitórias",
+  novo_roleta: "NOVO: Roleta de armas e 10 armas novas!",
+  novo_loja: "NOVO: Loja de armas liberada!"
 };

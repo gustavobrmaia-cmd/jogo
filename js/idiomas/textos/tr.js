@@ -570,5 +570,11 @@ TEXTOS.tr = {
   // v19.6
   proxima_partida: "SONRAKİ MAÇ",
   // v19.8
-  roleta_melhor: "DAHA İYİ!"
+  roleta_melhor: "DAHA İYİ!",
+  // v20.2
+  libera_roleta: "Kazan ve aç: ÇARK + 10 YENİ SİLAH!",
+  libera_loja: "Kazan ve aç: SİLAH DÜKKANI!",
+  loja_em: "Silah dükkanı {0} galibiyet sonra",
+  novo_roleta: "YENİ: Silah çarkı ve 10 yeni silah!",
+  novo_loja: "YENİ: Silah dükkanı açıldı!"
 };

@@ -570,5 +570,11 @@ TEXTOS.it = {
   // v19.6
   proxima_partida: "PROSSIMA PARTITA",
   // v19.8
-  roleta_melhor: "MEGLIO!"
+  roleta_melhor: "MEGLIO!",
+  // v20.2
+  libera_roleta: "Vinci e sblocca: RUOTA + 10 ARMI NUOVE!",
+  libera_loja: "Vinci e sblocca: NEGOZIO DI ARMI!",
+  loja_em: "Negozio di armi tra {0} vittorie",
+  novo_roleta: "NUOVO: Ruota delle armi e 10 armi nuove!",
+  novo_loja: "NUOVO: Negozio di armi sbloccato!"
 };

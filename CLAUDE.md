@@ -444,6 +444,18 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       não encontrada".
     - **Sala velha:** salas de quem fechou o jogo ficam um tempo na lista. Entrou numa sala e ninguém respondeu em
       12 s: a sala vai para `Rede.evitar` e a partida rápida procura outra (antes ficava esperando para sempre).
+  - v20.2 (para buscar 3m30: no PFT da v19.9 só 55% passavam do rival 2 para o 3 e 51% do 3 para o 4):
+    - **1) Isca do próximo desbloqueio:** `desbloqueioRival(i, liga)` em dados/rivais.js. Aparece em verde no VS, entre
+      o prêmio e a trilha:
+      - rival 2: "Vença e libere: ROLETA + 10 ARMAS NOVAS!";
+      - rivais 3–5: "Loja de armas em N vitórias" / "Vença e libere: LOJA DE ARMAS!".
+
+      Ao vencer, comemora na faixa (fluxo direto) ou numa ficha da tela de fim: `novo_roleta` / `novo_loja`.
+    - **2) Pausas ~25% menores:** `RODADA.fim` 2,1 -> 1,7; sem K.O. 1,5 -> 1,2 (`RODADA.semKo`); abertura das rodadas
+      2+ 1,0 -> 0,8; fim da partida 2,6 -> 2,1.
+    - **3) Carregamento adiado:** queda.js, roleta.js, rede.js e online.js saíram do index.html e carregam 1,5 s depois
+      de abrir (`carregarAdiados` no main.js). "Online" no menu espera o carregamento. Loja e personalização continuam
+      no começo: a loja cria o botão do menu quando carrega.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

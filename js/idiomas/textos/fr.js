@@ -570,5 +570,11 @@ TEXTOS.fr = {
   // v19.6
   proxima_partida: "PARTIE SUIVANTE",
   // v19.8
-  roleta_melhor: "MIEUX !"
+  roleta_melhor: "MIEUX !",
+  // v20.2
+  libera_roleta: "Gagne pour débloquer : ROULETTE + 10 NOUVELLES ARMES !",
+  libera_loja: "Gagne pour débloquer : BOUTIQUE D'ARMES !",
+  loja_em: "Boutique d'armes dans {0} victoires",
+  novo_roleta: "NOUVEAU : Roulette d'armes et 10 nouvelles armes !",
+  novo_loja: "NOUVEAU : Boutique d'armes débloquée !"
 };

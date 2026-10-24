@@ -15,7 +15,9 @@
 //        "online" (v19: dois aparelhos; js/rede/online.js)
 // =========================
 
-const RODADA = { intro: 1.0, introPrimeira: 1.7, luta: 45, fim: 2.1, quedaIntro: 1.1, quedaMax: 6, quedaFim: 1.6, fimPartida: 2.6, danoDobro: 10 };
+// v20.2: pausas entre as lutas ~25% menores (fim 2,1 -> 1,7; sem K.O. 1,5 -> 1,2; abertura das rodadas 2+ 1,0 -> 0,8;
+// fim da partida 2,6 -> 2,1): cada pausa é um momento em que a pessoa pode sair
+const RODADA = { intro: 0.8, introPrimeira: 1.7, luta: 45, fim: 1.7, semKo: 1.2, quedaIntro: 1.1, quedaMax: 6, quedaFim: 1.6, fimPartida: 2.1, danoDobro: 10 };
 
 let jogo = null;   // a partida atual (de verdade ou a de demonstração)
 
@@ -367,7 +369,7 @@ function passoDaPartida(dt) {
     // câmera lenta no começo do fim da rodada (mais longa e mais lenta num K.O.)
     passoMundo(j, M, true, M.ko ? (j.tempoFase < 1.1 ? 0.25 : 1) : (j.tempoFase < 0.7 ? 0.35 : 1));
     festejar(j, M, j.vencedorRodada);
-    if (j.tempoFase >= (j.M.ko ? RODADA.fim : 1.5)) fecharRodada(j);   // v18.2: sem K.O. (tempo, queda de braço) é mais curto
+    if (j.tempoFase >= (j.M.ko ? RODADA.fim : RODADA.semKo)) fecharRodada(j);   // v18.2: sem K.O. (tempo, queda de braço) é mais curto
   }
 }
 

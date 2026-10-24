@@ -570,5 +570,11 @@ TEXTOS.es = {
   // v19.6
   proxima_partida: "SIGUIENTE PARTIDA",
   // v19.8
-  roleta_melhor: "¡MEJOR!"
+  roleta_melhor: "¡MEJOR!",
+  // v20.2
+  libera_roleta: "¡Gana y desbloquea: RULETA + 10 ARMAS NUEVAS!",
+  libera_loja: "¡Gana y desbloquea: TIENDA DE ARMAS!",
+  loja_em: "Tienda de armas en {0} victorias",
+  novo_roleta: "NUEVO: ¡Ruleta de armas y 10 armas nuevas!",
+  novo_loja: "NUEVO: ¡Tienda de armas desbloqueada!"
 };

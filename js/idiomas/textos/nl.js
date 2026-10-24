@@ -570,5 +570,11 @@ TEXTOS.nl = {
   // v19.6
   proxima_partida: "VOLGENDE POTJE",
   // v19.8
-  roleta_melhor: "BETER!"
+  roleta_melhor: "BETER!",
+  // v20.2
+  libera_roleta: "Win en speel vrij: RAD + 10 NIEUWE WAPENS!",
+  libera_loja: "Win en speel vrij: WAPENWINKEL!",
+  loja_em: "Wapenwinkel over {0} overwinningen",
+  novo_roleta: "NIEUW: Wapenrad en 10 nieuwe wapens!",
+  novo_loja: "NIEUW: Wapenwinkel vrijgespeeld!"
 };

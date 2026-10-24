@@ -190,6 +190,8 @@ function finalizarPartida(j) {
     if (venceu) save.vitorias++; else save.derrotas++;
     j.resultadoRival = { venceu: venceu, i: r.i, liga: r.liga, nome: r.d.nome, moedas: 0, campeao: false };
     if (venceu) {
+      // v20.2: desbloqueio comemorado (roleta + armas novas depois do rival 2; loja depois do rival 5)
+      j.resultadoRival.libera = r.liga === 0 && r.i === 1 ? "roleta" : r.liga === 0 && r.i === 4 && !Progresso.lojaLiberada() ? "loja" : null;
       const premio = premioRival(r.i, r.liga);
       Progresso.ganharMoedas(premio);
       j.resultadoRival.moedas = premio;
@@ -205,6 +207,7 @@ function finalizarPartida(j) {
     if (venceu) {
       extra.push({ icone: "trofeu", texto: t("n_moedas", j.resultadoRival.moedas), classe: "trofeu" });
       if (j.resultadoRival.acessorio) extra.push({ icone: "presente", texto: t("premio_equipado", t("sk_" + j.resultadoRival.acessorio)), classe: "skin" });
+      if (j.resultadoRival.libera) extra.push({ icone: j.resultadoRival.libera, texto: t("novo_" + j.resultadoRival.libera), classe: "skin" });
     }
   } else if (j.modo === "bot") {
     const venceu = j.vencedorPartida === 1;
@@ -272,6 +275,7 @@ function entregarSemTela(j, ganho) {
   });
   linhas.unshift(t("n_moedas", moedas)); icones.unshift("moeda");
   if (rr.acessorio) { linhas.push(t("premio_equipado", t("sk_" + rr.acessorio))); icones.push("presente"); }
+  if (rr.libera) { linhas.push(t("novo_" + rr.libera)); icones.push(rr.libera); }   // v20.2
   if (xp.subiu) { linhas.push(t("subiu_nivel", xp.nivel)); icones.push("estrela"); Eventos.marco("player-level-" + xp.nivel); }
   (xp.liberados || []).forEach(function(id) { linhas.push(t("item_liberado", t("sk_" + id))); icones.push("brilho"); });
   // v17: a melhoria grátis vem sozinha (Força: a rodada fica mais curta e a abertura mostra "⚡110 VS ⚡100")
@@ -408,7 +412,7 @@ function montarTelas() {
     modoBot: function() { comecarPartida("bot"); },
     modoRivais: function() { comecarPartida("rivais"); },
     modo2p: function() { comecarPartida("2p"); },
-    modoOnline: function() { Online.acoes.modoOnline(); },
+    modoOnline: function() { carregarAdiados().then(function() { Online.acoes.modoOnline(); }); },   // v20.2: online carrega depois
     lendaria: ativarLendaria,
     idiomas: function() { estado = "idiomas"; mostrarTela("telaIdiomas"); },
     voltar: function() { estado = "menu"; atualizarTextos(); mostrarTela("telaMenu"); },

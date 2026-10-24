@@ -570,5 +570,11 @@ TEXTOS.id = {
   // v19.6
   proxima_partida: "PERTANDINGAN BERIKUTNYA",
   // v19.8
-  roleta_melhor: "LEBIH BAIK!"
+  roleta_melhor: "LEBIH BAIK!",
+  // v20.2
+  libera_roleta: "Menang untuk membuka: RODA + 10 SENJATA BARU!",
+  libera_loja: "Menang untuk membuka: TOKO SENJATA!",
+  loja_em: "Toko senjata dalam {0} kemenangan",
+  novo_roleta: "BARU: Roda senjata dan 10 senjata baru!",
+  novo_loja: "BARU: Toko senjata terbuka!"
 };

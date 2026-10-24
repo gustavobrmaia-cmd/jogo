@@ -570,5 +570,11 @@ TEXTOS.ro = {
   // v19.6
   proxima_partida: "MECIUL URMĂTOR",
   // v19.8
-  roleta_melhor: "MAI BUNĂ!"
+  roleta_melhor: "MAI BUNĂ!",
+  // v20.2
+  libera_roleta: "Câștigă și deblochează: RULETA + 10 ARME NOI!",
+  libera_loja: "Câștigă și deblochează: MAGAZINUL DE ARME!",
+  loja_em: "Magazinul de arme în {0} victorii",
+  novo_roleta: "NOU: Ruleta de arme și 10 arme noi!",
+  novo_loja: "NOU: Magazinul de arme deblocat!"
 };

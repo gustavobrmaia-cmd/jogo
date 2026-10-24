@@ -570,5 +570,11 @@ TEXTOS.de = {
   // v19.6
   proxima_partida: "NÄCHSTES SPIEL",
   // v19.8
-  roleta_melhor: "BESSER!"
+  roleta_melhor: "BESSER!",
+  // v20.2
+  libera_roleta: "Gewinne und schalte frei: WAFFENRAD + 10 NEUE WAFFEN!",
+  libera_loja: "Gewinne und schalte frei: WAFFENLADEN!",
+  loja_em: "Waffenladen in {0} Siegen",
+  novo_roleta: "NEU: Waffenrad und 10 neue Waffen!",
+  novo_loja: "NEU: Waffenladen freigeschaltet!"
 };

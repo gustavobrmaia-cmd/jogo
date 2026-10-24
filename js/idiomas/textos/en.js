@@ -570,5 +570,11 @@ TEXTOS.en = {
   // v19.6
   proxima_partida: "NEXT MATCH",
   // v19.8
-  roleta_melhor: "UPGRADE!"
+  roleta_melhor: "UPGRADE!",
+  // v20.2
+  libera_roleta: "Win to unlock: WEAPON SPIN + 10 NEW WEAPONS!",
+  libera_loja: "Win to unlock: WEAPON SHOP!",
+  loja_em: "Weapon shop in {0} wins",
+  novo_roleta: "NEW: Weapon spin and 10 new weapons!",
+  novo_loja: "NEW: Weapon shop unlocked!"
 };
