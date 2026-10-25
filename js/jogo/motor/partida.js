@@ -125,7 +125,9 @@ function novaPartida(modo, opcoes) {
     const crueis = ["dojo", "castelo", "cidade", "lua", "vulcao", "espaco", "oceano"];
     // v17: até o rival 3 também sem deserto (vento), gelo (escorrega) e laboratório (gravidade vira) — no v16 o jogador
     // perdia 41%, 42% e 35% das rodadas neles, contra 16–27% nos outros. Sobram campo, fábrica, floresta, fliperama, templo.
-    if (opcoes.rival <= 2 && !(opcoes.liga > 0)) crueis.push("deserto", "gelo", "laboratorio");
+    // v21.7: na Bronze INTEIRA (PFT da v21.6: laboratório 15% saíam durante o mapa e 25% perdiam, gelo 9%/52%,
+    // deserto 7%/48%; nos outros 0,3–9%). Continuam como casa do rival que mora neles
+    if (!(opcoes.liga > 0)) crueis.push("deserto", "gelo", "laboratorio");
     // v20.8: rivais 2 e 3 também sem templo e fliperama (ver o treino acima): sobram campo, fábrica e floresta.
     // Eles voltam como casa do Rocky (rival 4) e da Nova (rival 5)
     if (opcoes.rival <= 2 && !(opcoes.liga > 0)) crueis.push("templo", "fliperama");
@@ -819,7 +821,7 @@ function escolherTwist(j) {
   if (j.modo === "bot" && !r && save.partidas <= 2) return null;
   if (Math.random() >= 0.6) return null;
   const lista = ["gigantes", "turbo", "chuva", "pulo", "meteoros", "tempestade", "bolas", "lua", "vento"];
-  if (!r || r.liga > 0 || r.i >= 3) lista.push("mini");
+  // v21.7: sem "mini" (a Rodada Maluca com mais saída no PFT da v21.6: 3,1%; as outras 0–2,2%)
   const ok = lista.filter(function(id) { return id !== j.ultimoTwist; });
   const id = ok[Math.floor(Math.random() * ok.length)];
   j.ultimoTwist = id;

@@ -610,7 +610,12 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       x0,55; `fisica.js gravidadeDe` lê `jogo.M.twist`), vento (ventania que vira a cada 4 s; `ventoTwist`, riscos na tela).
     - Corrigido: a Rodada Maluca "gigantes"/"mini" não funcionava (atualizarEfeitos voltava o raio ao normal no passo
       seguinte). Agora existe `b.raioBase`.
-  - **TESTE A/B (`save.exp`) É TEMPORÁRIO:** depois do PFT, ficar só com o bot vencedor e tirar o sorteio e os eventos exp/*.
+  - **PFT v21.6 (25/10 09:21, manhã): 3m11s, 30% — PASSOU** (melhor desde a v18.3). Funil: 1ª partida 634, 30 s 513,
+    2ª partida 432, 1 min 371, 3ª partida 241 (a 2ª partida perde 44%: ~16% por rodada, por tempo), 3 min 169, 5 min 108.
+    Rodada Maluca: 0–3% saem durante (mapas: 0,3–15%). ~30% dos jogadores caem no modo de resolução baixa (perf-auto-lowres).
+  - **Teste A/B do bot: EMPATE** (a: 338 -> 1m 56%, 3m 25%, 5m 16%; b: 341 -> 54%, 25%, 16%).
+  - v21.7 — fim do A/B (fica o bot atual; saíram `save.exp`, o bot simples e os eventos exp/*); deserto, gelo e
+    laboratório fora da Bronze inteira (só como casa do rival); Rodada Maluca sem "mini".
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;

@@ -90,10 +90,6 @@ function criarBot(lado, nivel, estilo) {
     grafo: null, grafoM: null, nav: null,
     prev: new Float32Array(2 * 64), prevOk: false
   };
-  // v21.1: teste A/B, grupo "b": bot simples (o jeito de lutar da v18.3; nível, mira e reação continuam iguais)
-  if (typeof save !== "undefined" && save.exp === "b") {
-    bot.preve = 0; bot.leMira = 0; bot.cobre = 0; bot.finta = 0.1; bot.combo = 0; bot.arcoAlto = false; bot.tabela = false; bot.dash = 0;
-  }
   return bot;
 }
 

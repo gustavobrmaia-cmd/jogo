@@ -42,11 +42,7 @@ function saveNovo() {
     armaInicial: "",  // v19: arma escolhida na loja. v21.4: é a arma RESERVA (quando a munição acaba; "" = estilingue)
     supers: [],       // v21.6: supers comprados na loja (ids de SUPERS)
     superEquip: "",   // v21.6: super escolhido ("" = um dos 3 grátis sorteado a cada rodada)
-    qualidade: "auto", // "auto" | "alta" | "leve"
-    // v21.1: TESTE A/B (sorteado 1 vez por jogador, como o Smash Room do blog do Poki): "a" = bot atual (v19),
-    // "b" = bot simples (sem cobertura, sem sair da linha da mira, sem previsão/fintas/tabela, como o da v18.3).
-    // Eventos exp/bot-a|bot-b (visible) e exp/bot-x-1m|3m|5m (reached): quem passa de 3 min em cada grupo
-    exp: ""
+    qualidade: "auto" // "auto" | "alta" | "leve"
   };
 }
 
@@ -63,7 +59,6 @@ function carregarSave() {
       save = base;
     }
   } catch (e) { /* sem armazenamento: segue com o save novo */ }
-  if (save.exp !== "a" && save.exp !== "b") { save.exp = Math.random() < 0.5 ? "a" : "b"; salvar(); }
 }
 
 function salvar() {
