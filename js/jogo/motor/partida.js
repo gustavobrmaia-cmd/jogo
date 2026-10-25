@@ -819,10 +819,15 @@ function escolherTwist(j) {
   const r = j.rival;
   if (r && r.liga === 0 && r.i < 1) return null;
   if (j.modo === "bot" && !r && save.partidas <= 2) return null;
-  if (Math.random() >= 0.6) return null;
+  // v21.8: nos rivais 2 e 3 da Bronze TODA rodada (da 2ª em diante) é maluca; nos outros 75% (era 60%). PFT da v21.6:
+  // a 2ª partida perde ~15% por rodada (quase ninguém perde dela: é tédio — os mesmos 3 mapas do treino) e as rodadas
+  // malucas foram as de menos saída do jogo (0–3%, contra 7–11% nos mapas sem nada)
+  const cedo = r && r.liga === 0 && r.i <= 2;
+  if (!cedo && Math.random() >= 0.75) return null;
   const lista = ["gigantes", "turbo", "chuva", "pulo", "meteoros", "tempestade", "bolas", "lua", "vento"];
   // v21.7: sem "mini" (a Rodada Maluca com mais saída no PFT da v21.6: 3,1%; as outras 0–2,2%)
-  const ok = lista.filter(function(id) { return id !== j.ultimoTwist; });
+  const base = cedo ? ["gigantes", "pulo", "chuva", "bolas", "lua", "meteoros"] : lista;   // cedo: as de 0–1,6% de saída
+  const ok = base.filter(function(id) { return id !== j.ultimoTwist; });
   const id = ok[Math.floor(Math.random() * ok.length)];
   j.ultimoTwist = id;
   Poki.medir("twist", id, "start");

@@ -616,6 +616,9 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
   - **Teste A/B do bot: EMPATE** (a: 338 -> 1m 56%, 3m 25%, 5m 16%; b: 341 -> 54%, 25%, 16%).
   - v21.7 — fim do A/B (fica o bot atual; saíram `save.exp`, o bot simples e os eventos exp/*); deserto, gelo e
     laboratório fora da Bronze inteira (só como casa do rival); Rodada Maluca sem "mini".
+  - PFT v21.7 (dom 25/10 17:00): ~3m05–3m10 (perto da v21.6; a v21.7 não mudou o patamar — ruído de ±20 s).
+  - v21.8 — **Rodada Maluca em TODA rodada (da 2ª em diante) nos rivais 2 e 3** (só gigantes, pulo, chuva, bolas, lua,
+    meteoros: as de menos saída) e 75% nas outras (era 60%). Motivo: a 2ª partida perde ~15% por rodada por tédio.
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;
