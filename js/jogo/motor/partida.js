@@ -140,7 +140,8 @@ function novaPartida(modo, opcoes) {
     modo: modo,
     demo: modo === "demo",
     pontos: [0, 0],
-    alvo: opcoes.primeiraVez && modo === "bot" ? CONFIG.pontosPrimeira : CONFIG.pontosParaVencer,
+    alvo: opcoes.primeiraVez && modo === "bot" ? CONFIG.pontosPrimeira :
+      modo === "bot" && opcoes.rival === 1 && !(opcoes.liga > 0) ? CONFIG.pontosRival2 : CONFIG.pontosParaVencer,
     rodada: 0,
     cores: sortearCores(modo),
     ordem: ordem,

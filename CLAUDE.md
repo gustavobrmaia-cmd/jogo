@@ -621,6 +621,9 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
     meteoros: as de menos saída) e 75% nas outras (era 60%). Motivo: a 2ª partida perde ~15% por rodada por tédio.
   - v21.9 — a pendência do agente de teste (rodada 1 do treino com 45 s de tela parada para quem não entende): o relógio
     dessa rodada caiu para 25 s e, sem acerto da pessoa por 5 s, o Bob vira alvo parado na frente dela (`bobAlvo`).
+  - v22 — **treino e rival 2 até 2 pontos** (eram 3; `CONFIG.pontosPrimeira`, `CONFIG.pontosRival2`). PFT v21.6: quem
+    TERMINA uma partida começa a próxima (~100%: treino 418 -> 422, rival 2 231 -> 241); no meio dela saem ~15% por
+    rodada. Menos rodadas até a vitória = ~20% mais gente chegando no "gancho" (vitória, prêmio, próximo rival).
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;
