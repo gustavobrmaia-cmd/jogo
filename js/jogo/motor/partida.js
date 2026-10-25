@@ -285,7 +285,9 @@ function iniciarRodada() {
   j.M = M;
   j.fase = "intro";
   j.tempoFase = 0;
-  j.relogio = RODADA.luta;
+  // v21.8: a rodada 1 do treino com 25 s (o agente de teste viu 45 s de tela parada para quem não entende o controle;
+  // o 1º texto que explica algo, o "TOQUE NA TELA" da queda de braço, vinha só aos 47 s)
+  j.relogio = j.treino && j.rodada === 1 ? 25 : RODADA.luta;
   j.queda = null;
   j.avisouDobro = false;
   j.vencedorRodada = 0;
@@ -420,7 +422,7 @@ function passoMundo(j, M, controles, lento) {
     let ent;
     const bot = j.bots[k];
     if (!controles || !b.viva) ent = PARADO;
-    else if (bot) { ent = pensarBot(bot, M, b); botDash(bot, M, b, ent); }
+    else if (bot) { ent = pensarBot(bot, M, b); botDash(bot, M, b, ent); if (j.treino && j.rodada === 1) ent = bobAlvo(M, b, ent); }
     else ent = entradaHumana(b.lado, b);
     b.ent = ent;
     const yAntes = b.vy;
@@ -814,6 +816,20 @@ const TWISTS = {
   lua:        { icone: "lua",        cor: "#d0bfff" },
   vento:      { icone: "vento",      cor: "#a5d8ff" }
 };
+// v21.8: rodada 1 do treino: se a pessoa passa 5 s sem acertar, o Bob para de atacar, vai para a FRENTE dela, a
+// meia distância, e fica parado como alvo (com o giro automático da v20.9, qualquer tiro acerta). Relatório do agente de
+// teste (v20.9): "a rodada 1 do treino pode passar 45 s sem nenhuma ação" — e 20% saíam nos primeiros 30 s (PFT v21.6)
+const PARADO_BOB = { esq: false, dir: false, pulo: false, segPulo: false, baixo: false, tiro: false, apertouTiro: false, dash: false };
+function bobAlvo(M, b, ent) {
+  const h = M.bolinhas[0], ac = M.stats.acertos[0];
+  if (M.acertosH !== ac) { M.acertosH = ac; M.tAcertoH = M.t; }
+  if (!h.viva || M.t - (M.tAcertoH || 0) < 5) return ent;
+  const lado = h.x < 260 ? 1 : h.x > 1020 ? -1 : (h.dir || 1);
+  const tx = h.x + lado * 230, dx = tx - b.x;
+  if (Math.abs(dx) < 25) { b.dir = h.x > b.x ? 1 : -1; return PARADO_BOB; }
+  return { esq: dx < 0, dir: dx > 0, pulo: false, segPulo: false, baixo: false, tiro: false, apertouTiro: false, dash: false };
+}
+
 function escolherTwist(j) {
   if (j.demo || j.treino || j.modo === "sobrevivencia" || j.rodada < 2) return null;
   const r = j.rival;

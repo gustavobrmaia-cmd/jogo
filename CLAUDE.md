@@ -619,6 +619,8 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
   - PFT v21.7 (dom 25/10 17:00): ~3m05–3m10 (perto da v21.6; a v21.7 não mudou o patamar — ruído de ±20 s).
   - v21.8 — **Rodada Maluca em TODA rodada (da 2ª em diante) nos rivais 2 e 3** (só gigantes, pulo, chuva, bolas, lua,
     meteoros: as de menos saída) e 75% nas outras (era 60%). Motivo: a 2ª partida perde ~15% por rodada por tédio.
+  - v21.9 — a pendência do agente de teste (rodada 1 do treino com 45 s de tela parada para quem não entende): o relógio
+    dessa rodada caiu para 25 s e, sem acerto da pessoa por 5 s, o Bob vira alvo parado na frente dela (`bobAlvo`).
   - **Online (js/rede/):**
     - `netlib.js` é a Poki Networking Library (WebRTC P2P; servidor de salas e TURN de graça do Poki; licença ISC no
       topo do arquivo). Só é baixada quando a pessoa abre o online;
