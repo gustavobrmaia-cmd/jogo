@@ -628,5 +628,11 @@ TEXTOS.de = {
   tw_lua: "MONDSCHWERKRAFT!",
   tw_vento: "STURM!",
   su_em_uso: "AKTIV",
-  su_usando: "Aktiv"
+  su_usando: "Aktiv",
+  // v23: trilha de níveis, missão na abertura, chefes
+  trilha_super: "NEUER SUPER: {0}!",
+  trilha_arma: "NEUE WAFFE: {0}!",
+  missao_ok: "Mission erfüllt! +{0}",
+  missao_rotulo: "MISSION:",
+  chefe: "BOSS"
 };

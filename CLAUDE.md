@@ -645,6 +645,20 @@ Arquivo novo: colocar na pasta certa. Arte nunca mexe em regra de jogo; motor nu
       entre parênteses no texto (ex.: "servidor-socket-error"). Se a netlib falhar, a próxima tentativa recria a conexão;
     - não testado com a rede de verdade aqui (o ambiente bloqueia netlib.poki.io); testar no site.
 
+- **WEB FIT da v18.3 (resultado 27/10): REPROVADO.** Conversão para jogar 73,3% (mínimo ~56,7%: OK), tempo médio
+  **3:23 (mínimo ~5:46)**, CTR nas categorias 0,37%. O Poki: "keep using our playtesting feature... request another
+  review". **A meta de verdade é ~5:46 no Web Fit** (o Web Fit deu ~10% acima do PFT da mesma versão).
+- PFT v22 (seg 26/10 06:57, pior horário): 3m08, 28%.
+- v23 — **reforma da progressão** (o que segura depois de 5 min):
+  - trilha de níveis (`progresso.js premioDoNivel/darPremioDoNivel/proximoPremio`): todo nível dá prêmio GARANTIDO
+    (baú de nível com item 100%; múltiplo de 3: super; múltiplo de 5: arma, que vira a reserva/o escolhido se não tiver);
+    curva de XP mais plana (`min(260, 80 + 30·(n-1))`); barra até o próximo nível com o ícone do prêmio na faixa de prêmios;
+  - supers 900–5.000 moedas (eram 2.500–10.000);
+  - missões prontas resgatadas sozinhas no fluxo direto (`resgatarProntas`) e a missão da vez numa pílula na abertura
+    da rodada (`desenho.js desenharMissaoAtual`); missão de mapa só nos mapas da Bronze;
+  - CHEFES: rivais 5 e 10 de cada liga (`rivais.js ehChefe`): raio x1,3, defesa x1,3, "CHEFE" no nome e prêmio em dobro;
+  - evento Poki track/<tipo>-<id> (reached) a cada prêmio da trilha.
+
 ## Entrega para o Poki
 - Zip com número de versão (ex.: `jogo-v1.zip`):
   `git archive --format=zip -o jogo-vX.zip HEAD index.html estilo.css estilo-v19c.css js fonte`

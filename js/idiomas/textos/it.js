@@ -628,5 +628,11 @@ TEXTOS.it = {
   tw_lua: "GRAVITÀ LUNARE!",
   tw_vento: "BUFERA DI VENTO!",
   su_em_uso: "IN USO",
-  su_usando: "In uso"
+  su_usando: "In uso",
+  // v23: trilha de níveis, missão na abertura, chefes
+  trilha_super: "NUOVO SUPER: {0}!",
+  trilha_arma: "NUOVA ARMA: {0}!",
+  missao_ok: "Missione completata! +{0}",
+  missao_rotulo: "MISSIONE:",
+  chefe: "BOSS"
 };

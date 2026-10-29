@@ -628,5 +628,11 @@ TEXTOS.nl = {
   tw_lua: "MAANZWAARTEKRACHT!",
   tw_vento: "STORM!",
   su_em_uso: "IN GEBRUIK",
-  su_usando: "In gebruik"
+  su_usando: "In gebruik",
+  // v23: trilha de níveis, missão na abertura, chefes
+  trilha_super: "NIEUWE SUPER: {0}!",
+  trilha_arma: "NIEUW WAPEN: {0}!",
+  missao_ok: "Missie voltooid! +{0}",
+  missao_rotulo: "MISSIE:",
+  chefe: "BAAS"
 };

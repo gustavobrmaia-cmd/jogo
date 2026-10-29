@@ -628,5 +628,11 @@ TEXTOS.fr = {
   tw_lua: "GRAVITÉ LUNAIRE !",
   tw_vento: "TEMPÊTE DE VENT !",
   su_em_uso: "UTILISÉ",
-  su_usando: "Utilisé"
+  su_usando: "Utilisé",
+  // v23: trilha de níveis, missão na abertura, chefes
+  trilha_super: "NOUVEAU SUPER : {0} !",
+  trilha_arma: "NOUVELLE ARME : {0} !",
+  missao_ok: "Mission accomplie ! +{0}",
+  missao_rotulo: "MISSION :",
+  chefe: "BOSS"
 };

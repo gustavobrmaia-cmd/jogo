@@ -628,5 +628,11 @@ TEXTOS.id = {
   tw_lua: "GRAVITASI BULAN!",
   tw_vento: "BADAI ANGIN!",
   su_em_uso: "DIPAKAI",
-  su_usando: "Dipakai"
+  su_usando: "Dipakai",
+  // v23: trilha de níveis, missão na abertura, chefes
+  trilha_super: "SUPER BARU: {0}!",
+  trilha_arma: "SENJATA BARU: {0}!",
+  missao_ok: "Misi selesai! +{0}",
+  missao_rotulo: "MISI:",
+  chefe: "BOS"
 };

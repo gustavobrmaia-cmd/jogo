@@ -628,5 +628,11 @@ TEXTOS.ja = {
   tw_lua: "月の重力！",
   tw_vento: "大嵐！",
   su_em_uso: "使用中",
-  su_usando: "使用中"
+  su_usando: "使用中",
+  // v23: trilha de níveis, missão na abertura, chefes
+  trilha_super: "新スーパー：{0}！",
+  trilha_arma: "新しい武器：{0}！",
+  missao_ok: "ミッション達成！+{0}",
+  missao_rotulo: "ミッション：",
+  chefe: "ボス"
 };

@@ -275,6 +275,13 @@ function entregarSemTela(j, ganho) {
     moedas += p.moedas;
     if (p.skin) { linhas.push(t("premio_skin", t("sk_" + p.skin))); icones.push("presente"); }
   });
+  // v23: prêmios garantidos da trilha de níveis e missões prontas resgatadas sozinhas
+  (xp.premios || []).forEach(function(p) {
+    linhas.push(t(p.tipo === "super" ? "trilha_super" : "trilha_arma", t(p.tipo === "super" ? "su_" + p.id : "a_" + p.id)));
+    icones.push(p.tipo === "super" ? "s_" + p.id : "arma");
+  });
+  const mis = Progresso.resgatarProntas();
+  if (mis) { moedas += mis; linhas.push(t("missao_ok", mis)); icones.push("ok"); }
   linhas.unshift(t("n_moedas", moedas)); icones.unshift("moeda");
   if (rr.acessorio) { linhas.push(t("premio_equipado", t("sk_" + rr.acessorio))); icones.push("presente"); }
   if (rr.libera) { linhas.push(t("novo_" + rr.libera)); icones.push(rr.libera); }   // v20.2
@@ -292,7 +299,7 @@ function entregarSemTela(j, ganho) {
   }
   save.stats.semTela = (save.stats.semTela || 0) + 1;
   salvar();
-  faixaPremio = { linhas: linhas, icones: icones, destaque: destaque, t0: 0, velho: j };   // o relógio da faixa começa quando a próxima partida aparece
+  faixaPremio = { linhas: linhas, icones: icones, destaque: destaque, t0: 0, velho: j, prox: Progresso.proximoPremio() };   // o relógio da faixa começa quando a próxima partida aparece
   Eventos.marco("next-rival-direct");
   atualizarMenuProgresso();
   comecarPartida("rivais");

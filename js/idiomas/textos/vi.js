@@ -628,5 +628,11 @@ TEXTOS.vi = {
   tw_lua: "TRỌNG LỰC MẶT TRĂNG!",
   tw_vento: "GIÓ BÃO!",
   su_em_uso: "ĐANG DÙNG",
-  su_usando: "Đang dùng"
+  su_usando: "Đang dùng",
+  // v23: trilha de níveis, missão na abertura, chefes
+  trilha_super: "SIÊU CHIÊU MỚI: {0}!",
+  trilha_arma: "VŨ KHÍ MỚI: {0}!",
+  missao_ok: "Hoàn thành nhiệm vụ! +{0}",
+  missao_rotulo: "NHIỆM VỤ:",
+  chefe: "TRÙM"
 };

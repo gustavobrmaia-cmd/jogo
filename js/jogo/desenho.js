@@ -268,6 +268,22 @@ function desenharVoos(ctx, j, M) {
     ctx.restore();
   }
 }
+// v23: a missão da vez numa pílula embaixo da abertura da rodada (antes ficava escondida no menu; no fluxo direto
+// entre rivais quase ninguém via): "MISSÃO: Vença 2 partidas  1/2"
+function desenharMissaoAtual(ctx, j, L, cx, meio) {
+  const m = typeof Progresso !== "undefined" && Progresso.missaoAtual && Progresso.missaoAtual();
+  if (!m) return;
+  const em = L.emPe, ta = em ? 30 : 22, y = (j.abBaixo || meio + 120) + (em ? 64 : 48);
+  const txt = t("missao_rotulo") + " " + t("mi_" + m.id, m.meta, m.cenario ? t("c_" + m.cenario) : "") + "   " + Math.min(m.prog, m.meta) + "/" + m.meta;
+  const k = Math.min(1, j.tempoFase / 0.25);
+  ctx.save(); ctx.globalAlpha *= k;
+  ctx.font = "900 " + ta + FONTE;
+  const tw = Math.min(ctx.measureText(txt).width, CONFIG.largura - 120);
+  ctx.fillStyle = "rgba(12,8,30,0.72)"; retRedondo(ctx, cx - tw / 2 - 20, y - ta * 1.08, tw + 40, ta * 1.46, ta * 0.73); ctx.fill();
+  textoRico(ctx, txt, cx, y, ta, "#8ce99a");
+  ctx.restore();
+}
+
 // v21.3: letreiro da RODADA MALUCA (em cima da abertura e no 1º segundo da luta)
 function desenharTwist(ctx, j, M, L, cx, meio) {
   const tw = TWISTS[M.twist]; if (!tw) return;
@@ -748,7 +764,7 @@ function retRedondo(ctx, x, y, w, h, r) {
 }
 
 function nomeJogador(j, lado) {
-  if (j.rival && lado === 2) return j.rival.d.nome.toUpperCase() + " · " + t("rival_n", j.rival.i + 1, RIVAIS.length);
+  if (j.rival && lado === 2) return (ehChefe(j.rival.i) ? t("chefe") + " " : "") + j.rival.d.nome.toUpperCase() + " · " + t("rival_n", j.rival.i + 1, RIVAIS.length);
   if (j.modo === "bot" || j.modo === "sobrevivencia") {
     const nivel = j.bots[1] ? j.bots[1].nivel : j.nivelBot;
     const estilo = j.bots[1] ? " · " + t("estilo_" + j.bots[1].estilo) : "";
@@ -783,6 +799,7 @@ function desenharHud(ctx, j, M, L) {
   const meio = mundoParaTela(0, FIS.altura * 0.42).y;
   // abertura da rodada (v17.5): faixa com o mapa; contra rival na 1ª rodada, o "VS" com os retratos
   if (j.fase === "intro") desenharAbertura(ctx, j, M, L, cx, meio);
+  if (j.fase === "intro" && !M.twist && j.modo === "bot" && !j.treino) desenharMissaoAtual(ctx, j, L, cx, meio);   // v23
   if (M.twist && (j.fase === "intro" || (j.fase === "luta" && j.tempoFase < 1.4))) desenharTwist(ctx, j, M, L, cx, meio);   // v21.3
   else if (j.fase === "cartas" && typeof CartasArma !== "undefined") CartasArma.desenhar(ctx, j, M, L, cx, meio);   // v20.5: cartas de arma
   // textos do meio (LUTE, K.O., placar): em pé ficam 40% maiores (a tela do celular é estreita)
@@ -881,7 +898,7 @@ function desenharHud(ctx, j, M, L) {
     if (!faixaPremio.t0) faixaPremio.t0 = performance.now() / 1000;
     const tf = performance.now() / 1000 - faixaPremio.t0;
     // v17: com a melhoria grátis (destaque) a faixa fica mais tempo
-    const ld = faixaPremio.destaque, dur = ld ? 5.5 : 4.2;
+    const ld = faixaPremio.destaque, px = faixaPremio.prox, dur = (ld ? 5.5 : 4.2) + (px ? 0.8 : 0);
     if (tf > dur) faixaPremio = null;
     else {
       // 1ª linha: as moedas, grande; depois a melhoria grátis (v17) e o resto (skin, acessório, nível),
@@ -900,7 +917,7 @@ function desenharHud(ctx, j, M, L) {
       const w = Math.max(280, (l2 ? largura(l2, t2) : 0) + 90, (l3 ? largura(l3, t2) : 0) + 90, (ld ? largura(ld, td) : 0) + 80);
       // a parte de baixo fica acima das bolinhas, que começam no chão (v17: a faixa mais alta cobria as duas);
       // em pé a câmera aproxima e as bolinhas ficam maiores: mais folga
-      const h = 58 + (ld ? 42 : 0) + (l2 ? 36 : 0) + (l3 ? 36 : 0), esc = em ? 1.35 : 1;
+      const h = 58 + (ld ? 42 : 0) + (l2 ? 36 : 0) + (l3 ? 36 : 0) + (px ? 46 : 0), esc = em ? 1.35 : 1;
       // v18.3: em pé com câmera a faixa fica no céu, logo abaixo do HUD (antes cobria a luta nos 4 s iniciais)
       const yf = L.cam ? L.hudTopo + 128 * 1.45 + 30 + h * (esc - 1) / 2 : mundoParaTela(0, FIS.altura).y - (em ? 205 : 110) - h * (esc + 1) / 2;
       const yd = yf + 86, y2 = yf + (ld ? 122 : 80);
@@ -915,6 +932,15 @@ function desenharHud(ctx, j, M, L) {
         });
         if (l2) textoRico(ctx, l2, cx, y2, Math.round(t2), "#ffffff");
         if (l3) textoRico(ctx, l3, cx, y2 + 36, Math.round(t2), "#ffffff");
+        // v23: barra até o próximo nível com o prêmio dele na ponta (a meta seguinte sempre à vista)
+        if (px) {
+          const yb = yf + h - 30, bw = Math.max(200, w - 190), bx = cx - bw / 2 + 10, f = Math.min(1, px.xp / px.total) * Math.min(1, tf / 0.8);
+          textoContorno(ctx, t("nivel_curto", px.nivel - 1), bx - 14, yb + 8, 20, "#ffd43b", "right", 4);
+          ctx.fillStyle = "#1a0d33"; retRedondo(ctx, bx - 3, yb - 11, bw + 6, 22, 11); ctx.fill();
+          if (f > 0.02) { ctx.fillStyle = "#ffd43b"; retRedondo(ctx, bx, yb - 8, bw * f, 16, 8); ctx.fill(); }
+          const ic = px.tipo === "super" ? "s_" + px.id : px.tipo === "arma" ? "arma" : "presente";
+          Icone.desenhar(ctx, ic, bx + bw + 30, yb, 40 + 4 * Math.sin(tf * 6));
+        }
       });
       ctx.restore();
     }
@@ -1043,7 +1069,7 @@ function desenharAbertura(ctx, j, M, L, cx, meio) {
       medalhaRetrato(ctx, px, 0, 56, j.cores[s], sk, s ? -1 : 1, s ? "bravo" : "normal");
     }
     textoCaber(ctx, t("rival_n", j.rival.i + 1, RIVAIS.length) + " · " + t("liga_n", nomeLiga(j.rival.liga)), 0, -14, 22, "#e9ecef", 500);
-    escalaEm(ctx, 0, 20, 0.6 + 0.4 * entra(0.08), function() { letreiro(ctx, j.rival.d.nome.toUpperCase(), 0, 48, 72, j.cores[1], 500); });
+    escalaEm(ctx, 0, 20, 0.6 + 0.4 * entra(0.08), function() { letreiro(ctx, (ehChefe(j.rival.i) ? t("chefe") + " " : "") + j.rival.d.nome.toUpperCase(), 0, 48, 72, j.cores[1], 560); });   // v23: chefe
     // medalhão "VS" em cima da faixa
     const ev = entra(0.14);
     if (ev > 0.01) escalaEm(ctx, 0, -h / 2, ev, function() {

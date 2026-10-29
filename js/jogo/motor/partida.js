@@ -282,6 +282,7 @@ function iniciarRodada() {
   M.twist = escolherTwist(j);
   if (M.twist) aplicarTwist(M, M.twist);
   b1.superId = escolherSuper(j, 0); b2.superId = escolherSuper(j, 1);
+  if (j.rival && ehChefe(j.rival.i)) { b2.chefe = true; b2.r = b2.raioBase = (b2.raioBase || FIS.raio) * 1.3; b2.defesa = (b2.defesa || 1) * 1.3; }   // v23
   b1.mira = 0; b2.mira = Math.PI;
   j.M = M;
   j.fase = "intro";

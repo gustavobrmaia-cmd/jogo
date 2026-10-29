@@ -628,5 +628,11 @@ TEXTOS.pl = {
   tw_lua: "GRAWITACJA KSIĘŻYCA!",
   tw_vento: "WICHURA!",
   su_em_uso: "UŻYWANY",
-  su_usando: "Używany"
+  su_usando: "Używany",
+  // v23: trilha de níveis, missão na abertura, chefes
+  trilha_super: "NOWY SUPER: {0}!",
+  trilha_arma: "NOWA BROŃ: {0}!",
+  missao_ok: "Misja wykonana! +{0}",
+  missao_rotulo: "MISJA:",
+  chefe: "BOSS"
 };

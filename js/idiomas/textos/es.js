@@ -628,5 +628,11 @@ TEXTOS.es = {
   tw_lua: "¡GRAVEDAD LUNAR!",
   tw_vento: "¡VENDAVAL!",
   su_em_uso: "EN USO",
-  su_usando: "En uso"
+  su_usando: "En uso",
+  // v23: trilha de níveis, missão na abertura, chefes
+  trilha_super: "¡NUEVO SÚPER: {0}!",
+  trilha_arma: "¡NUEVA ARMA: {0}!",
+  missao_ok: "¡Misión completa! +{0}",
+  missao_rotulo: "MISIÓN:",
+  chefe: "JEFE"
 };

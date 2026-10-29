@@ -628,5 +628,11 @@ TEXTOS.pt = {
   tw_lua: "GRAVIDADE DA LUA!",
   tw_vento: "VENTANIA!",
   su_em_uso: "EM USO",
-  su_usando: "Em uso"
+  su_usando: "Em uso",
+  // v23: trilha de níveis, missão na abertura, chefes
+  trilha_super: "NOVO SUPER: {0}!",
+  trilha_arma: "NOVA ARMA: {0}!",
+  missao_ok: "Missão completa! +{0}",
+  missao_rotulo: "MISSÃO:",
+  chefe: "CHEFE"
 };

@@ -37,7 +37,10 @@ function abrirRecompensa(j, titulo, sub) {
   garantirDemo();          // no fundo, a luta de demonstração (sem o placar da partida que acabou)
   atualizarTextos();
   el("recTitulo").textContent = titulo;
-  rec.sub = (sub || []).concat((xp.liberados || []).map(function(id) { return { icone: "brilho", texto: t("item_liberado", t("sk_" + id)), classe: "skin" }; }));
+  rec.sub = (sub || []).concat((xp.liberados || []).map(function(id) { return { icone: "brilho", texto: t("item_liberado", t("sk_" + id)), classe: "skin" }; }))
+    .concat((xp.premios || []).map(function(p) {   // v23: trilha de níveis
+      return { icone: p.tipo === "super" ? "s_" + p.id : "arma", texto: t(p.tipo === "super" ? "trilha_super" : "trilha_arma", t(p.tipo === "super" ? "su_" + p.id : "a_" + p.id)), classe: "skin" };
+    }));
   mostrarSub(rec.sub);
   el("recPremio").textContent = "";
   // v17.5: vitória (título dourado com raios) ou derrota (tons frios)

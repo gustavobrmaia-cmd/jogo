@@ -628,5 +628,11 @@ TEXTOS.ru = {
   tw_lua: "ЛУННАЯ ГРАВИТАЦИЯ!",
   tw_vento: "УРАГАН!",
   su_em_uso: "ВЫБРАН",
-  su_usando: "Выбран"
+  su_usando: "Выбран",
+  // v23: trilha de níveis, missão na abertura, chefes
+  trilha_super: "НОВЫЙ СУПЕР: {0}!",
+  trilha_arma: "НОВОЕ ОРУЖИЕ: {0}!",
+  missao_ok: "Миссия выполнена! +{0}",
+  missao_rotulo: "МИССИЯ:",
+  chefe: "БОСС"
 };

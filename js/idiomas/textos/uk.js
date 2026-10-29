@@ -628,5 +628,11 @@ TEXTOS.uk = {
   tw_lua: "МІСЯЧНА ГРАВІТАЦІЯ!",
   tw_vento: "УРАГАН!",
   su_em_uso: "ВИБРАНО",
-  su_usando: "Вибрано"
+  su_usando: "Вибрано",
+  // v23: trilha de níveis, missão na abertura, chefes
+  trilha_super: "НОВИЙ СУПЕР: {0}!",
+  trilha_arma: "НОВА ЗБРОЯ: {0}!",
+  missao_ok: "Місію виконано! +{0}",
+  missao_rotulo: "МІСІЯ:",
+  chefe: "БОС"
 };

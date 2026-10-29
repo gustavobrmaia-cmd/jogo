@@ -628,5 +628,11 @@ TEXTOS.tr = {
   tw_lua: "AY YERÇEKİMİ!",
   tw_vento: "FIRTINA!",
   su_em_uso: "KULLANILIYOR",
-  su_usando: "Kullanılıyor"
+  su_usando: "Kullanılıyor",
+  // v23: trilha de níveis, missão na abertura, chefes
+  trilha_super: "YENİ SÜPER: {0}!",
+  trilha_arma: "YENİ SİLAH: {0}!",
+  missao_ok: "Görev tamam! +{0}",
+  missao_rotulo: "GÖREV:",
+  chefe: "PATRON"
 };

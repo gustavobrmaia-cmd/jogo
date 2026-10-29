@@ -628,5 +628,11 @@ TEXTOS.ro = {
   tw_lua: "GRAVITAȚIA LUNII!",
   tw_vento: "VIJELIE!",
   su_em_uso: "FOLOSIT",
-  su_usando: "Folosit"
+  su_usando: "Folosit",
+  // v23: trilha de níveis, missão na abertura, chefes
+  trilha_super: "SUPER NOU: {0}!",
+  trilha_arma: "ARMĂ NOUĂ: {0}!",
+  missao_ok: "Misiune completă! +{0}",
+  missao_rotulo: "MISIUNE:",
+  chefe: "ȘEF"
 };

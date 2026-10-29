@@ -628,5 +628,11 @@ TEXTOS.en = {
   tw_lua: "MOON GRAVITY!",
   tw_vento: "WINDSTORM!",
   su_em_uso: "IN USE",
-  su_usando: "In use"
+  su_usando: "In use",
+  // v23: trilha de níveis, missão na abertura, chefes
+  trilha_super: "NEW SUPER: {0}!",
+  trilha_arma: "NEW WEAPON: {0}!",
+  missao_ok: "Mission complete! +{0}",
+  missao_rotulo: "MISSION:",
+  chefe: "BOSS"
 };

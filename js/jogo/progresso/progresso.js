@@ -29,7 +29,8 @@ const Progresso = (function() {
     const feitas = save.stats.missoes || 0;
     const nivel = Math.min(2, Math.floor(Math.random() * (1 + Math.min(2, feitas / 4))));
     const m = nova({ id: mod.id, chave: mod.chave, meta: mod.metas[nivel], moedas: mod.moedas[nivel] });
-    if (mod.porCenario) m.cenario = CENARIOS[Math.floor(Math.random() * CENARIOS.length)].id;
+    // v23: só mapas que a pessoa encontra cedo (antes podia pedir um mapa que só aparece na Prata: missão impossível)
+    if (mod.porCenario) { const comuns = ["campo", "fabrica", "floresta", "fliperama", "templo"]; m.cenario = comuns[Math.floor(Math.random() * comuns.length)]; }
     return m;
   }
 
@@ -303,7 +304,45 @@ const Progresso = (function() {
   }
 
   // ---------- XP e nível do jogador ----------
-  function xpParaSubir(nivel) { return 80 + 40 * (nivel - 1); }
+  // v23: curva mais plana (era 80 + 40 por nível, sem teto): um nível a cada ~2 partidas também lá na frente
+  function xpParaSubir(nivel) { return Math.min(260, 80 + 30 * (nivel - 1)); }
+
+  // ---------- v23: TRILHA DE PRÊMIOS (Web Fit da v18.3: 3:23 de média; o Poki pede ~5:46) ----------
+  // Todo nível dá um prêmio GARANTIDO (antes: baú com 35% de chance de item) e a próxima recompensa fica sempre à vista
+  // (barra na faixa de prêmios). Nível múltiplo de 5: arma (a mais barata que falta; vira a reserva se não tiver);
+  // múltiplo de 3: super (o mais barato que falta; vira o escolhido se não tiver); os outros: item do baú do nível.
+  function armasDaTrilha() {
+    return ARMAS.filter(function(a) { return a.raridade >= 1 && a.tipo !== "mina" && a.tipo !== "ceu" && a.tipo !== "torreta"; })
+      .sort(function(a, b) { return a.raridade - b.raridade; });
+  }
+  function premioDoNivel(nivel) {
+    if (nivel % 5 === 0) { const a = armasDaTrilha().filter(function(a) { return !temArma(a.id); })[0]; if (a) return { tipo: "arma", id: a.id }; }
+    if (nivel % 3 === 0 || nivel % 5 === 0) { const s = SUPERS.filter(function(s) { return !s.gratis && !temSuper(s.id); })[0]; if (s) return { tipo: "super", id: s.id }; }
+    return { tipo: "skin" };
+  }
+  function darPremioDoNivel(nivel) {
+    const p = premioDoNivel(nivel);
+    if (p.tipo === "super") { save.supers.push(p.id); if (!save.superEquip) save.superEquip = p.id; }
+    else if (p.tipo === "arma") { save.armas.push(p.id); if (!save.armaInicial) save.armaInicial = p.id; }
+    if (p.id) Poki.medir("track", p.tipo + "-" + p.id, "reached");
+    return p;
+  }
+  // o que vem no próximo nível e quanto falta (para a barra)
+  function proximoPremio() {
+    const n = save.nivel + 1, p = premioDoNivel(n);
+    return { nivel: n, tipo: p.tipo, id: p.id, xp: save.xp, total: xpParaSubir(save.nivel) };
+  }
+  // missões prontas são resgatadas sozinhas no fluxo direto (antes esperavam a pessoa abrir o menu, o que quase
+  // ninguém faz entre os rivais: a missão completa nunca virava prêmio)
+  function resgatarProntas() {
+    let total = 0;
+    for (let i = 0; i < save.missoes.length; i++) if (save.missoes[i].feito) total += resgatarMissao(i);
+    return total;
+  }
+  function missaoAtual() {
+    for (let i = 0; i < save.missoes.length; i++) if (!save.missoes[i].feito) return save.missoes[i];
+    return null;
+  }
   // Dá XP e devolve o que aconteceu (para a barra animar): { nivelAntes, xpAntes, nivel, xp, subiu }
   function ganharXP(n) {
     const r = { nivelAntes: save.nivel, xpAntes: save.xp, ganho: n, subiu: 0 };
@@ -312,6 +351,8 @@ const Progresso = (function() {
     r.nivel = save.nivel; r.xp = save.xp;
     // v19: itens que o nível novo libera (personalização)
     r.liberados = r.subiu ? SKINS.filter(function(s) { return s.nivel && s.nivel > r.nivelAntes && s.nivel <= r.nivel; }).map(function(s) { return s.id; }) : [];
+    r.premios = [];
+    for (let n = r.nivelAntes + 1; n <= r.nivel; n++) { const p = darPremioDoNivel(n); if (p.id) r.premios.push(p); }
     if (r.subiu) Poki.medir("player", "level-" + save.nivel, "reached");
     salvar();
     return r;
@@ -342,7 +383,7 @@ const Progresso = (function() {
   // garantir: o baú da 1ª partida da vida sempre traz um acessório, que já vem equipado na partida seguinte
   // (a pessoa vê o prêmio em cima da bolinha logo de cara)
   function abrirBau(tipo, garantir) {
-    const regra = { normal: [15, 40, 0.08, 2], nivel: [80, 150, 0.35, 3], lendario: [250, 400, 1, 4] }[tipo] || [15, 40, 0, 1];
+    const regra = { normal: [15, 40, 0.08, 2], nivel: [80, 150, 1, 3], lendario: [250, 400, 1, 4] }[tipo] || [15, 40, 0, 1];
     // v19: Sorte (0 a 1) = baú melhor: +40% de moedas e o dobro da chance de item no máximo; o baú normal pode
     // trazer até épico
     const sorte = typeof sorteJogador === "function" ? sorteJogador() : 0;
@@ -400,6 +441,7 @@ const Progresso = (function() {
     temSkin: temSkin, ganharSkin: ganharSkin, comprarSkin: comprarSkin, equipar: equipar, pendentes: pendentes,
     prepararVisual: prepararVisual, precoArma: precoArma, temArma: temArma, comprarArma: comprarArma, equiparArma: equiparArma,
     lojaLiberada: lojaLiberada, PRECO_ARMA: PRECO_ARMA,
+    premioDoNivel: premioDoNivel, proximoPremio: proximoPremio, resgatarProntas: resgatarProntas, missaoAtual: missaoAtual,
     precoSuper: precoSuper, temSuper: temSuper, comprarSuper: comprarSuper, equiparSuper: equiparSuper,
     moedasDaPartida: moedasDaPartida, ganharMoedas: ganharMoedas, avisos: avisos, atualizarAvisos: atualizarAvisos,
     xpParaSubir: xpParaSubir, ganharXP: ganharXP, xpDaPartida: xpDaPartida, abrirBau: abrirBau,

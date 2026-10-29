@@ -37,8 +37,11 @@ function nivelRival(i, liga, ajuste) {
 }
 
 // moedas por vencer o rival i (o 5º e o 10º também dão baú)
+// v23: os rivais 5 e 10 de cada liga são CHEFES: maiores, mais resistentes e com prêmio em dobro (meta clara a cada
+// 5 rivais; partida.js iniciarRodada e desenho.js nomeJogador)
+function ehChefe(i) { return i === 4 || i === 9; }
 function premioRival(i, liga) {
-  return Math.round((40 + 15 * i) * (1 + 0.5 * (liga || 0)));
+  return Math.round((40 + 15 * i) * (1 + 0.5 * (liga || 0)) * (ehChefe(i) ? 2 : 1));   // v23: chefe vale o dobro
 }
 
 // "Bronze", "Prata"... e depois "Mestre 2", "Mestre 3"...
