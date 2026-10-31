@@ -189,5 +189,8 @@ TEXTOS.nl = {
   inv_d: "Tik erop om het te verslaan!",
   inv_venceu: "Monster verslagen!",
   inv_fugiu: "Het monster is gevlucht...",
-  m_feita: "Missie voltooid!"
+  m_feita: "Missie voltooid!",
+  // v5: batalha em multidão
+  bat_quantos: "{0} robotjes gaan het gevecht in!",
+  bat_gigante: "REUZENMONSTER!"
 };

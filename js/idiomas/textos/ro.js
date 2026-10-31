@@ -189,5 +189,8 @@ TEXTOS.ro = {
   inv_d: "Atinge-l ca să-l învingi!",
   inv_venceu: "Monstru învins!",
   inv_fugiu: "Monstrul a fugit...",
-  m_feita: "Misiune îndeplinită!"
+  m_feita: "Misiune îndeplinită!",
+  // v5: batalha em multidão
+  bat_quantos: "{0} roboței pleacă la luptă!",
+  bat_gigante: "MONSTRU URIAȘ!"
 };

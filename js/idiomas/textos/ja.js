@@ -189,5 +189,8 @@ TEXTOS.ja = {
   inv_d: "タップして倒そう！",
   inv_venceu: "モンスターを倒した！",
   inv_fugiu: "モンスターは逃げた…",
-  m_feita: "ミッション達成！"
+  m_feita: "ミッション達成！",
+  // v5: batalha em multidão
+  bat_quantos: "ちびロボ{0}体が出撃！",
+  bat_gigante: "巨大モンスター！"
 };

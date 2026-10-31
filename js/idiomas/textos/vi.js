@@ -189,5 +189,8 @@ TEXTOS.vi = {
   inv_d: "Chạm vào để đánh bại!",
   inv_venceu: "Đã hạ quái vật!",
   inv_fugiu: "Quái vật đã bỏ chạy...",
-  m_feita: "Hoàn thành nhiệm vụ!"
+  m_feita: "Hoàn thành nhiệm vụ!",
+  // v5: batalha em multidão
+  bat_quantos: "{0} robot tí hon ra trận!",
+  bat_gigante: "QUÁI VẬT KHỔNG LỒ!"
 };

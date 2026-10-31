@@ -189,5 +189,8 @@ TEXTOS.en = {
   inv_d: "Tap it to defeat it!",
   inv_venceu: "Monster defeated!",
   inv_fugiu: "The monster ran away...",
-  m_feita: "Mission complete!"
+  m_feita: "Mission complete!",
+  // v5: batalha em multidão
+  bat_quantos: "{0} little robots go to battle!",
+  bat_gigante: "GIANT MONSTER!"
 };

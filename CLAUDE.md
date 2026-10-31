@@ -61,6 +61,14 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
   (toque + o time atiram; derrotar dá moedas e entra no compêndio). Turbo: Jogo.multTurbo (fora do multMoedas).
 - Abas sempre visíveis (a que tem bolinha vermelha pisca). Eventos Poki: mission, event golden/invader.
 
+## v5: batalha em multidão (pedido: "estilo How Many Dudes"; a pixel art fica como está)
+- Cada robô escolhido vira um bando de robozinhos (4 + nível/4, máx. 120 no total; vida/ataque divididos).
+  Sprites pequenos: Pixel.mini (reduz 2x e refaz o contorno). Física simples: correm, pulam batendo, são arremessados.
+- Ondas: 4 e 6 monstros; a 3ª tem um MONSTRO GIGANTE (vida x5) que dá pancadas em área e arremessa todo mundo.
+- Conserto agora também manda reforços (1/3 dos que caíram). Placar "xN robozinhos / xN monstros" e barra do gigante.
+- Ataque dos monstros x0,3 (ATQ) e números do gigante acertados por simulação (scratchpad/sim/bat.js compara com a
+  batalha antiga: mesmo nível mínimo para vencer cada horda). Deitado: esquerda x direita; em pé: baixo x cima.
+
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.
 - 1ª partida: nível 6 ~40 s, 8 (libera renascer) ~5 min, 10 ~15 min, 12 ~28 min. Depois de renascer anda bem mais rápido.

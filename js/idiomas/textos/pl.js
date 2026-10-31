@@ -189,5 +189,8 @@ TEXTOS.pl = {
   inv_d: "Dotknij go, by pokonać!",
   inv_venceu: "Potwór pokonany!",
   inv_fugiu: "Potwór uciekł...",
-  m_feita: "Misja wykonana!"
+  m_feita: "Misja wykonana!",
+  // v5: batalha em multidão
+  bat_quantos: "{0} małych robotów rusza do walki!",
+  bat_gigante: "OLBRZYMI POTWÓR!"
 };

@@ -189,5 +189,8 @@ TEXTOS.tr = {
   inv_d: "Yenmek için ona dokun!",
   inv_venceu: "Canavar yenildi!",
   inv_fugiu: "Canavar kaçtı...",
-  m_feita: "Görev tamamlandı!"
+  m_feita: "Görev tamamlandı!",
+  // v5: batalha em multidão
+  bat_quantos: "{0} küçük robot savaşa gidiyor!",
+  bat_gigante: "DEV CANAVAR!"
 };

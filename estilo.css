@@ -274,3 +274,5 @@ img.ouro { filter: sepia(1) saturate(4) hue-rotate(-8deg) brightness(1.18) drop-
 #boxTurbo { position: absolute; left: 6px; top: 6px; z-index: 6; }
 body.empe #boxTurbo .ico { width: 22px; height: 22px; } body.empe #boxTurbo b { font-size: 18px; }
 body.empe #missao b { font-size: 15px; } body.empe #missao > .ico { width: 28px; height: 28px; }
+/* v5: quantos robozinhos vão para a batalha */
+.quantos { text-align: center; margin: 2px 0 8px; } .quantos b { color: var(--ouro); font-size: 18px; text-shadow: 2px 2px 0 var(--borda); }

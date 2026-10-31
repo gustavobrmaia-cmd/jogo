@@ -189,5 +189,8 @@ TEXTOS.id = {
   inv_d: "Ketuk untuk mengalahkannya!",
   inv_venceu: "Monster dikalahkan!",
   inv_fugiu: "Monsternya kabur...",
-  m_feita: "Misi selesai!"
+  m_feita: "Misi selesai!",
+  // v5: batalha em multidão
+  bat_quantos: "{0} robot kecil maju bertempur!",
+  bat_gigante: "MONSTER RAKSASA!"
 };

@@ -189,5 +189,8 @@ TEXTOS.it = {
   inv_d: "Toccalo per sconfiggerlo!",
   inv_venceu: "Mostro sconfitto!",
   inv_fugiu: "Il mostro è scappato...",
-  m_feita: "Missione completata!"
+  m_feita: "Missione completata!",
+  // v5: batalha em multidão
+  bat_quantos: "{0} robottini vanno in battaglia!",
+  bat_gigante: "MOSTRO GIGANTE!"
 };

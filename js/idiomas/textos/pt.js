@@ -189,5 +189,8 @@ TEXTOS.pt = {
   inv_d: "Toque nele para derrotar!",
   inv_venceu: "Monstro derrotado!",
   inv_fugiu: "O monstro fugiu...",
-  m_feita: "Missão completa!"
+  m_feita: "Missão completa!",
+  // v5: batalha em multidão
+  bat_quantos: "{0} robozinhos vão para a luta!",
+  bat_gigante: "MONSTRO GIGANTE!"
 };

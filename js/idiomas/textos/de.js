@@ -189,5 +189,8 @@ TEXTOS.de = {
   inv_d: "Tippe es an, um es zu besiegen!",
   inv_venceu: "Monster besiegt!",
   inv_fugiu: "Das Monster ist geflohen...",
-  m_feita: "Mission erfüllt!"
+  m_feita: "Mission erfüllt!",
+  // v5: batalha em multidão
+  bat_quantos: "{0} kleine Roboter ziehen in den Kampf!",
+  bat_gigante: "RIESENMONSTER!"
 };

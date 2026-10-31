@@ -465,6 +465,36 @@ const Pixel = (function() {
     const g = s.getContext("2d"); g.drawImage(cv, 0, 0); g.globalCompositeOperation = "source-in"; g.fillStyle = "#2a2246"; g.fillRect(0, 0, s.width, s.height);
     cacheSombra.set(cv, s); return s;
   }
+  // versão pequena (metade) para a multidão da batalha: cada bloco 2x2 vira a cor mais comum dele (sem contar o
+  // contorno) e depois ganha contorno novo de 1 pixel, para não virar borrão
+  const cacheMini = new Map();
+  function mini(cv) {
+    if (cacheMini.has(cv)) return cacheMini.get(cv);
+    const w = cv.width >> 1, h = cv.height >> 1, d = cv.getContext("2d").getImageData(0, 0, cv.width, cv.height).data;
+    const s = document.createElement("canvas"); s.width = w + 2; s.height = h + 2;
+    const g = s.getContext("2d"), o = g.createImageData(w + 2, h + 2), od = o.data, cheio = new Uint8Array((w + 2) * (h + 2));
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const cont = {}; let melhor = null, mv = 0, opacos = 0, tinta = 0;
+      for (let k = 0; k < 4; k++) {
+        const i = ((y * 2 + (k >> 1)) * cv.width + x * 2 + (k & 1)) * 4;
+        if (d[i + 3] < 128) continue;
+        opacos++;
+        const c = d[i] + "," + d[i + 1] + "," + d[i + 2];
+        if (c === "26,16,48") { tinta++; continue; }
+        cont[c] = (cont[c] || 0) + 1; if (cont[c] > mv) { mv = cont[c]; melhor = c; }
+      }
+      if (opacos < 2) continue;
+      const j = ((y + 1) * (w + 2) + x + 1);
+      const rgb = (melhor || (tinta ? "26,16,48" : null)); if (!rgb) continue;
+      const p = rgb.split(","); od[j * 4] = +p[0]; od[j * 4 + 1] = +p[1]; od[j * 4 + 2] = +p[2]; od[j * 4 + 3] = 255; cheio[j] = 1;
+    }
+    for (let y = 0; y < h + 2; y++) for (let x = 0; x < w + 2; x++) {
+      const j = y * (w + 2) + x; if (cheio[j]) continue;
+      if ((x > 0 && cheio[j - 1]) || (x < w + 1 && cheio[j + 1]) || (y > 0 && cheio[j - w - 2]) || (y < h + 1 && cheio[j + w + 2])) { od[j * 4] = 26; od[j * 4 + 1] = 16; od[j * 4 + 2] = 48; od[j * 4 + 3] = 255; }
+    }
+    g.putImageData(o, 0, 0);
+    cacheMini.set(cv, s); return s;
+  }
   const cacheUrl = new Map();
   function url(cv) { if (!cacheUrl.has(cv)) cacheUrl.set(cv, cv.toDataURL()); return cacheUrl.get(cv); }
   function img(cv, classe) {
@@ -472,5 +502,5 @@ const Pixel = (function() {
     return i;
   }
 
-  return { robo: robo, monstro: monstro, botao: botao, caixa: caixa, engrenagem: engrenagem, icone: icone, textura: textura, sombra: sombra, url: url, img: img, mat: mat, hsl: hsl };
+  return { robo: robo, monstro: monstro, botao: botao, caixa: caixa, engrenagem: engrenagem, icone: icone, textura: textura, sombra: sombra, mini: mini, url: url, img: img, mat: mat, hsl: hsl };
 })();

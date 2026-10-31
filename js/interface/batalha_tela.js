@@ -52,6 +52,7 @@ const BatalhaTela = (function() {
     const pr = Batalha.poderRobos(sel), ph = Batalha.poderHorda(horda), forte = pr >= ph;
     caixa.appendChild(E("p", "", "<b>" + esc(t("z_" + horda)) + "</b> · " + esc(t("bat_escolha", marcados.length, vagas))));
     caixa.appendChild(E("p", "titulo2", "<span style='color:" + (forte ? "var(--verde)" : "var(--vermelho)") + "'>" + esc(t("bat_poder", fmt(pr), fmt(ph))) + "</span>"));
+    if (sel.length) caixa.appendChild(E("p", "quantos", "<b>" + esc(t("bat_quantos", Batalha.contarMinis(sel))) + "</b>"));
     const bts = E("div", "linhaBtns");
     const bm = E("button", "btn sem", esc(t("bat_melhores")));
     bm.addEventListener("click", function() { marcados = melhores(); Som.som("clique"); remontar(); });
@@ -79,9 +80,8 @@ const BatalhaTela = (function() {
 
   // ---------- luta: abre a cena da fábrica (cena_batalha.js) ----------
   function lutar(tiers) {
-    Batalha.iniciar(horda, tiers);
     modo = "lista";
-    CenaBatalha.abrir();
+    CenaBatalha.abrir(horda, tiers);
   }
   function voltou() { modo = "lista"; remontar(); }
   function sair() { modo = "lista"; }

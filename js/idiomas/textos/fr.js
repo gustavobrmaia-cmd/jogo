@@ -189,5 +189,8 @@ TEXTOS.fr = {
   inv_d: "Touche-le pour le battre !",
   inv_venceu: "Monstre vaincu !",
   inv_fugiu: "Le monstre s'est enfui...",
-  m_feita: "Mission terminée !"
+  m_feita: "Mission terminée !",
+  // v5: batalha em multidão
+  bat_quantos: "{0} petits robots partent au combat !",
+  bat_gigante: "MONSTRE GÉANT !"
 };
