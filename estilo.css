@@ -193,6 +193,9 @@ img.px, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 #cenaSair { position: absolute; right: 12px; top: 10px; }
 #cenaFim { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(92vw, 460px); flex-direction: column; text-align: center; gap: 10px; padding: 22px 16px 16px; }
 
+/* curto-circuito do renascer: por cima de tudo (até da árvore, para o clarão) e segura os cliques */
+#curto { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 50; display: none; image-rendering: pixelated; touch-action: none; }
+#curto.on { display: block; }
 #fx { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 40; }
 
 /* ---------- em pé (celular) ---------- */

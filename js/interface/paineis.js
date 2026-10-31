@@ -151,9 +151,8 @@ const Paineis = (function() {
     janela("<h2>" + esc(t("renascer")) + "?</h2><p>" + esc(t("renascer_conf", ganho)) + "</p><p class='titulo2'>" + esc(t("renascer_mantem")) + "</p>",
       [{ texto: t("renascer"), classe: "roxo grande", acao: function() {
         fecharJanela();
-        Jogo.renascer();
-        Som.som("renascer");
-        ArvoreTela.abrir(true);
+        // curto-circuito: a máquina pifa e explode; no auge do clarão renasce e a árvore abre (curto.js)
+        Curto.iniciar(function() { Jogo.renascer(); ArvoreTela.abrir(true); });
       } }, { texto: t("cancelar"), classe: "sem", acao: fecharJanela }]);
   }
 

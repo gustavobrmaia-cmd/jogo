@@ -97,6 +97,19 @@ const Som = (function() {
       [60, 64, 67, 72].forEach(function(n) { osc("triangle", nota(n), nota(n), 1.4, 0.08, 1.1, 0.02, 6); });
       chiado(9000, 2000, 1.6, 0.06, 0.2, "highpass");
     },
+    // ---- curto-circuito do renascer (curto.js) ----
+    faisca: function() { chiado(9000, 3500, 0.035, 0.14, 0, "highpass"); osc("square", 1800 + Math.random() * 2600, 600, 0.025, 0.035); },
+    zumbido: function(k) {   // k = duração em segundos: zumbido elétrico que sobe
+      osc("sawtooth", 55, 95, k, 0.07, 0, 0.3, 14); osc("square", 110, 190, k, 0.025, 0, 0.3);
+      chiado(1200, 4000, k, 0.05, 0, "bandpass", 4);
+    },
+    alarme: function() { osc("square", 880, 880, 0.16, 0.05); osc("square", 660, 660, 0.16, 0.05, 0.17); },
+    carga: function() { osc("sine", 180, 2600, 0.45, 0.12, 0, 0.05); osc("sawtooth", 90, 1300, 0.45, 0.04, 0, 0.05, 20); chiado(400, 9000, 0.45, 0.08, 0, "bandpass", 5); },
+    explosao: function() {
+      osc("sine", 90, 24, 1.3, 0.8, 0, 0.002); osc("square", 70, 28, 0.5, 0.18, 0, 0.002);
+      chiado(3500, 60, 1.6, 0.7, 0, "lowpass"); chiado(9000, 700, 0.45, 0.3, 0, "bandpass", 0.8);
+      for (let i = 0; i < 5; i++) chiado(5000, 1500, 0.06, 0.12, 0.25 + i * 0.13 + Math.random() * 0.06, "highpass");   // estalinhos depois do estouro
+    },
     tiro: function(k) { osc("square", 1400 * k, 320, 0.07, 0.035); },
     acerto: function() { chiado(1800, 400, 0.06, 0.08, 0, "bandpass", 1.2); },
     hab_missil: function() { chiado(800, 4000, 0.4, 0.12, 0, "bandpass", 1); osc("sine", 90, 28, 0.6, 0.5, 0.38); chiado(1500, 80, 0.7, 0.35, 0.38); },
@@ -149,7 +162,9 @@ const Som = (function() {
     if (compasso >= T.acordes.length / 2 && T.melodia[s]) { const n = T.melodia[s] - (compasso % 2 ? 0 : 2); osc("square", nota(n), nota(n), d * 1.7, 0.05, at, 0.006, 9, m); }
   }
   function musica(qual) { if (TRILHAS[qual] && qual !== trilha) { trilha = qual; passo = 0; } }
-  function atualizarMusica() { if (musicaBus) musicaBus.gain.setTargetAtTime(save.semMusica ? 0 : 0.26, a.currentTime, 0.1); }
+  let abafada = false;
+  function atualizarMusica() { if (musicaBus) musicaBus.gain.setTargetAtTime(save.semMusica ? 0 : (abafada ? 0.03 : 0.26), a.currentTime, abafada ? 0.25 : 0.1); }
+  function abafar(sim) { abafada = !!sim; atualizarMusica(); }   // música quase some durante o curto-circuito
 
-  return { som: som, musica: musica, atualizarMusica: atualizarMusica };
+  return { som: som, musica: musica, atualizarMusica: atualizarMusica, abafar: abafar };
 })();

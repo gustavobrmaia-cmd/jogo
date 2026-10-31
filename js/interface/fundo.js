@@ -9,7 +9,9 @@
 const Fundo = (function() {
   const cv = el("fundo"), g = cv.getContext("2d");
   const ESC = 4, QS = 6;
-  let W = 0, H = 0, fixo = null, acum = 0, t = 0;
+  let W = 0, H = 0, fixo = null, acum = 0, t = 0, tg = 0;
+  // pane: mexido pela animação do renascer (curto.js): velocidade das engrenagens/pistões, quanto de fumaça e se as luzes piram
+  const pane = { vel: 1, fumaca: 1, luzes: 0 };
   const fumaca = [];
   function montar() {
     W = Math.ceil(window.innerWidth / ESC); H = Math.ceil(window.innerHeight / ESC);
@@ -56,34 +58,41 @@ const Fundo = (function() {
   ];
   function passo(dt) {
     acum += dt; if (acum < 1 / 30) return;
-    t += acum; const d = acum; acum = 0;
+    t += acum; const d = acum; acum = 0; tg += d * pane.vel;
     if (!fixo) return;
     g.drawImage(fixo, 0, 0);
     // engrenagens (as pequenas encaixadas nas grandes)
     ENG.forEach(function(e, i) {
       let x = e.fx * W, y = e.fy * H;
       if (e.liga !== undefined) { const p = ENG[e.liga]; x = p.fx * W + Math.cos(e.ang) * (p.r + e.r + 1); y = p.fy * H + Math.sin(e.ang) * (p.r + e.r + 1); }
-      const per = Math.PI * 2 / e.d, ang = t * e.v, q = Math.floor((((ang % per) + per) % per) / per * QS);
+      const per = Math.PI * 2 / e.d, ang = tg * e.v, q = Math.floor((((ang % per) + per) % per) / per * QS);
       const s = Pixel.engrenagem(e.r, e.d, q, QS, e.tom);
       g.drawImage(s, Math.round(x - s.width / 2), Math.round(y - s.height / 2));
     });
     // motor: pistões e fumaça
     const m = montar.motor;
     for (let k = 0; k < 2; k++) {
-      const off = Math.round(Math.abs(Math.sin(t * 6 + k * 1.6)) * 5);
+      const off = Math.round(Math.abs(Math.sin(tg * 6 + k * 1.6)) * 5);
       g.fillStyle = "#9aa3c0"; g.fillRect(m.x + 8 + k * 14, m.y - 10 + off, 8, 10 - off + 2); g.fillStyle = "#c9d0e3"; g.fillRect(m.x + 8 + k * 14, m.y - 10 + off, 8, 2);
     }
-    if (Math.random() < d * 6) fumaca.push({ x: m.x + 41, y: m.y - 25, r: 2 + Math.random() * 2, t: 0, vx: (Math.random() - 0.3) * 6 });
+    if (Math.random() < d * 6 * pane.fumaca) fumaca.push({ x: m.x + 41, y: m.y - 25, r: 2 + Math.random() * 2, t: 0, vx: (Math.random() - 0.3) * 6 });
     for (let i = fumaca.length - 1; i >= 0; i--) {
       const p = fumaca[i]; p.t += d; p.y -= d * 14; p.x += p.vx * d; p.r += d * 3;
       if (p.t > 3) { fumaca.splice(i, 1); continue; }
-      g.globalAlpha = 0.45 * (1 - p.t / 3); g.fillStyle = "#6a6290";
+      g.globalAlpha = 0.45 * (1 - p.t / 3); g.fillStyle = pane.fumaca > 1 ? "#3a3450" : "#6a6290";
       g.fillRect(Math.round(p.x - p.r), Math.round(p.y - p.r * 0.7), Math.round(p.r * 2), Math.round(p.r * 1.4));
       g.fillRect(Math.round(p.x - p.r * 0.7), Math.round(p.y - p.r), Math.round(p.r * 1.4), Math.round(p.r * 2));
     }
     g.globalAlpha = 1;
     // luzinhas no cano
-    for (let k = 0; k < 6; k++) { const on = Math.sin(t * (1.3 + k * 0.4) + k) > 0.2; g.fillStyle = on ? (k % 2 ? "#3ccf6e" : "#ff4d5e") : "#2a2050"; g.fillRect(Math.round(W * (0.12 + k * 0.15)), Math.round(H * 0.08) + 2, 2, 2); }
+    for (let k = 0; k < 6; k++) { const on = pane.luzes ? Math.random() < 0.5 : Math.sin(t * (1.3 + k * 0.4) + k) > 0.2; g.fillStyle = on ? (k % 2 ? "#3ccf6e" : "#ff4d5e") : "#2a2050"; g.fillRect(Math.round(W * (0.12 + k * 0.15)), Math.round(H * 0.08) + 2, 2, 2); }
   }
-  return { passo: passo };
+  // pontos do fundo em pixels da tela (de onde sai a fumaça do motor e a linha do cano de cima)
+  function pontos() {
+    const m = montar.motor;
+    const e = ENG[3], p = ENG[e.liga];   // a engrenagem dourada (encaixada na grande de cima à direita)
+    const engr = { x: (p.fx * W + Math.cos(e.ang) * (p.r + e.r + 1)) * ESC, y: (p.fy * H + Math.sin(e.ang) * (p.r + e.r + 1)) * ESC, r: e.r * ESC };
+    return { motor: { x: (m.x + 41) * ESC, y: (m.y - 22) * ESC }, engrenagem: engr, cano: Math.round(H * 0.08 + 3) * ESC, canoDir: Math.round(W * 0.965 + 3) * ESC };
+  }
+  return { passo: passo, pane: pane, pontos: pontos };
 })();

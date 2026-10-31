@@ -41,6 +41,7 @@
     Tela.desenharBotao();
     Tela.dica();
     Fx.passo(dt);
+    Curto.passo(dt);
     Paineis.passoFaixa();
     pontosEm -= dt;
     if (pontosEm <= 0) { pontosEm = 0.25; Paineis.pontos(); Paineis.atualizarUpgrades(); }

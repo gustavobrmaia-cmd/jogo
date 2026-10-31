@@ -47,6 +47,12 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
 - Preço de criar robô: o dono mandou deixar como está.
 - Regra do dono: o que vier com "sei lá" na mensagem, perguntar ou sugerir em vez de fazer.
 
+## v3.1
+- Animação de curto-circuito ao renascer (js/interface/curto.js, canvas #curto por cima de tudo): o painel fecha,
+  a máquina pifa (tremedeira, faíscas, fumaça, raios, alarme, música abafada), carrega e explode; no auge do clarão
+  chama Jogo.renascer() + ArvoreTela.abrir(true). 3 variações em rodízio (save.renascimentos % 3): engrenagens,
+  botão vermelho, pane elétrica geral. O fundo tem Fundo.pane {vel, fumaca, luzes} e Fundo.pontos().
+
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.
 - 1ª partida: nível 6 ~40 s, 8 (libera renascer) ~5 min, 10 ~15 min, 12 ~28 min. Depois de renascer anda bem mais rápido.
