@@ -10,7 +10,7 @@ const Revela = (function() {
   const fila = [];
   let aberta = false, ate = 0, desde = 0;
 
-  Jogo.ao("descobriu", function(d) { if (d.tipo === "robo" && d.id >= 2) fila.push(d); });
+  Jogo.ao("descobriu", function(d) { if (d.tipo === "robo" && d.id >= 2 && !d.repetido) fila.push(d); });
 
   function pode() { return !Paineis.janelaAberta() && !CenaBatalha.aberta && !Curto.ativo; }
   function mostrar(d) {

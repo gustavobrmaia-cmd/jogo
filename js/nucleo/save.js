@@ -11,6 +11,7 @@ function partidaNova() {
     criados: 0,           // robôs criados na partida (o preço sobe com eles)
     up: {},               // nível de cada upgrade
     maxTier: 1,           // maior robô da partida (PH do renascimento)
+    pegos: [],            // níveis de robô que já deram pontos nesta partida (renasceu: zera e dá de novo)
     esteira: 0            // segundos até o próximo robô grátis
   };
 }
@@ -40,6 +41,8 @@ function carregarSave() {
       const base = saveNovo();
       for (const k in base) if (s[k] !== undefined && typeof s[k] === typeof base[k]) base[k] = s[k];
       base.p = Object.assign(partidaNova(), s.p || {});
+      // save antigo: a partida em andamento já "pegou" os níveis até o maior (senão daria pontos de graça agora)
+      if (!s.p || !Array.isArray(s.p.pegos)) { base.p.pegos = []; for (let n = 1; n <= base.p.maxTier; n++) base.p.pegos.push(n); }
       base.stats = Object.assign(saveNovo().stats, base.stats);
       save = base;
     }

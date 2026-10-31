@@ -69,6 +69,10 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
 - Ataque dos monstros x0,3 (ATQ) e números do gigante acertados por simulação (scratchpad/sim/bat.js compara com a
   batalha antiga: mesmo nível mínimo para vencer cada horda). Deitado: esquerda x direita; em pé: baixo x cima.
 
+## v5.1: pontos dos robôs a cada partida
+- save.p.pegos: níveis que já deram PH/moedas nesta partida. Renasceu -> zera -> chegar de novo em cada nível dá os
+  pontos de novo (só faixa; a tela "NOVO ROBÔ!" e o ponto do compêndio só no inédito). Save antigo: pegos = 1..maxTier.
+
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.
 - 1ª partida: nível 6 ~40 s, 8 (libera renascer) ~5 min, 10 ~15 min, 12 ~28 min. Depois de renascer anda bem mais rápido.

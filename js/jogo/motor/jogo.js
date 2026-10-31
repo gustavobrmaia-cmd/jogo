@@ -111,14 +111,18 @@ const Jogo = (function() {
   }
 
   // ---------- compêndio ----------
+  // cada nível de robô dá pontos UMA vez por partida: o 1º de todos ainda abre a tela "NOVO ROBÔ!" (compêndio);
+  // nas partidas depois de renascer, chegar de novo num nível já conhecido dá os mesmos pontos, só com a faixa
   function descobrir(tier) {
     if (tier > save.p.maxTier) { save.p.maxTier = tier; Poki.medir("robot", "tier-" + tier, "reached"); }
-    if (save.robosVistos.indexOf(tier) >= 0) return;
-    save.robosVistos.push(tier);
+    if (save.p.pegos.indexOf(tier) >= 0) return;
+    save.p.pegos.push(tier);
+    const novo = save.robosVistos.indexOf(tier) < 0;
+    if (novo) save.robosVistos.push(tier);
     const ph = phRobo(tier), moedas = Math.round(valorRobo(tier) * 40 * multMoedas());
     save.ph += ph; save.p.moedas += moedas;
-    Poki.medir("compendium", "robot-" + tier, "reached");
-    avisar("descobriu", { tipo: "robo", id: tier, ph: ph, moedas: moedas });
+    if (novo) Poki.medir("compendium", "robot-" + tier, "reached");
+    avisar("descobriu", { tipo: "robo", id: tier, ph: ph, moedas: moedas, repetido: !novo });
   }
   function descobrirMonstro(id) {
     if (save.monstrosVistos.indexOf(id) >= 0) return null;
