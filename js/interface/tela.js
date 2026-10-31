@@ -42,9 +42,12 @@ const Tela = (function() {
       save.p[lista].forEach(function(_, i) {
         const d = document.createElement("div");
         d.className = "vaga"; d.dataset.lista = lista; d.dataset.i = i;
-        const im = document.createElement("img"); im.className = "px"; im.draggable = false; im.alt = "";
+        const im = document.createElement("img"); im.className = "px robo"; im.draggable = false; im.alt = "";
+        im.style.setProperty("--d", (-Math.random() * 1.1).toFixed(2) + "s");   // cada robô respira no seu tempo
+        const cx = document.createElement("img"); cx.className = "px caixinha"; cx.draggable = false; cx.alt = ""; cx.style.display = "none";
         const nv = document.createElement("span"); nv.className = "nv";
-        d.appendChild(im); d.appendChild(nv); caixa.appendChild(d);
+        d.appendChild(im); d.appendChild(cx); d.appendChild(nv); caixa.appendChild(d);
+        d._im = im; d._cx = cx; d._nv = nv;
         d._tier = -1; vagas[lista].push(d);
         d.addEventListener("pointerdown", function(e) { comecarArrasto(e, lista, i); });
       });
@@ -58,9 +61,9 @@ const Tela = (function() {
         const d = vagas[lista][i];
         if (d._tier === n) return;
         d._tier = n;
-        const im = d.firstChild;
-        if (n) { im.src = Pixel.url(Pixel.robo(n)); im.style.display = ""; d.lastChild.textContent = n; }
-        else { im.style.display = "none"; d.lastChild.textContent = ""; }
+        const im = d._im;
+        if (n) { im.src = Pixel.url(Pixel.robo(n)); im.style.display = d._abrindo ? "none" : ""; d._nv.textContent = d._abrindo ? "" : n; }
+        else { im.style.display = "none"; d._nv.textContent = ""; d._cx.style.display = "none"; d._abrindo = 0; }
         d.classList.toggle("vazia", !n);
       });
     });
@@ -83,6 +86,7 @@ const Tela = (function() {
   let arr = null;
   const fantasma = el("arrasto");
   function comecarArrasto(e, lista, i) {
+    if (vagas[lista][i]._abrindo) { abrirCaixa(lista, i); e.preventDefault(); return; }   // tocou na caixinha: abre já
     if (!save.p[lista][i] || Paineis.escolhendo()) return;
     e.preventDefault();
     arr = { lista: lista, i: i, x0: e.clientX, y0: e.clientY, id: e.pointerId, mov: false };
@@ -155,7 +159,28 @@ const Tela = (function() {
     if (Jogo.criar()) Som.som("criar");
     else Som.som("erro");
   });
-  Jogo.ao("criou", function(d) { animarVaga("grade", d.i, "nasceu"); atualizarVagas(); });
+  // o robô nasce dentro de uma caixinha: ela cai, treme e abre (tocar abre na hora)
+  function caixinha(lista, i) {
+    const d = vagas[lista][i]; if (!d) return;
+    d._abrindo = performance.now();
+    d._cx.src = Pixel.url(Pixel.caixa(false)); d._cx.style.display = ""; d._cx.classList.remove("treme");
+    d._im.style.display = "none"; d._nv.textContent = "";
+    clearTimeout(d._t1); clearTimeout(d._t2);
+    d._t1 = setTimeout(function() { d._cx.classList.add("treme"); }, 250);
+    d._t2 = setTimeout(function() { abrirCaixa(lista, i); }, 750);
+  }
+  function abrirCaixa(lista, i) {
+    const d = vagas[lista][i]; if (!d || !d._abrindo) return;
+    clearTimeout(d._t1); clearTimeout(d._t2);
+    d._abrindo = 0;
+    d._cx.classList.remove("treme"); d._cx.src = Pixel.url(Pixel.caixa(true));
+    setTimeout(function() { if (!d._abrindo) d._cx.style.display = "none"; }, 160);
+    d._tier = -1; atualizarVagas();
+    animarVaga(lista, i, "juntou");
+    const c = centroVaga(lista, i); Fx.faiscas(c.x, c.y, "#ffcc33", 8);
+    Som.som("abrir");
+  }
+  Jogo.ao("criou", function(d) { atualizarVagas(); caixinha("grade", d.i); });
   Jogo.ao("juntou", function(d) {
     atualizarVagas();
     animarVaga(d.lista, d.i, "juntou");
@@ -204,6 +229,18 @@ const Tela = (function() {
     el("btnCriar").classList.toggle("destaque", save.tutorial === 1 && p.moedas >= Jogo.custoCriar());
   }
   Jogo.ao("toque", function() { toquesDica++; });
+
+  // ---------- abas escondidas ----------
+  // com mouse: passar por cima abre (CSS :hover). Com o dedo: o 1º toque só puxa as abas para fora; o 2º escolhe
+  const abas = el("abas");
+  let fecharAbas = 0;
+  abas.addEventListener("pointerdown", function(e) {
+    if (e.pointerType === "mouse" || abas.classList.contains("aberto")) return;
+    abas.classList.add("aberto"); abas._engole = true;
+  }, true);
+  abas.addEventListener("click", function(e) { if (abas._engole) { abas._engole = false; e.stopPropagation(); e.preventDefault(); } recolher(); }, true);
+  function recolher() { clearTimeout(fecharAbas); fecharAbas = setTimeout(function() { if (!Paineis.aba) abas.classList.remove("aberto"); }, 3500); }
+  document.addEventListener("pointerdown", function(e) { if (!abas.contains(e.target) && !Paineis.aba) abas.classList.remove("aberto"); });
 
   return {
     layout: layout, montarVagas: montarVagas, atualizarVagas: atualizarVagas, atualizarTopo: atualizarTopo,

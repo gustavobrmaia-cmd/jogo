@@ -1,32 +1,44 @@
 "use strict";
 
 // =========================
-// ÁRVORE DE HABILIDADES (pontos de habilidade = PH; só dá para gastar NA HORA DE RENASCER: é o que puxa o
-// renascimento sem obrigar). 3 galhos. "req": nó que precisa ter antes. "max" > 1: dá para comprar de novo,
-// cada vez mais caro (custo * 2^nível).
+// ÁRVORE DE HABILIDADES (rede de nós como uma placa de circuito; pontos de habilidade = PH)
+// Os PH só são gastos NA HORA DE RENASCER (dá para olhar a qualquer momento): ver o que dá para ter com os pontos
+// guardados é o que puxa o renascimento sem obrigar. Um nó abre quando QUALQUER nó ligado a ele ("liga") já foi
+// comprado. x/y em 0..100 (posição no desenho). max > 1: compra de novo, cada vez mais cara (custo * 2^nível).
+// Três galhos saindo do núcleo: Botão (para cima), Fábrica (embaixo à esquerda), Batalha (embaixo à direita).
 // =========================
 const ARVORE = [
-  // galho do BOTÃO
-  { id: "dedo_aco",   galho: 0, custo: 2,  max: 3, req: null },          // toque x2 por nível
-  { id: "turbo",      galho: 0, custo: 3,  max: 3, req: "dedo_aco" },    // time +25% de velocidade por nível
-  { id: "critico",    galho: 0, custo: 4,  max: 1, req: "dedo_aco" },    // 10% dos toques valem x10
-  { id: "sexto",      galho: 0, custo: 8,  max: 1, req: "turbo" },       // 6º robô no time
-  { id: "dobro",      galho: 0, custo: 6,  max: 20, req: "turbo" },      // tudo rende x2 (repetível)
-  // galho da FÁBRICA
-  { id: "rico",       galho: 1, custo: 1,  max: 1, req: null },          // começa com 2.000 moedas
-  { id: "fab_ini",    galho: 1, custo: 3,  max: 5, req: "rico" },        // começa com a fábrica +1 por nível
-  { id: "grade",      galho: 1, custo: 4,  max: 1, req: "rico" },        // +6 vagas na grade
-  { id: "sorte",      galho: 1, custo: 5,  max: 3, req: "fab_ini" },     // 10% de chance (por nível) do robô nascer 1 acima
-  { id: "fusao",      galho: 1, custo: 7,  max: 1, req: "grade" },       // junta sozinho os iguais
-  // galho da BATALHA
-  { id: "blindagem",  galho: 2, custo: 1,  max: 5, req: null },          // +30% de vida e ataque por nível
-  { id: "saque",      galho: 2, custo: 3,  max: 3, req: "blindagem" },   // +50% de prêmio nas hordas por nível
-  { id: "esquadrao",  galho: 2, custo: 5,  max: 1, req: "blindagem" },   // 12 robôs na batalha
-  { id: "offline",    galho: 2, custo: 3,  max: 2, req: "saque" },       // ganhos offline até +2 h por nível
-  { id: "cacador",    galho: 2, custo: 6,  max: 1, req: "esquadrao" }    // monstros descobertos dão o dobro de PH
+  { id: "nucleo",    x: 50, y: 52, custo: 1,  max: 1,  liga: [],                        ico: "reator" },     // +10% em tudo
+  // BOTÃO
+  { id: "dedo_aco",  x: 50, y: 39, custo: 2,  max: 3,  liga: ["nucleo"],                ico: "dedo" },       // toque x2
+  { id: "critico",   x: 37, y: 30, custo: 4,  max: 1,  liga: ["dedo_aco"],              ico: "raio" },       // 10% dos toques x10
+  { id: "turbo",     x: 63, y: 30, custo: 3,  max: 3,  liga: ["dedo_aco"],              ico: "motor" },      // time +25%
+  { id: "critico2",  x: 28, y: 17, custo: 10, max: 1,  liga: ["critico"],               ico: "raio" },       // crítico x25
+  { id: "ganancia",  x: 50, y: 22, custo: 5,  max: 3,  liga: ["critico", "turbo"],      ico: "moeda" },      // tudo +50%
+  { id: "sexto",     x: 72, y: 17, custo: 8,  max: 1,  liga: ["turbo"],                 ico: "upgrades" },   // 6º robô no time
+  { id: "dobro",     x: 50, y: 7,  custo: 6,  max: 20, liga: ["ganancia"],              ico: "cofre" },      // tudo x2
+  // FÁBRICA
+  { id: "rico",      x: 37, y: 61, custo: 1,  max: 1,  liga: ["nucleo"],                ico: "moeda" },      // começa com 2.000
+  { id: "fab_ini",   x: 24, y: 57, custo: 3,  max: 3,  liga: ["rico"],                  ico: "fabrica" },    // Fábrica +1 no começo
+  { id: "desconto",  x: 33, y: 74, custo: 3,  max: 3,  liga: ["rico"],                  ico: "prensa" },     // criar 15% mais barato
+  { id: "grade",     x: 12, y: 66, custo: 4,  max: 1,  liga: ["fab_ini"],               ico: "fabrica" },    // +6 vagas
+  { id: "sorte",     x: 21, y: 80, custo: 5,  max: 3,  liga: ["fab_ini", "desconto"],   ico: "engrenagem" }, // 10% nasce 1 acima
+  { id: "esteira_r", x: 40, y: 88, custo: 4,  max: 2,  liga: ["desconto"],              ico: "esteira" },    // robô grátis 20% mais cedo
+  { id: "fusao",     x: 9,  y: 89, custo: 7,  max: 1,  liga: ["grade", "sorte"],        ico: "linha" },      // junta sozinho
+  // BATALHA
+  { id: "blindagem", x: 63, y: 61, custo: 1,  max: 5,  liga: ["nucleo"],                ico: "escudo" },     // +30% vida e ataque
+  { id: "saque",     x: 76, y: 57, custo: 3,  max: 3,  liga: ["blindagem"],             ico: "trofeu" },     // +50% de prêmio
+  { id: "hab_dano",  x: 67, y: 74, custo: 3,  max: 3,  liga: ["blindagem"],             ico: "missil" },     // habilidades +50%
+  { id: "esquadrao", x: 88, y: 66, custo: 5,  max: 1,  liga: ["saque"],                 ico: "batalha" },    // 12 robôs na batalha
+  { id: "hab_cd",    x: 79, y: 80, custo: 4,  max: 2,  liga: ["saque", "hab_dano"],     ico: "choque" },     // habilidades recarregam 20% mais rápido
+  { id: "offline",   x: 60, y: 88, custo: 3,  max: 2,  liga: ["hab_dano"],              ico: "reator" },     // ganhos offline +2 h
+  { id: "cacador",   x: 91, y: 89, custo: 6,  max: 1,  liga: ["esquadrao", "hab_cd"],   ico: "compendio" },  // monstros dão o dobro de PH
+  // no meio, embaixo do núcleo
+  { id: "ph_bonus",  x: 50, y: 70, custo: 4,  max: 3,  liga: ["nucleo"],                ico: "ph" }          // renascer dá +25% PH
 ];
 const NO = {};
 ARVORE.forEach(function(n) { NO[n.id] = n; });
 function custoNo(id, nivel) { return NO[id].custo * Math.pow(2, nivel || 0); }
-// PH ganhos ao renascer, pelo maior robô da partida: 8 -> 1, 10 -> 3, 12 -> 7, 14 -> 17...
-function phRenascer(maxTier) { return maxTier < CONFIG.tierRenascer ? 0 : Math.floor(Math.pow(1.5, maxTier - 7)); }
+function noAberto(id) { const n = NO[id]; return !n.liga.length || n.liga.some(function(l) { return (save.arvore[l] || 0) > 0; }); }
+// PH ganhos ao renascer, pelo maior robô da partida: 8 -> 1, 10 -> 3, 12 -> 7, 14 -> 17... (+25% por nível de ph_bonus)
+function phRenascer(maxTier) { return maxTier < CONFIG.tierRenascer ? 0 : Math.floor(Math.pow(1.5, maxTier - 7) * (1 + 0.25 * (save.arvore.ph_bonus || 0))); }

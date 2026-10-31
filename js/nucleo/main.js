@@ -10,6 +10,10 @@
   const primeira = !save.stats.toques;
   IDIOMA = detectarIdioma(save.idioma);
   Promise.all([carregarIdioma(IDIOMA), Poki.iniciar(), document.fonts && document.fonts.load ? document.fonts.load("20px Pixelify").catch(function() {}) : Promise.resolve()]).then(function() {
+    // texturas da interface (chapas, faixa de perigo, encaixes) em variáveis do CSS
+    [["placa", "placa"], ["escura", "placaEscura"], ["clara", "placaClara"], ["aco", "placaAco"], ["perigo", "perigo"], ["vaga", "vaga"]].forEach(function(p) {
+      document.documentElement.style.setProperty("--tex-" + p[0], "url(" + Pixel.url(Pixel.textura(p[1])) + ")");
+    });
     traduzirDom();
     Paineis.preencherIcones();
     Tela.montarVagas();
@@ -30,7 +34,8 @@
     if (Poki.anuncioAberto) return;
     Jogo.passo(dt);
     Batalha.passo(dt);
-    BatalhaTela.passo();
+    CenaBatalha.passo(dt);
+    Fundo.passo(dt);
     Eventos.passo(dt);
     Tela.atualizarTopo();
     Tela.desenharBotao();

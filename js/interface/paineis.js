@@ -26,7 +26,7 @@ const Paineis = (function() {
     Poki.medir("tab", qual, "visible");
   }
   function fechar() {
-    if (aba === "batalha" && typeof BatalhaTela !== "undefined") BatalhaTela.sair();
+    if (aba === "batalha" && typeof BatalhaTela !== "undefined" && !CenaBatalha.aberta) BatalhaTela.sair();
     aba = null;
     document.querySelectorAll(".aba").forEach(function(b) { b.classList.remove("ativa"); });
     el("painel").classList.add("escondido");
@@ -42,20 +42,30 @@ const Paineis = (function() {
     else if (aba === "config") montarConfig();
   }
 
-  // ---------- upgrades ----------
+  // ---------- upgrades (em tiers: 5 níveis cada; o principal no nível 3 libera o próximo tier) ----------
   const linhasUp = {};
   function textoEfeito(id, n) {
+    const pct = function(k) { return Math.round(k * 100); };
     switch (id) {
-      case "dedo": return t("up_dedo_d", fmt(1 + 2 * n), fmt(3 + 2 * n));
-      case "motor": return t("up_motor_d", Math.round(n * 12), Math.round((n + 1) * 12));
+      case "dedo": return t("up_dedo_d", fmt(1 + 3 * n), fmt(4 + 3 * n));
+      case "motor": return t("up_motor_d", pct(0.15 * n), pct(0.15 * (n + 1)));
+      case "esteira": return t("up_esteira_d", (15 * Math.pow(0.85, n)).toFixed(1), (15 * Math.pow(0.85, n + 1)).toFixed(1));
       case "fabrica": return t("up_fabrica_d", 1 + n, 2 + n);
-      case "esteira": return t("up_esteira_d", (15 * Math.pow(0.82, n)).toFixed(1), (15 * Math.pow(0.82, n + 1)).toFixed(1));
-      case "linha": return t("up_linha_d", Math.round((1 - Math.pow(0.88, n)) * 100), Math.round((1 - Math.pow(0.88, n + 1)) * 100));
-      case "moedas": return t("up_moedas_d", fmt(Math.pow(1.3, n)), fmt(Math.pow(1.3, n + 1)));
-      case "blindagem": return t("up_blindagem_d", Math.round(n * 15), Math.round((n + 1) * 15));
+      case "linha": return t("up_linha_d", pct(1 - Math.pow(0.85, n)), pct(1 - Math.pow(0.85, n + 1)));
+      case "blindagem": return t("up_blindagem_d", pct(0.25 * n), pct(0.25 * (n + 1)));
+      case "cofre": return t("up_cofre_d", fmt(Math.pow(1.5, n)), fmt(Math.pow(1.5, n + 1)));
+      case "dedo2": return t("up_dedo2_d", Math.pow(2, n), Math.pow(2, n + 1));
+      case "turbina": return t("up_turbina_d", pct(0.25 * n), pct(0.25 * (n + 1)));
+      case "fabrica2": return t("up_fabrica2_d", n, n + 1);
+      case "prensa": return t("up_prensa_d", pct(1 - Math.pow(0.8, n)), pct(1 - Math.pow(0.8, n + 1)));
+      case "canhoes": return t("up_canhoes_d", pct(0.5 * n), pct(0.5 * (n + 1)));
+      case "reator": return t("up_reator_d", Math.pow(2, n), Math.pow(2, n + 1));
+      case "esteira2": return t("up_esteira2_d", pct(1 - Math.pow(0.8, n)), pct(1 - Math.pow(0.8, n + 1)));
+      case "overclock": return t("up_overclock_d", pct(0.4 * n), pct(0.4 * (n + 1)));
     }
     return "";
   }
+  function pips(n) { let h = "<div class='pips'>"; for (let k = 0; k < NIVEIS_UPGRADE; k++) h += "<i" + (k < n ? " class='on'" : "") + "></i>"; return h + "</div>"; }
   function montarUpgrades() {
     // renascimento no topo
     const r = elem("div", "card renascer");
@@ -70,22 +80,32 @@ const Paineis = (function() {
     ver.appendChild(icone("ph")); ver.appendChild(document.createTextNode(t("ver_arvore")));
     ver.addEventListener("click", function() { Som.som("clique"); ArvoreTela.abrir(false); });
     const linhaVer = elem("div", "linhaBtns"); linhaVer.appendChild(ver); corpo.appendChild(linhaVer);
-    UPGRADES.forEach(function(u) {
-      const c = elem("div", "card");
-      c.appendChild(icone(u.icone));
-      const info = elem("div", "info"); c.appendChild(info);
-      const b = elem("button", "btn"); c.appendChild(b);
-      b.addEventListener("click", function() {
-        if (Jogo.comprarUpgrade(u.id)) { Som.som("compra"); const rr = b.getBoundingClientRect(); Fx.faiscas(rr.left + rr.width / 2, rr.top, "#3ccf6e", 10); salvar(); }
-        else Som.som("erro");
-        atualizarUpgrades();
+    linhasUp._tiers = [];
+    for (let tr = 1; tr <= N_TIERS; tr++) {
+      const topo = elem("div", "tierTopo", esc(t("tier", tr)));
+      corpo.appendChild(topo);
+      const bloq = elem("div", "card tierBloq"); bloq.appendChild(icone("cadeado"));
+      const bi = elem("div", "info"); bloq.appendChild(bi); corpo.appendChild(bloq);
+      const cards = [];
+      UPGRADES.filter(function(u) { return u.tier === tr; }).forEach(function(u) {
+        const c = elem("div", "card" + (u.principal ? " principal" : ""));
+        c.appendChild(icone(u.icone));
+        const info = elem("div", "info"); c.appendChild(info);
+        const b = elem("button", "btn"); c.appendChild(b);
+        b.addEventListener("click", function() {
+          if (Jogo.comprarUpgrade(u.id)) { Som.som("compra"); const rr = b.getBoundingClientRect(); Fx.faiscas(rr.left + rr.width / 2, rr.top, "#3ccf6e", 10); salvar(); }
+          else Som.som("erro");
+          atualizarUpgrades(true);
+        });
+        corpo.appendChild(c);
+        cards.push(c);
+        linhasUp[u.id] = { info: info, btn: b, card: c };
       });
-      corpo.appendChild(c);
-      linhasUp[u.id] = { info: info, btn: b };
-    });
-    atualizarUpgrades();
+      linhasUp._tiers.push({ t: tr, topo: topo, bloq: bloq, bi: bi, cards: cards });
+    }
+    atualizarUpgrades(true);
   }
-  function atualizarUpgrades() {
+  function atualizarUpgrades(forcar) {
     if (aba !== "upgrades") return;
     const r = linhasUp._renascer;
     if (r) {
@@ -95,20 +115,33 @@ const Paineis = (function() {
       if (r.info._h !== html) { r.info._h = html; r.info.innerHTML = html; }
       r.btn.textContent = t("renascer"); r.btn.disabled = !pode;
     }
+    // tiers: aberto mostra os cards; o primeiro fechado mostra o que falta; os outros somem
+    let primeiroFechado = true;
+    (linhasUp._tiers || []).forEach(function(tr) {
+      const aberto = Jogo.tierAberto(tr.t);
+      tr.cards.forEach(function(c) { c.classList.toggle("escondido", !aberto); });
+      tr.bloq.classList.toggle("escondido", aberto || !primeiroFechado);
+      tr.topo.classList.toggle("escondido", !aberto && !primeiroFechado);
+      if (!aberto && primeiroFechado) {
+        primeiroFechado = false;
+        const p = principalDoTier(tr.t - 1), n = nivelUp(p.id);
+        const html = "<b>" + esc(t("tier_bloq", t("up_" + p.id), tr.t)) + "</b>" + pips(Math.min(n, 3)).replace("<div class='pips'>", "<div class='pips'>");
+        if (tr.bi._h !== html) { tr.bi._h = html; tr.bi.innerHTML = html; }
+      }
+    });
     UPGRADES.forEach(function(u) {
       const l = linhasUp[u.id]; if (!l) return;
-      const n = nivelUp(u.id), max = n >= u.max, c = max ? 0 : custoUpgrade(u.id, n);
-      const html = "<b>" + esc(t("up_" + u.id)) + " <small>" + esc(t("nivel", n)) + "</small></b><span>" + esc(textoEfeito(u.id, n)) + "</span>";
+      const n = nivelUp(u.id), max = n >= NIVEIS_UPGRADE, c = max ? 0 : custoUpgrade(u.id, n);
+      const html = "<b>" + esc(t("up_" + u.id)) + (u.principal ? "<span class='selo'>" + esc(t("principal")) + "</span>" : "") + "</b><span>" + esc(textoEfeito(u.id, n)) + "</span>" + pips(n);
       if (l.info._h !== html) { l.info._h = html; l.info.innerHTML = html; }
       const bt = max ? t("max") : fmt(c);
       if (l.btn._t !== bt) { l.btn._t = bt; l.btn.innerHTML = ""; if (!max) l.btn.appendChild(icone("moeda")); l.btn.appendChild(document.createTextNode(bt)); }
-      const sem = max || save.p.moedas < c;
-      l.btn.classList.toggle("sem", sem); l.btn.disabled = max;
+      l.btn.classList.toggle("sem", max || save.p.moedas < c); l.btn.disabled = max;
     });
   }
   // bolinha vermelha na aba Upgrades: dá para comprar algo (ou renascer)
   function pontos() {
-    const pode = UPGRADES.some(function(u) { const n = nivelUp(u.id); return n < u.max && save.p.moedas >= custoUpgrade(u.id, n); });
+    const pode = UPGRADES.some(function(u) { const n = nivelUp(u.id); return n < NIVEIS_UPGRADE && Jogo.tierAberto(u.tier) && save.p.moedas >= custoUpgrade(u.id, n); });
     el("pontoUp").classList.toggle("on", (pode && save.tutorial >= 4) || (Jogo.podeRenascer() && phRenascer(save.p.maxTier) >= 3));
   }
 
@@ -181,7 +214,10 @@ const Paineis = (function() {
   }
 
   // ---------- janela ----------
+  let aoFechar = null;
+  function aoFecharJanela(fn) { aoFechar = fn; }
   function janela(html, botoes) {
+    if (aoFechar) { const f = aoFechar; aoFechar = null; f(); }
     const cx = el("modalCaixa");
     cx.innerHTML = html;
     const l = elem("div", "linhaBtns");
@@ -197,7 +233,7 @@ const Paineis = (function() {
     el("modal").classList.remove("escondido");
     return cx;
   }
-  function fecharJanela() { el("modal").classList.add("escondido"); }
+  function fecharJanela() { el("modal").classList.add("escondido"); if (aoFechar) { const f = aoFechar; aoFechar = null; f(); } }
   function janelaAberta() { return !el("modal").classList.contains("escondido"); }
 
   // ---------- faixa (descobertas e avisos) ----------
@@ -238,7 +274,7 @@ const Paineis = (function() {
   // escolhendo robôs para a batalha: a grade não arrasta
   function escolhendo() { return aba === "batalha" && BatalhaTela.escolhendo(); }
 
-  return { abrir: abrir, fechar: fechar, atualizarUpgrades: atualizarUpgrades, pontos: pontos, janela: janela, fecharJanela: fecharJanela,
+  return { abrir: abrir, fechar: fechar, atualizarUpgrades: atualizarUpgrades, pontos: pontos, janela: janela, fecharJanela: fecharJanela, aoFecharJanela: aoFecharJanela,
     janelaAberta: janelaAberta, faixa: faixa, passoFaixa: passoFaixa, mostrarOffline: mostrarOffline, preencherIcones: preencherIcones,
     icone: icone, elem: elem, esc: esc, escolhendo: escolhendo, get aba() { return aba; } };
 })();

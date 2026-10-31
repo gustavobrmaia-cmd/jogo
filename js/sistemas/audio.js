@@ -50,6 +50,11 @@ const Som = (function() {
     lutar: [["tom", "sawtooth", 220, 440, 0.2, 0.06], ["ruido", 2000, 0.15, 0.06]],
     vitoria: [["tom", "square", 523, 523, 0.12, 0.07], ["tom", "square", 659, 659, 0.12, 0.07, 0.12], ["tom", "square", 784, 784, 0.12, 0.07, 0.24], ["tom", "square", 1046, 1046, 0.4, 0.07, 0.36]],
     derrota: [["tom", "triangle", 392, 392, 0.2, 0.08], ["tom", "triangle", 311, 311, 0.2, 0.08, 0.2], ["tom", "triangle", 233, 200, 0.5, 0.08, 0.4]],
+    abrir: [["tom", "square", 300, 900, 0.07, 0.06], ["ruido", 2500, 0.08, 0.06]],
+    hab_missil: [["tom", "sawtooth", 600, 200, 0.35, 0.06], ["ruido", 1200, 0.5, 0.3, 0.35]],
+    hab_choque: [["tom", "square", 90, 70, 0.3, 0.08], ["ruido", 6000, 0.25, 0.1]],
+    hab_conserto: [["tom", "triangle", 523, 1046, 0.3, 0.07], ["tom", "triangle", 784, 1568, 0.3, 0.06, 0.12]],
+    hab_sobrecarga: [["tom", "sawtooth", 200, 1200, 0.5, 0.06]],
     renascer: [["tom", "sine", 200, 1600, 0.8, 0.08], ["tom", "triangle", 400, 3200, 0.8, 0.05, 0.1], ["ruido", 3000, 0.6, 0.05, 0.2]]
   };
   function som(nome, tomMult) {

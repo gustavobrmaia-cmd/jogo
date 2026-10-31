@@ -22,7 +22,26 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
   faixa de descoberta, offline), `batalha_tela.js`, `arvore_tela.js`, `fx.js` (números e partículas).
 - `ferramentas/construir.js`: gera `dist/` (scripts num arquivo minificado; idiomas minificados à parte).
 
-## Economia (scratchpad/sim/eco.js simula um jogador médio)
+## v2 (pedidos do dono depois da v1)
+- Arte: robôs e monstros em 48x48 com sombreado por peça (5 tons, bisel, dithering, contorno interno), engrenagens,
+  caixinha de nascimento, texturas da interface (chapas com rebite, faixa de perigo, encaixes) — tudo em pixel.js.
+- Fundo da máquina (`interface/fundo.js`, 1/4 da resolução, 30 qps): parede, canos, engrenagens girando, motor com
+  pistões e fumaça, luzinhas.
+- Robôs na grade respiram (idle em 2 quadros, cada um no seu tempo) e nascem DENTRO de uma caixinha (cai, treme e
+  abre; tocar abre na hora).
+- Abas escondidas: só a ponta aparece; mouse por cima (ou 1º toque) puxa as abas; 2º toque escolhe.
+- Upgrades em TIERS (economia.js): 5 tiers x 3, cada um com 5 níveis; o principal de um tier no nível 3 libera o
+  próximo. Simulação: scratchpad/sim/eco2.js.
+- Árvore em REDE (arvore.js: 23 nós com x/y e ligações; abre quando qualquer nó ligado foi comprado), desenhada como
+  placa de circuito (arvore_tela.js).
+- Batalha em tela cheia numa FÁBRICA (`interface/cena_batalha.js`, baixa resolução com escala inteira); os robôs lutam
+  sozinhos e o jogador lança 4 habilidades (Míssil, Choque, Conserto, Sobrecarga; batalha.js HABILIDADES), liberadas
+  pelas hordas vencidas. Em pé: robôs no chão e monstros na passarela (luta na vertical).
+- PENDENTE (o dono escreveu "sei lá"): deixar criar robô mais caro — 3 opções propostas (começo mais caro; preço sobe
+  com robôs parados na grade; preço por lote de 10). Esperando a escolha dele.
+- Regra do dono: o que vier com "sei lá" na mensagem, perguntar ou sugerir em vez de fazer.
+
+## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.
 - 1ª partida: nível 6 ~40 s, 8 (libera renascer) ~5 min, 10 ~15 min, 12 ~28 min. Depois de renascer anda bem mais rápido.
 - PH: descobrir robô (1 + nível/5), monstro (1, x2 com Caçador), renascer (1,5^(maxTier-7)). Gastos só ao renascer.

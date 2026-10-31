@@ -32,6 +32,8 @@ const Fx = (function() {
   }
   function passo(dt) {
     g.clearRect(0, 0, larg, alt);
+    // na batalha (tela cheia) os números do botão não aparecem (a cena tem os dela)
+    if (typeof CenaBatalha !== "undefined" && CenaBatalha.aberta) { numeros.length = 0; parts.length = 0; return; }
     const moeda = Pixel.icone("moeda");
     for (let i = parts.length - 1; i >= 0; i--) {
       const p = parts[i];

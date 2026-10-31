@@ -12,8 +12,11 @@ const Jogo = (function() {
   function avisar(ev, dado) { (ouvintes[ev] || []).forEach(function(fn) { fn(dado); }); }
 
   // ---------- números ----------
-  function multMoedas() { return Math.pow(1.3, nivelUp("moedas")) * Math.pow(2, nivelNo("dobro")); }
-  function velocidadeTime() { return (1 + 0.12 * nivelUp("motor")) * (1 + 0.25 * nivelNo("turbo")); }
+  function multMoedas() {
+    return Math.pow(1.5, nivelUp("cofre")) * Math.pow(2, nivelUp("reator")) * Math.pow(2, nivelNo("dobro")) *
+      (1 + 0.1 * nivelNo("nucleo")) * (1 + 0.5 * nivelNo("ganancia"));
+  }
+  function velocidadeTime() { return (1 + 0.15 * nivelUp("motor") + 0.25 * nivelUp("turbina") + 0.4 * nivelUp("overclock")) * (1 + 0.25 * nivelNo("turbo")); }
   // moedas por segundo do time (cada robô aperta o botão "velocidade" vezes por segundo)
   function prodTime() {
     let s = 0;
@@ -21,17 +24,19 @@ const Jogo = (function() {
     return s * velocidadeTime() * multMoedas();
   }
   function valorToque() {
-    const base = (1 + 2 * nivelUp("dedo")) * Math.pow(2, nivelNo("dedo_aco"));
+    const base = (1 + 3 * nivelUp("dedo")) * Math.pow(2, nivelUp("dedo2")) * Math.pow(2, nivelNo("dedo_aco"));
     return (base + ECO.toqueTime * prodTime() / multMoedas()) * multMoedas();
   }
-  function custoCriar() { return Math.ceil(ECO.criarBase * Math.pow(ECO.criarCresce, save.p.criados) * Math.pow(0.88, nivelUp("linha"))); }
-  function tierNasce() { return Math.min(MAX_TIER, 1 + nivelUp("fabrica") + (Math.random() < 0.1 * nivelNo("sorte") ? 1 : 0)); }
-  function intervaloEsteira() { return 15 * Math.pow(0.82, nivelUp("esteira")); }
+  function custoCriar() {
+    return Math.ceil(ECO.criarBase * Math.pow(ECO.criarCresce, save.p.criados) * Math.pow(0.85, nivelUp("linha")) * Math.pow(0.8, nivelUp("prensa")) * Math.pow(0.85, nivelNo("desconto")));
+  }
+  function tierNasce() { return Math.min(MAX_TIER, 1 + nivelUp("fabrica") + nivelUp("fabrica2") + (Math.random() < 0.1 * nivelNo("sorte") ? 1 : 0)); }
+  function intervaloEsteira() { return 15 * Math.pow(0.85, nivelUp("esteira")) * Math.pow(0.8, nivelUp("esteira2")) * Math.pow(0.8, nivelNo("esteira_r")); }
 
   // ---------- toque no botão ----------
   function tocar() {
     let v = valorToque(), critico = false;
-    if (nivelNo("critico") && Math.random() < 0.1) { v *= 10; critico = true; }
+    if (nivelNo("critico") && Math.random() < 0.1) { v *= nivelNo("critico2") ? 25 : 10; critico = true; }
     save.p.moedas += v;
     save.stats.toques++;
     avisar("toque", { valor: v, critico: critico });
@@ -155,9 +160,11 @@ const Jogo = (function() {
   }
 
   // ---------- upgrades ----------
+  // tier aberto: o 1º sempre; os outros quando o principal do anterior chega no nível 3
+  function tierAberto(t) { if (t <= 1) return true; const p = principalDoTier(t - 1); return !!p && nivelUp(p.id) >= 3; }
   function comprarUpgrade(id) {
     const n = nivelUp(id), u = UPGRADE[id];
-    if (n >= u.max) return false;
+    if (n >= NIVEIS_UPGRADE || !tierAberto(u.tier)) return false;
     const c = custoUpgrade(id, n);
     if (save.p.moedas < c) return false;
     save.p.moedas -= c;
@@ -183,14 +190,14 @@ const Jogo = (function() {
   function novaPartida() {
     save.p = partidaNova();
     if (nivelNo("rico")) save.p.moedas = 2000;
-    if (nivelNo("fab_ini")) save.p.up.fabrica = nivelNo("fab_ini");
+    if (nivelNo("fab_ini")) save.p.up.fabrica = Math.min(NIVEIS_UPGRADE, nivelNo("fab_ini"));
     arrumarVagas();
     relTime.length = 0;
     avisar("mudou");
   }
   function comprarNo(id) {
     const no = NO[id], n = nivelNo(id);
-    if (n >= no.max || (no.req && !nivelNo(no.req))) return false;
+    if (n >= no.max || !noAberto(id)) return false;
     const c = custoNo(id, n);
     if (save.ph < c) return false;
     save.ph -= c;
@@ -202,7 +209,7 @@ const Jogo = (function() {
 
   return {
     ao: ao, avisar: avisar, multMoedas: multMoedas, velocidadeTime: velocidadeTime, prodTime: prodTime, valorToque: valorToque,
-    custoCriar: custoCriar, intervaloEsteira: intervaloEsteira, tocar: tocar, criar: criar, mover: mover, tocarRobo: tocarRobo,
+    custoCriar: custoCriar, tierAberto: tierAberto, intervaloEsteira: intervaloEsteira, tocar: tocar, criar: criar, mover: mover, tocarRobo: tocarRobo,
     descobrirMonstro: descobrirMonstro, passo: passo, ganhoOffline: ganhoOffline, comprarUpgrade: comprarUpgrade,
     podeRenascer: podeRenascer, renascer: renascer, novaPartida: novaPartida, comprarNo: comprarNo
   };

@@ -8,11 +8,12 @@
   <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
+  <canvas id="fundo"></canvas>
   <div id="app">
     <!-- topo: moedas, produção e pontos de habilidade -->
     <header id="topo">
-      <div class="contador" id="boxMoedas"><i class="ico" data-ico="moeda"></i><b id="txtMoedas">0</b><small id="txtProd"></small></div>
-      <div class="contador ph" id="boxPh"><i class="ico" data-ico="ph"></i><b id="txtPh">0</b></div>
+      <div class="contador" id="boxMoedas"><i class="ico" data-ico="moeda"></i><div class="tela"><b id="txtMoedas">0</b><small id="txtProd"></small></div></div>
+      <div class="contador ph" id="boxPh"><i class="ico" data-ico="ph"></i><div class="tela"><b id="txtPh">0</b></div></div>
     </header>
 
     <!-- abas (saem do lado da grade, como no desenho) -->
@@ -44,6 +45,15 @@
     </section>
   </div>
 
+  <!-- batalha: tela cheia, numa fábrica (interface/cena_batalha.js) -->
+  <div id="cena" class="escondido">
+    <canvas id="cvCena"></canvas>
+    <div id="cenaTopo"><div class="contador"><div class="tela"><b id="cenaNome"></b><small id="cenaOnda"></small></div></div></div>
+    <button id="cenaSair" class="fechar">✕</button>
+    <div id="cenaHab"></div>
+    <div id="cenaFim" class="card escondido"></div>
+  </div>
+
   <canvas id="fx"></canvas>
   <div id="modal" class="escondido"><div class="caixa" id="modalCaixa"></div></div>
   <div id="faixa" class="escondido"></div>
@@ -63,11 +73,13 @@
   <script src="js/jogo/arte/pixel.js"></script>
   <script src="js/jogo/motor/jogo.js"></script>
   <script src="js/jogo/motor/batalha.js"></script>
+  <script src="js/interface/fundo.js"></script>
   <script src="js/interface/fx.js"></script>
   <script src="js/interface/tela.js"></script>
   <script src="js/interface/paineis.js"></script>
   <script src="js/interface/batalha_tela.js"></script>
   <script src="js/interface/arvore_tela.js"></script>
+  <script src="js/interface/cena_batalha.js"></script>
   <script src="js/nucleo/main.js"></script>
 </body>
 </html>
