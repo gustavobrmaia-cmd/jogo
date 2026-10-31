@@ -44,7 +44,8 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
   e "batalha", Som.musica); opção Música separada (save.semMusica).
 - Balanceamento (o dono: "parece que nem precisa renascer" e "poucos pontos"): PH de robô 2 + nível/2, de monstro 3,
   de renascer 3·1,6^(maxTier−7); cada renascimento dá renda x1,25 para sempre (BONUS_RENASCER); árvore custa 3x.
-- Preço de criar robô: o dono mandou deixar como está.
+- Preço de criar robô: na v3 o dono mandou deixar; na v5.2 pediu ficar caro no fim (tinha 7 bi e custava ~1000):
+  piso = (2 s por nível acima do robô 8, até 20 s) da renda do time. Simulado (sim/eco3.js): não muda o ritmo.
 - Regra do dono: o que vier com "sei lá" na mensagem, perguntar ou sugerir em vez de fazer.
 
 ## v3.1

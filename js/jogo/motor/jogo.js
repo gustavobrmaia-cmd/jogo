@@ -32,8 +32,14 @@ const Jogo = (function() {
     const base = (1 + 3 * nivelUp("dedo")) * Math.pow(2, nivelUp("dedo2")) * Math.pow(2, nivelNo("dedo_aco"));
     return (base + ECO.toqueTime * prodTime() / multMoedas()) * multMoedas();
   }
+  // preço de criar: sobe com os robôs criados e, depois do robô nível 8, tem um PISO de alguns segundos da renda
+  // do time (2 s por nível acima do 8, até 20 s). Assim quem está muito evoluído (bilhões) não cria robô por
+  // trocado. O começo (até liberar o renascer) não muda. Os descontos (Linha, Prensa, Desconto) valem nos dois.
   function custoCriar() {
-    return Math.ceil(ECO.criarBase * Math.pow(ECO.criarCresce, save.p.criados) * Math.pow(0.85, nivelUp("linha")) * Math.pow(0.8, nivelUp("prensa")) * Math.pow(0.85, nivelNo("desconto")));
+    const desconto = Math.pow(0.85, nivelUp("linha")) * Math.pow(0.8, nivelUp("prensa")) * Math.pow(0.85, nivelNo("desconto"));
+    const normal = ECO.criarBase * Math.pow(ECO.criarCresce, save.p.criados);
+    const segundos = Math.min(20, 2 * Math.max(0, save.p.maxTier - 8));
+    return Math.ceil(Math.max(normal, segundos * prodTime()) * desconto);
   }
   function tierNasce() { return Math.min(MAX_TIER, 1 + nivelUp("fabrica") + nivelUp("fabrica2") + (Math.random() < 0.1 * nivelNo("sorte") ? 1 : 0)); }
   function intervaloEsteira() { return 15 * Math.pow(0.85, nivelUp("esteira")) * Math.pow(0.8, nivelUp("esteira2")) * Math.pow(0.8, nivelNo("esteira_r")); }
