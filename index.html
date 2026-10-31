@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Robot Button</title>
+  <script src="https://game-cdn.poki.com/scripts/v2/poki-sdk.js"></script>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <div id="app">
+    <!-- topo: moedas, produção e pontos de habilidade -->
+    <header id="topo">
+      <div class="contador" id="boxMoedas"><i class="ico" data-ico="moeda"></i><b id="txtMoedas">0</b><small id="txtProd"></small></div>
+      <div class="contador ph" id="boxPh"><i class="ico" data-ico="ph"></i><b id="txtPh">0</b></div>
+    </header>
+
+    <!-- abas (saem do lado da grade, como no desenho) -->
+    <nav id="abas">
+      <button class="aba" data-aba="upgrades"><i class="ico" data-ico="upgrades"></i><span data-t="aba_upgrades"></span><em class="ponto" id="pontoUp"></em></button>
+      <button class="aba" data-aba="batalha"><i class="ico" data-ico="batalha"></i><span data-t="aba_batalha"></span></button>
+      <button class="aba" data-aba="compendio"><i class="ico" data-ico="compendio"></i><span data-t="aba_compendio"></span><em class="ponto" id="pontoComp"></em></button>
+      <button class="aba" data-aba="config"><i class="ico" data-ico="config"></i><span data-t="aba_config"></span></button>
+    </nav>
+
+    <!-- metade da grade: robôs para juntar -->
+    <section id="esq">
+      <div id="grade"></div>
+      <div id="barraCriar">
+        <button id="btnCriar"><i class="ico" data-ico="fabrica"></i><span data-t="criar_robo"></span><b id="txtCusto"></b></button>
+        <div id="esteira" title=""><i></i></div>
+      </div>
+      <!-- painel das abas: cobre só a grade (o botão continua apertável) -->
+      <div id="painel" class="escondido">
+        <div class="painelTopo"><h2 id="painelTitulo"></h2><button class="fechar" id="btnFechar">✕</button></div>
+        <div id="painelCorpo"></div>
+      </div>
+    </section>
+
+    <!-- metade do botão: o botão vermelho e o time -->
+    <section id="dir">
+      <div id="areaBotao"><canvas id="cvBotao" width="64" height="64"></canvas><div id="dica" class="escondido"></div></div>
+      <div id="time"></div>
+    </section>
+  </div>
+
+  <canvas id="fx"></canvas>
+  <div id="modal" class="escondido"><div class="caixa" id="modalCaixa"></div></div>
+  <div id="faixa" class="escondido"></div>
+  <img id="arrasto" class="px escondido" alt="">
+
+  <script src="js/nucleo/config.js"></script>
+  <script src="js/nucleo/util.js"></script>
+  <script src="js/idiomas/idiomas.js"></script>
+  <script src="js/nucleo/save.js"></script>
+  <script src="js/poki/poki.js"></script>
+  <script src="js/poki/eventos.js"></script>
+  <script src="js/sistemas/audio.js"></script>
+  <script src="js/jogo/dados/economia.js"></script>
+  <script src="js/jogo/dados/robos.js"></script>
+  <script src="js/jogo/dados/monstros.js"></script>
+  <script src="js/jogo/dados/arvore.js"></script>
+  <script src="js/jogo/arte/pixel.js"></script>
+  <script src="js/jogo/motor/jogo.js"></script>
+  <script src="js/jogo/motor/batalha.js"></script>
+  <script src="js/interface/fx.js"></script>
+  <script src="js/interface/tela.js"></script>
+  <script src="js/interface/paineis.js"></script>
+  <script src="js/interface/batalha_tela.js"></script>
+  <script src="js/interface/arvore_tela.js"></script>
+  <script src="js/nucleo/main.js"></script>
+</body>
+</html>
