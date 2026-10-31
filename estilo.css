@@ -22,8 +22,8 @@ img.px, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 #fundo { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; }
 
 /* ---------- layout deitado ---------- */
-#app { position: fixed; inset: 0; z-index: 1; display: grid; grid-template-columns: 70px 1fr 1fr; grid-template-rows: 64px 1fr;
-  grid-template-areas: "topo topo topo" "abas esq dir"; gap: 0 12px; padding: 10px 12px 12px 0; }
+#app { position: fixed; inset: 0; z-index: 1; display: grid; grid-template-columns: 92px 1fr 1fr; grid-template-rows: 64px 1fr;
+  grid-template-areas: "topo topo missao" "abas esq dir"; gap: 0 12px; padding: 10px 12px 12px 0; }
 #topo { grid-area: topo; display: flex; align-items: center; justify-content: center; gap: 18px; }
 #abas { grid-area: abas; position: relative; z-index: 15; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
 #esq { grid-area: esq; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 0; }
@@ -37,15 +37,15 @@ img.px, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 .contador.ph b { color: var(--ciano); text-shadow: 0 0 6px rgba(124,240,255,.55), 2px 2px 0 #000; }
 .contador .ico { width: 32px; height: 32px; }
 
-/* ABAS escondidas: só a pontinha aparece; passou o mouse (ou tocou) elas saem */
-.aba { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 92px; padding: 12px 4px 8px; border: 0; font-size: 13px;
-  background-image: var(--tex-clara); background-size: 128px; box-shadow: var(--pxb), inset 0 -4px 0 0 rgba(0,0,0,.3); transform: translateX(-56px); transition: transform .16s steps(4); }
+/* ABAS: sempre à mostra (ícone + nome); a que tem novidade pisca com a bolinha vermelha */
+.aba { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 86px; margin-left: 4px; padding: 12px 4px 8px; border: 0; font-size: 13px;
+  background-image: var(--tex-clara); background-size: 128px; box-shadow: var(--pxb), inset 0 -4px 0 0 rgba(0,0,0,.3); }
+.aba:hover { filter: brightness(1.12); } .aba:active { transform: translateY(3px); }
+.aba:has(.ponto.on) { animation: chama 1s steps(2) infinite; }
+@keyframes chama { 50% { filter: brightness(1.3); } }
 .aba::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 6px; background-image: var(--tex-perigo); background-size: 32px 16px; }
-.aba .ico { width: 34px; height: 34px; margin-left: 50px; transition: margin .16s steps(4); }
-.aba span { opacity: 0; transition: opacity .1s; white-space: nowrap; }
-#abas:hover .aba, #abas.aberto .aba, .aba.ativa { transform: translateX(0); }
-#abas:hover .aba .ico, #abas.aberto .aba .ico, .aba.ativa .ico { margin-left: 0; }
-#abas:hover .aba span, #abas.aberto .aba span, .aba.ativa span { opacity: 1; }
+.aba .ico { width: 34px; height: 34px; }
+.aba span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
 .aba.ativa { filter: brightness(1.25); }
 .ponto { display: none; position: absolute; top: -5px; right: -5px; width: 14px; height: 14px; background: var(--vermelho); box-shadow: 0 0 0 3px var(--borda); animation: pisca 0.8s steps(2) infinite; }
 .ponto.on { display: block; }
@@ -199,12 +199,12 @@ img.px, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 #fx { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 40; }
 
 /* ---------- em pé (celular) ---------- */
-body.empe #app { grid-template-columns: 1fr; grid-template-rows: 54px 38% 1fr 64px; grid-template-areas: "topo" "dir" "esq" "abas"; gap: 8px; padding: 8px 8px 0; }
+body.empe #app { grid-template-columns: 1fr; grid-template-rows: 54px 50px 33% 1fr 70px; grid-template-areas: "topo" "missao" "dir" "esq" "abas"; gap: 8px; padding: 8px 8px 0; }
 body.empe #abas { flex-direction: row; justify-content: center; gap: 8px; align-items: flex-end; }
-body.empe .aba { width: auto; flex: 1; max-width: 120px; transform: translateY(26px); padding: 8px 2px 10px; }
+body.empe .aba { width: auto; flex: 1; max-width: 120px; padding: 8px 2px 8px; }
 body.empe .aba .ico { margin-left: 0; width: 30px; height: 30px; }
-body.empe .aba span { opacity: 1; }
-body.empe #abas:hover .aba, body.empe #abas.aberto .aba, body.empe .aba.ativa { transform: translateY(-4px); }
+body.empe .aba span { font-size: 11px; }
+body.empe .aba.ativa { transform: translateY(-4px); }
 body.empe .contador b { font-size: 22px; } body.empe .contador .tela { min-width: 110px; padding: 3px 10px; } body.empe .contador .ico { width: 26px; height: 26px; }
 body.empe #btnCriar { font-size: 20px; padding: 10px 8px 8px; }
 body.empe #painel { inset: -6px -4px 0; }
@@ -213,3 +213,64 @@ body.empe #faixa { top: 60px; }
 body.empe .rede { aspect-ratio: 3 / 4; }
 body.empe .no { width: 38px; height: 38px; } body.empe .no .ico { width: 24px; height: 24px; }
 body.empe .hab { width: 74px; height: 80px; font-size: 11px; } body.empe .hab .ico { width: 36px; height: 36px; }
+
+/* ===== v4: missão, NOVO ROBÔ!, robô dourado, monstro invasor, turbo ===== */
+#missao { grid-area: missao; align-self: center; justify-self: center; width: min(100%, 460px); display: flex; align-items: center; gap: 10px; padding: 6px 10px; border: 0; text-align: left; color: var(--texto);
+  background-image: var(--tex-aco); background-size: 128px; box-shadow: var(--pxb), inset 0 -4px 0 0 rgba(0,0,0,.3); }
+#missao > .ico { width: 34px; height: 34px; flex: none; }
+#missao .mtxt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+#missao small { font-size: 12px; color: var(--ouro); letter-spacing: 1px; }
+#missao b { font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 2px 2px 0 var(--borda); }
+.mbarra { height: 7px; background: #0b1424; box-shadow: 0 0 0 2px var(--borda), inset 0 2px 0 0 #050a14; }
+.mbarra i { display: block; height: 100%; width: 0; background: var(--ouro); transition: width .2s steps(4); }
+.mpremio { flex: none; display: flex; align-items: center; gap: 4px; padding: 3px 8px; background: #0b1424; box-shadow: inset 0 2px 0 0 #050a14; }
+.mpremio b { font-size: 14px !important; color: var(--ouro); display: flex; align-items: center; gap: 3px; }
+.mpremio .ico { width: 18px; height: 18px; }
+#missao.pronta { background-image: none; background: var(--verde); box-shadow: var(--pxb), inset 0 -4px 0 0 var(--verdeE), inset 0 3px 0 0 rgba(255,255,255,.3); animation: pula2 .7s steps(2) infinite; cursor: pointer; }
+#missao.pronta small { color: #fff; }
+#missao.pronta .mbarra i { background: #fff; }
+@keyframes pula2 { 50% { transform: translateY(-3px) scale(1.03); } }
+#missao.cutuca { animation: treme .1s steps(2) 3; }
+#missao.pegou { animation: junta .35s steps(4); }
+
+/* NOVO ROBÔ! */
+#revela { position: fixed; inset: 0; z-index: 44; display: flex; align-items: center; justify-content: center; background: rgba(8,4,20,.72); overflow: hidden; }
+#revela .raios { position: absolute; left: 50%; top: 50%; width: 170vmax; height: 170vmax; margin: -85vmax 0 0 -85vmax;
+  background: repeating-conic-gradient(rgba(255,204,51,.22) 0deg 9deg, transparent 9deg 18deg);
+  -webkit-mask: radial-gradient(circle, #000 0, #000 18%, transparent 55%); mask: radial-gradient(circle, #000 0, #000 18%, transparent 55%);
+  animation: gira 10s steps(60) infinite linear; }
+@keyframes gira { to { transform: rotate(360deg); } }
+#revela .rcaixa { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 18px 34px 14px; text-align: center;
+  background-image: var(--tex-placa); background-size: 128px; box-shadow: var(--pxb), 0 0 0 10px rgba(255,204,51,.25); }
+#revela small { font-size: 30px; color: var(--ouro); text-shadow: 3px 3px 0 var(--borda), 0 0 12px rgba(255,204,51,.6); letter-spacing: 2px; }
+#revela img { width: 192px; height: 192px; filter: drop-shadow(0 8px 0 rgba(0,0,0,.35)); }
+#revela b { font-size: 28px; text-shadow: 3px 3px 0 var(--borda); }
+#revela span { color: var(--fraco); font-size: 16px; }
+#revela p { margin: 6px 0 2px; display: flex; align-items: center; gap: 6px; font-size: 20px; color: var(--ouro); }
+#revela p .ico { width: 24px; height: 24px; }
+#revela em { font-style: normal; font-size: 13px; color: var(--fraco); animation: pisca 1s steps(2) infinite; }
+#revela.entra .rcaixa { animation: revelaCaixa .45s steps(6); }
+#revela.entra img { animation: revelaRobo .7s steps(8); }
+@keyframes revelaCaixa { 0% { transform: scale(.2); } 70% { transform: scale(1.08); } 100% { transform: scale(1); } }
+@keyframes revelaRobo { 0% { transform: scale(0) rotate(-20deg); filter: brightness(5); } 60% { transform: scale(1.25) rotate(4deg); filter: brightness(2); } 100% { transform: scale(1); } }
+body.empe #revela img { width: 160px; height: 160px; }
+
+/* surpresas: robô dourado e monstro invasor (por cima da tela, embaixo dos números) */
+#surpresas { position: fixed; inset: 0; z-index: 38; pointer-events: none; overflow: hidden; }
+#surpresas > * { position: absolute; left: 0; top: 0; pointer-events: auto; cursor: pointer; touch-action: none; }
+img.ouro { filter: sepia(1) saturate(4) hue-rotate(-8deg) brightness(1.18) drop-shadow(0 0 6px #ffe066) drop-shadow(0 0 2px #fff6c2); animation: idle .5s steps(1) infinite; }
+.invasor { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.invasor img { filter: drop-shadow(0 6px 0 rgba(0,0,0,.35)); }
+.invasor img.apanha { animation: apanha .18s steps(2); }
+@keyframes apanha { 50% { filter: brightness(4); transform: translateX(6px); } }
+.invasor.foge img { transform: scaleX(-1); }
+.vidaInv { width: 70%; height: 9px; background: #2a0b16; box-shadow: 0 0 0 3px var(--borda); }
+.vidaInv i { display: block; height: 100%; width: 100%; background: var(--vermelho); }
+
+/* selo do turbo no topo */
+.contador.turbo b { color: #fff6c2; text-shadow: 0 0 8px #ffcc33, 2px 2px 0 #000; }
+.contador.turbo { animation: pula2 .5s steps(2) infinite; }
+.contador.turbo .tela { min-width: 70px; }
+#boxTurbo { position: absolute; left: 6px; top: 6px; z-index: 6; }
+body.empe #boxTurbo .ico { width: 22px; height: 22px; } body.empe #boxTurbo b { font-size: 18px; }
+body.empe #missao b { font-size: 15px; } body.empe #missao > .ico { width: 28px; height: 28px; }

@@ -16,7 +16,10 @@
       <div class="contador ph" id="boxPh"><i class="ico" data-ico="ph"></i><div class="tela"><b id="txtPh">0</b></div></div>
     </header>
 
-    <!-- abas (saem do lado da grade, como no desenho) -->
+    <!-- missão atual (sempre na tela; completa -> toque pega o prêmio) -->
+    <button id="missao"><i class="ico" data-ico="trofeu"></i><div class="mtxt"><small id="mTitulo"></small><b id="mTexto"></b><div class="mbarra"><i id="mBarra"></i></div></div><div class="mpremio"><i class="ico" data-ico="moeda"></i><b id="mPremio"></b></div></button>
+
+    <!-- abas (sempre visíveis; bolinha vermelha quando tem novidade) -->
     <nav id="abas">
       <button class="aba" data-aba="upgrades"><i class="ico" data-ico="upgrades"></i><span data-t="aba_upgrades"></span><em class="ponto" id="pontoUp"></em></button>
       <button class="aba" data-aba="batalha"><i class="ico" data-ico="batalha"></i><span data-t="aba_batalha"></span></button>
@@ -40,6 +43,7 @@
 
     <!-- metade do botão: o botão vermelho e o time -->
     <section id="dir">
+      <div class="contador turbo escondido" id="boxTurbo"><i class="ico" data-ico="raio"></i><div class="tela"><b>x3</b><small id="txtTurbo"></small></div></div>
       <div id="areaBotao"><canvas id="cvBotao" width="64" height="64"></canvas><div id="dica" class="escondido"></div></div>
       <div id="time"></div>
     </section>
@@ -55,6 +59,8 @@
   </div>
 
   <canvas id="fx"></canvas>
+  <div id="surpresas"></div>
+  <div id="revela" class="escondido"><div class="raios"></div><div class="rcaixa"><small data-t="rev_titulo"></small><img class="px" id="revImg" alt=""><b id="revNome"></b><span id="revNivel"></span><p id="revPremio"></p><em data-t="rev_toque"></em></div></div>
   <canvas id="curto"></canvas>
   <div id="modal" class="escondido"><div class="caixa" id="modalCaixa"></div></div>
   <div id="faixa" class="escondido"></div>
@@ -82,6 +88,9 @@
   <script src="js/interface/arvore_tela.js"></script>
   <script src="js/interface/cena_batalha.js"></script>
   <script src="js/interface/curto.js"></script>
+  <script src="js/interface/missoes.js"></script>
+  <script src="js/interface/revela.js"></script>
+  <script src="js/interface/surpresas.js"></script>
   <script src="js/nucleo/main.js"></script>
 </body>
 </html>

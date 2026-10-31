@@ -28,7 +28,6 @@ const Curto = (function() {
     aoExplodir = quandoExplodir;
     variante = (save.renascimentos || 0) % 3;
     Paineis.fechar();
-    el("abas").classList.remove("aberto");
     W = Math.ceil(window.innerWidth / ESC); H = Math.ceil(window.innerHeight / ESC);
     cv.width = W; cv.height = H;
     cv.classList.add("on");

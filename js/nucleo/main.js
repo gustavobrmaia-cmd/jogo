@@ -42,9 +42,11 @@
     Tela.dica();
     Fx.passo(dt);
     Curto.passo(dt);
+    Revela.passo();
+    Surpresas.passo(dt);
     Paineis.passoFaixa();
     pontosEm -= dt;
-    if (pontosEm <= 0) { pontosEm = 0.25; Paineis.pontos(); Paineis.atualizarUpgrades(); }
+    if (pontosEm <= 0) { pontosEm = 0.25; Paineis.pontos(); Paineis.atualizarUpgrades(); Missoes.atualizar(); }
     salvarEm -= dt;
     if (salvarEm <= 0) { salvarEm = 10; salvar(); }
   }

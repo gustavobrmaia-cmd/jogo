@@ -53,6 +53,14 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
   chama Jogo.renascer() + ArvoreTela.abrir(true). 3 variações em rodízio (save.renascimentos % 3): engrenagens,
   botão vermelho, pane elétrica geral. O fundo tem Fundo.pane {vel, fumaca, luzes} e Fundo.pontos().
 
+## v4 (pesquisa: idle segura mais tempo que duelo, mas precisa de objetivo claro, recompensa e quebra de rotina)
+- Missões (js/interface/missoes.js): cartão #missao sempre na tela; 19 fixas que ensinam o jogo (até renascer) e
+  depois geradas sem fim. save.missao {n, tipo, alvo, base}. Completa -> verde pulando -> tocar pega o prêmio.
+- "NOVO ROBÔ!" (revela.js): robô nunca visto (nível 2+) ganha tela cheia com raios; a faixa fica só para monstros.
+- Surpresas (surpresas.js): robô dourado voando (moedas, turbo x3 por 20 s ou robô de presente) e monstro invasor
+  (toque + o time atiram; derrotar dá moedas e entra no compêndio). Turbo: Jogo.multTurbo (fora do multMoedas).
+- Abas sempre visíveis (a que tem bolinha vermelha pisca). Eventos Poki: mission, event golden/invader.
+
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.
 - 1ª partida: nível 6 ~40 s, 8 (libera renascer) ~5 min, 10 ~15 min, 12 ~28 min. Depois de renascer anda bem mais rápido.

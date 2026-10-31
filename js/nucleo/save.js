@@ -24,7 +24,8 @@ function saveNovo() {
     monstrosVistos: [],   // compêndio (ids)
     hordasVencidas: 0,    // maior horda vencida + 1 (libera a seguinte); permanente
     renascimentos: 0,
-    stats: { toques: 0, batalhas: 0, vitorias: 0, juncoes: 0, tempo: 0 },
+    stats: { toques: 0, batalhas: 0, vitorias: 0, juncoes: 0, tempo: 0, criados: 0, ouros: 0, invasores: 0 },
+    missao: null,         // missão atual {n, tipo, alvo, id?, ph?, base} (missoes.js)
     mudo: false, semMusica: false, vibrar: true, idioma: "",
     ultimo: Date.now(),   // ganhos offline
     tutorial: 0           // 0 toque no botão, 1 criar, 2 juntar, 3 time, 4 pronto
@@ -39,6 +40,7 @@ function carregarSave() {
       const base = saveNovo();
       for (const k in base) if (s[k] !== undefined && typeof s[k] === typeof base[k]) base[k] = s[k];
       base.p = Object.assign(partidaNova(), s.p || {});
+      base.stats = Object.assign(saveNovo().stats, base.stats);
       save = base;
     }
   } catch (e) { /* sem armazenamento: segue com o save novo */ }

@@ -110,6 +110,23 @@ const Som = (function() {
       chiado(3500, 60, 1.6, 0.7, 0, "lowpass"); chiado(9000, 700, 0.45, 0.3, 0, "bandpass", 0.8);
       for (let i = 0; i < 5; i++) chiado(5000, 1500, 0.06, 0.12, 0.25 + i * 0.13 + Math.random() * 0.06, "highpass");   // estalinhos depois do estouro
     },
+    // ---- v4: missão, robô novo, robô dourado ----
+    missao: function() {   // caixa registradora + acorde maior subindo
+      chiado(6000, 2500, 0.06, 0.18, 0, "bandpass", 2); osc("square", 2637, 2637, 0.05, 0.06, 0.02);
+      [[67, 0.08], [72, 0.16], [76, 0.24], [79, 0.32]].forEach(function(n, i) { osc("square", nota(n[0]), nota(n[0]), i === 3 ? 0.4 : 0.12, 0.07, n[1], 0.003, 8); osc("triangle", nota(n[0] - 12), nota(n[0] - 12), 0.15, 0.08, n[1]); });
+      chiado(9000, 6000, 0.4, 0.05, 0.32, "highpass");
+    },
+    revela: function() {   // fanfarra: subida + acorde longo com brilho
+      osc("sawtooth", 200, 900, 0.28, 0.05, 0, 0.02, 12); chiado(500, 6000, 0.3, 0.06, 0, "bandpass", 2);
+      [[60, 0.28], [64, 0.36], [67, 0.44], [72, 0.52]].forEach(function(n) { osc("square", nota(n[0]), nota(n[0]), 0.12, 0.07, n[1], 0.003, 8); });
+      [72, 76, 79, 84].forEach(function(n) { osc("triangle", nota(n), nota(n), 0.9, 0.07, 0.62, 0.01, 6); osc("square", nota(n - 12), nota(n - 12), 0.7, 0.025, 0.62, 0.01); });
+      osc("sine", 110, 55, 0.5, 0.35, 0.6); chiado(10000, 7000, 0.9, 0.06, 0.62, "highpass");
+    },
+    ouro_aparece: function() { [88, 91, 96, 100].forEach(function(n, i) { osc("triangle", nota(n), nota(n), 0.1, 0.05, i * 0.05); }); },
+    ouro: function() {
+      [[84, 0], [88, 0.06], [91, 0.12], [96, 0.18], [100, 0.24]].forEach(function(n) { osc("square", nota(n[0]), nota(n[0]), 0.1, 0.05, n[1], 0.003, 6); osc("triangle", nota(n[0] + 12), nota(n[0] + 12), 0.2, 0.04, n[1] + 0.02); });
+      chiado(10000, 6000, 0.5, 0.07, 0.1, "highpass");
+    },
     tiro: function(k) { osc("square", 1400 * k, 320, 0.07, 0.035); },
     acerto: function() { chiado(1800, 400, 0.06, 0.08, 0, "bandpass", 1.2); },
     hab_missil: function() { chiado(800, 4000, 0.4, 0.12, 0, "bandpass", 1); osc("sine", 90, 28, 0.6, 0.5, 0.38); chiado(1500, 80, 0.7, 0.35, 0.38); },

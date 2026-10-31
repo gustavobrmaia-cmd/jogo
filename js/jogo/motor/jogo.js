@@ -16,6 +16,11 @@ const Jogo = (function() {
     return Math.pow(1.5, nivelUp("cofre")) * Math.pow(2, nivelUp("reator")) * Math.pow(2, nivelNo("dobro")) *
       (1 + 0.1 * nivelNo("nucleo")) * (1 + 0.5 * nivelNo("ganancia")) * Math.pow(BONUS_RENASCER, save.renascimentos);
   }
+  // turbo (robô dourado): toques e time rendem x3 por alguns segundos (fora do multMoedas: não mexe em prêmios nem offline)
+  let turboAte = 0;
+  function multTurbo() { return performance.now() < turboAte ? 3 : 1; }
+  function turboRestante() { return Math.max(0, (turboAte - performance.now()) / 1000); }
+  function ligarTurbo(seg) { turboAte = performance.now() + seg * 1000; }
   function velocidadeTime() { return (1 + 0.15 * nivelUp("motor") + 0.25 * nivelUp("turbina") + 0.4 * nivelUp("overclock")) * (1 + 0.25 * nivelNo("turbo")); }
   // moedas por segundo do time (cada robô aperta o botão "velocidade" vezes por segundo)
   function prodTime() {
@@ -36,6 +41,7 @@ const Jogo = (function() {
   // ---------- toque no botão ----------
   function tocar() {
     let v = valorToque(), critico = false;
+    v *= multTurbo();
     if (nivelNo("critico") && Math.random() < 0.1) { v *= nivelNo("critico2") ? 25 : 10; critico = true; }
     save.p.moedas += v;
     save.stats.toques++;
@@ -59,6 +65,7 @@ const Jogo = (function() {
     if (vagaLivre("grade") < 0) { avisar("cheio"); return false; }
     save.p.moedas -= c;
     save.p.criados++;
+    save.stats.criados = (save.stats.criados || 0) + 1;
     colocar(tierNasce());
     return true;
   }
@@ -128,7 +135,7 @@ const Jogo = (function() {
   const relTime = [];
   let relFusao = 0;
   function passo(dt) {
-    const p = save.p, vel = velocidadeTime(), mult = multMoedas();
+    const p = save.p, vel = velocidadeTime(), mult = multMoedas() * multTurbo();
     // time: cada robô aperta o botão no seu ritmo (desencontrados, para o botão não piscar junto)
     for (let i = 0; i < p.time.length; i++) {
       if (!p.time[i]) { relTime[i] = 0; continue; }
@@ -211,6 +218,8 @@ const Jogo = (function() {
     ao: ao, avisar: avisar, multMoedas: multMoedas, velocidadeTime: velocidadeTime, prodTime: prodTime, valorToque: valorToque,
     custoCriar: custoCriar, tierAberto: tierAberto, intervaloEsteira: intervaloEsteira, tocar: tocar, criar: criar, mover: mover, tocarRobo: tocarRobo,
     descobrirMonstro: descobrirMonstro, passo: passo, ganhoOffline: ganhoOffline, comprarUpgrade: comprarUpgrade,
-    podeRenascer: podeRenascer, renascer: renascer, novaPartida: novaPartida, comprarNo: comprarNo
+    podeRenascer: podeRenascer, renascer: renascer, novaPartida: novaPartida, comprarNo: comprarNo,
+    multTurbo: multTurbo, turboRestante: turboRestante, ligarTurbo: ligarTurbo,
+    presente: function(tier) { return colocar(Math.max(1, Math.min(MAX_TIER, tier))) >= 0; }   // robô de graça na grade (robô dourado)
   };
 })();

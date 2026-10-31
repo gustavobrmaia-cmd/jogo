@@ -200,7 +200,7 @@ const Tela = (function() {
   function escrever(id, txt) { if (cache[id] !== txt) { cache[id] = txt; el(id).textContent = txt; } }
   function atualizarTopo() {
     escrever("txtMoedas", fmt(save.p.moedas));
-    const prod = Jogo.prodTime();
+    const prod = Jogo.prodTime() * Jogo.multTurbo();
     escrever("txtProd", prod > 0 ? "+" + fmt(prod) + "/s" : "");
     escrever("txtPh", fmt(save.ph));
     const c = Jogo.custoCriar();
@@ -229,18 +229,6 @@ const Tela = (function() {
     el("btnCriar").classList.toggle("destaque", save.tutorial === 1 && p.moedas >= Jogo.custoCriar());
   }
   Jogo.ao("toque", function() { toquesDica++; });
-
-  // ---------- abas escondidas ----------
-  // com mouse: passar por cima abre (CSS :hover). Com o dedo: o 1º toque só puxa as abas para fora; o 2º escolhe
-  const abas = el("abas");
-  let fecharAbas = 0;
-  abas.addEventListener("pointerdown", function(e) {
-    if (e.pointerType === "mouse" || abas.classList.contains("aberto")) return;
-    abas.classList.add("aberto"); abas._engole = true;
-  }, true);
-  abas.addEventListener("click", function(e) { if (abas._engole) { abas._engole = false; e.stopPropagation(); e.preventDefault(); } recolher(); }, true);
-  function recolher() { clearTimeout(fecharAbas); fecharAbas = setTimeout(function() { if (!Paineis.aba) abas.classList.remove("aberto"); }, 3500); }
-  document.addEventListener("pointerdown", function(e) { if (!abas.contains(e.target) && !Paineis.aba) abas.classList.remove("aberto"); });
 
   return {
     layout: layout, montarVagas: montarVagas, atualizarVagas: atualizarVagas, atualizarTopo: atualizarTopo,

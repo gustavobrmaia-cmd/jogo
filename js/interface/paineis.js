@@ -256,8 +256,8 @@ const Paineis = (function() {
   Jogo.ao("descobriu", function(d) {
     const sprite = d.tipo === "robo" ? Pixel.robo(d.id) : Pixel.monstro(d.id);
     const nome = d.tipo === "robo" ? NOMES_ROBOS[d.id - 1] : NOMES_MONSTROS[d.id];
-    faixa(sprite, t(d.tipo === "robo" ? "novo_robo" : "novo_monstro", nome), t("ganhou_ph", d.ph, fmt(d.moedas)));
-    Som.som("descobrir");
+    // robô novo do 2 em diante ganha a tela "NOVO ROBÔ!" (revela.js) em vez da faixa
+    if (d.tipo !== "robo" || d.id < 2) { faixa(sprite, t(d.tipo === "robo" ? "novo_robo" : "novo_monstro", nome), t("ganhou_ph", d.ph, fmt(d.moedas))); Som.som("descobrir"); }
     if (aba !== "compendio") el("pontoComp").classList.add("on");
     salvar();
   });
