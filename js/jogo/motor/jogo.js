@@ -14,7 +14,7 @@ const Jogo = (function() {
   // ---------- números ----------
   function multMoedas() {
     return Math.pow(1.5, nivelUp("cofre")) * Math.pow(2, nivelUp("reator")) * Math.pow(2, nivelNo("dobro")) *
-      (1 + 0.1 * nivelNo("nucleo")) * (1 + 0.5 * nivelNo("ganancia"));
+      (1 + 0.1 * nivelNo("nucleo")) * (1 + 0.5 * nivelNo("ganancia")) * Math.pow(BONUS_RENASCER, save.renascimentos);
   }
   function velocidadeTime() { return (1 + 0.15 * nivelUp("motor") + 0.25 * nivelUp("turbina") + 0.4 * nivelUp("overclock")) * (1 + 0.25 * nivelNo("turbo")); }
   // moedas por segundo do time (cada robô aperta o botão "velocidade" vezes por segundo)
@@ -116,7 +116,7 @@ const Jogo = (function() {
   function descobrirMonstro(id) {
     if (save.monstrosVistos.indexOf(id) >= 0) return null;
     save.monstrosVistos.push(id);
-    const ph = 1 * (nivelNo("cacador") ? 2 : 1), z = Math.floor(id / 3), moedas = Math.round(HORDAS[z].premio * 0.3 * multMoedas());
+    const ph = 3 * (nivelNo("cacador") ? 2 : 1), z = Math.floor(id / 3), moedas = Math.round(HORDAS[z].premio * 0.3 * multMoedas());
     save.ph += ph; save.p.moedas += moedas;
     Poki.medir("compendium", "monster-" + id, "reached");
     const d = { tipo: "monstro", id: id, ph: ph, moedas: moedas };

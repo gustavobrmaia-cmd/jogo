@@ -37,8 +37,14 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
 - Batalha em tela cheia numa FÁBRICA (`interface/cena_batalha.js`, baixa resolução com escala inteira); os robôs lutam
   sozinhos e o jogador lança 4 habilidades (Míssil, Choque, Conserto, Sobrecarga; batalha.js HABILIDADES), liberadas
   pelas hordas vencidas. Em pé: robôs no chão e monstros na passarela (luta na vertical).
-- PENDENTE (o dono escreveu "sei lá"): deixar criar robô mais caro — 3 opções propostas (começo mais caro; preço sobe
-  com robôs parados na grade; preço por lote de 10). Esperando a escolha dele.
+## v3
+- Ícones refeitos em 24x24 com o sombreado dos robôs (pixel.js icone). O de "dedo" é um dedo apertando o botão
+  vermelho (a 1ª versão parecia um gesto ofensivo: cuidado com mãos).
+- Som v2 (audio.js): efeitos com envelope, desafinação, filtros e eco; MÚSICA chiptune gerada na hora (trilha "jogo"
+  e "batalha", Som.musica); opção Música separada (save.semMusica).
+- Balanceamento (o dono: "parece que nem precisa renascer" e "poucos pontos"): PH de robô 2 + nível/2, de monstro 3,
+  de renascer 3·1,6^(maxTier−7); cada renascimento dá renda x1,25 para sempre (BONUS_RENASCER); árvore custa 3x.
+- Preço de criar robô: o dono mandou deixar como está.
 - Regra do dono: o que vier com "sei lá" na mensagem, perguntar ou sugerir em vez de fazer.
 
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)

@@ -31,9 +31,9 @@ TEXTOS.fr = {
   nivel: "Niv. {0}",
   max: "MAX",
   renascer: "Renaître",
-  renascer_d: "Recommence plus fort : +{0} points de compétence",
+  renascer_d: "+{0} points de compétence et revenus x1,25 pour toujours",
   renascer_bloq: "Atteins le robot niveau {0} ({1}) pour renaître",
-  renascer_conf: "Tu perds pièces, robots et améliorations et gagnes +{0} points de compétence pour l'arbre.",
+  renascer_conf: "Tu perds pièces, robots et améliorations. Tu gagnes +{0} points de compétence et des revenus x1,25 pour toujours.",
   renascer_mantem: "Le bestiaire, les hordes vaincues et l'arbre restent.",
   ver_arvore: "Voir l'arbre",
   cancelar: "Annuler",
@@ -162,5 +162,6 @@ TEXTOS.fr = {
   hab_conserto: "Réparation",
   hab_sobrecarga: "Surcharge",
   hab_bloq: "Bats {0} pour débloquer",
-  so_ao_renascer: "seulement en renaissant"
+  so_ao_renascer: "seulement en renaissant",
+  cfg_musica: "Musique"
 };

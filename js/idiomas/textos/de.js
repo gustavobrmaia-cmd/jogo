@@ -31,9 +31,9 @@ TEXTOS.de = {
   nivel: "St. {0}",
   max: "MAX",
   renascer: "Wiedergeburt",
-  renascer_d: "Neu starten, aber stärker: +{0} Skillpunkte",
+  renascer_d: "+{0} Skillpunkte und für immer x1,25 Einkommen",
   renascer_bloq: "Erreiche Roboter Stufe {0} ({1}) für die Wiedergeburt",
-  renascer_conf: "Du verlierst Münzen, Roboter und Upgrades und bekommst +{0} Skillpunkte für den Baum.",
+  renascer_conf: "Du verlierst Münzen, Roboter und Upgrades. Du bekommst +{0} Skillpunkte und für immer x1,25 Einkommen.",
   renascer_mantem: "Kompendium, besiegte Horden und Baum bleiben.",
   ver_arvore: "Baum ansehen",
   cancelar: "Abbrechen",
@@ -162,5 +162,6 @@ TEXTOS.de = {
   hab_conserto: "Reparatur",
   hab_sobrecarga: "Überladung",
   hab_bloq: "Besiege {0} zum Freischalten",
-  so_ao_renascer: "nur bei Wiedergeburt"
+  so_ao_renascer: "nur bei Wiedergeburt",
+  cfg_musica: "Musik"
 };

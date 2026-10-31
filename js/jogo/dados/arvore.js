@@ -38,7 +38,10 @@ const ARVORE = [
 ];
 const NO = {};
 ARVORE.forEach(function(n) { NO[n.id] = n; });
-function custoNo(id, nivel) { return NO[id].custo * Math.pow(2, nivel || 0); }
+// v3: tudo custa 3x (os PH ficaram bem maiores)
+function custoNo(id, nivel) { return NO[id].custo * 3 * Math.pow(2, nivel || 0); }
 function noAberto(id) { const n = NO[id]; return !n.liga.length || n.liga.some(function(l) { return (save.arvore[l] || 0) > 0; }); }
-// PH ganhos ao renascer, pelo maior robô da partida: 8 -> 1, 10 -> 3, 12 -> 7, 14 -> 17... (+25% por nível de ph_bonus)
-function phRenascer(maxTier) { return maxTier < CONFIG.tierRenascer ? 0 : Math.floor(Math.pow(1.5, maxTier - 7) * (1 + 0.25 * (save.arvore.ph_bonus || 0))); }
+// PH ganhos ao renascer, pelo maior robô da partida (v3, bem mais): 8 -> 4, 9 -> 7, 10 -> 12, 11 -> 19, 12 -> 31,
+// 14 -> 80... (+25% por nível de ph_bonus). E cada renascimento multiplica a renda por 1,25 para sempre (jogo.js)
+function phRenascer(maxTier) { return maxTier < CONFIG.tierRenascer ? 0 : Math.floor(3 * Math.pow(1.6, maxTier - 7) * (1 + 0.25 * (save.arvore.ph_bonus || 0))); }
+const BONUS_RENASCER = 1.25;

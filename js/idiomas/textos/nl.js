@@ -31,9 +31,9 @@ TEXTOS.nl = {
   nivel: "Nv. {0}",
   max: "MAX",
   renascer: "Herboren",
-  renascer_d: "Begin sterker opnieuw: +{0} vaardigheidspunten",
+  renascer_d: "+{0} vaardigheidspunten en voor altijd x1,25 inkomen",
   renascer_bloq: "Bereik robot niveau {0} ({1}) om herboren te worden",
-  renascer_conf: "Je verliest munten, robots en upgrades en krijgt +{0} vaardigheidspunten voor de boom.",
+  renascer_conf: "Je verliest munten, robots en upgrades. Je krijgt +{0} vaardigheidspunten en voor altijd x1,25 inkomen.",
   renascer_mantem: "Het compendium, verslagen hordes en de boom blijven.",
   ver_arvore: "Boom bekijken",
   cancelar: "Annuleren",
@@ -162,5 +162,6 @@ TEXTOS.nl = {
   hab_conserto: "Reparatie",
   hab_sobrecarga: "Overbelasting",
   hab_bloq: "Versla {0} om te ontgrendelen",
-  so_ao_renascer: "alleen bij herboren"
+  so_ao_renascer: "alleen bij herboren",
+  cfg_musica: "Muziek"
 };

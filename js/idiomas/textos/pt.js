@@ -31,9 +31,9 @@ TEXTOS.pt = {
   nivel: "Nv. {0}",
   max: "MÁX",
   renascer: "Renascer",
-  renascer_d: "Recomece mais forte: +{0} pontos de habilidade",
+  renascer_d: "+{0} pontos de habilidade e renda x1,25 para sempre",
   renascer_bloq: "Chegue no robô nível {0} ({1}) para renascer",
-  renascer_conf: "Você perde moedas, robôs e upgrades e ganha +{0} pontos de habilidade para a árvore.",
+  renascer_conf: "Você perde moedas, robôs e upgrades. Ganha +{0} pontos de habilidade e sua renda fica x1,25 para sempre.",
   renascer_mantem: "O compêndio, as hordas vencidas e a árvore ficam.",
   ver_arvore: "Ver árvore",
   cancelar: "Cancelar",
@@ -162,5 +162,6 @@ TEXTOS.pt = {
   hab_conserto: "Conserto",
   hab_sobrecarga: "Sobrecarga",
   hab_bloq: "Vença {0} para liberar",
-  so_ao_renascer: "só ao renascer"
+  so_ao_renascer: "só ao renascer",
+  cfg_musica: "Música"
 };

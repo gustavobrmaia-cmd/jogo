@@ -31,9 +31,9 @@ TEXTOS.it = {
   nivel: "Liv. {0}",
   max: "MAX",
   renascer: "Rinascita",
-  renascer_d: "Ricomincia più forte: +{0} punti abilità",
+  renascer_d: "+{0} punti abilità e guadagni x1,25 per sempre",
   renascer_bloq: "Raggiungi il robot livello {0} ({1}) per rinascere",
-  renascer_conf: "Perdi monete, robot e potenziamenti e ottieni +{0} punti abilità per l'albero.",
+  renascer_conf: "Perdi monete, robot e potenziamenti. Ottieni +{0} punti abilità e guadagni x1,25 per sempre.",
   renascer_mantem: "Il compendio, le orde sconfitte e l'albero restano.",
   ver_arvore: "Vedi albero",
   cancelar: "Annulla",
@@ -162,5 +162,6 @@ TEXTOS.it = {
   hab_conserto: "Riparazione",
   hab_sobrecarga: "Sovraccarico",
   hab_bloq: "Sconfiggi {0} per sbloccare",
-  so_ao_renascer: "solo alla rinascita"
+  so_ao_renascer: "solo alla rinascita",
+  cfg_musica: "Musica"
 };

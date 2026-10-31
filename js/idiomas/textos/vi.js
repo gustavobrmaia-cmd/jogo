@@ -31,9 +31,9 @@ TEXTOS.vi = {
   nivel: "Cấp {0}",
   max: "TỐI ĐA",
   renascer: "Tái Sinh",
-  renascer_d: "Chơi lại mạnh hơn: +{0} điểm kỹ năng",
+  renascer_d: "+{0} điểm kỹ năng và thu nhập x1,25 mãi mãi",
   renascer_bloq: "Đạt robot cấp {0} ({1}) để tái sinh",
-  renascer_conf: "Bạn mất xu, robot và nâng cấp, nhận +{0} điểm kỹ năng cho cây.",
+  renascer_conf: "Bạn mất xu, robot và nâng cấp. Nhận +{0} điểm kỹ năng và thu nhập x1,25 mãi mãi.",
   renascer_mantem: "Bách khoa, các đợt đã thắng và cây được giữ lại.",
   ver_arvore: "Xem cây",
   cancelar: "Hủy",
@@ -162,5 +162,6 @@ TEXTOS.vi = {
   hab_conserto: "Sửa Chữa",
   hab_sobrecarga: "Quá Tải",
   hab_bloq: "Thắng {0} để mở khóa",
-  so_ao_renascer: "chỉ khi tái sinh"
+  so_ao_renascer: "chỉ khi tái sinh",
+  cfg_musica: "Nhạc"
 };

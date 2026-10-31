@@ -31,9 +31,9 @@ TEXTOS.id = {
   nivel: "Lv. {0}",
   max: "MAKS",
   renascer: "Terlahir Kembali",
-  renascer_d: "Mulai lagi lebih kuat: +{0} poin keahlian",
+  renascer_d: "+{0} poin keahlian dan penghasilan x1,25 selamanya",
   renascer_bloq: "Capai robot level {0} ({1}) untuk terlahir kembali",
-  renascer_conf: "Kamu kehilangan koin, robot, dan upgrade, lalu dapat +{0} poin keahlian untuk pohon.",
+  renascer_conf: "Kamu kehilangan koin, robot, dan upgrade. Kamu dapat +{0} poin keahlian dan penghasilan x1,25 selamanya.",
   renascer_mantem: "Ensiklopedia, gerombolan yang dikalahkan, dan pohon tetap ada.",
   ver_arvore: "Lihat pohon",
   cancelar: "Batal",
@@ -162,5 +162,6 @@ TEXTOS.id = {
   hab_conserto: "Perbaikan",
   hab_sobrecarga: "Kelebihan Beban",
   hab_bloq: "Kalahkan {0} untuk membuka",
-  so_ao_renascer: "hanya saat terlahir kembali"
+  so_ao_renascer: "hanya saat terlahir kembali",
+  cfg_musica: "Musik"
 };

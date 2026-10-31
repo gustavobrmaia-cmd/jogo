@@ -12,5 +12,5 @@ const MAX_TIER = NOMES_ROBOS.length;
 // força na batalha (vida e ataque por segundo); a blindagem e a árvore multiplicam
 function vidaRobo(n) { return 30 * Math.pow(1.8, n - 1); }
 function ataqueRobo(n) { return 5 * Math.pow(1.8, n - 1); }
-// pontos de habilidade por descobrir o robô (1, e +1 a cada 5 níveis)
-function phRobo(n) { return 1 + Math.floor(n / 5); }
+// pontos de habilidade por descobrir o robô (v3: 2 + metade do nível; o dono achou que dava muito pouco)
+function phRobo(n) { return 2 + Math.floor(n / 2); }

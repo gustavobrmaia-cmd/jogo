@@ -31,9 +31,9 @@ TEXTOS.tr = {
   nivel: "Sv. {0}",
   max: "MAKS",
   renascer: "Yeniden Doğ",
-  renascer_d: "Daha güçlü yeniden başla: +{0} yetenek puanı",
+  renascer_d: "+{0} yetenek puanı ve sonsuza dek x1,25 gelir",
   renascer_bloq: "Yeniden doğmak için {0}. seviye robota ({1}) ulaş",
-  renascer_conf: "Paraları, robotları ve geliştirmeleri kaybedersin, ağaç için +{0} yetenek puanı kazanırsın.",
+  renascer_conf: "Paraları, robotları ve geliştirmeleri kaybedersin. +{0} yetenek puanı ve sonsuza dek x1,25 gelir kazanırsın.",
   renascer_mantem: "Ansiklopedi, yenilen sürüler ve ağaç kalır.",
   ver_arvore: "Ağacı gör",
   cancelar: "İptal",
@@ -162,5 +162,6 @@ TEXTOS.tr = {
   hab_conserto: "Tamir",
   hab_sobrecarga: "Aşırı Yük",
   hab_bloq: "Açmak için {0} seviyesini yen",
-  so_ao_renascer: "sadece yeniden doğunca"
+  so_ao_renascer: "sadece yeniden doğunca",
+  cfg_musica: "Müzik"
 };

@@ -193,6 +193,7 @@ const Paineis = (function() {
       c.appendChild(info); c.appendChild(b); corpo.appendChild(c);
     }
     chave(t("cfg_som"), !save.mudo, function() { save.mudo = !save.mudo; });
+    chave(t("cfg_musica"), !save.semMusica, function() { save.semMusica = !save.semMusica; Som.atualizarMusica(); });
     chave(t("cfg_vibrar"), save.vibrar, function() { save.vibrar = !save.vibrar; });
     const ci = elem("div", "card"); ci.appendChild(elem("div", "info", "<b>" + esc(t("cfg_idioma")) + "</b>"));
     const sel = elem("select", "btn");

@@ -31,9 +31,9 @@ TEXTOS.ja = {
   nivel: "Lv{0}",
   max: "MAX",
   renascer: "転生",
-  renascer_d: "もっと強くやり直し：スキルポイント+{0}",
+  renascer_d: "スキルポイント+{0}、収入が永久にx1.25",
   renascer_bloq: "Lv{0}のロボット（{1}）で転生できる",
-  renascer_conf: "コイン・ロボット・強化を失い、ツリー用のスキルポイントを+{0}もらえる。",
+  renascer_conf: "コイン・ロボット・強化を失い、スキルポイント+{0}と永久に収入x1.25をもらえる。",
   renascer_mantem: "図鑑・倒した群れ・ツリーは残る。",
   ver_arvore: "ツリーを見る",
   cancelar: "キャンセル",
@@ -162,5 +162,6 @@ TEXTOS.ja = {
   hab_conserto: "修理",
   hab_sobrecarga: "オーバーロード",
   hab_bloq: "{0}に勝つと解放",
-  so_ao_renascer: "転生時のみ"
+  so_ao_renascer: "転生時のみ",
+  cfg_musica: "音楽"
 };

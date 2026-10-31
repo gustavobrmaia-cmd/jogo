@@ -68,6 +68,7 @@ const Batalha = (function() {
       const alvo = mv[0], dano = r.ataque * (0.85 + Math.random() * 0.3);
       alvo.vida -= dano; r.golpe = 1;
       b.tiros.push({ de: "r", i: b.robos.indexOf(r), para: b.monstros.indexOf(alvo), t: 0 });
+      if (typeof Som !== "undefined") Som.som("tiro", 0.85 + Math.random() * 0.4);
       b.numeros.push({ lado: "m", i: b.monstros.indexOf(alvo), v: dano, t: 0 });
     });
     vivos(b.monstros).forEach(function(m) {
@@ -79,6 +80,7 @@ const Batalha = (function() {
       const alvo = alvos[Math.floor(Math.random() * Math.min(3, alvos.length))], dano = m.ataque * (0.85 + Math.random() * 0.3);
       alvo.vida -= dano; m.golpe = 1;
       b.tiros.push({ de: "m", i: b.monstros.indexOf(m), para: b.robos.indexOf(alvo), t: 0 });
+      if (typeof Som !== "undefined") Som.som("acerto");
     });
     b.tiros.forEach(function(x) { x.t += dt; }); b.tiros = b.tiros.filter(function(x) { return x.t < 0.3; });
     b.numeros.forEach(function(x) { x.t += dt; }); b.numeros = b.numeros.filter(function(x) { return x.t < 0.8; });

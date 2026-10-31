@@ -104,6 +104,7 @@ const CenaBatalha = (function() {
     el("cenaFim").classList.add("escondido");
     montarBotoes();
     Som.som("lutar");
+    Som.musica("batalha");
   }
   function montarBotoes() {
     const caixa = el("cenaHab"); caixa.innerHTML = "";
@@ -246,6 +247,7 @@ const CenaBatalha = (function() {
   function fechar(intervalo) {
     aberta = false;
     cena.classList.add("escondido");
+    Som.musica("jogo");
     Batalha.sair();
     if (typeof BatalhaTela !== "undefined") BatalhaTela.voltou();
     if (intervalo) Poki.intervalo();

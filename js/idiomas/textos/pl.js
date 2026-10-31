@@ -31,9 +31,9 @@ TEXTOS.pl = {
   nivel: "Poz. {0}",
   max: "MAKS",
   renascer: "Odrodzenie",
-  renascer_d: "Zacznij od nowa silniejszy: +{0} punktów umiejętności",
+  renascer_d: "+{0} punktów umiejętności i dochód x1,25 na zawsze",
   renascer_bloq: "Zdobądź robota poziomu {0} ({1}), by się odrodzić",
-  renascer_conf: "Tracisz monety, roboty i ulepszenia, a dostajesz +{0} punktów umiejętności na drzewko.",
+  renascer_conf: "Tracisz monety, roboty i ulepszenia. Dostajesz +{0} punktów umiejętności i dochód x1,25 na zawsze.",
   renascer_mantem: "Kompendium, pokonane hordy i drzewko zostają.",
   ver_arvore: "Zobacz drzewko",
   cancelar: "Anuluj",
@@ -162,5 +162,6 @@ TEXTOS.pl = {
   hab_conserto: "Naprawa",
   hab_sobrecarga: "Przeciążenie",
   hab_bloq: "Pokonaj {0}, by odblokować",
-  so_ao_renascer: "tylko przy odrodzeniu"
+  so_ao_renascer: "tylko przy odrodzeniu",
+  cfg_musica: "Muzyka"
 };

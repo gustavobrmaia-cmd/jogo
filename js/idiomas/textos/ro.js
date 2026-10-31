@@ -31,9 +31,9 @@ TEXTOS.ro = {
   nivel: "Nv. {0}",
   max: "MAX",
   renascer: "Renaștere",
-  renascer_d: "Începe din nou mai puternic: +{0} puncte de abilitate",
+  renascer_d: "+{0} puncte de abilitate și venit x1,25 pentru totdeauna",
   renascer_bloq: "Ajungi la robotul de nivel {0} ({1}) ca să renaști",
-  renascer_conf: "Pierzi monedele, roboții și îmbunătățirile și primești +{0} puncte de abilitate pentru arbore.",
+  renascer_conf: "Pierzi monedele, roboții și îmbunătățirile. Primești +{0} puncte de abilitate și venit x1,25 pentru totdeauna.",
   renascer_mantem: "Compendiul, hoardele învinse și arborele rămân.",
   ver_arvore: "Vezi arborele",
   cancelar: "Anulează",
@@ -162,5 +162,6 @@ TEXTOS.ro = {
   hab_conserto: "Reparație",
   hab_sobrecarga: "Supraîncărcare",
   hab_bloq: "Învinge {0} ca să deblochezi",
-  so_ao_renascer: "doar la renaștere"
+  so_ao_renascer: "doar la renaștere",
+  cfg_musica: "Muzică"
 };

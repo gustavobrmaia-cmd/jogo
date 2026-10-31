@@ -25,7 +25,7 @@ function saveNovo() {
     hordasVencidas: 0,    // maior horda vencida + 1 (libera a seguinte); permanente
     renascimentos: 0,
     stats: { toques: 0, batalhas: 0, vitorias: 0, juncoes: 0, tempo: 0 },
-    mudo: false, vibrar: true, idioma: "",
+    mudo: false, semMusica: false, vibrar: true, idioma: "",
     ultimo: Date.now(),   // ganhos offline
     tutorial: 0           // 0 toque no botão, 1 criar, 2 juntar, 3 time, 4 pronto
   };

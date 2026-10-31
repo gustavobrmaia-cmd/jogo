@@ -31,9 +31,9 @@ TEXTOS.en = {
   nivel: "Lv. {0}",
   max: "MAX",
   renascer: "Rebirth",
-  renascer_d: "Start over stronger: +{0} skill points",
+  renascer_d: "+{0} skill points and x1.25 income forever",
   renascer_bloq: "Reach robot level {0} ({1}) to rebirth",
-  renascer_conf: "You lose coins, robots and upgrades and get +{0} skill points for the tree.",
+  renascer_conf: "You lose coins, robots and upgrades. You get +{0} skill points and x1.25 income forever.",
   renascer_mantem: "The compendium, beaten hordes and the tree stay.",
   ver_arvore: "View tree",
   cancelar: "Cancel",
@@ -162,5 +162,6 @@ TEXTOS.en = {
   hab_conserto: "Repair",
   hab_sobrecarga: "Overload",
   hab_bloq: "Beat {0} to unlock",
-  so_ao_renascer: "only on rebirth"
+  so_ao_renascer: "only on rebirth",
+  cfg_musica: "Music"
 };
