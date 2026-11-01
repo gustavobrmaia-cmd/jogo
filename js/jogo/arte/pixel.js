@@ -20,7 +20,7 @@ const Pixel = (function() {
   // ---------- cores ----------
   function hsl(h, s, l) { return "hsl(" + Math.round(((h % 360) + 360) % 360) + "," + limitar(s, 0, 100) + "%," + limitar(l, 0, 100) + "%)"; }
   // material: 5 tons a partir de matiz, saturação e luz
-  function mat(h, s, l) { return { tons: [hsl(h - 10, s - 8, l + 24), hsl(h - 5, s - 2, l + 12), hsl(h, s, l), hsl(h + 12, s + 2, l - 14), hsl(h + 22, s + 4, l - 27)] }; }
+  function mat(h, s, l) { return { tons: [hsl(h - 10, s - 8, l + 24), hsl(h - 5, s - 2, l + 12), hsl(h, s, l), hsl(h + 12, s + 2, l - 14), hsl(h + 22, s + 4, l - 27), hsl(h + 30, s + 8, Math.max(8, l - 40))] }; }
   const METAL = mat(228, 18, 66), METAL_E = mat(232, 16, 44), BORRACHA = mat(240, 14, 26), OURO = mat(44, 92, 56), OSSO = mat(40, 32, 84);
 
   // ---------- folha com peças ----------
@@ -90,20 +90,33 @@ const Pixel = (function() {
       else if (esq) t = 1;
       else if (baixo2) t = 3;
       else {
-        const ry = (y - cy0[p]) / Math.max(1, cy1[p] - cy0[p]);
+        const ry = (y - cy0[p]) / Math.max(1, cy1[p] - cy0[p]), alto = cy1[p] - cy0[p] >= 6;
         if (ry > 0.86 || (ry > 0.72 && (x + y) % 2)) t = 3;
+        else if (alto && (ry < 0.12 || (ry < 0.24 && (x + y) % 2))) t = 1;   // v7: luz pontilhada em cima
       }
       out[i] = tons[t];
     }
     f.brilho.forEach(function(b, p) {
       if (!b || cx0[p] === undefined) return;
       const bx = Math.round(cx0[p] + (cx1[p] - cx0[p]) * 0.28), by = Math.round(cy0[p] + (cy1[p] - cy0[p]) * 0.24);
-      [[0, 0], [1, 0], [0, 1]].forEach(function(o) { const i = (by + o[1]) * w + bx + o[0]; if (f.parte[i] === p && !f.det[i]) out[i] = "#ffffff"; });
+      const grande = cx1[p] - cx0[p] >= 10 && cy1[p] - cy0[p] >= 8;
+      (grande ? [[0, 0], [1, 0], [0, 1], [2, 0], [0, 2], [1, 1]] : [[0, 0], [1, 0], [0, 1]]).forEach(function(o) { const i = (by + o[1]) * w + bx + o[0]; if (f.parte[i] === p && !f.det[i]) out[i] = o[0] + o[1] >= 2 ? f.mats[p].tons[0] : "#ffffff"; });
+      if (grande) { const i = (by + 4) * w + bx + 3; if (f.parte[i] === p && !f.det[i]) out[i] = f.mats[p].tons[0]; }
     });
+    // contorno de fora (v7, "sel-out"): onde a luz bate (em cima e à esquerda) o contorno é um tom bem escuro da cor
+    // da própria peça; embaixo e à direita fica a tinta escura. Dá volume e deixa o desenho menos "chapado".
     const fim = out.slice();
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       const i = y * w + x; if (out[i]) continue;
-      for (let k = 0; k < 4; k++) { const xx = x + [1, -1, 0, 0][k], yy = y + [0, 0, 1, -1][k]; if (xx >= 0 && yy >= 0 && xx < w && yy < h && out[yy * w + xx]) { fim[i] = TINTA; break; } }
+      let cor = null;
+      for (let k = 0; k < 4; k++) {
+        const xx = x + [1, -1, 0, 0][k], yy = y + [0, 0, 1, -1][k];
+        if (xx < 0 || yy < 0 || xx >= w || yy >= h || !out[yy * w + xx]) continue;
+        const pv = f.parte[yy * w + xx], luzLado = k === 0 || k === 2;   // vizinho à direita/embaixo: este pixel está em cima/à esquerda
+        if (!luzLado) { cor = TINTA; break; }
+        cor = pv >= 0 && !f.det[yy * w + xx] && f.mats[pv].tons[5] ? f.mats[pv].tons[5] : TINTA;
+      }
+      if (cor) fim[i] = cor;
     }
     const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
     const g = cv.getContext("2d");
@@ -166,6 +179,12 @@ const Pixel = (function() {
     else if (iPeito === 2) { [[16, 23], [31, 23], [16, 32], [31, 32]].forEach(function(q) { f.d(q[0], q[1], "#e8ecf8"); f.d(q[0] + 1, q[1] + 1, "#5d6380"); }); f.dR(20, 25, 8, 5, COR2.tons[3]); f.dR(21, 26, 6, 3, luz); }
     else { f.dR(14, 27, 20, 3, COR.tons[4]); f.dR(22, 27, 4, 3, luz); }
     f.dR(24, 33, 1, 2, COR.tons[4]);
+    // v7: acabamento do corpo — emenda de painel, rebites nos cantos e grade de ventilação na barriga
+    if (iCorpo === 0 || iCorpo === 3) { [[15, 22], [32, 22], [15, 33], [32, 33]].forEach(function(q) { f.d(q[0], q[1], COR.tons[0]); f.d(q[0], q[1] + 1, COR.tons[4]); }); }
+    if (iPeito !== 3) for (let x = 19; x < 30; x += 2) f.d(x, 32, COR.tons[4]);
+    f.dR(13 + (iCorpo === 1 ? 3 : 1), 21, 1, 4, COR.tons[1]);   // reflexo na lateral
+    // propulsores nas costas (13+): chaminés com fogo embaixo do braço
+    if (n >= 13 && iBraco !== 2) { f.dRSim(11, 34, 2, 2, "#ffb02e"); f.dRSim(11, 36, 2, 1, "#ff5a2e"); }
     if (n >= 10) f.dR(15, 35, 18, 1, OURO.tons[1]);
     if (n >= 15) { const omb = f.peca(OURO, true); f.simRR(9, 18, 8, 6, 3, omb); }
     // rosto
@@ -187,6 +206,8 @@ const Pixel = (function() {
     else if (iAnt === 3) { [[25, 0], [24, 1], [23, 2], [24, 2], [25, 2], [24, 3]].forEach(function(q) { f.d(q[0], q[1], "#ffe14d"); }); }
     else if (iAnt === 4) { const a = f.peca(METAL_E); f.rr(16, 0, 16, 3, 1, a); f.rect(23, 2, 2, 2, a); }
     if (n >= 28) { f.dC(24, 27, 4, luz2); f.dC(24, 27, 2, "#ffffff"); }
+    // emblema no peito dos lendários (21+): losango dourado
+    if (n >= 21 && n < 28 && iPeito !== 1) { f.d(24, 22, "#fff6c8"); f.dR(23, 23, 3, 1, "#ffcc33"); f.d(24, 24, "#c98a10"); }
     return (cacheRobo[n] = finalizar(f));
   }
 
@@ -240,6 +261,20 @@ const Pixel = (function() {
       const ch = f.peca(OSSO); f.poli([[28, 11], [34, 1], [32, 12]], ch); f.poli([[21, 11], [22, 2], [25, 11]], ch);
       f.dC(23, 18, 2.6, "#ffd23f"); f.dR(23, 17, 1, 3, pup); f.d(8, 21, pup); f.dR(9, 28, 2, 2, "#ffffff"); f.dR(15, 28, 2, 2, "#ffffff");
     }
+    // v7: textura — pintas escuras e claras espalhadas no corpo (sempre iguais para o mesmo monstro)
+    const rnd = semente(id * 13 + 5), corC = mat(h, 58, 50);
+    for (let k = 0; k < 9; k++) {
+      const x = 8 + Math.floor(rnd() * 32), y = 14 + Math.floor(rnd() * 26), i = y * 48 + x;
+      if (f.parte[i] === C && !f.det[i] && f.parte[i + 1] === C && f.parte[i + 48] === C) { f.d(x, y, k % 3 ? corC.tons[3] : corC.tons[1]); if (k % 2) f.d(x + 1, y, corC.tons[3]); }
+    }
+    // barriga clara nas formas gordas
+    if (forma === "gosma" || forma === "morcego" || forma === "caranguejo") {
+      const by = forma === "gosma" ? 37 : forma === "morcego" ? 29 : 34, bw = forma === "morcego" ? 4 : 7;
+      for (let x = 24 - bw; x <= 24 + bw; x++) for (let y = by; y < by + 3; y++) { const i = y * 48 + x; if (f.parte[i] === C && !f.det[i] && (x + y) % 2 === 0) f.d(x, y, corC.tons[1]); }
+    }
+    // dentinhos nas bocas de gosma e cogumelo
+    if (forma === "gosma") { f.d(22, 39, "#ffffff"); f.d(25, 39, "#ffffff"); }
+    if (forma === "cogumelo") { f.d(23, 39, "#ffffff"); f.d(24, 39, "#ffffff"); }
     // chifres (horda 4+) e coroa (7+), presos no topo
     const topo = function(x) { for (let y = 0; y < 48; y++) if (f.tem(x, y)) return y; return 20; };
     if (z >= 3 && forma !== "dragao") { const ch = f.peca(OSSO); [[16, -1], [31, 1]].forEach(function(c) { const y = topo(c[0]) + 2; f.poli([[c[0] - 2, y], [c[0] + 2, y], [c[0] + c[1] * 4, y - 9]], ch); }); }

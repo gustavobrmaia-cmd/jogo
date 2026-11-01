@@ -27,7 +27,7 @@ const Som = (function() {
       const molhado = a.createGain(); molhado.gain.value = 0.16;
       const corta = a.createBiquadFilter(); corta.type = "lowpass"; corta.frequency.value = 3200;
       efeitos.connect(molhado).connect(eco); eco.connect(corta).connect(volta).connect(eco); corta.connect(mestre);
-      musicaBus = a.createGain(); musicaBus.gain.value = save.semMusica ? 0 : 0.26; musicaBus.connect(mestre);
+      musicaBus = a.createGain(); musicaBus.gain.value = save.semMusica ? 0 : 0.9; musicaBus.connect(mestre);
       ruido = a.createBuffer(1, a.sampleRate, a.sampleRate);
       const d = ruido.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
       iniciarMusica();
@@ -142,45 +142,176 @@ const Som = (function() {
     try { EF[nome](k || 1); } catch (e) { /* som nunca trava o jogo */ }
   }
 
-  // ---------- música ----------
-  // acordes por compasso (graus em MIDI) e padrões de 16 passos; "jogo" calmo, "batalha" mais rápida e tensa
-  const TRILHAS = {
-    jogo: { bpm: 112, acordes: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62], [57, 60, 64], [55, 59, 62], [53, 57, 60], [52, 56, 59]],
-      bumbo: "x...x...x...x...", caixa: "....x.......x...", chimbal: "..x...x...x...x.", baixo: "x.x.x.x.x.x.x.xx",
-      melodia: [76, 0, 79, 0, 81, 0, 79, 76, 74, 0, 72, 0, 74, 0, 76, 0] },
-    batalha: { bpm: 138, acordes: [[57, 60, 64], [57, 60, 64], [58, 62, 65], [56, 59, 64], [57, 60, 64], [53, 57, 60], [55, 59, 62], [56, 59, 64]],
-      bumbo: "x..x..x.x..x..x.", caixa: "....x.......x..x", chimbal: "xxxxxxxxxxxxxxxx", baixo: "xxxxxxxxxxxxxxxx",
-      melodia: [81, 0, 81, 84, 0, 81, 0, 79, 81, 0, 76, 0, 77, 0, 76, 74] }
+  // ---------- música (v7): várias músicas, compostas na hora a partir de uma "partitura" curta ----------
+  // Cada música: tom, escala, andamento, progressões da parte A e B (algarismos romanos), padrões de bateria e baixo,
+  // timbre da melodia. A melodia é escrita por um gerador com semente fixa (sempre igual para a mesma música): motivo
+  // de 2 compassos repetido e variado, notas do acorde nos tempos fortes, passos da escala no meio, termina na tônica.
+  // Forma: intro (2) + A (8) + B (8) + A' com contramelodia (8) + final (2) = 28 compassos (~1 min); depois troca de
+  // música (sorteia outra da lista, sem repetir a mesma). Na batalha, a lista de batalha.
+  const ESCALAS = { maior: [0, 2, 4, 5, 7, 9, 11], menor: [0, 2, 3, 5, 7, 8, 10], dorica: [0, 2, 3, 5, 7, 9, 10], harmonica: [0, 2, 3, 5, 7, 8, 11], mixo: [0, 2, 4, 5, 7, 9, 10] };
+  const MUSICAS = {
+    jogo: [
+      { nome: "fabrica", tom: 57, esc: "menor", bpm: 112, A: "i VI III VII", B: "iv i VII V", lead: "square", sem: 11,
+        bumbo: "x...x...x...x...", caixa: "....x.......x...", chimbal: "..x...x...x...x.", aberto: "..............x.", baixo: "R.R.R.8.R.R.5.R." },
+      { nome: "engrenagens", tom: 60, esc: "maior", bpm: 122, A: "I V vi IV", B: "IV I ii V", lead: "square", sem: 23, swing: 0.12,
+        bumbo: "x.....x.x.......", caixa: "....x.......x...", chimbal: "x.x.x.x.x.x.x.x.", aberto: "......x.......x.", baixo: "R..R..5.R..R..8." },
+      { nome: "turno da noite", tom: 62, esc: "dorica", bpm: 92, A: "i IV i VII", B: "III VII iv V", lead: "triangle", sem: 37, calmo: true,
+        bumbo: "x.......x..x....", caixa: "....x.......x...", chimbal: "..x...x...x...x.", aberto: "................", baixo: "R.......5...R.8." },
+      { nome: "linha de montagem", tom: 64, esc: "menor", bpm: 130, A: "i VII VI VII", B: "iv v i i", lead: "sawtooth", sem: 51,
+        bumbo: "x...x...x...x...", caixa: "....x..x....x...", chimbal: "xxxxxxxxxxxxxxxx", aberto: "..x...x...x...x.", baixo: "RRR8RRR8RRR5RRR8" },
+      { nome: "hora do lucro", tom: 65, esc: "maior", bpm: 116, A: "I iii IV V", B: "vi IV I V", lead: "square", sem: 67, swing: 0.08,
+        bumbo: "x..x..x.x..x....", caixa: "....x.......x...", chimbal: "..x.x.x...x.x.x.", aberto: "......x.......x.", baixo: "R.8.R.5.R.8.5.8." }
+    ],
+    batalha: [
+      { nome: "horda", tom: 57, esc: "harmonica", bpm: 140, A: "i VI iv V", B: "i iv VI V", lead: "sawtooth", sem: 79,
+        bumbo: "x..x..x.x..x..x.", caixa: "....x.......x..x", chimbal: "xxxxxxxxxxxxxxxx", aberto: "..............x.", baixo: "RRRRRRRRRRRR8888" },
+      { nome: "chefao", tom: 62, esc: "harmonica", bpm: 150, A: "i i VI VII", B: "iv V i V", lead: "square", sem: 97,
+        bumbo: "x.x.x.x.x.x.x.x.", caixa: "....x.......x.x.", chimbal: "x.xxx.xxx.xxx.xx", aberto: "..x...x...x...x.", baixo: "R8R8R8R8R8R8R858" },
+      { nome: "ataque final", tom: 64, esc: "menor", bpm: 146, A: "i VI VII i", B: "iv VII III V", lead: "sawtooth", sem: 113,
+        bumbo: "x..x..x...x..x..", caixa: "....x.......x...", chimbal: "xxxxxxxxxxxxxxxx", aberto: "......x.......x.", baixo: "RR.RR.R.RR.RR.58" }
+    ]
   };
-  let trilha = "jogo", proximo = 0, passo = 0, timerMusica = 0;
+  const ROM = { i: 0, ii: 1, iii: 2, iv: 3, v: 4, vi: 5, vii: 6 };
+  // acorde: [fundamental, terça, quinta] em MIDI (minúsculo = menor, maiúsculo = maior; graus pela escala da música)
+  function acorde(m, r) {
+    const sc = ESCALAS[m.esc === "harmonica" ? "menor" : m.esc], g = ROM[r.toLowerCase()], raiz = m.tom + sc[g] - 12;
+    const maior = r !== r.toLowerCase();
+    return [raiz, raiz + (maior ? 4 : 3), raiz + 7];
+  }
+  // compõe a música inteira em eventos por semicolcheia: {passo: [eventos]}
+  const cachePartitura = {};
+  function compor(m) {
+    if (cachePartitura[m.nome]) return cachePartitura[m.nome];
+    const rnd = semente(m.sem), sc = ESCALAS[m.esc], ev = [], N = 28 * 16;
+    for (let i = 0; i < N; i++) ev.push([]);
+    const secoes = [["intro", 2, m.A], ["A", 8, m.A], ["B", 8, m.B], ["A2", 8, m.A], ["fim", 2, m.A]];
+    // notas da escala em várias oitavas (para andar na melodia)
+    const escala = []; for (let o = -1; o <= 2; o++) sc.forEach(function(x) { escala.push(m.tom + 12 * o + x); });
+    const perto = function(alvo) { let b = 0; for (let k = 1; k < escala.length; k++) if (Math.abs(escala[k] - alvo) < Math.abs(escala[b] - alvo)) b = k; return b; };
+    // ritmos da melodia (16 passos; "x" começa nota) — o motivo usa 2 e varia
+    const RITMOS = ["x.x.x...x.x.x...", "x...x.x.x...x...", "x.xx..x.x...x.x.", "x..x..x.x.x.....", "x.x.x.x.x...x...", "x...x...x.xxx...", "..x.x.x.x...x..."];
+    function frase(prog, compassos, varia) {
+      const out = []; let pos = perto(m.tom + 12 + (m.calmo ? 0 : 4));
+      const r1 = RITMOS[Math.floor(rnd() * RITMOS.length)], r2 = RITMOS[Math.floor(rnd() * RITMOS.length)];
+      const contorno = []; for (let k = 0; k < 8; k++) contorno.push(Math.floor(rnd() * 5) - 2);
+      for (let c = 0; c < compassos; c++) {
+        const ac = acorde(m, prog[c % prog.length]), ritmo = (c % 4 === 3) ? "x.......x.......".replace(/x/g, function(x, i) { return i === 8 && rnd() < 0.5 ? "." : x; }) : (c % 2 ? r2 : r1);
+        let k = 0;
+        for (let s = 0; s < 16; s++) {
+          if (ritmo[s] !== "x") continue;
+          let alvoNota;
+          if (s % 8 === 0) {   // tempo forte: nota do acorde mais perto
+            const tons = []; ac.forEach(function(n) { for (let o = 1; o <= 2; o++) tons.push(n + 12 * o); });
+            const atual = escala[pos]; alvoNota = tons.reduce(function(a, b) { return Math.abs(b - atual) < Math.abs(a - atual) ? b : a; });
+            if (c % 4 === 3 && s === 0) alvoNota = ac[0] + 24;   // fim da frase: tônica do acorde
+            pos = perto(alvoNota);
+          } else { pos = Math.max(7, Math.min(escala.length - 2, pos + contorno[(k + c * 3 + (varia ? 1 : 0)) % 8])); }
+          let dur = 1; while (s + dur < 16 && ritmo[s + dur] !== "x" && dur < 6) dur++;
+          out.push({ p: c * 16 + s, n: escala[pos], d: dur });
+          k++;
+        }
+      }
+      return out;
+    }
+    const melA = frase(m.A.split(" "), 8, false), melB = frase(m.B.split(" "), 8, true);
+    let base = 0;
+    secoes.forEach(function(sec) {
+      const nome = sec[0], nc = sec[1], prog = sec[2].split(" ");
+      for (let c = 0; c < nc; c++) {
+        const ac = acorde(m, prog[c % prog.length]), b0 = base + c * 16, ultimo = c === nc - 1 && nome !== "intro";
+        // bateria (a última batida da seção vira uma virada)
+        for (let s = 0; s < 16; s++) {
+          const e = ev[b0 + s];
+          if (nome === "fim" && c === 1 && s > 0) break;
+          if (ultimo && s >= 12) { e.push({ t: "caixa", v: 0.6 + (s - 12) * 0.1 }); if (s % 2 === 0) e.push({ t: "tom", n: 52 - (s - 12) * 2 }); continue; }
+          if (m.bumbo[s] === "x") e.push({ t: "bumbo" });
+          if (m.caixa[s] === "x" && !(nome === "intro" && c === 0)) e.push({ t: "caixa", v: 1 });
+          if (m.chimbal[s] === "x" && nome !== "intro") e.push({ t: "chimbal" });
+          if (m.aberto[s] === "x" && nome !== "intro") e.push({ t: "aberto" });
+          if (s === 0 && c === 0 && nome !== "intro") e.push({ t: "prato" });
+        }
+        // baixo
+        for (let s = 0; s < 16; s++) {
+          const q = m.baixo[s]; if (q === ".") continue;
+          const n = ac[0] - 12 + (q === "8" ? 12 : q === "5" ? 7 : 0);
+          let d = 1; while (s + d < 16 && m.baixo[s + d] === "." && d < 4) d++;
+          ev[b0 + s].push({ t: "baixo", n: n, d: d });
+        }
+        // acorde de fundo (pad) e arpejo
+        ev[b0].push({ t: "pad", ac: ac, d: 16 });
+        if (nome !== "intro") for (let s = 0; s < 16; s += (m.calmo ? 2 : 1)) { const n = ac[[0, 1, 2, 1][s % 4]] + 12 + (s >= 8 ? 12 : 0); ev[b0 + s].push({ t: "arpejo", n: n }); }
+      }
+      // melodia
+      if (nome === "A" || nome === "A2" || nome === "B") {
+        const mel = nome === "B" ? melB : melA;
+        mel.forEach(function(x) { ev[base + x.p].push({ t: "lead", n: x.n + (nome === "A2" && x.p >= 64 ? 12 : 0), d: x.d }); });
+        if (nome === "A2") melA.forEach(function(x) { if (x.p % 8 === 0) ev[base + x.p].push({ t: "contra", n: x.n - 5, d: Math.max(2, x.d) }); });   // contramelodia
+      }
+      base += nc * 16;
+    });
+    return (cachePartitura[m.nome] = ev);
+  }
+  // timbres
+  function lead(tipo, f, dur, vol, at, m) {
+    const t0 = a.currentTime + at, g = a.createGain(), o = a.createOscillator(), filtro = a.createBiquadFilter();
+    o.type = tipo; o.frequency.setValueAtTime(f, t0);
+    filtro.type = "lowpass"; filtro.frequency.value = tipo === "sawtooth" ? 2400 : 5000;
+    g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(vol, t0 + 0.012); g.gain.setValueAtTime(vol * 0.8, t0 + dur * 0.6); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + 0.05);
+    if (dur > 0.25) {   // vibrato depois de um tempinho nas notas longas
+      const lfo = a.createOscillator(), lg = a.createGain(); lfo.frequency.value = 5.5; lg.gain.setValueAtTime(0, t0); lg.gain.linearRampToValueAtTime(f * 0.012, t0 + 0.25);
+      lfo.connect(lg).connect(o.frequency); lfo.start(t0); lfo.stop(t0 + dur + 0.1);
+    }
+    o.connect(filtro).connect(g).connect(m); o.start(t0); o.stop(t0 + dur + 0.1);
+  }
+  function pad(ac, dur, at, m) {
+    const t0 = a.currentTime + at, g = a.createGain(), filtro = a.createBiquadFilter();
+    filtro.type = "lowpass"; filtro.frequency.setValueAtTime(700, t0); filtro.frequency.linearRampToValueAtTime(1300, t0 + dur * 0.5); filtro.frequency.linearRampToValueAtTime(800, t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(0.028, t0 + 0.25); g.gain.setValueAtTime(0.028, t0 + dur - 0.2); g.gain.linearRampToValueAtTime(0.0001, t0 + dur + 0.1);
+    filtro.connect(g).connect(m);
+    ac.forEach(function(n) { [-7, 7].forEach(function(det) { const o = a.createOscillator(); o.type = "sawtooth"; o.frequency.value = nota(n + 12); o.detune.value = det; o.connect(filtro); o.start(t0); o.stop(t0 + dur + 0.15); }); });
+  }
+
+  let lista = "jogo", atual = null, ultimaNome = "", proximo = 0, passo = 0, timerMusica = 0;
+  function escolher() {
+    const l = MUSICAS[lista].filter(function(m) { return m.nome !== ultimaNome; });
+    atual = l[Math.floor(Math.random() * l.length)]; ultimaNome = atual.nome; passo = 0;
+  }
   function iniciarMusica() {
     if (timerMusica) return;
-    proximo = a.currentTime + 0.1; passo = 0;
+    escolher();
+    proximo = a.currentTime + 0.1;
     timerMusica = setInterval(agendar, 30);
   }
   function agendar() {
     if (!a || a.state !== "running") return;
-    const T = TRILHAS[trilha], dur16 = 60 / T.bpm / 4;
     while (proximo < a.currentTime + 0.12) {
-      tocarPasso(T, passo, proximo - a.currentTime, dur16);
-      proximo += dur16; passo = (passo + 1) % (16 * T.acordes.length);
+      const ev = compor(atual), dur16 = 60 / atual.bpm / 4;
+      const swing = (passo % 2 === 1 && atual.swing) ? dur16 * atual.swing : 0;
+      if (!save.semMusica) ev[passo].forEach(function(e) { tocarEvento(e, proximo - a.currentTime + swing, dur16); });
+      proximo += dur16; passo++;
+      if (passo >= ev.length) escolher();   // acabou: próxima música
     }
   }
-  function tocarPasso(T, p, at, d) {
-    if (save.semMusica) return;
-    const s = p % 16, compasso = Math.floor(p / 16), ac = T.acordes[compasso], m = musicaBus;
-    if (T.bumbo[s] === "x") { osc("sine", 150, 42, 0.16, 0.55, at, 0.002, 0, m); }
-    if (T.caixa[s] === "x") { chiado(2200, 700, 0.12, 0.22, at, "bandpass", 0.8, m); osc("triangle", 220, 160, 0.06, 0.08, at, 0.002, 0, m); }
-    if (T.chimbal[s] === "x") chiado(9000, 7000, 0.035, 0.07, at, "highpass", 1, m);
-    if (T.baixo[s] === "x") { const n = ac[0] - 24 + (s % 8 === 6 ? 12 : 0); osc("square", nota(n), nota(n), d * 0.9, 0.11, at, 0.004, 0, m); }
-    // arpejo do acorde em semicolcheias
-    const an = ac[s % 3] + 12 * (Math.floor(s / 3) % 2); osc("triangle", nota(an), nota(an), d * 0.8, 0.05, at, 0.003, 0, m);
-    // melodia só na 2ª metade da volta (respira)
-    if (compasso >= T.acordes.length / 2 && T.melodia[s]) { const n = T.melodia[s] - (compasso % 2 ? 0 : 2); osc("square", nota(n), nota(n), d * 1.7, 0.05, at, 0.006, 9, m); }
+  function tocarEvento(e, at, d) {
+    const m = musicaBus;
+    if (at < 0) return;
+    switch (e.t) {
+      case "bumbo": osc("sine", 160, 40, 0.18, 0.55, at, 0.002, 0, m); chiado(1200, 200, 0.03, 0.12, at, "lowpass", 1, m); break;
+      case "caixa": chiado(2400, 800, 0.13, 0.2 * e.v, at, "bandpass", 0.8, m); osc("triangle", 230, 170, 0.06, 0.07 * e.v, at, 0.002, 0, m); break;
+      case "chimbal": chiado(9500, 7500, 0.03, 0.05, at, "highpass", 1, m); break;
+      case "aberto": chiado(8500, 6000, 0.16, 0.045, at, "highpass", 1, m); break;
+      case "prato": chiado(9000, 4000, 0.9, 0.06, at, "highpass", 0.7, m); break;
+      case "tom": osc("sine", nota(e.n), nota(e.n - 5), 0.18, 0.22, at, 0.002, 0, m); break;
+      case "baixo": osc(atual.calmo ? "triangle" : "square", nota(e.n), nota(e.n), d * e.d * 0.92, atual.calmo ? 0.16 : 0.09, at, 0.004, 0, m); break;
+      case "arpejo": osc("triangle", nota(e.n), nota(e.n), d * 0.8, atual.calmo ? 0.045 : 0.032, at, 0.003, 0, m); break;
+      case "pad": pad(e.ac, d * e.d, at, m); break;
+      case "lead": lead(atual.lead, nota(e.n), d * e.d * 0.95, atual.lead === "sawtooth" ? 0.04 : atual.lead === "triangle" ? 0.09 : 0.05, at, m); break;
+      case "contra": lead("triangle", nota(e.n), d * e.d * 0.95, 0.045, at, m); break;
+    }
   }
-  function musica(qual) { if (TRILHAS[qual] && qual !== trilha) { trilha = qual; passo = 0; } }
+  function musica(qual) { if (MUSICAS[qual] && qual !== lista) { lista = qual; if (a) { escolher(); proximo = a.currentTime + 0.05; } } }
   let abafada = false;
-  function atualizarMusica() { if (musicaBus) musicaBus.gain.setTargetAtTime(save.semMusica ? 0 : (abafada ? 0.03 : 0.26), a.currentTime, abafada ? 0.25 : 0.1); }
+  function atualizarMusica() { if (musicaBus) musicaBus.gain.setTargetAtTime(save.semMusica ? 0 : (abafada ? 0.08 : 0.9), a.currentTime, abafada ? 0.25 : 0.1); }
   function abafar(sim) { abafada = !!sim; atualizarMusica(); }   // música quase some durante o curto-circuito
 
   return { som: som, musica: musica, atualizarMusica: atualizarMusica, abafar: abafar };

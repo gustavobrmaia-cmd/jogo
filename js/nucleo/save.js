@@ -60,7 +60,7 @@ function arrumarVagas() {
   while (p.grade.length < g) p.grade.push(0);
   while (p.time.length < t) p.time.push(0);
 }
-function vagasGrade() { return CONFIG.slotsGrade + (nivelNo("grade") ? 6 : 0); }
-function vagasTime() { return CONFIG.slotsTime + (nivelNo("sexto") ? 1 : 0); }
+function vagasGrade() { return CONFIG.slotsGrade + (nivelNo("grade") ? 6 : 0) + (nivelNo("grade2") ? 6 : 0); }
+function vagasTime() { return CONFIG.slotsTime + (nivelNo("sexto") ? 1 : 0) + (nivelNo("setimo") ? 1 : 0); }
 function nivelNo(id) { return save.arvore[id] || 0; }
 function nivelUp(id) { return save.p.up[id] || 0; }

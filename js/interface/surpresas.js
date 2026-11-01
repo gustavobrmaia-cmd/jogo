@@ -43,10 +43,11 @@ const Surpresas = (function() {
       Jogo.presente(tier);
       texto = t("ouro_robo", tier);
     } else if (sorte < 0.75) {
-      Jogo.ligarTurbo(20);
-      texto = t("ouro_turbo", 20);
+      const seg = 20 + 5 * arv("turboouro");   // árvore: turbo mais longo
+      Jogo.ligarTurbo(seg);
+      texto = t("ouro_turbo", seg);
     } else {
-      const v = Math.round(Math.max(Jogo.custoCriar() * 4, Jogo.prodTime() * 60 + Jogo.valorToque() * 40) * (1 + 0.5 * nivelUp("ima")));   // Ímã Dourado: +50%/nível
+      const v = Math.round(Math.max(Jogo.custoCriar() * 4, Jogo.prodTime() * 60 + Jogo.valorToque() * 40) * (1 + 0.5 * nivelUp("ima")) * (1 + 0.3 * arv("ouro")));   // Ímã Dourado e árvore
       save.p.moedas += v;
       Fx.numero(x, y, "+" + fmt(v), "#ffcc33", 40);
       texto = t("ouro_moedas", fmt(v));
@@ -98,7 +99,7 @@ const Surpresas = (function() {
   function venceuMonstro(x, y) {
     const m = monstro; sumir(m); monstro = null;
     save.stats.invasores = (save.stats.invasores || 0) + 1;
-    const v = Math.round(Math.max(Jogo.custoCriar() * 5, Jogo.prodTime() * 90 + Jogo.valorToque() * 50));
+    const v = Math.round(Math.max(Jogo.custoCriar() * 5, Jogo.prodTime() * 90 + Jogo.valorToque() * 50) * (1 + 0.6 * arv("invasor")));
     save.p.moedas += v;
     Fx.moedas(x, y, 14); Fx.faiscas(x, y, "#ff5d73", 18);
     Fx.numero(x, y - 20, "+" + fmt(v), "#ffcc33", 40);
@@ -140,7 +141,7 @@ const Surpresas = (function() {
     if (save.tutorial < 2) return;   // primeiro aprende o básico
     const m = Missoes.atual().tipo;
     if (ouro) passoOuro(dt);
-    else { proxOuro -= dt * (m === "ouro" ? 4 : 1) * (1 + 0.25 * nivelUp("ima")); if (proxOuro <= 0) soltarOuro(); }   // Ímã: aparece mais
+    else { proxOuro -= dt * (m === "ouro" ? 4 : 1) * (1 + 0.25 * nivelUp("ima")) * (1 + 0.15 * arv("ouro")); if (proxOuro <= 0) soltarOuro(); }   // Ímã: aparece mais
     const monstroLiberado = save.hordasVencidas >= 1 || m === "monstro";
     if (monstro) passoMonstro(dt);
     else if (monstroLiberado) { proxMonstro -= dt * (m === "monstro" ? 6 : 1); if (proxMonstro <= 0) soltarMonstro(); }

@@ -164,8 +164,14 @@ img.px, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 @keyframes desce { from { transform: translate(-50%, -30px); opacity: 0; } }
 
 /* ÁRVORE: rede de nós numa placa de circuito */
-.rede { position: relative; width: 100%; aspect-ratio: 16 / 10; background: #0d2522; box-shadow: 0 0 0 4px var(--borda), inset 0 0 0 4px #164a40; overflow: hidden; }
-.rede canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.rede { position: relative; width: 100%; height: min(54vh, 500px); background: #0d2522; box-shadow: 0 0 0 4px var(--borda), inset 0 0 0 4px #164a40; overflow: hidden; touch-action: none; cursor: grab; }
+.rede.arrastando { cursor: grabbing; }
+.rede .mapa { position: absolute; left: 0; top: 0; }
+.rede canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.rede::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 4px #164a40, inset 0 0 30px 10px rgba(5,14,12,.8); }
+.no.chave { width: 56px; height: 56px; border-radius: 0; background: #3a2470; box-shadow: 0 0 0 3px var(--borda), inset 0 0 0 3px var(--roxo); }
+.no.chave .ico { width: 36px; height: 36px; }
+.no.chave.tem { background: #6b3fc4; box-shadow: 0 0 0 3px var(--borda), 0 0 14px #b06bff, inset 0 3px 0 0 rgba(255,255,255,.25); }
 .no { position: absolute; transform: translate(-50%, -50%); width: 46px; height: 46px; padding: 0; border: 0; background: #1f2b3d; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 0 0 3px var(--borda), inset 0 -3px 0 0 rgba(0,0,0,.35), inset 0 3px 0 0 rgba(255,255,255,.12); }
 .no .ico { width: 30px; height: 30px; }
@@ -210,7 +216,8 @@ body.empe #btnCriar { font-size: 20px; padding: 10px 8px 8px; }
 body.empe #painel { inset: -6px -4px 0; }
 body.empe #dica { top: auto; bottom: 2px; font-size: 16px; }
 body.empe #faixa { top: 60px; }
-body.empe .rede { aspect-ratio: 3 / 4; }
+body.empe .rede { height: 52vh; }
+body.empe .no.chave { width: 46px; height: 46px; }
 body.empe .no { width: 38px; height: 38px; } body.empe .no .ico { width: 24px; height: 24px; }
 body.empe .hab { width: 74px; height: 80px; font-size: 11px; } body.empe .hab .ico { width: 36px; height: 36px; }
 

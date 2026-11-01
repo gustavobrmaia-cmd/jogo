@@ -83,6 +83,20 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
   reflexo passando no botão, vagas com brilho pela raridade do robô (data-r 1..6), números do time somados (0,7 s),
   faíscas nos golpes da multidão, volume nos cartões/botões.
 
+## v7
+- Renascer NÃO dá pontos (o dono: "você vai gastar o que conseguiu"); só renda x1,25 para sempre. phRenascer() = 0.
+- Árvore: 23 -> 73 nós, mapa 26x20 casas que se arrasta (arvore_tela.js). Nós genéricos por tipo (arv(tipo) soma os
+  níveis): renda, time, toque, criar, esteira, batalha, hab, invasor, ouro, missao, turboouro, ph, offline. Nós-chave:
+  setimo, grade2, auto_criar, rico2, fab_ini2. ph_bonus virou "Bônus de Descoberta" (+25% PH das descobertas).
+- Batalha mais difícil: ATQ 0,6, vida dos monstros x1,7, gigante x9 -> ~2 níveis de robô a mais (sim/bat.js).
+  poderHorda x8 calibrado (sim/poder.js): antes mostrava verde e perdia.
+- Música: 8 músicas (5 do jogo, 3 de batalha) compostas na hora (audio.js MUSICAS + compor): intro/A/B/A'/fim, 28
+  compassos (~1 min), melodia por gerador com semente, contramelodia, pad, baixo, bateria com viradas e prato; troca
+  de música sorteando outra. Volume da música 0,9. Para ouvir fora do jogo: verif/gravar.js grava um WAV.
+- Sprites: contorno seletivo (tom escuro da cor em cima/esquerda, tinta embaixo/direita: mat() tem 6º tom), luz
+  pontilhada no topo das peças, brilho maior; robôs com rebites, ventilação, reflexo, propulsores (13+), emblema
+  (21-27); monstros com pintas, barriga clara e dentes. Folha de comparação: verif/sprites.js.
+
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.
 - 1ª partida: nível 6 ~40 s, 8 (libera renascer) ~5 min, 10 ~15 min, 12 ~28 min. Depois de renascer anda bem mais rápido.

@@ -14,14 +14,14 @@ const Jogo = (function() {
   // ---------- números ----------
   function multMoedas() {
     return Math.pow(1.5, nivelUp("cofre")) * Math.pow(2, nivelUp("reator")) * Math.pow(3, nivelUp("estelar")) * Math.pow(2, nivelNo("dobro")) *
-      (1 + 0.1 * nivelNo("nucleo")) * (1 + 0.5 * nivelNo("ganancia")) * Math.pow(BONUS_RENASCER, save.renascimentos);
+      (1 + 0.1 * nivelNo("nucleo")) * (1 + 0.5 * nivelNo("ganancia")) * (1 + 0.2 * arv("renda")) * Math.pow(BONUS_RENASCER, save.renascimentos);
   }
   // turbo (robô dourado): toques e time rendem x3 por alguns segundos (fora do multMoedas: não mexe em prêmios nem offline)
   let turboAte = 0;
   function multTurbo() { return performance.now() < turboAte ? 3 : 1; }
   function turboRestante() { return Math.max(0, (turboAte - performance.now()) / 1000); }
   function ligarTurbo(seg) { turboAte = performance.now() + seg * 1000; }
-  function velocidadeTime() { return (1 + 0.15 * nivelUp("motor") + 0.25 * nivelUp("turbina") + 0.4 * nivelUp("overclock") + 0.6 * nivelUp("hidraulica")) * (1 + 0.25 * nivelNo("turbo")); }
+  function velocidadeTime() { return (1 + 0.15 * nivelUp("motor") + 0.25 * nivelUp("turbina") + 0.4 * nivelUp("overclock") + 0.6 * nivelUp("hidraulica")) * (1 + 0.25 * nivelNo("turbo")) * (1 + 0.15 * arv("time")); }
   // moedas por segundo do time (cada robô aperta o botão "velocidade" vezes por segundo)
   function prodTime() {
     let s = 0;
@@ -29,15 +29,15 @@ const Jogo = (function() {
     return s * velocidadeTime() * multMoedas();
   }
   function valorToque() {
-    const base = (1 + 3 * nivelUp("dedo")) * Math.pow(2, nivelUp("dedo2")) * Math.pow(3, nivelUp("dedo3")) * Math.pow(2, nivelNo("dedo_aco"));
+    const base = (1 + 3 * nivelUp("dedo")) * Math.pow(2, nivelUp("dedo2")) * Math.pow(3, nivelUp("dedo3")) * Math.pow(2, nivelNo("dedo_aco")) * (1 + 0.5 * arv("toque"));
     return (base + ECO.toqueTime * prodTime() / multMoedas()) * multMoedas();
   }
   // preço de criar: sobe 12% a cada robô criado na partida (zera ao renascer); Linha, Prensa e Desconto baixam
   function custoCriar() {
-    return Math.ceil(ECO.criarBase * Math.pow(ECO.criarCresce, save.p.criados) * Math.pow(0.85, nivelUp("linha")) * Math.pow(0.8, nivelUp("prensa")) * Math.pow(0.85, nivelNo("desconto")));
+    return Math.ceil(ECO.criarBase * Math.pow(ECO.criarCresce, save.p.criados) * Math.pow(0.85, nivelUp("linha")) * Math.pow(0.8, nivelUp("prensa")) * Math.pow(0.85, nivelNo("desconto")) * Math.pow(0.94, arv("criar")));
   }
   function tierNasce() { return Math.min(MAX_TIER, 1 + nivelUp("fabrica") + nivelUp("fabrica2") + nivelUp("fabrica3") + (Math.random() < 0.1 * nivelNo("sorte") ? 1 : 0)); }
-  function intervaloEsteira() { return 15 * Math.pow(0.85, nivelUp("esteira")) * Math.pow(0.8, nivelUp("esteira2")) * Math.pow(0.8, nivelNo("esteira_r")); }
+  function intervaloEsteira() { return 15 * Math.pow(0.85, nivelUp("esteira")) * Math.pow(0.8, nivelUp("esteira2")) * Math.pow(0.8, nivelNo("esteira_r")) * Math.pow(0.92, arv("esteira")); }
 
   // ---------- toque no botão ----------
   function tocar() {
@@ -125,7 +125,7 @@ const Jogo = (function() {
     save.p.pegos.push(tier);
     const novo = save.robosVistos.indexOf(tier) < 0;
     if (novo) save.robosVistos.push(tier);
-    const ph = phRobo(tier), moedas = Math.round(valorRobo(tier) * 40 * multMoedas());
+    const ph = Math.ceil(phRobo(tier) * fatorPh()), moedas = Math.round(valorRobo(tier) * 40 * multMoedas());
     save.ph += ph; save.p.moedas += moedas;
     if (novo) Poki.medir("compendium", "robot-" + tier, "reached");
     avisar("descobriu", { tipo: "robo", id: tier, ph: ph, moedas: moedas, repetido: !novo });
@@ -133,7 +133,7 @@ const Jogo = (function() {
   function descobrirMonstro(id) {
     if (save.monstrosVistos.indexOf(id) >= 0) return null;
     save.monstrosVistos.push(id);
-    const ph = 3 * (nivelNo("cacador") ? 2 : 1), z = Math.floor(id / 3), moedas = Math.round(HORDAS[z].premio * 0.3 * multMoedas());
+    const ph = Math.ceil(3 * (nivelNo("cacador") ? 2 : 1) * fatorPh()), z = Math.floor(id / 3), moedas = Math.round(HORDAS[z].premio * 0.3 * multMoedas());
     save.ph += ph; save.p.moedas += moedas;
     Poki.medir("compendium", "monster-" + id, "reached");
     const d = { tipo: "monstro", id: id, ph: ph, moedas: moedas };
@@ -143,7 +143,7 @@ const Jogo = (function() {
 
   // ---------- relógio ----------
   const relTime = [];
-  let relFusao = 0;
+  let relFusao = 0, relAuto = 0;
   function passo(dt) {
     const p = save.p, vel = velocidadeTime(), mult = multMoedas() * multTurbo();
     // time: cada robô aperta o botão no seu ritmo (desencontrados, para o botão não piscar junto)
@@ -163,6 +163,8 @@ const Jogo = (function() {
       if (vagaLivre("grade") >= 0) { p.esteira = 0; colocar(tierNasce()); }
       else p.esteira = intervaloEsteira();
     }
+    // Criador Automático (árvore): cria um robô sozinho a cada 5 s se der
+    if (nivelNo("auto_criar")) { relAuto += dt; if (relAuto >= 5) { relAuto = 0; if (save.p.moedas >= custoCriar() && vagaLivre("grade") >= 0) criar(); } }
     if (nivelNo("fusao")) { relFusao += dt; if (relFusao >= 1.5) { relFusao = 0; fundirUm(); } }
     save.stats.tempo += dt;
   }
@@ -171,7 +173,7 @@ const Jogo = (function() {
   function ganhoOffline() {
     const longe = (Date.now() - (save.ultimo || Date.now())) / 1000;
     if (longe < 60) return null;
-    const maxSeg = CONFIG.offlineMax + nivelNo("offline") * 7200;
+    const maxSeg = CONFIG.offlineMax + nivelNo("offline") * 7200 + arv("offline") * 3600;
     const seg = Math.min(longe, maxSeg), valor = prodTime() * seg * CONFIG.offlineFator;
     return valor >= 1 ? { seg: seg, valor: valor } : null;
   }
@@ -195,8 +197,7 @@ const Jogo = (function() {
   function podeRenascer() { return save.p.maxTier >= CONFIG.tierRenascer; }
   function renascer() {
     if (!podeRenascer()) return false;
-    const ganho = phRenascer(save.p.maxTier);
-    save.ph += ganho;
+    const ganho = 0;   // v7: renascer não dá pontos
     save.renascimentos++;
     Poki.medir("rebirth", "n-" + save.renascimentos, "complete");
     novaPartida();   // já zera aqui (recarregar a página na árvore não pode renascer de novo); "Começar" refaz com a árvore
@@ -207,6 +208,8 @@ const Jogo = (function() {
   function novaPartida() {
     save.p = partidaNova();
     if (nivelNo("rico")) save.p.moedas = 2000;
+    if (nivelNo("rico2")) save.p.moedas = 1e6;
+    if (nivelNo("fab_ini2")) save.p.up.fabrica2 = 1;
     if (nivelNo("fab_ini")) save.p.up.fabrica = Math.min(NIVEIS_UPGRADE, nivelNo("fab_ini"));
     arrumarVagas();
     relTime.length = 0;

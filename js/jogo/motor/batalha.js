@@ -24,7 +24,7 @@ const Batalha = (function() {
   let b = null;
   const GRAV = 340, MAX_MINIS = 120;
 
-  function multRobo() { return (1 + 0.25 * nivelUp("blindagem")) * (1 + 0.5 * nivelUp("canhoes")) * (1 + 0.3 * nivelNo("blindagem")); }
+  function multRobo() { return (1 + 0.25 * nivelUp("blindagem")) * (1 + 0.5 * nivelUp("canhoes")) * (1 + 0.3 * nivelNo("blindagem")) * (1 + 0.2 * arv("batalha")); }
   function vagas() { return nivelNo("esquadrao") ? 12 : CONFIG.slotsBatalha; }
   function hordaAberta(z) { return z < 3 || z <= save.hordasVencidas; }
   function minisPorRobo(n) { return 4 + Math.floor(n / 4); }   // nível 1: 4 robozinhos; nível 12: 7; nível 24: 10
@@ -36,23 +36,23 @@ const Batalha = (function() {
   function poderRobos(tiers) { const m = multRobo(); return tiers.reduce(function(s, n) { return s + Math.sqrt(vidaRobo(n) * ataqueRobo(n)) * m; }, 0); }
   function poderHorda(z) {
     let s = 0;
-    for (let o = 0; o < HORDAS[z].ondas; o++) composicao(z, o).forEach(function(u) { s += Math.sqrt(u.vida * u.ataque / ATQ) / 3.2; });
-    return s;
+    for (let o = 0; o < HORDAS[z].ondas; o++) composicao(z, o).forEach(function(u) { s += Math.sqrt(u.vida * u.ataque / ATQ * 0.6) / 3.2; });
+    return s * 8;   // calibrado por simulação (sim/poder.js): time >= horda ~ vence (antes o número enganava)
   }
 
   // ---------- quem entra em cada onda ----------
   // na multidão cada golpe de monstro acerta um robozinho só (e o gigante acerta vários): ataque ajustado por simulação
   // (scratchpad/sim/bat.js) para a dificuldade ficar igual à da batalha antiga
-  const ATQ = 0.3, GIGANTE = { vida: 5, ataque: 1.2 };
+  const ATQ = 0.6, VIDA = 1.7, GIGANTE = { vida: 9, ataque: 1.4 };   // v7: bem mais difícil (~2 níveis)
   function composicao(z, o) {
     const h = HORDAS[z], l = [], ultima = o === h.ondas - 1;
     if (ultima) {
       const st = statsMonstro(h, 2, o);
-      l.push({ id: h.monstros[2].id, vida: st.vida * GIGANTE.vida, ataque: st.ataque * GIGANTE.ataque * ATQ, gigante: true });
-      for (let k = 0; k < 2; k++) { const s2 = statsMonstro(h, k, o); l.push({ id: h.monstros[k].id, vida: s2.vida, ataque: s2.ataque * ATQ }); }
+      l.push({ id: h.monstros[2].id, vida: st.vida * VIDA * GIGANTE.vida, ataque: st.ataque * GIGANTE.ataque * ATQ, gigante: true });
+      for (let k = 0; k < 2; k++) { const s2 = statsMonstro(h, k, o); l.push({ id: h.monstros[k].id, vida: s2.vida * VIDA, ataque: s2.ataque * ATQ }); }
     } else {
       const n = o === 0 ? 4 : 6;
-      for (let k = 0; k < n; k++) { const tipo = k % 2, st = statsMonstro(h, tipo, o); l.push({ id: h.monstros[tipo].id, vida: st.vida, ataque: st.ataque * ATQ }); }
+      for (let k = 0; k < n; k++) { const tipo = k % 2, st = statsMonstro(h, tipo, o); l.push({ id: h.monstros[tipo].id, vida: st.vida * VIDA, ataque: st.ataque * ATQ }); }
     }
     return l;
   }
@@ -267,7 +267,7 @@ const Batalha = (function() {
   function liberada(h) { return save.hordasVencidas >= h.libera; }
   function cdDe(h) { return h.cd * Math.pow(0.8, nivelNo("hab_cd")); }
   function poder() {
-    const m = (1 + 0.5 * nivelUp("canhoes")) * (1 + 0.5 * nivelNo("hab_dano"));
+    const m = (1 + 0.5 * nivelUp("canhoes")) * (1 + 0.5 * nivelNo("hab_dano")) * (1 + 0.3 * arv("hab"));
     return (vivos(b.robos).reduce(function(s, r) { return s + r.ataque; }, 0) + b.fila.reduce(function(s, f) { return s + f.ataque; }, 0)) * m;
   }
   function usar(id) {

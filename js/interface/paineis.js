@@ -115,8 +115,8 @@ const Paineis = (function() {
     if (aba !== "upgrades") return;
     const r = linhasUp._renascer;
     if (r) {
-      const pode = Jogo.podeRenascer(), ganho = phRenascer(save.p.maxTier);
-      const html = "<b>" + esc(t("renascer")) + "</b><span>" + esc(pode ? t("renascer_d", ganho) : t("renascer_bloq", CONFIG.tierRenascer, NOMES_ROBOS[CONFIG.tierRenascer - 1])) + "</span>" +
+      const pode = Jogo.podeRenascer();
+      const html = "<b>" + esc(t("renascer")) + "</b><span>" + esc(pode ? t("renascer_d2", fmt(save.ph)) : t("renascer_bloq", CONFIG.tierRenascer, NOMES_ROBOS[CONFIG.tierRenascer - 1])) + "</span>" +
         (pode ? "" : "<div class='barraP'><i style='width:" + Math.round(save.p.maxTier / CONFIG.tierRenascer * 100) + "%'></i></div>");
       if (r.info._h !== html) { r.info._h = html; r.info.innerHTML = html; }
       r.btn.textContent = t("renascer"); r.btn.disabled = !pode;
@@ -148,13 +148,12 @@ const Paineis = (function() {
   // bolinha vermelha na aba Upgrades: dá para comprar algo (ou renascer)
   function pontos() {
     const pode = UPGRADES.some(function(u) { const n = nivelUp(u.id); return n < NIVEIS_UPGRADE && Jogo.tierAberto(u.tier) && save.p.moedas >= custoUpgrade(u.id, n); });
-    el("pontoUp").classList.toggle("on", (pode && save.tutorial >= 4) || (Jogo.podeRenascer() && phRenascer(save.p.maxTier) >= 3));
+    el("pontoUp").classList.toggle("on", (pode && save.tutorial >= 4) || (Jogo.podeRenascer() && save.ph >= 9));
   }
 
   // ---------- renascer ----------
   function confirmarRenascer() {
-    const ganho = phRenascer(save.p.maxTier);
-    janela("<h2>" + esc(t("renascer")) + "?</h2><p>" + esc(t("renascer_conf", ganho)) + "</p><p class='titulo2'>" + esc(t("renascer_mantem")) + "</p>",
+    janela("<h2>" + esc(t("renascer")) + "?</h2><p>" + esc(t("renascer_conf2", fmt(save.ph))) + "</p><p class='titulo2'>" + esc(t("renascer_mantem")) + "</p>",
       [{ texto: t("renascer"), classe: "roxo grande", acao: function() {
         fecharJanela();
         // curto-circuito: a máquina pifa e explode; no auge do clarão renasce e a árvore abre (curto.js)
