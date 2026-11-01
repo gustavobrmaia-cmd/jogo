@@ -46,8 +46,9 @@ const Tela = (function() {
         im.style.setProperty("--d", (-Math.random() * 1.1).toFixed(2) + "s");   // cada robô respira no seu tempo
         const cx = document.createElement("img"); cx.className = "px caixinha"; cx.draggable = false; cx.alt = ""; cx.style.display = "none";
         const nv = document.createElement("span"); nv.className = "nv";
-        d.appendChild(im); d.appendChild(cx); d.appendChild(nv); caixa.appendChild(d);
-        d._im = im; d._cx = cx; d._nv = nv;
+        const tr = document.createElement("i"); tr.className = "tr"; tr.style.display = "none";
+        d.appendChild(im); d.appendChild(cx); d.appendChild(nv); d.appendChild(tr); caixa.appendChild(d);
+        d._im = im; d._cx = cx; d._nv = nv; d._tr = tr; d._trId = null;
         d._tier = -1; vagas[lista].push(d);
         d.addEventListener("pointerdown", function(e) { comecarArrasto(e, lista, i); });
       });
@@ -58,7 +59,12 @@ const Tela = (function() {
     if (vagas.grade.length !== save.p.grade.length || vagas.time.length !== save.p.time.length) { montarVagas(); layout(); return; }
     ["grade", "time"].forEach(function(lista) {
       save.p[lista].forEach(function(n, i) {
-        const d = vagas[lista][i];
+        const d = vagas[lista][i], trId = n ? Jogo.trDe(lista, i) : "";
+        if (d._trId !== trId) {   // selo do traço (canto de cima, à esquerda)
+          d._trId = trId;
+          if (trId) { d._tr.style.display = ""; d._tr.style.backgroundImage = "url(" + Pixel.url(Pixel.icone(TRACOS[trId].ico)) + ")"; d._tr.style.setProperty("--trc", TRACOS[trId].cor); d._tr.title = t("tr_" + trId); }
+          else d._tr.style.display = "none";
+        }
         if (d._tier === n) return;
         d._tier = n;
         const im = d._im;
@@ -207,6 +213,10 @@ const Tela = (function() {
     if (d.clone) { Fx.numero(c.x, c.y + 10, "x2", "#7cf0ff", 34); }   // Clonagem: sobrou uma cópia
     vibrar(15);
   });
+  // robô nasceu com traço: nome do traço sobe da vaga
+  Jogo.ao("traco", function(d) {
+    setTimeout(function() { const v = vagas[d.lista] && vagas[d.lista][d.i]; if (!v) return; const c = centroVaga(d.lista, d.i); Fx.numero(c.x, c.y - 24, t("tr_" + d.tr), TRACOS[d.tr].cor, 20); }, d.lista === "grade" ? 800 : 100);
+  });
   Jogo.ao("cheio", function() {
     const g = el("grade"); g.classList.remove("cheio"); void g.offsetWidth; g.classList.add("cheio");
     Paineis.faixa(null, t("grade_cheia"), t("grade_cheia_d"));
@@ -234,8 +244,10 @@ const Tela = (function() {
   function escrever(id, txt) { if (cache[id] !== txt) { cache[id] = txt; (id === "comboTxt" ? el("combo").firstChild : el(id)).textContent = txt; } }
   function atualizarTopo() {
     escrever("txtMoedas", fmt(save.p.moedas));
+    const des = save.p.desafio ? "⚑ " + t("des_" + save.p.desafio) + (save.p.desafioFeito ? " ✓" : "") : "";
+    if (cache.des !== des) { cache.des = des; el("chipDes").textContent = des; el("chipDes").classList.toggle("escondido", !des); }
     atualizarCombo();
-    const prod = Jogo.prodTime() * Jogo.multTurbo();
+    const prod = Jogo.prodTime() * Jogo.multTurbo() * Jogo.multSabotagem();
     escrever("txtProd", prod > 0 ? "+" + fmt(prod) + "/s" : "");
     escrever("txtPh", fmt(save.ph));
     const c = Jogo.custoCriar();

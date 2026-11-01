@@ -33,6 +33,7 @@
     antes = agora;
     if (Poki.anuncioAberto) return;
     Jogo.passo(dt);
+    Encomendas.passo(dt);
     Batalha.passo(dt);
     CenaBatalha.passo(dt);
     Fundo.passo(dt);
@@ -44,6 +45,7 @@
     Curto.passo(dt);
     Revela.passo();
     Surpresas.passo(dt);
+    Ataque.passo(dt);
     Paineis.passoFaixa();
     pontosEm -= dt;
     if (pontosEm <= 0) { pontosEm = 0.25; Paineis.pontos(); Paineis.atualizarUpgrades(); Missoes.atualizar(); }

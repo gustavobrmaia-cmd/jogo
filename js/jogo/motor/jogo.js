@@ -22,11 +22,21 @@ const Jogo = (function() {
   function multTurbo() { return performance.now() < turboAte ? 3 + 0.5 * nivelUp("turbo_forte") : 1; }
   function turboRestante() { return Math.max(0, (turboAte - performance.now()) / 1000); }
   function ligarTurbo(seg) { turboAte = performance.now() + seg * 1000; }
+  // Ataque à Fábrica (v9): com o chefão na tela, ou depois de perder para ele, a fábrica rende a metade
+  function multSabotagem() { return Date.now() < (save.p.sabotagem || 0) ? 0.5 : 1; }
   function velocidadeTime() { return (1 + 0.15 * nivelUp("motor") + 0.25 * nivelUp("turbina") + 0.4 * nivelUp("overclock") + 0.6 * nivelUp("hidraulica")) * (1 + 0.25 * nivelNo("turbo")) * (1 + 0.15 * arv("time")); }
+  // ---------- traços (tracos.js) e equipamentos (equip.js) por vaga ----------
+  function trDe(lista, i) { const t = save.p.tr && save.p.tr[lista]; return (t && t[i]) || ""; }
+  function poeTr(lista, i, v) { if (!save.p.tr) save.p.tr = { grade: [], time: [] }; save.p.tr[lista][i] = v || ""; }
+  // vaga do time i: velocidade, valor e sorte somando o traço do robô e a peça equipada nela
+  function fatorVaga(i) {
+    const d = dadosTraco(trDe("time", i)), e = typeof Equip !== "undefined" ? Equip.bonusVaga(i) : null;
+    return { vel: (d.vel || 1) * (e ? 1 + e.vel : 1), valor: (d.valor || 1) * (e ? 1 + e.valor : 1), sorte: (d.sorte || 0) + (e ? e.sorte : 0) };
+  }
   // moedas por segundo do time (cada robô aperta o botão "velocidade" vezes por segundo)
   function prodTime() {
     let s = 0;
-    save.p.time.forEach(function(n) { if (n) s += valorRobo(n); });
+    save.p.time.forEach(function(n, i) { if (n) { const f = fatorVaga(i); s += valorRobo(n) * f.vel * f.valor * (1 + f.sorte * 9); } });
     return (s * velocidadeTime() + prodBancada()) * multMoedas();
   }
   // Bancada: robôs parados na grade rendem 1%/nível do valor deles por segundo (sem o multiplicador de velocidade)
@@ -41,7 +51,7 @@ const Jogo = (function() {
   }
   // preço de criar: sobe 12% a cada robô criado na partida (zera ao renascer); Linha, Prensa e Desconto baixam
   function custoCriar() {
-    return Math.ceil(ECO.criarBase * Math.pow(ECO.criarCresce, save.p.criados) * Math.pow(0.85, nivelUp("linha")) * Math.pow(0.8, nivelUp("prensa")) * Math.pow(0.85, nivelNo("desconto")) * Math.pow(0.94, arv("criar")));
+    return (save.p.desafio === "caro" ? 2 : 1) * Math.ceil(ECO.criarBase * Math.pow(ECO.criarCresce, save.p.criados) * Math.pow(0.85, nivelUp("linha")) * Math.pow(0.8, nivelUp("prensa")) * Math.pow(0.85, nivelNo("desconto")) * Math.pow(0.94, arv("criar")));
   }
   function tierNasce() { return Math.min(MAX_TIER, 1 + nivelUp("fabrica") + nivelUp("fabrica2") + nivelUp("fabrica3") + (Math.random() < 0.1 * nivelNo("sorte") ? 1 : 0) +
     (Math.random() < 0.03 * nivelUp("caixa_premiada") ? 2 : 0)); }   // Caixa Premiada: nasce 2 níveis acima
@@ -58,7 +68,7 @@ const Jogo = (function() {
     if (nivelUp("ritmo")) { combo = agora - ultimoToque < 450 ? Math.min(1, combo + 0.05) : Math.max(0, combo - 0.2); }
     ultimoToque = agora;
     let v = valorToque() * (1 + combo * 0.2 * nivelUp("ritmo")), critico = false;
-    v *= multTurbo();
+    v *= multTurbo() * multSabotagem();
     if (emFuria()) v *= 3;
     if (Math.random() < chanceCritico()) { v *= multCritico(); critico = true; }
     if (nivelUp("furia") && !emFuria() && ++toquesFuria >= 100) { toquesFuria = 0; furiaAte = agora + (4 + 2 * nivelUp("furia")) * 1000; avisar("furia"); }
@@ -73,6 +83,7 @@ const Jogo = (function() {
     const i = vagaLivre("grade");
     if (i < 0) { avisar("cheio"); return -1; }
     save.p.grade[i] = tier;
+    const tr = rolarTraco(); poeTr("grade", i, tr); if (tr) avisar("traco", { lista: "grade", i: i, tr: tr });
     descobrir(tier);
     avisar("criou", { i: i, tier: tier });
     avisar("mudou");
@@ -91,13 +102,14 @@ const Jogo = (function() {
   // arrastar: de {lista, i} para {lista, i}. Igual -> junta; vazio -> move; diferente -> troca
   function mover(de, para) {
     if (de.lista === para.lista && de.i === para.i) return;
-    const p = save.p, a = p[de.lista][de.i], b = p[para.lista][para.i];
+    const p = save.p, a = p[de.lista][de.i], b = p[para.lista][para.i], ta = trDe(de.lista, de.i), tb = trDe(para.lista, para.i);
     if (!a) return;
     if (b === a && a < MAX_TIER) {
       const novo = nivelJunta(a), clone = clonou();
       p[para.lista][para.i] = novo; p[de.lista][de.i] = clone ? a : 0;
+      if (!clone) poeTr(de.lista, de.i, "");
       juntou(para, novo, novo > a + 1, clone);
-    } else { p[para.lista][para.i] = a; p[de.lista][de.i] = b; }
+    } else { p[para.lista][para.i] = a; p[de.lista][de.i] = b; poeTr(para.lista, para.i, ta); poeTr(de.lista, de.i, tb); }
     avisar("mudou");
   }
   // Fusão Instável (tier 7): 6% por nível de chance de a junção pular um nível
@@ -106,6 +118,7 @@ const Jogo = (function() {
   function nivelJunta(n) { return Math.min(MAX_TIER, n + 1 + (n + 1 < MAX_TIER && Math.random() < 0.06 * nivelUp("fusao_inst") ? 1 : 0)); }
   function juntou(onde, tier, pulou, clone) {
     save.stats.juncoes++;
+    const tr = rolarTraco(); poeTr(onde.lista, onde.i, tr); if (tr) avisar("traco", { lista: onde.lista, i: onde.i, tr: tr });
     if (nivelUp("reciclagem")) save.p.moedas += custoCriar() * 0.05 * nivelUp("reciclagem");   // Reciclagem
     if (pulou) descobrir(tier - 1);
     descobrir(tier);
@@ -116,9 +129,9 @@ const Jogo = (function() {
     const p = save.p, n = p[lista][i];
     if (!n) return;
     const par = p.grade.findIndex(function(m, k) { return m === n && !(lista === "grade" && k === i); });
-    if (par >= 0 && n < MAX_TIER) { const novo = nivelJunta(n), clone = clonou(); p.grade[par] = clone ? n : 0; p[lista][i] = novo; juntou({ lista: lista, i: i }, novo, novo > n + 1, clone); avisar("mudou"); return; }
+    if (par >= 0 && n < MAX_TIER) { const novo = nivelJunta(n), clone = clonou(); p.grade[par] = clone ? n : 0; if (!clone) poeTr("grade", par, ""); p[lista][i] = novo; juntou({ lista: lista, i: i }, novo, novo > n + 1, clone); avisar("mudou"); return; }
     const outra = lista === "grade" ? "time" : "grade", v = vagaLivre(outra);
-    if (v >= 0) { p[outra][v] = n; p[lista][i] = 0; avisar("mudou"); }
+    if (v >= 0) { p[outra][v] = n; p[lista][i] = 0; poeTr(outra, v, trDe(lista, i)); poeTr(lista, i, ""); avisar("mudou"); }
   }
   // fusão automática (árvore): junta o par mais baixo da grade, um por vez
   function fundirUm() {
@@ -131,7 +144,7 @@ const Jogo = (function() {
     }
     if (!melhor) return false;
     const novo = nivelJunta(melhor.n), clone = clonou();
-    g[melhor.a] = novo; g[melhor.b] = clone ? melhor.n : 0;
+    g[melhor.a] = novo; g[melhor.b] = clone ? melhor.n : 0; if (!clone) poeTr("grade", melhor.b, "");
     juntou({ lista: "grade", i: melhor.a }, novo, novo > melhor.n + 1, clone);
     avisar("mudou");
     return true;
@@ -142,6 +155,10 @@ const Jogo = (function() {
   // nas partidas depois de renascer, chegar de novo num nível já conhecido dá os mesmos pontos, só com a faixa
   function descobrir(tier) {
     if (tier > save.p.maxTier) { save.p.maxTier = tier; Poki.medir("robot", "tier-" + tier, "reached"); }
+    if (save.p.desafio && !save.p.desafioFeito && save.p.maxTier >= CONFIG.tierRenascer) {   // desafio cumprido: +10 pontos
+      save.p.desafioFeito = true; save.ph += 10; avisar("desafio");
+      Poki.medir("challenge", save.p.desafio, "complete");
+    }
     if (save.p.pegos.indexOf(tier) >= 0) return;
     save.p.pegos.push(tier);
     const novo = save.robosVistos.indexOf(tier) < 0;
@@ -166,25 +183,26 @@ const Jogo = (function() {
   const relTime = [];
   let relFusao = 0, relAuto = 0, relJuros = 0;
   function passo(dt) {
-    const p = save.p, vel = velocidadeTime(), mult = multMoedas() * multTurbo();
+    const p = save.p, vel = velocidadeTime(), mult = multMoedas() * multTurbo() * multSabotagem();
     // time: cada robô aperta o botão no seu ritmo (desencontrados, para o botão não piscar junto)
     for (let i = 0; i < p.time.length; i++) {
       if (!p.time[i]) { relTime[i] = 0; continue; }
-      relTime[i] = (relTime[i] || i * 0.17) + dt * vel;
+      const fv = fatorVaga(i);
+      relTime[i] = (relTime[i] || i * 0.17) + dt * vel * fv.vel;
       if (relTime[i] >= 1) {
         relTime[i] -= 1;
-        const v = valorRobo(p.time[i]) * mult;
+        const sorte = Math.random() < fv.sorte, v = valorRobo(p.time[i]) * mult * fv.valor * (sorte ? 10 : 1);
         p.moedas += v;
-        avisar("timeClicou", { i: i, valor: v });
+        avisar("timeClicou", { i: i, valor: v, sorte: sorte });
       }
     }
     // Bancada: robôs da grade rendem sem apertar
-    const banc = prodBancada(); if (banc) p.moedas += banc * multMoedas() * dt;
+    const banc = prodBancada(); if (banc) p.moedas += banc * multMoedas() * multSabotagem() * dt;
     // Cofrinho: juros a cada 10 s (0,5%/nível das moedas, no máximo 30 s da produção)
     if (nivelUp("cofrinho")) { relJuros += dt; if (relJuros >= 10) { relJuros = 0; const j = Math.min(p.moedas * 0.005 * nivelUp("cofrinho"), prodTime() * 30 + valorToque() * 20); if (j >= 1) { p.moedas += j; avisar("juros", { valor: j }); } } }
     if (combo > 0 && performance.now() - ultimoToque > 450) combo = Math.max(0, combo - dt * 0.4);
-    // esteira: robô grátis (Esteira Dupla: às vezes vêm 2)
-    p.esteira += dt;
+    // esteira: robô grátis (Esteira Dupla: às vezes vêm 2). Desafio "Sem Esteira": parada
+    if (p.desafio !== "semesteira") p.esteira += dt;
     if (p.esteira >= intervaloEsteira()) {
       if (vagaLivre("grade") >= 0) { p.esteira = 0; colocar(tierNasce()); if (Math.random() < 0.08 * nivelUp("esteira_dupla") && vagaLivre("grade") >= 0) colocar(tierNasce()); }
       else p.esteira = intervaloEsteira();
@@ -231,8 +249,10 @@ const Jogo = (function() {
     return ganho;
   }
   // começa a partida nova com o que a árvore dá
-  function novaPartida() {
+  // desafio (v9, escolhido na árvore ao renascer): semesteira, caro, time3, furioso (ou "")
+  function novaPartida(desafio) {
     save.p = partidaNova();
+    save.p.desafio = DESAFIOS.indexOf(desafio) >= 0 ? desafio : "";
     if (nivelNo("rico")) save.p.moedas = 2000;
     if (nivelNo("rico2")) save.p.moedas = 1e6;
     if (nivelNo("fab_ini2")) save.p.up.fabrica2 = 1;
@@ -259,7 +279,7 @@ const Jogo = (function() {
     descobrirMonstro: descobrirMonstro, passo: passo, ganhoOffline: ganhoOffline, comprarUpgrade: comprarUpgrade,
     podeRenascer: podeRenascer, renascer: renascer, novaPartida: novaPartida, comprarNo: comprarNo,
     multTurbo: multTurbo, turboRestante: turboRestante, ligarTurbo: ligarTurbo,
-    get combo() { return combo; }, emFuria: emFuria, furiaRestante: function() { return Math.max(0, (furiaAte - performance.now()) / 1000); },
+    get combo() { return combo; }, multSabotagem: multSabotagem, trDe: trDe, poeTr: poeTr, fatorVaga: fatorVaga, vagaLivre: vagaLivre, emFuria: emFuria, furiaRestante: function() { return Math.max(0, (furiaAte - performance.now()) / 1000); },
     presente: function(tier) { return colocar(Math.max(1, Math.min(MAX_TIER, tier))) >= 0; }   // robô de graça na grade (robô dourado)
   };
 })();

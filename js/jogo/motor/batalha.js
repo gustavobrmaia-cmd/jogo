@@ -28,15 +28,18 @@ const Batalha = (function() {
   function vagas() { return (nivelNo("esquadrao") ? 12 : CONFIG.slotsBatalha) + nivelUp("exercito"); }   // + Exército Maior
   function hordaAberta(z) { return z < 3 || z <= save.hordasVencidas; }
   function minisPorRobo(n) { return 4 + Math.floor(n / 4) + nivelUp("reforco"); }   // + Reforços   // nível 1: 4 robozinhos; nível 12: 7; nível 24: 10
+  // v9: cada robô pode vir como número (nível) ou {n: nível, f: força do traço}
+  function nv(x) { return typeof x === "number" ? x : x.n; }
+  function fb(x) { return typeof x === "number" ? 1 : (x.f || 1); }
   function contarMinis(tiers) {
-    const tot = tiers.reduce(function(s, n) { return s + minisPorRobo(n); }, 0);
+    const tot = tiers.reduce(function(s, x) { return s + minisPorRobo(nv(x)); }, 0);
     return Math.min(MAX_MINIS, tot);
   }
   // "poder" para comparar antes de lutar (vida x ataque somados)
-  function poderRobos(tiers) { const m = multRobo(); return tiers.reduce(function(s, n) { return s + Math.sqrt(vidaRobo(n) * ataqueRobo(n)) * m; }, 0); }
+  function poderRobos(tiers) { const m = multRobo(); return tiers.reduce(function(s, x) { const n = nv(x); return s + Math.sqrt(vidaRobo(n) * ataqueRobo(n)) * m * fb(x); }, 0); }
   function poderHorda(z) {
     let s = 0;
-    for (let o = 0; o < HORDAS[z].ondas; o++) composicao(z, o).forEach(function(u) { s += Math.sqrt(u.vida * u.ataque / ATQ * 0.6) / 3.2; });
+    for (let o = 0; o < hordaDe(z).ondas; o++) composicao(z, o).forEach(function(u) { s += Math.sqrt(u.vida * u.ataque / ATQ * 0.6) / 3.2; });
     return s * 8;   // calibrado por simulação (sim/poder.js): time >= horda ~ vence (antes o número enganava)
   }
 
@@ -44,15 +47,29 @@ const Batalha = (function() {
   // na multidão cada golpe de monstro acerta um robozinho só (e o gigante acerta vários): ataque ajustado por simulação
   // (scratchpad/sim/bat.js) para a dificuldade ficar igual à da batalha antiga
   const ATQ = 0.6, VIDA = 1.7, GIGANTE = { vida: 9, ataque: 1.4 };   // v7: bem mais difícil (~2 níveis)
+  // TORRE INFINITA (v9): z = "torre" gera o andar atual. Cada andar ~0,9 nível de robô mais forte que o anterior;
+  // 2 ondas; a cada 5 andares, um GIGANTE no fim. Os monstros vão mudando de cara a cada 3 andares.
+  function andarTorre(n) {
+    const z = Math.min(HORDAS.length - 1, Math.floor((n - 1) / 3)), nivel = 2 + (n - 1) * 0.9;
+    return { id: "torre", andar: n, nivel: nivel, monstros: HORDAS[(n - 1) % HORDAS.length].monstros, z: z, ondas: 2, gigante: n % 5 === 0,
+      premio: Math.round(150 * valorRobo(nivel)) };
+  }
+  function hordaDe(z) { return z === "torre" ? andarTorre(save.torre.andar) : HORDAS[z]; }
+  // Desafio "Monstros Furiosos" (renascer): monstros 2x vida e 1,5x ataque, prêmio 2x
+  function furia() { return save.p.desafio === "furioso"; }
   function composicao(z, o) {
-    const h = HORDAS[z], l = [], ultima = o === h.ondas - 1;
+    const h = hordaDe(z), l = [], ultima = o === h.ondas - 1, fv = furia() ? 2 : 1, fa = furia() ? 1.5 : 1;
+    if (ultima && h.gigante === false) {   // torre sem gigante: um bando maior no fim
+      for (let k = 0; k < 7; k++) { const tipo = k % 3, st = statsMonstro(h, tipo, o); l.push({ id: h.monstros[tipo].id, vida: st.vida * VIDA * fv, ataque: st.ataque * ATQ * fa }); }
+      return l;
+    }
     if (ultima) {
       const st = statsMonstro(h, 2, o);
-      l.push({ id: h.monstros[2].id, vida: st.vida * VIDA * GIGANTE.vida, ataque: st.ataque * GIGANTE.ataque * ATQ, gigante: true });
-      for (let k = 0; k < 2; k++) { const s2 = statsMonstro(h, k, o); l.push({ id: h.monstros[k].id, vida: s2.vida * VIDA, ataque: s2.ataque * ATQ }); }
+      l.push({ id: h.monstros[2].id, vida: st.vida * VIDA * GIGANTE.vida * fv, ataque: st.ataque * GIGANTE.ataque * ATQ * fa, gigante: true });
+      for (let k = 0; k < 2; k++) { const s2 = statsMonstro(h, k, o); l.push({ id: h.monstros[k].id, vida: s2.vida * VIDA * fv, ataque: s2.ataque * ATQ * fa }); }
     } else {
       const n = o === 0 ? 4 : 6;
-      for (let k = 0; k < n; k++) { const tipo = k % 2, st = statsMonstro(h, tipo, o); l.push({ id: h.monstros[tipo].id, vida: st.vida * VIDA, ataque: st.ataque * ATQ }); }
+      for (let k = 0; k < n; k++) { const tipo = k % 2, st = statsMonstro(h, tipo, o); l.push({ id: h.monstros[tipo].id, vida: st.vida * VIDA * fv, ataque: st.ataque * ATQ * fa }); }
     }
     return l;
   }
@@ -74,14 +91,14 @@ const Batalha = (function() {
   // campo: {L, P, raioGigante} em pixels da cena (sem cena: um campo padrão, para simular)
   function iniciar(z, tiers, campo) {
     campo = campo || { L: 400, P: 90, raioGigante: 40 };
-    const m = multRobo(), total = contarMinis(tiers), pedidos = tiers.reduce(function(s, n) { return s + minisPorRobo(n); }, 0);
+    const m = multRobo(), total = contarMinis(tiers), pedidos = tiers.reduce(function(s, x) { return s + minisPorRobo(nv(x)); }, 0);
     const corte = total / pedidos;   // passou de 120: cada robô manda menos robozinhos, mais fortes
     b = {
-      z: z, onda: 0, t: 0, fim: null, numeros: [], fx: [], pecas: [], agenda: [], sobrecarga: 0, cds: {}, tremor: 0,
+      z: z, h: hordaDe(z), onda: 0, t: 0, fim: null, numeros: [], fx: [], pecas: [], agenda: [], sobrecarga: 0, cds: {}, tremor: 0,
       L: campo.L, P: campo.P, raioGigante: campo.raioGigante || 40, robos: [], monstros: [], caidos: [], fila: [], avisoGigante: -9
     };
-    tiers.forEach(function(n, i) {
-      const k = Math.max(1, Math.round(minisPorRobo(n) * corte)), vida = vidaRobo(n) * m / k, atq = ataqueRobo(n) * m / k;
+    tiers.forEach(function(x, i) {
+      const n = nv(x), f = fb(x), k = Math.max(1, Math.round(minisPorRobo(n) * corte)), vida = vidaRobo(n) * m * f / k, atq = ataqueRobo(n) * m * f / k;
       for (let j = 0; j < k; j++) b.fila.push({ t: i * 0.1 + j * 0.06 + Math.random() * 0.1, tier: n, vida: vida, ataque: atq });
     });
     b.fila.sort(function(a, c) { return a.t - c.t; });
@@ -219,7 +236,7 @@ const Batalha = (function() {
     b.numeros.forEach(function(x) { x.t += dt; }); b.numeros = b.numeros.filter(function(x) { return x.t < 0.8; });
     // fim de onda / fim de luta
     if (!b.monstros.length && !b.agenda.some(function(a) { return a.onda; })) {
-      if (b.onda + 1 >= HORDAS[b.z].ondas) { terminar(true); return; }
+      if (b.onda + 1 >= b.h.ondas) { terminar(true); return; }
       b.onda++;
       b.agenda.push({ t: b.t + 1, onda: true, fn: soltarOnda });
     }
@@ -302,20 +319,27 @@ const Batalha = (function() {
   }
 
   function terminar(venceu) {
-    const z = b.z;
-    b.fim = { venceu: venceu, premio: 0, novos: [] };
-    Poki.medir("battle", "horde-" + z, venceu ? "complete" : "fail");
+    const z = b.z, h = b.h;
+    b.fim = { venceu: venceu, premio: 0, novos: [], peca: null, torre: z === "torre" ? h.andar : 0 };
+    Poki.medir("battle", z === "torre" ? "tower-" + h.andar : "horde-" + z, venceu ? "complete" : "fail");
     if (!venceu) return;
     save.stats.vitorias++;
-    const premio = Math.round(HORDAS[z].premio * (1 + 0.5 * nivelNo("saque")) * Jogo.multMoedas());
+    const premio = Math.round(h.premio * (1 + 0.5 * nivelNo("saque")) * Jogo.multMoedas() * (furia() ? 2 : 1));
     b.fim.premio = premio;
     save.p.moedas += premio;
-    HORDAS[z].monstros.forEach(function(m) { const d = Jogo.descobrirMonstro(m.id); if (d) b.fim.novos.push(d); });
-    if (z + 1 > save.hordasVencidas) save.hordasVencidas = z + 1;
+    if (z === "torre") {
+      save.torre.andar++; save.torre.recorde = Math.max(save.torre.recorde, save.torre.andar - 1);
+      // peça: garantida a cada 5 andares, senão 35% de chance; melhor quanto mais alto
+      if (h.andar % 5 === 0 || Math.random() < 0.35) b.fim.peca = Equip.ganhar(Math.min(1, h.andar / 60));
+    } else {
+      h.monstros.forEach(function(m) { const d = Jogo.descobrirMonstro(m.id); if (d) b.fim.novos.push(d); });
+      if (z + 1 > save.hordasVencidas) save.hordasVencidas = z + 1;
+      if (Math.random() < 0.3 + z * 0.05) b.fim.peca = Equip.ganhar(z / 10);   // hordas também soltam peças
+    }
     salvar();
   }
 
   return { iniciar: iniciar, passo: passo, vagas: vagas, hordaAberta: hordaAberta, poderRobos: poderRobos, poderHorda: poderHorda,
-    usar: usar, liberada: liberada, cdDe: cdDe, contarMinis: contarMinis,
+    usar: usar, liberada: liberada, cdDe: cdDe, contarMinis: contarMinis, andarTorre: andarTorre,
     get atual() { return b; }, sair: function() { b = null; } };
 })();

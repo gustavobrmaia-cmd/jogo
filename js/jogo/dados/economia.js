@@ -6,7 +6,7 @@
 // em ~30 min. Depois de renascer (árvore), cada partida anda bem mais rápido: é isso que puxa o renascimento.
 // =========================
 const ECO = {
-  razao: 2.3,          // cada nível de robô vale 2,3x o anterior (juntar dois sempre compensa)
+  razao: 2.05,         // cada nível vale 2,05x o anterior (v9: era 2,3; jogo ~2x mais lento depois do começo, sim/eco7.js)
   criarBase: 10,       // preço do 1º robô
   criarCresce: 1.12,  // cada robô criado na partida encarece o próximo
   toqueTime: 0.1       // o seu toque também vale 10% do que o time faz por segundo (tocar nunca fica inútil)
@@ -70,6 +70,6 @@ const N_TIERS = Math.max.apply(null, UPGRADES.map(function(u) { return u.tier; }
 function principalDoTier(t) { return UPGRADES.filter(function(u) { return u.tier === t && u.principal; })[0]; }
 // v8 (mais difícil): do tier 2 em diante tudo custa o dobro e cada nível sobe +0,3 a mais; Negociador desconta 6%/nível
 function custoUpgrade(id, nivel) {
-  const u = UPGRADE[id], dif = u.tier >= 2 ? 2 : 1, cresce = u.cresce + (u.tier >= 2 ? 0.3 : 0);
+  const u = UPGRADE[id], dif = u.tier >= 2 ? 4 : 1, cresce = u.cresce + (u.tier >= 2 ? 0.6 : 0);   // v9: 4x e +0,6
   return Math.ceil(u.base * dif * Math.pow(cresce, nivel) * Math.pow(0.94, nivelUp("negociador")));
 }

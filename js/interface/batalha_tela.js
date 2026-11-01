@@ -19,6 +19,15 @@ const BatalhaTela = (function() {
   // ---------- lista ----------
   function lista() {
     caixa.appendChild(E("p", "titulo2", esc(t("bat_explica"))));
+    // TORRE INFINITA (v9): sempre aberta depois da 1ª horda vencida; andar atual e recorde
+    if (save.hordasVencidas >= 1) {
+      const a = Batalha.andarTorre(save.torre.andar), c = E("div", "card torre");
+      c.appendChild(Paineis.icone("trofeu"));
+      c.appendChild(E("div", "info", "<b>" + esc(t("torre_nome")) + " · " + esc(t("torre_andar", a.andar)) + "</b><span>" + esc(t("torre_d", save.torre.recorde)) + "</span>"));
+      c.appendChild(E("button", "btn roxo", esc(t("bat_ir"))));
+      c.addEventListener("click", function() { horda = "torre"; marcados = melhores(); modo = "escolha"; Som.som("clique"); remontar(); });
+      caixa.appendChild(c);
+    }
     HORDAS.forEach(function(h) {
       const aberta = Batalha.hordaAberta(h.id), vencida = h.id < save.hordasVencidas;
       const c = E("div", "card horda" + (aberta ? "" : " fechada"));
@@ -40,17 +49,17 @@ const BatalhaTela = (function() {
   // ---------- escolha ----------
   function todos() {   // robôs da grade e do time, do maior para o menor
     const l = [];
-    ["time", "grade"].forEach(function(lista) { save.p[lista].forEach(function(n, i) { if (n) l.push({ lista: lista, i: i, n: n }); }); });
-    return l.sort(function(a, b) { return b.n - a.n; });
+    ["time", "grade"].forEach(function(lista) { save.p[lista].forEach(function(n, i) { if (n) { const tr = Jogo.trDe(lista, i); l.push({ lista: lista, i: i, n: n, tr: tr, f: dadosTraco(tr).bat || 1 }); } }); });
+    return l.sort(function(a, b) { return b.n - a.n || b.f - a.f; });
   }
   function chave(r) { return r.lista + r.i; }
   function melhores() { return todos().slice(0, Batalha.vagas()).map(chave); }
   function escolha() {
     const l = todos(), vagas = Batalha.vagas();
     marcados = marcados.filter(function(k) { return l.some(function(r) { return chave(r) === k; }); });
-    const sel = l.filter(function(r) { return marcados.indexOf(chave(r)) >= 0; }).map(function(r) { return r.n; });
+    const sel = l.filter(function(r) { return marcados.indexOf(chave(r)) >= 0; }).map(function(r) { return { n: r.n, f: r.f }; });
     const pr = Batalha.poderRobos(sel), ph = Batalha.poderHorda(horda), forte = pr >= ph;
-    caixa.appendChild(E("p", "", "<b>" + esc(t("z_" + horda)) + "</b> · " + esc(t("bat_escolha", marcados.length, vagas))));
+    caixa.appendChild(E("p", "", "<b>" + esc(horda === "torre" ? t("torre_andar", save.torre.andar) : t("z_" + horda)) + "</b> · " + esc(t("bat_escolha", marcados.length, vagas))));
     caixa.appendChild(E("p", "titulo2", "<span style='color:" + (forte ? "var(--verde)" : "var(--vermelho)") + "'>" + esc(t("bat_poder", fmt(pr), fmt(ph))) + "</span>"));
     if (sel.length) caixa.appendChild(E("p", "quantos", "<b>" + esc(t("bat_quantos", Batalha.contarMinis(sel))) + "</b>"));
     const bts = E("div", "linhaBtns");
@@ -67,6 +76,7 @@ const BatalhaTela = (function() {
     l.forEach(function(r) {
       const k = chave(r), it = E("div", "item" + (marcados.indexOf(k) >= 0 ? " marcado" : ""));
       it.appendChild(Pixel.img(Pixel.robo(r.n)));
+      if (r.tr) { const ti = Paineis.icone(TRACOS[r.tr].ico); ti.className = "ico trItem"; it.appendChild(ti); }
       it.appendChild(E("small", "", esc(t("nivel", r.n))));
       it.addEventListener("click", function() {
         const j = marcados.indexOf(k);

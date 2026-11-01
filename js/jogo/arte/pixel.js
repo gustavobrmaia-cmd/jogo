@@ -538,6 +538,15 @@ const Pixel = (function() {
         const g = M(VERDE, true); f.rect(7, 13, 3, 6, g); f.rect(12, 9, 3, 10, g); f.rect(17, 4, 3, 15, g);
         f.poli([[15, 2], [22, 2], [22, 9]], M(OURO, true)); break;
       }
+      case "chip": {   // chip de computador com pernas
+        f.rect(5, 5, 14, 14, M(mat(150, 30, 26), true)); f.rect(8, 8, 8, 8, M(mat(150, 40, 40)));
+        for (let k = 0; k < 4; k++) { const q = 6 + k * 3.5; f.dR(Math.round(q), 2, 1, 3, "#c9d0e3"); f.dR(Math.round(q), 19, 1, 3, "#c9d0e3"); f.dR(2, Math.round(q), 3, 1, "#c9d0e3"); f.dR(19, Math.round(q), 3, 1, "#c9d0e3"); }
+        f.dR(10, 10, 4, 4, "#ffcc33"); f.d(11, 11, "#fff6c8"); break;
+      }
+      case "trevo": {   // trevo de quatro folhas (sortudo)
+        const v = M(VERDE, true); f.circ(8, 8, 4.5, v); f.circ(16, 8, 4.5, v); f.circ(8, 15, 4.5, v); f.circ(16, 15, 4.5, v);
+        f.traco(12, 14, 15, 23, 2, M(mat(110, 50, 36))); f.d(7, 6, "#b8ffcf"); f.d(15, 6, "#b8ffcf"); break;
+      }
       case "engrenagem": {
         const m = M(mat(40, 70, 52), true); f.circ(12, 12, 7.5, m);
         for (let n = 0; n < 8; n++) { const an = n * Math.PI / 4 + 0.2; f.traco(12 + Math.cos(an) * 6, 12 + Math.sin(an) * 6, 12 + Math.cos(an) * 11, 12 + Math.sin(an) * 11, 4, m); }

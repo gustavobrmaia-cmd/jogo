@@ -187,8 +187,8 @@ const CenaBatalha = (function() {
     numeros(b);
     g.restore();
     hud(b);
-    const h = HORDAS[b.z];
-    escrever("cenaNome", t("z_" + h.id));
+    const h = b.h;
+    escrever("cenaNome", h.id === "torre" ? t("torre_andar", h.andar) : t("z_" + h.id));
     escrever("cenaOnda", "  " + t("bat_onda", Math.min(b.onda + 1, h.ondas), h.ondas));
     atualizarBotoes();
     if (b.fim && !mostrouFim) { mostrouFim = true; resultado(b.fim); }
@@ -278,7 +278,7 @@ const CenaBatalha = (function() {
     g.font = "10px Pixelify, monospace"; g.textBaseline = "middle";
     g.drawImage(mini, 6, y - 13);
     g.textAlign = "left"; contorno("x" + nR, 32, y, "#7cf0ff");
-    const ms = Pixel.monstro(HORDAS[b.z].monstros[0].id);
+    const ms = Pixel.monstro(b.h.monstros[0].id);
     g.save(); g.translate(W - 6, y - 12); g.scale(-0.5, 0.5); g.drawImage(ms, 0, 0); g.restore();
     g.textAlign = "right"; contorno("x" + nM, W - 34, y, "#ff8a8a");
     const gig = b.monstros.filter(function(m) { return m.gigante; })[0];
@@ -314,6 +314,8 @@ const CenaBatalha = (function() {
     r.innerHTML = "<b style='font-size:30px;color:" + (f.venceu ? "var(--ouro)" : "var(--vermelho)") + "'>" + Paineis.esc(t(f.venceu ? "bat_vitoria" : "bat_derrota")) + "</b>" +
       (f.venceu ? "<span>+" + fmt(f.premio) + " " + Paineis.esc(t("moedas")) + "</span>" : "<span>" + Paineis.esc(t("bat_dica_derrota")) + "</span>");
     if (f.novos.length) { const m = Paineis.elem("div", "mini"); f.novos.forEach(function(d) { m.appendChild(Pixel.img(Pixel.monstro(d.id))); }); r.appendChild(m); }
+    if (f.venceu && f.torre) r.appendChild(Paineis.elem("span", "", Paineis.esc(t("torre_venceu", f.torre))));
+    if (f.peca) { const pc = Paineis.elem("div", "pecaGanha", "<b style='color:" + RARIDADE_COR[f.peca.r] + "'>" + Paineis.esc(Equip.nome(f.peca)) + "</b> <span>" + Paineis.esc(Equip.textoBonus(f.peca)) + "</span>"); pc.prepend(Paineis.icone(EQUIP_TIPOS[f.peca.t].ico)); r.appendChild(pc); }
     const l = Paineis.elem("div", "linhaBtns");
     const ok = Paineis.elem("button", "btn grande", Paineis.esc(t(f.venceu ? "pegar" : "voltar")));
     ok.addEventListener("click", function() { Som.som("clique"); fechar(true); });

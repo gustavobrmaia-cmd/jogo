@@ -8,14 +8,15 @@
 //   - só olhar (botão na aba Upgrades): mostra tudo, mas comprar só ao renascer.
 // =========================
 const ArvoreTela = (function() {
-  let compra = false, sel = "nucleo", rede = null, cv = null, mapa = null, U = 56, px = 0, py = 0, arrastou = false;
+  let desafio = "", compra = false, sel = "nucleo", rede = null, cv = null, mapa = null, U = 56, px = 0, py = 0, arrastou = false;
   const esc = function(s) { return Paineis.esc(s); };
 
   function abrir(modoCompra) {
     compra = !!modoCompra;
     const cx = Paineis.janela(
       "<h2>" + esc(t("arvore")) + "</h2><p><i class='ico' data-ico='ph'></i> <b style='color:var(--ciano)' id='arvPh'></b> " + esc(t("ph_nome")) + "</p>" +
-      "<p class='titulo2'>" + esc(compra ? t("arvore_compre") : t("arvore_so_ver")) + " " + esc(t("arvore_arraste")) + "</p><div class='rede' id='arvRede'><div class='mapa'><canvas></canvas></div></div><div class='infoNo' id='arvInfo'></div>",
+      "<p class='titulo2'>" + esc(compra ? t("arvore_compre") : t("arvore_so_ver")) + " " + esc(t("arvore_arraste")) + "</p><div class='rede' id='arvRede'><div class='mapa'><canvas></canvas></div></div><div class='infoNo' id='arvInfo'></div>" +
+      (compra ? "<div class='desafios' id='arvDes'></div>" : ""),
       compra ? [{ texto: t("comecar"), classe: "grande", acao: comecar }] : [{ texto: t("fechar"), classe: "sem", acao: Paineis.fecharJanela }]);
     cx.classList.add("larga");
     rede = cx.querySelector("#arvRede"); mapa = rede.querySelector(".mapa"); cv = mapa.querySelector("canvas");
@@ -36,6 +37,7 @@ const ArvoreTela = (function() {
       mapa.appendChild(b);
     });
     arrastar();
+    if (compra) { desafio = ""; montarDesafios(); }
     requestAnimationFrame(function() { centrar(NO[sel] || NO.nucleo); });
     const aoMudar = function() { limitarPos(); };
     const fim = function() { cx.classList.remove("larga"); window.removeEventListener("resize", aoMudar); };
@@ -124,10 +126,24 @@ const ArvoreTela = (function() {
     rede.addEventListener("pointerup", solta); rede.addEventListener("pointercancel", solta);
     rede.addEventListener("wheel", function(e) { e.preventDefault(); px -= e.shiftKey ? e.deltaY : e.deltaX; py -= e.shiftKey ? 0 : e.deltaY; limitarPos(); }, { passive: false });
   }
+  // desafios da próxima partida (opcional)
+  function montarDesafios() {
+    const box = el("arvDes"); if (!box) return;
+    box.innerHTML = "<b>" + esc(t("des_titulo")) + "</b>";
+    const fila = Paineis.elem("div", "linhaBtns");
+    [""].concat(DESAFIOS).forEach(function(d) {
+      const b = Paineis.elem("button", "btn" + (desafio === d ? (d ? " vermelho" : "") : " sem"), esc(t(d ? "des_" + d : "des_nenhum")));
+      b.addEventListener("click", function() { desafio = d; Som.som("clique"); montarDesafios(); });
+      fila.appendChild(b);
+    });
+    box.appendChild(fila);
+    box.appendChild(Paineis.elem("span", "", esc(desafio ? t("des_" + desafio + "_d") + " " + t("des_premio") : t("des_explica"))));
+  }
   function comecar() {
     Paineis.fecharJanela();
     Paineis.fechar();
-    Jogo.novaPartida();
+    Jogo.novaPartida(desafio);
+    if (desafio) Poki.medir("challenge", desafio, "start");
     Tela.montarVagas(); Tela.layout();
     salvar();
     Poki.intervalo();

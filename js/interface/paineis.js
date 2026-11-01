@@ -27,6 +27,7 @@ const Paineis = (function() {
   }
   function fechar() {
     if (aba === "batalha" && typeof BatalhaTela !== "undefined" && !CenaBatalha.aberta) BatalhaTela.sair();
+    if (aba === "oficina") OficinaTela.sair();
     aba = null;
     document.querySelectorAll(".aba").forEach(function(b) { b.classList.remove("ativa"); });
     el("painel").classList.add("escondido");
@@ -40,6 +41,7 @@ const Paineis = (function() {
     else if (aba === "batalha") BatalhaTela.montar(corpo);
     else if (aba === "compendio") montarCompendio();
     else if (aba === "config") montarConfig();
+    else if (aba === "oficina") { OficinaTela.montar(corpo); el("pontoOfi").classList.remove("on"); }
   }
 
   // ---------- upgrades (em tiers: 5 níveis cada; o principal no nível 3 libera o próximo tier) ----------
@@ -170,7 +172,15 @@ const Paineis = (function() {
   function pontos() {
     const pode = UPGRADES.some(function(u) { const n = nivelUp(u.id); return n < NIVEIS_UPGRADE && Jogo.tierAberto(u.tier) && save.p.moedas >= custoUpgrade(u.id, n); });
     el("pontoUp").classList.toggle("on", (pode && save.tutorial >= 4) || (Jogo.podeRenascer() && save.ph >= 9));
+    if (aba !== "oficina" && Encomendas.prontas()) el("pontoOfi").classList.add("on");
   }
+  // v9: peça nova (faixa + bolinha na Oficina) e encomenda nova
+  Jogo.ao("peca", function(it) {
+    faixa(Pixel.icone(EQUIP_TIPOS[it.t].ico), t("eq_ganhou"), Equip.nome(it) + " · " + Equip.textoBonus(it));
+    if (aba !== "oficina") el("pontoOfi").classList.add("on");
+  });
+  Jogo.ao("desafio", function() { faixa(null, t("des_feito"), t("des_feito_d", 10)); Som.som("vitoria"); });
+  Jogo.ao("encomenda", function() { if (aba !== "oficina" && Encomendas.lista().length) el("pontoOfi").classList.add("on"); });
 
   // ---------- renascer ----------
   function confirmarRenascer() {

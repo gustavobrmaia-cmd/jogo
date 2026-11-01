@@ -105,6 +105,19 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
 - Mais difícil: tier 2+ custa 2x e cada nível sobe +0,3 a mais (custoUpgrade); moedas de descoberta pela metade.
   sim/eco6.js: começo igual (robô 8 ~7 min), meio/fim ~30% mais lento.
 
+## v9: mais coisas para fazer, variável e ~2x mais lento (o dono escolheu na pergunta)
+- Traços (dados/tracos.js, save.p.tr paralelo a grade/time): Veloz, Forte, Sortudo, Guerreiro, Preguiçoso, Dourado;
+  ~30% dos robôs nascem com um (criado, esteira ou junção). Valem no time (Jogo.fatorVaga) e na batalha ({n, f}).
+- Equipamentos (motor/equip.js, save.equip permanente): Engrenagem (vel), Chip (valor), Trevo (x10), 5 raridades;
+  1 por vaga do time; desmontar dá PH. Caem de hordas, Torre, Ataque e encomendas.
+- Encomendas (motor/encomendas.js, save.p.encomendas): até 3, prazo 3-7 min, gastam robôs, pagam moedas/PH/peça.
+- Aba nova OFICINA (interface/oficina_tela.js): Encomendas + Equipamentos + legenda dos traços.
+- Torre Infinita (batalha.js andarTorre, save.torre): z="torre"; andar +0,9 nível; gigante a cada 5; peça a cada 5.
+- Ataque à Fábrica (interface/ataque.js): chefão a cada 6-9 min (depois da 2ª horda), 60 de vida, 40 s; sabotagem
+  (Jogo.multSabotagem 0,5) enquanto ele está lá e por 60 s se perder.
+- Desafios ao renascer (escolhe na árvore): semesteira, caro, time3, furioso; descobertas +50% PH e +10 no robô 8.
+- Dificuldade: razão 2,05 (era 2,3), upgrades tier 2+ custam 4x e +0,6 no crescimento (sim/eco7.js).
+
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.
 - 1ª partida: nível 6 ~40 s, 8 (libera renascer) ~5 min, 10 ~15 min, 12 ~28 min. Depois de renascer anda bem mais rápido.
