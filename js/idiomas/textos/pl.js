@@ -192,5 +192,16 @@ TEXTOS.pl = {
   m_feita: "Misja wykonana!",
   // v5: batalha em multidão
   bat_quantos: "{0} małych robotów rusza do walki!",
-  bat_gigante: "OLBRZYMI POTWÓR!"
+  bat_gigante: "OLBRZYMI POTWÓR!",
+  // v6: tiers 6 e 7
+  up_estelar: "Reaktor Gwiezdny",
+  up_estelar_d: "Wszystko daje x{0} → x{1}",
+  up_ima: "Złoty Magnes",
+  up_ima_d: "Złoty robot pojawia się +{0}% → +{1}% częściej i płaci więcej",
+  up_hidraulica: "Tłoki Hydrauliczne",
+  up_hidraulica_d: "Drużyna +{0}% → +{1}%",
+  up_fabrica3: "Megafabryka",
+  up_fusao_inst: "Niestabilna Fuzja",
+  up_fusao_inst_d: "{0}% → {1}% szansy, że łączenie przeskoczy 1 poziom",
+  up_dedo3: "Kosmiczny Palec"
 };

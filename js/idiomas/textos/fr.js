@@ -192,5 +192,16 @@ TEXTOS.fr = {
   m_feita: "Mission terminée !",
   // v5: batalha em multidão
   bat_quantos: "{0} petits robots partent au combat !",
-  bat_gigante: "MONSTRE GÉANT !"
+  bat_gigante: "MONSTRE GÉANT !",
+  // v6: tiers 6 e 7
+  up_estelar: "Réacteur Stellaire",
+  up_estelar_d: "Tout rapporte x{0} → x{1}",
+  up_ima: "Aimant Doré",
+  up_ima_d: "Le robot doré apparaît +{0}% → +{1}% et paie plus",
+  up_hidraulica: "Pistons Hydrauliques",
+  up_hidraulica_d: "Équipe +{0}% → +{1}%",
+  up_fabrica3: "Méga-usine",
+  up_fusao_inst: "Fusion Instable",
+  up_fusao_inst_d: "{0}% → {1}% de chance qu'une fusion saute 1 niveau",
+  up_dedo3: "Doigt Cosmique"
 };

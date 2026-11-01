@@ -192,5 +192,16 @@ TEXTOS.en = {
   m_feita: "Mission complete!",
   // v5: batalha em multidão
   bat_quantos: "{0} little robots go to battle!",
-  bat_gigante: "GIANT MONSTER!"
+  bat_gigante: "GIANT MONSTER!",
+  // v6: tiers 6 e 7
+  up_estelar: "Stellar Reactor",
+  up_estelar_d: "Everything earns x{0} → x{1}",
+  up_ima: "Golden Magnet",
+  up_ima_d: "Golden robot shows up +{0}% → +{1}% and pays more",
+  up_hidraulica: "Hydraulic Pistons",
+  up_hidraulica_d: "Team +{0}% → +{1}%",
+  up_fabrica3: "Megafactory",
+  up_fusao_inst: "Unstable Fusion",
+  up_fusao_inst_d: "{0}% → {1}% chance a merge skips 1 level",
+  up_dedo3: "Cosmic Finger"
 };

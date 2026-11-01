@@ -62,6 +62,12 @@ const Paineis = (function() {
       case "reator": return t("up_reator_d", Math.pow(2, n), Math.pow(2, n + 1));
       case "esteira2": return t("up_esteira2_d", pct(1 - Math.pow(0.8, n)), pct(1 - Math.pow(0.8, n + 1)));
       case "overclock": return t("up_overclock_d", pct(0.4 * n), pct(0.4 * (n + 1)));
+      case "estelar": return t("up_estelar_d", fmt(Math.pow(3, n)), fmt(Math.pow(3, n + 1)));
+      case "ima": return t("up_ima_d", pct(0.25 * n), pct(0.25 * (n + 1)));
+      case "hidraulica": return t("up_hidraulica_d", pct(0.6 * n), pct(0.6 * (n + 1)));
+      case "fabrica3": return t("up_fabrica2_d", n, n + 1);
+      case "fusao_inst": return t("up_fusao_inst_d", pct(0.06 * n), pct(0.06 * (n + 1)));
+      case "dedo3": return t("up_dedo2_d", Math.pow(3, n), Math.pow(3, n + 1));
     }
     return "";
   }

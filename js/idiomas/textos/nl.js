@@ -192,5 +192,16 @@ TEXTOS.nl = {
   m_feita: "Missie voltooid!",
   // v5: batalha em multidão
   bat_quantos: "{0} robotjes gaan het gevecht in!",
-  bat_gigante: "REUZENMONSTER!"
+  bat_gigante: "REUZENMONSTER!",
+  // v6: tiers 6 e 7
+  up_estelar: "Sterrenreactor",
+  up_estelar_d: "Alles levert x{0} → x{1}",
+  up_ima: "Gouden Magneet",
+  up_ima_d: "Gouden robot komt +{0}% → +{1}% vaker en betaalt meer",
+  up_hidraulica: "Hydraulische Zuigers",
+  up_hidraulica_d: "Team +{0}% → +{1}%",
+  up_fabrica3: "Megafabriek",
+  up_fusao_inst: "Instabiele Fusie",
+  up_fusao_inst_d: "{0}% → {1}% kans dat samenvoegen 1 niveau overslaat",
+  up_dedo3: "Kosmische Vinger"
 };

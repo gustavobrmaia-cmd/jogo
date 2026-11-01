@@ -192,5 +192,16 @@ TEXTOS.id = {
   m_feita: "Misi selesai!",
   // v5: batalha em multidão
   bat_quantos: "{0} robot kecil maju bertempur!",
-  bat_gigante: "MONSTER RAKSASA!"
+  bat_gigante: "MONSTER RAKSASA!",
+  // v6: tiers 6 e 7
+  up_estelar: "Reaktor Bintang",
+  up_estelar_d: "Semua menghasilkan x{0} → x{1}",
+  up_ima: "Magnet Emas",
+  up_ima_d: "Robot emas muncul +{0}% → +{1}% lebih sering dan bayar lebih",
+  up_hidraulica: "Piston Hidrolik",
+  up_hidraulica_d: "Tim +{0}% → +{1}%",
+  up_fabrica3: "Megapabrik",
+  up_fusao_inst: "Fusi Tak Stabil",
+  up_fusao_inst_d: "Peluang {0}% → {1}% gabungan melompati 1 level",
+  up_dedo3: "Jari Kosmik"
 };

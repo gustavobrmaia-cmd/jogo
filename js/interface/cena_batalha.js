@@ -20,6 +20,7 @@ const CenaBatalha = (function() {
     g.imageSmoothingEnabled = false;
     fundoFixo = montarFundo();
     campo();
+    luzes = montarLuzes();
     const b = Batalha.atual; if (b) { b.L = C.L; b.P = C.P; }
   }
   window.addEventListener("resize", function() { if (aberta) medir(); });
@@ -62,6 +63,27 @@ const CenaBatalha = (function() {
     for (let x = 0; x < W; x++) for (let y = ch; y < ch + 4; y++) rt(x, y, 1, 1, ((x + y) % 8) < 4 ? "#ffcc33" : "#241a10");
     rt(0, ch + 4, W, 1, "#151420");
     return c;
+  }
+  // LUZ da cena (v6), pontilhada em Bayer 4x4: poças de luz quente no chão embaixo das lâmpadas (por baixo da
+  // multidão) e vinheta escura nos cantos (por cima de tudo, menos do placar)
+  const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+  let luzes = null;
+  function montarLuzes() {
+    const chao_ = chao(), poca = document.createElement("canvas"), vin = document.createElement("canvas");
+    poca.width = vin.width = W; poca.height = vin.height = H;
+    const p = poca.getContext("2d"), v = vin.getContext("2d"), cx = W / 2, cy = H * 0.55, rmax = Math.hypot(W, H) * 0.6;
+    const lamps = [0.2, 0.5, 0.8].map(function(k) { return W * k; });
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const lim = (BAYER[(y & 3) * 4 + (x & 3)] + 0.5) / 16;
+      const e = Math.max(0, Math.min(1, (Math.hypot(x - cx, (y - cy) * 1.3) / rmax - 0.5) * 1.8));
+      if (e > lim) { v.fillStyle = e - lim > 0.3 ? "rgba(6,3,16,.6)" : "rgba(6,3,16,.32)"; v.fillRect(x, y, 1, 1); }
+      if (y > chao_) {
+        let k = 0;
+        lamps.forEach(function(lx) { const ry = (H - chao_) * 0.5, d = Math.hypot((x - lx) / 46, (y - (chao_ + ry)) / ry); k = Math.max(k, 1 - d); });
+        if (k * 0.9 > lim) { p.fillStyle = k * 0.9 - lim > 0.3 ? "rgba(255,226,160,.14)" : "rgba(255,226,160,.07)"; p.fillRect(x, y, 1, 1); }
+      }
+    }
+    return { poca: poca, vin: vin };
   }
   function desenharFundoVivo() {
     const ch = chao();
@@ -144,6 +166,7 @@ const CenaBatalha = (function() {
     g.save();
     if (b.tremor > 0) g.translate(Math.round((Math.random() - 0.5) * 6), Math.round((Math.random() - 0.5) * 4));
     desenharFundoVivo();
+    if (luzes) g.drawImage(luzes.poca, 0, 0);
     // todo mundo (e a sucata) ordenado pelo pé: quem está mais "na frente" é desenhado por cima
     const lista = [];
     b.robos.forEach(function(r) { lista.push({ u: r, p: tela(r.x, r.y) }); });
@@ -160,6 +183,7 @@ const CenaBatalha = (function() {
     b.pecas.forEach(function(pc) { const p = tela(pc.x, pc.y); g.fillStyle = pc.cor; g.globalAlpha = Math.min(1, (pc.vida - pc.t) * 4); g.fillRect(Math.round(p.x), Math.round(p.y - pc.z), pc.tam + 1, pc.tam + 1); });
     g.globalAlpha = 1;
     efeitos(b);
+    if (luzes) g.drawImage(luzes.vin, 0, 0);
     numeros(b);
     g.restore();
     hud(b);
@@ -210,6 +234,11 @@ const CenaBatalha = (function() {
         g.fillStyle = k < 0.2 ? "#ffffff" : "#ff8a2e";
         for (let a = 0; a < 18; a++) { const an = a / 18 * Math.PI * 2; g.fillRect(Math.round(p.x + Math.cos(an) * r) - 2, Math.round(cy + Math.sin(an) * r * 0.8) - 2, 4, 4); }
         g.globalAlpha = 1;
+      } else if (f.tipo === "faisca") {   // faísca do golpe de um robozinho
+        const p = tela(f.x, f.y), y = Math.round(p.y - f.z), x = Math.round(p.x), r = 1 + Math.round(k * 3);
+        g.fillStyle = k < 0.5 ? "#fff6c2" : "#ffb02e";
+        g.fillRect(x - r, y, 1, 1); g.fillRect(x + r, y, 1, 1); g.fillRect(x, y - r, 1, 1); g.fillRect(x, y + r, 1, 1);
+        if (k < 0.4) g.fillRect(x, y, 1, 1);
       } else if (f.tipo === "poeira") {
         const p = tela(f.x, f.y); g.globalAlpha = 1 - k; g.fillStyle = "#8a8aa8";
         g.fillRect(Math.round(p.x - 4 - k * 6), Math.round(p.y - 4 - k * 4), 3, 3); g.fillRect(Math.round(p.x + 2 + k * 6), Math.round(p.y - 5 - k * 5), 3, 3); g.fillRect(Math.round(p.x - 1), Math.round(p.y - 7 - k * 7), 3, 3);

@@ -192,5 +192,16 @@ TEXTOS.vi = {
   m_feita: "Hoàn thành nhiệm vụ!",
   // v5: batalha em multidão
   bat_quantos: "{0} robot tí hon ra trận!",
-  bat_gigante: "QUÁI VẬT KHỔNG LỒ!"
+  bat_gigante: "QUÁI VẬT KHỔNG LỒ!",
+  // v6: tiers 6 e 7
+  up_estelar: "Lò Phản Ứng Sao",
+  up_estelar_d: "Mọi thứ được x{0} → x{1}",
+  up_ima: "Nam Châm Vàng",
+  up_ima_d: "Robot vàng xuất hiện +{0}% → +{1}% và trả nhiều hơn",
+  up_hidraulica: "Piston Thủy Lực",
+  up_hidraulica_d: "Đội +{0}% → +{1}%",
+  up_fabrica3: "Siêu Nhà Máy",
+  up_fusao_inst: "Hợp Nhất Bất Ổn",
+  up_fusao_inst_d: "{0}% → {1}% cơ hội ghép nhảy thêm 1 cấp",
+  up_dedo3: "Ngón Tay Vũ Trụ"
 };

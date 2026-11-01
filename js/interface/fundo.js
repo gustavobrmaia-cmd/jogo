@@ -46,8 +46,30 @@ const Fundo = (function() {
     rt(mx + 38, my - 22, 6, 22, "#3d4a66"); rt(mx + 38, my - 22, 2, 22, "#5d6c8f"); rt(mx + 36, my - 24, 10, 3, "#53627f");
     montar.motor = { x: mx, y: my };
   }
+  // LUZ (v6): camada pontilhada (matriz de Bayer 4x4, fica com cara de pixel art) com vinheta escura nos cantos,
+  // luz quente vinda de cima e um brilho vermelho atrás do botão. Refeita quando a tela ou o botão mudam de lugar.
+  const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+  let luz = null, luzChave = "";
+  function montarLuz(bx, by, br) {
+    luz = document.createElement("canvas"); luz.width = W; luz.height = H;
+    const l = luz.getContext("2d"), cx = W / 2, cy = H * 0.35, rmax = Math.hypot(W, H) * 0.62;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const lim = (BAYER[(y & 3) * 4 + (x & 3)] + 0.5) / 16;
+      const d = Math.hypot(x - cx, (y - cy) * 1.2) / rmax;
+      const esc = Math.max(0, Math.min(1, (d - 0.45) * 1.6));           // vinheta
+      if (esc > lim) { l.fillStyle = esc - lim > 0.35 ? "rgba(6,3,16,.55)" : "rgba(6,3,16,.3)"; l.fillRect(x, y, 1, 1); continue; }
+      const db = Math.hypot(x - bx, y - by) / br;                       // brilho atrás do botão
+      const brilho = Math.max(0, 1 - db) * 0.9;
+      if (brilho > lim) { l.fillStyle = brilho - lim > 0.4 ? "rgba(255,60,70,.34)" : "rgba(255,90,90,.18)"; l.fillRect(x, y, 1, 1); continue; }
+      const cima = Math.max(0, 1 - y / (H * 0.5)) * Math.max(0, 1 - Math.abs(x - cx) / (W * 0.6)) * 0.7;   // luz quente de cima
+      if (cima > lim) { l.fillStyle = "rgba(255,214,140,.07)"; l.fillRect(x, y, 1, 1); }
+    }
+  }
+  const poeira = [];
+  function semearPoeira() { poeira.length = 0; for (let i = 0; i < Math.round(W * H / 900); i++) poeira.push({ x: Math.random() * W, y: Math.random() * H, v: 1.5 + Math.random() * 3, f: Math.random() * 6 }); }
   window.addEventListener("resize", montar);
-  montar();
+  montar(); semearPoeira();
+  window.addEventListener("resize", semearPoeira);
 
   const ENG = [
     { fx: 0.05, fy: 0.95, r: 34, d: 16, v: 0.25 },
@@ -83,6 +105,17 @@ const Fundo = (function() {
       g.fillRect(Math.round(p.x - p.r), Math.round(p.y - p.r * 0.7), Math.round(p.r * 2), Math.round(p.r * 1.4));
       g.fillRect(Math.round(p.x - p.r * 0.7), Math.round(p.y - p.r), Math.round(p.r * 1.4), Math.round(p.r * 2));
     }
+    g.globalAlpha = 1;
+    // luz por cima (pontilhada) e poeira brilhando no ar
+    const bt = el("cvBotao").getBoundingClientRect(), bx = Math.round((bt.left + bt.width / 2) / ESC), by = Math.round((bt.top + bt.height / 2) / ESC), br = Math.round(bt.width * 0.75 / ESC);
+    const chave = W + "x" + H + ":" + bx + "," + by + "," + br;
+    if (chave !== luzChave && bt.width > 0) { luzChave = chave; montarLuz(bx, by, br); }
+    if (luz) g.drawImage(luz, 0, 0);
+    poeira.forEach(function(p) {
+      p.y -= p.v * d; p.x += Math.sin(t * 0.7 + p.f) * 0.15; if (p.y < -2) { p.y = H + 2; p.x = Math.random() * W; }
+      const a = 0.25 + 0.25 * Math.sin(t * 2 + p.f);
+      g.globalAlpha = a; g.fillStyle = "#ffe9c4"; g.fillRect(Math.round(p.x), Math.round(p.y), 1, 1);
+    });
     g.globalAlpha = 1;
     // luzinhas no cano
     for (let k = 0; k < 6; k++) { const on = pane.luzes ? Math.random() < 0.5 : Math.sin(t * (1.3 + k * 0.4) + k) > 0.2; g.fillStyle = on ? (k % 2 ? "#3ccf6e" : "#ff4d5e") : "#2a2050"; g.fillRect(Math.round(W * (0.12 + k * 0.15)), Math.round(H * 0.08) + 2, 2, 2); }

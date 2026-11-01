@@ -192,5 +192,16 @@ TEXTOS.ja = {
   m_feita: "ミッション達成！",
   // v5: batalha em multidão
   bat_quantos: "ちびロボ{0}体が出撃！",
-  bat_gigante: "巨大モンスター！"
+  bat_gigante: "巨大モンスター！",
+  // v6: tiers 6 e 7
+  up_estelar: "恒星リアクター",
+  up_estelar_d: "すべての収入 x{0} → x{1}",
+  up_ima: "黄金マグネット",
+  up_ima_d: "金のロボットの出現 +{0}% → +{1}%、報酬もアップ",
+  up_hidraulica: "油圧ピストン",
+  up_hidraulica_d: "チーム +{0}% → +{1}%",
+  up_fabrica3: "メガ工場",
+  up_fusao_inst: "不安定融合",
+  up_fusao_inst_d: "合体で1レベル飛ぶ確率 {0}% → {1}%",
+  up_dedo3: "宇宙の指"
 };

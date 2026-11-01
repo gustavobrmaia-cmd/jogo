@@ -44,8 +44,8 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
   e "batalha", Som.musica); opção Música separada (save.semMusica).
 - Balanceamento (o dono: "parece que nem precisa renascer" e "poucos pontos"): PH de robô 2 + nível/2, de monstro 3,
   de renascer 3·1,6^(maxTier−7); cada renascimento dá renda x1,25 para sempre (BONUS_RENASCER); árvore custa 3x.
-- Preço de criar robô: na v3 o dono mandou deixar; na v5.2 pediu ficar caro no fim (tinha 7 bi e custava ~1000):
-  piso = (2 s por nível acima do robô 8, até 20 s) da renda do time. Simulado (sim/eco3.js): não muda o ritmo.
+- Preço de criar robô: v5.3 sobe 12% por robô criado (era 8,5%). O piso pela renda da v5.2 ficou caro demais e
+  saiu ("não precisa inventar a roda"). Simulado (sim/eco4.js): robô 8 na 1ª partida em ~6,4 min (era 5,3).
 - Regra do dono: o que vier com "sei lá" na mensagem, perguntar ou sugerir em vez de fazer.
 
 ## v3.1
@@ -73,6 +73,15 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
 ## v5.1: pontos dos robôs a cada partida
 - save.p.pegos: níveis que já deram PH/moedas nesta partida. Renasceu -> zera -> chegar de novo em cada nível dá os
   pontos de novo (só faixa; a tela "NOVO ROBÔ!" e o ponto do compêndio só no inédito). Save antigo: pegos = 1..maxTier.
+
+## v6: tiers 6 e 7, gráfico
+- Tier 6: Reator Estelar (P, tudo x3), Ímã Dourado (NOVO tipo: robô dourado +25% mais vezes e +50% de prêmio),
+  Pistões Hidráulicos (time +60%). Tier 7: Megafábrica (P, nasce +1), Fusão Instável (NOVO tipo: 6%/nível de a junção
+  pular 1 nível, mostra "+2!"), Dedo Cósmico (toque x3). Ícones novos: estrela, ima, pistao, atomo. sim/eco5.js: tier 7
+  abre depois de ~3 renascimentos.
+- Gráfico: luz pontilhada (Bayer) no fundo e na batalha (vinheta, brilho atrás do botão, poças de luz), poeira no ar,
+  reflexo passando no botão, vagas com brilho pela raridade do robô (data-r 1..6), números do time somados (0,7 s),
+  faíscas nos golpes da multidão, volume nos cartões/botões.
 
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.

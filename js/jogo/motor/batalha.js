@@ -169,6 +169,7 @@ const Batalha = (function() {
       else if (r.cd <= 0) {
         r.cd = 0.75 + Math.random() * 0.35; r.golpe = 1; r.pulo = a.gigante ? 10 + Math.random() * 40 : 5 + Math.random() * 7;
         dano(a, r.ataque * (0.85 + Math.random() * 0.3), r);
+        if (b.fx.length < 70 && Math.random() < 0.4) b.fx.push({ tipo: "faisca", x: r.x + (a.x - r.x) * 0.35, y: r.y + (a.y - r.y) * 0.35, z: 8 + r.pulo * 0.6, t: 0, dur: 0.2 });
         if (typeof Som !== "undefined" && Math.random() < 0.25) Som.som("tiro", 0.8 + Math.random() * 0.6);
       }
     });

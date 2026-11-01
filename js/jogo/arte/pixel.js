@@ -413,6 +413,31 @@ const Pixel = (function() {
         f.circ(4, 6, 3, M(OURO)); f.dC(4, 6, 1.4, null); f.circ(20, 6, 3, M(OURO)); f.dC(20, 6, 1.4, null);
         f.rect(10, 14, 4, 4, M(OURO2)); f.rr(5, 18, 14, 5, 1, M(MADEIRA)); f.dR(8, 4, 2, 4, "#fff6c8"); break;
       }
+      // ---- v6: ícones dos tiers 6 e 7 ----
+      case "estrela": {   // reator estelar: estrela branca-dourada dentro de um anel
+        f.circ(12, 12, 11, M(METAL_E)); f.circ(12, 12, 8.5, M(mat(270, 60, 30)));
+        const e = M(OURO, true), pts = [];
+        for (let n = 0; n < 10; n++) { const an = n * Math.PI / 5 - Math.PI / 2, r = n % 2 ? 3.2 : 7.6; pts.push([12 + Math.cos(an) * r, 12 + Math.sin(an) * r]); }
+        f.poli(pts, e); f.dC(12, 12, 1.8, "#ffffff"); f.d(5, 4, "#e6fdff"); f.d(19, 19, "#e6fdff"); break;
+      }
+      case "ima": {   // ímã em U vermelho com pontas de metal e uma moeda sendo puxada
+        const v = M(VERMELHO, true); f.traco(5, 3, 5, 13, 6, v); f.traco(17, 3, 17, 13, 6, v);
+        f.circ(11, 13, 8, v); f.dC(11, 13, 3, null); f.dR(8, 3, 6, 11, null);
+        f.rect(2, 1, 6, 4, M(METAL, true)); f.rect(14, 1, 6, 4, M(METAL, true));
+        f.circ(19, 20, 3.5, M(OURO, true)); f.d(14, 18, "#ffe066"); f.d(15, 21, "#ffe066"); break;
+      }
+      case "pistao": {   // pistão hidráulico: cilindro, haste brilhante e gotinha de óleo
+        f.rr(3, 9, 9, 13, 1, M(METAL_E)); f.rect(4, 11, 7, 2, M(AZUL));
+        f.traco(10, 15, 21, 4, 3, M(METAL, true)); f.circ(20, 4, 3, M(METAL_E, true));
+        f.dR(5, 19, 5, 1, "#3a3f58"); f.dC(16, 20, 1.6, "#2b2a3d"); f.d(16, 18, "#2b2a3d"); break;
+      }
+      case "atomo": {   // fusão instável: núcleo roxo com órbitas e faíscas
+        const o = M(CIANO);
+        for (let n = 0; n < 40; n++) { const an = n / 40 * Math.PI * 2; f.dR(Math.round(12 + Math.cos(an) * 10.5), Math.round(12 + Math.sin(an) * 4.2), 1, 1, "#7cf0ff"); }
+        for (let n = 0; n < 40; n++) { const an = n / 40 * Math.PI * 2, x = Math.cos(an) * 10.5, y = Math.sin(an) * 4.2; f.dR(Math.round(12 + x * 0.5 - y * 0.87), Math.round(12 + x * 0.87 + y * 0.5), 1, 1, "#ff9df0"); }
+        f.circ(12, 12, 4.5, M(ROXO, true)); f.dC(11, 11, 1.4, "#ffffff");
+        f.d(2, 3, "#ffe066"); f.d(21, 20, "#ffe066"); f.d(20, 2, "#ffffff"); void o; break;
+      }
       case "engrenagem": {
         const m = M(mat(40, 70, 52), true); f.circ(12, 12, 7.5, m);
         for (let n = 0; n < 8; n++) { const an = n * Math.PI / 4 + 0.2; f.traco(12 + Math.cos(an) * 6, 12 + Math.sin(an) * 6, 12 + Math.cos(an) * 11, 12 + Math.sin(an) * 11, 4, m); }

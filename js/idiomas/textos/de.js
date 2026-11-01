@@ -192,5 +192,16 @@ TEXTOS.de = {
   m_feita: "Mission erfüllt!",
   // v5: batalha em multidão
   bat_quantos: "{0} kleine Roboter ziehen in den Kampf!",
-  bat_gigante: "RIESENMONSTER!"
+  bat_gigante: "RIESENMONSTER!",
+  // v6: tiers 6 e 7
+  up_estelar: "Sternenreaktor",
+  up_estelar_d: "Alles bringt x{0} → x{1}",
+  up_ima: "Goldmagnet",
+  up_ima_d: "Goldroboter erscheint +{0}% → +{1}% öfter und zahlt mehr",
+  up_hidraulica: "Hydraulikkolben",
+  up_hidraulica_d: "Team +{0}% → +{1}%",
+  up_fabrica3: "Megafabrik",
+  up_fusao_inst: "Instabile Fusion",
+  up_fusao_inst_d: "{0}% → {1}% Chance, dass Verschmelzen 1 Stufe überspringt",
+  up_dedo3: "Kosmischer Finger"
 };

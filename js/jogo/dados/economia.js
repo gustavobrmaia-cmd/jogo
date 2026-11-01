@@ -8,7 +8,7 @@
 const ECO = {
   razao: 2.3,          // cada nível de robô vale 2,3x o anterior (juntar dois sempre compensa)
   criarBase: 10,       // preço do 1º robô
-  criarCresce: 1.085,  // cada robô criado na partida encarece o próximo
+  criarCresce: 1.12,  // cada robô criado na partida encarece o próximo
   toqueTime: 0.1       // o seu toque também vale 10% do que o time faz por segundo (tocar nunca fica inútil)
 };
 function valorRobo(n) { return Math.pow(ECO.razao, n - 1); }       // moedas por apertada do botão
@@ -30,7 +30,14 @@ const UPGRADES = [
   { id: "canhoes",   tier: 4, base: 2e6, cresce: 2.6, icone: "canhao" },                     // batalha +50% e habilidades
   { id: "reator",    tier: 5, principal: true, base: 4e8, cresce: 3.5, icone: "reator" },    // tudo rende x2
   { id: "esteira2",  tier: 5, base: 2e8, cresce: 2.8, icone: "esteira" },                    // robô grátis 20% mais cedo
-  { id: "overclock", tier: 5, base: 2.5e8, cresce: 2.8, icone: "raio" }                      // time +40%
+  { id: "overclock", tier: 5, base: 2.5e8, cresce: 2.8, icone: "raio" },                     // time +40%
+  // v6: tiers 6 e 7, com 2 tipos novos (Ímã Dourado e Fusão Instável)
+  { id: "estelar",   tier: 6, principal: true, base: 6e10, cresce: 4, icone: "estrela" },   // tudo rende x3
+  { id: "ima",       tier: 6, base: 3e10, cresce: 3, icone: "ima" },                        // robô dourado +25% mais vezes e +50% de prêmio
+  { id: "hidraulica", tier: 6, base: 4e10, cresce: 3, icone: "pistao" },                    // time +60%
+  { id: "fabrica3",  tier: 7, principal: true, base: 3e14, cresce: 5, icone: "fabrica" },   // robôs nascem 1 nível acima
+  { id: "fusao_inst", tier: 7, base: 1e14, cresce: 3.2, icone: "atomo" },                   // 6% de chance de juntar pular 1 nível
+  { id: "dedo3",     tier: 7, base: 8e13, cresce: 3, icone: "dedo" }                        // toque x3
 ];
 const NIVEIS_UPGRADE = 5;
 const UPGRADE = {};

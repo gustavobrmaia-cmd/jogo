@@ -192,5 +192,16 @@ TEXTOS.ro = {
   m_feita: "Misiune îndeplinită!",
   // v5: batalha em multidão
   bat_quantos: "{0} roboței pleacă la luptă!",
-  bat_gigante: "MONSTRU URIAȘ!"
+  bat_gigante: "MONSTRU URIAȘ!",
+  // v6: tiers 6 e 7
+  up_estelar: "Reactor Stelar",
+  up_estelar_d: "Totul aduce x{0} → x{1}",
+  up_ima: "Magnet Auriu",
+  up_ima_d: "Robotul auriu apare +{0}% → +{1}% mai des și plătește mai mult",
+  up_hidraulica: "Pistoane Hidraulice",
+  up_hidraulica_d: "Echipa +{0}% → +{1}%",
+  up_fabrica3: "Megafabrică",
+  up_fusao_inst: "Fuziune Instabilă",
+  up_fusao_inst_d: "{0}% → {1}% șansă ca unirea să sară 1 nivel",
+  up_dedo3: "Deget Cosmic"
 };

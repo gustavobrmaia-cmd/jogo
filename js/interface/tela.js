@@ -65,6 +65,7 @@ const Tela = (function() {
         if (n) { im.src = Pixel.url(Pixel.robo(n)); im.style.display = d._abrindo ? "none" : ""; d._nv.textContent = d._abrindo ? "" : n; }
         else { im.style.display = "none"; d._nv.textContent = ""; d._cx.style.display = "none"; d._abrindo = 0; }
         d.classList.toggle("vazia", !n);
+        if (n) d.dataset.r = Math.min(6, Math.ceil(n / 5)); else delete d.dataset.r;   // raridade: cor do brilho da vaga
       });
     });
     marcarIguais();
@@ -121,12 +122,20 @@ const Tela = (function() {
   window.addEventListener("pointercancel", soltar);
 
   // ---------- botão vermelho ----------
+  // reflexo: a cada 4 s uma faixa de luz passa na diagonal pelo botão (só onde tem botão: source-atop)
   function desenharBotao(forcar) {
-    const ap = performance.now() < apertadoAte;
-    if (!forcar && ap === desenharBotao.ultimo) return;
-    desenharBotao.ultimo = ap;
+    const agora = performance.now(), ap = agora < apertadoAte, k = (agora % 4000) / 550, brilho = k < 1;
+    if (!forcar && !brilho && ap === desenharBotao.ultimo && !desenharBotao.brilhava) return;
+    desenharBotao.ultimo = ap; desenharBotao.brilhava = brilho;
     gB.clearRect(0, 0, cvB.width, cvB.height);
     gB.drawImage(Pixel.botao(ap), 0, 0, cvB.width, cvB.height);
+    if (brilho && !ap) {
+      const e = cvB.width / 64, x = Math.round((-16 + k * 96) ) * e;
+      gB.save(); gB.globalCompositeOperation = "source-atop"; gB.globalAlpha = 0.35; gB.fillStyle = "#ffffff";
+      gB.beginPath(); gB.moveTo(x, 0); gB.lineTo(x + 6 * e, 0); gB.lineTo(x - 18 * e, 64 * e); gB.lineTo(x - 24 * e, 64 * e); gB.fill();
+      gB.globalAlpha = 0.2; gB.beginPath(); gB.moveTo(x + 9 * e, 0); gB.lineTo(x + 11 * e, 0); gB.lineTo(x - 13 * e, 64 * e); gB.lineTo(x - 15 * e, 64 * e); gB.fill();
+      gB.restore();
+    }
   }
   function apertarVisual(ms) { apertadoAte = Math.max(apertadoAte, performance.now() + (ms || 90)); }
   cvB.addEventListener("pointerdown", function(e) {
@@ -149,10 +158,17 @@ const Tela = (function() {
     const v = vagas.time[d.i]; if (!v) return;
     v.classList.add("bate"); setTimeout(function() { v.classList.remove("bate"); }, 110);
     apertarVisual(70);
-    const r = cvB.getBoundingClientRect();
-    Fx.numero(r.left + r.width * (0.3 + Math.random() * 0.4), r.top + r.height * 0.3, "+" + fmt(d.valor), "#ffe9a3", 20);
+    somaTime += d.valor;
     Som.som("time", 1 + d.i * 0.06);
   });
+  // o que o time ganha aparece somado, um número a cada 0,7 s (antes era um por apertada e virava bagunça)
+  let somaTime = 0;
+  setInterval(function() {
+    if (somaTime <= 0) return;
+    const r = cvB.getBoundingClientRect();
+    if (r.width) Fx.numero(r.left + r.width * (0.35 + Math.random() * 0.3), r.top + r.height * 0.2, "+" + fmt(somaTime), "#ffe9a3", 24);
+    somaTime = 0;
+  }, 700);
 
   // ---------- criar ----------
   el("btnCriar").addEventListener("click", function() {
@@ -187,6 +203,7 @@ const Tela = (function() {
     const c = centroVaga(d.lista, d.i);
     Fx.faiscas(c.x, c.y, "#7cf0ff", 12);
     Som.som("juntar", 1 + Math.min(d.tier, 20) * 0.03);
+    if (d.pulou) { Fx.numero(c.x, c.y - 20, "+2!", "#ff9df0", 40); Fx.faiscas(c.x, c.y, "#ff9df0", 20); }   // Fusão Instável
     vibrar(15);
   });
   Jogo.ao("cheio", function() {

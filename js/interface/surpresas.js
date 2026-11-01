@@ -46,7 +46,7 @@ const Surpresas = (function() {
       Jogo.ligarTurbo(20);
       texto = t("ouro_turbo", 20);
     } else {
-      const v = Math.round(Math.max(Jogo.custoCriar() * 4, Jogo.prodTime() * 60 + Jogo.valorToque() * 40));
+      const v = Math.round(Math.max(Jogo.custoCriar() * 4, Jogo.prodTime() * 60 + Jogo.valorToque() * 40) * (1 + 0.5 * nivelUp("ima")));   // Ímã Dourado: +50%/nível
       save.p.moedas += v;
       Fx.numero(x, y, "+" + fmt(v), "#ffcc33", 40);
       texto = t("ouro_moedas", fmt(v));
@@ -140,7 +140,7 @@ const Surpresas = (function() {
     if (save.tutorial < 2) return;   // primeiro aprende o básico
     const m = Missoes.atual().tipo;
     if (ouro) passoOuro(dt);
-    else { proxOuro -= dt * (m === "ouro" ? 4 : 1); if (proxOuro <= 0) soltarOuro(); }
+    else { proxOuro -= dt * (m === "ouro" ? 4 : 1) * (1 + 0.25 * nivelUp("ima")); if (proxOuro <= 0) soltarOuro(); }   // Ímã: aparece mais
     const monstroLiberado = save.hordasVencidas >= 1 || m === "monstro";
     if (monstro) passoMonstro(dt);
     else if (monstroLiberado) { proxMonstro -= dt * (m === "monstro" ? 6 : 1); if (proxMonstro <= 0) soltarMonstro(); }

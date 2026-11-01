@@ -192,5 +192,16 @@ TEXTOS.it = {
   m_feita: "Missione completata!",
   // v5: batalha em multidão
   bat_quantos: "{0} robottini vanno in battaglia!",
-  bat_gigante: "MOSTRO GIGANTE!"
+  bat_gigante: "MOSTRO GIGANTE!",
+  // v6: tiers 6 e 7
+  up_estelar: "Reattore Stellare",
+  up_estelar_d: "Tutto rende x{0} → x{1}",
+  up_ima: "Magnete d'Oro",
+  up_ima_d: "Il robot d'oro appare +{0}% → +{1}% e paga di più",
+  up_hidraulica: "Pistoni Idraulici",
+  up_hidraulica_d: "Squadra +{0}% → +{1}%",
+  up_fabrica3: "Megafabbrica",
+  up_fusao_inst: "Fusione Instabile",
+  up_fusao_inst_d: "{0}% → {1}% di probabilità che un'unione salti 1 livello",
+  up_dedo3: "Dito Cosmico"
 };

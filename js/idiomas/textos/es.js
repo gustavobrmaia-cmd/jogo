@@ -192,5 +192,16 @@ TEXTOS.es = {
   m_feita: "¡Misión completa!",
   // v5: batalha em multidão
   bat_quantos: "¡{0} robotitos van a la batalla!",
-  bat_gigante: "¡MONSTRUO GIGANTE!"
+  bat_gigante: "¡MONSTRUO GIGANTE!",
+  // v6: tiers 6 e 7
+  up_estelar: "Reactor Estelar",
+  up_estelar_d: "Todo rinde x{0} → x{1}",
+  up_ima: "Imán Dorado",
+  up_ima_d: "El robot dorado aparece +{0}% → +{1}% y paga más",
+  up_hidraulica: "Pistones Hidráulicos",
+  up_hidraulica_d: "Equipo +{0}% → +{1}%",
+  up_fabrica3: "Megafábrica",
+  up_fusao_inst: "Fusión Inestable",
+  up_fusao_inst_d: "{0}% → {1}% de probabilidad de saltar 1 nivel al juntar",
+  up_dedo3: "Dedo Cósmico"
 };

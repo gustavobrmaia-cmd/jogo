@@ -192,5 +192,16 @@ TEXTOS.tr = {
   m_feita: "Görev tamamlandı!",
   // v5: batalha em multidão
   bat_quantos: "{0} küçük robot savaşa gidiyor!",
-  bat_gigante: "DEV CANAVAR!"
+  bat_gigante: "DEV CANAVAR!",
+  // v6: tiers 6 e 7
+  up_estelar: "Yıldız Reaktörü",
+  up_estelar_d: "Her şey x{0} → x{1} kazandırır",
+  up_ima: "Altın Mıknatıs",
+  up_ima_d: "Altın robot +%{0} → +%{1} daha sık gelir ve daha çok öder",
+  up_hidraulica: "Hidrolik Pistonlar",
+  up_hidraulica_d: "Takım +{0}% → +{1}%",
+  up_fabrica3: "Mega Fabrika",
+  up_fusao_inst: "Kararsız Füzyon",
+  up_fusao_inst_d: "Birleştirmenin 1 seviye atlama şansı %{0} → %{1}",
+  up_dedo3: "Kozmik Parmak"
 };

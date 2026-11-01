@@ -13,7 +13,7 @@ const Jogo = (function() {
 
   // ---------- números ----------
   function multMoedas() {
-    return Math.pow(1.5, nivelUp("cofre")) * Math.pow(2, nivelUp("reator")) * Math.pow(2, nivelNo("dobro")) *
+    return Math.pow(1.5, nivelUp("cofre")) * Math.pow(2, nivelUp("reator")) * Math.pow(3, nivelUp("estelar")) * Math.pow(2, nivelNo("dobro")) *
       (1 + 0.1 * nivelNo("nucleo")) * (1 + 0.5 * nivelNo("ganancia")) * Math.pow(BONUS_RENASCER, save.renascimentos);
   }
   // turbo (robô dourado): toques e time rendem x3 por alguns segundos (fora do multMoedas: não mexe em prêmios nem offline)
@@ -21,7 +21,7 @@ const Jogo = (function() {
   function multTurbo() { return performance.now() < turboAte ? 3 : 1; }
   function turboRestante() { return Math.max(0, (turboAte - performance.now()) / 1000); }
   function ligarTurbo(seg) { turboAte = performance.now() + seg * 1000; }
-  function velocidadeTime() { return (1 + 0.15 * nivelUp("motor") + 0.25 * nivelUp("turbina") + 0.4 * nivelUp("overclock")) * (1 + 0.25 * nivelNo("turbo")); }
+  function velocidadeTime() { return (1 + 0.15 * nivelUp("motor") + 0.25 * nivelUp("turbina") + 0.4 * nivelUp("overclock") + 0.6 * nivelUp("hidraulica")) * (1 + 0.25 * nivelNo("turbo")); }
   // moedas por segundo do time (cada robô aperta o botão "velocidade" vezes por segundo)
   function prodTime() {
     let s = 0;
@@ -29,19 +29,14 @@ const Jogo = (function() {
     return s * velocidadeTime() * multMoedas();
   }
   function valorToque() {
-    const base = (1 + 3 * nivelUp("dedo")) * Math.pow(2, nivelUp("dedo2")) * Math.pow(2, nivelNo("dedo_aco"));
+    const base = (1 + 3 * nivelUp("dedo")) * Math.pow(2, nivelUp("dedo2")) * Math.pow(3, nivelUp("dedo3")) * Math.pow(2, nivelNo("dedo_aco"));
     return (base + ECO.toqueTime * prodTime() / multMoedas()) * multMoedas();
   }
-  // preço de criar: sobe com os robôs criados e, depois do robô nível 8, tem um PISO de alguns segundos da renda
-  // do time (2 s por nível acima do 8, até 20 s). Assim quem está muito evoluído (bilhões) não cria robô por
-  // trocado. O começo (até liberar o renascer) não muda. Os descontos (Linha, Prensa, Desconto) valem nos dois.
+  // preço de criar: sobe 12% a cada robô criado na partida (zera ao renascer); Linha, Prensa e Desconto baixam
   function custoCriar() {
-    const desconto = Math.pow(0.85, nivelUp("linha")) * Math.pow(0.8, nivelUp("prensa")) * Math.pow(0.85, nivelNo("desconto"));
-    const normal = ECO.criarBase * Math.pow(ECO.criarCresce, save.p.criados);
-    const segundos = Math.min(20, 2 * Math.max(0, save.p.maxTier - 8));
-    return Math.ceil(Math.max(normal, segundos * prodTime()) * desconto);
+    return Math.ceil(ECO.criarBase * Math.pow(ECO.criarCresce, save.p.criados) * Math.pow(0.85, nivelUp("linha")) * Math.pow(0.8, nivelUp("prensa")) * Math.pow(0.85, nivelNo("desconto")));
   }
-  function tierNasce() { return Math.min(MAX_TIER, 1 + nivelUp("fabrica") + nivelUp("fabrica2") + (Math.random() < 0.1 * nivelNo("sorte") ? 1 : 0)); }
+  function tierNasce() { return Math.min(MAX_TIER, 1 + nivelUp("fabrica") + nivelUp("fabrica2") + nivelUp("fabrica3") + (Math.random() < 0.1 * nivelNo("sorte") ? 1 : 0)); }
   function intervaloEsteira() { return 15 * Math.pow(0.85, nivelUp("esteira")) * Math.pow(0.8, nivelUp("esteira2")) * Math.pow(0.8, nivelNo("esteira_r")); }
 
   // ---------- toque no botão ----------
@@ -81,22 +76,26 @@ const Jogo = (function() {
     const p = save.p, a = p[de.lista][de.i], b = p[para.lista][para.i];
     if (!a) return;
     if (b === a && a < MAX_TIER) {
-      p[para.lista][para.i] = a + 1; p[de.lista][de.i] = 0;
-      juntou(para, a + 1);
+      const novo = nivelJunta(a);
+      p[para.lista][para.i] = novo; p[de.lista][de.i] = 0;
+      juntou(para, novo, novo > a + 1);
     } else { p[para.lista][para.i] = a; p[de.lista][de.i] = b; }
     avisar("mudou");
   }
-  function juntou(onde, tier) {
+  // Fusão Instável (tier 7): 6% por nível de chance de a junção pular um nível
+  function nivelJunta(n) { return Math.min(MAX_TIER, n + 1 + (n + 1 < MAX_TIER && Math.random() < 0.06 * nivelUp("fusao_inst") ? 1 : 0)); }
+  function juntou(onde, tier, pulou) {
     save.stats.juncoes++;
+    if (pulou) descobrir(tier - 1);
     descobrir(tier);
-    avisar("juntou", { lista: onde.lista, i: onde.i, tier: tier });
+    avisar("juntou", { lista: onde.lista, i: onde.i, tier: tier, pulou: !!pulou });
   }
   // tocar num robô (celular: sem arrastar): junta com outro igual da grade; senão vai para o time (ou volta)
   function tocarRobo(lista, i) {
     const p = save.p, n = p[lista][i];
     if (!n) return;
     const par = p.grade.findIndex(function(m, k) { return m === n && !(lista === "grade" && k === i); });
-    if (par >= 0 && n < MAX_TIER) { p.grade[par] = 0; p[lista][i] = n + 1; juntou({ lista: lista, i: i }, n + 1); avisar("mudou"); return; }
+    if (par >= 0 && n < MAX_TIER) { const novo = nivelJunta(n); p.grade[par] = 0; p[lista][i] = novo; juntou({ lista: lista, i: i }, novo, novo > n + 1); avisar("mudou"); return; }
     const outra = lista === "grade" ? "time" : "grade", v = vagaLivre(outra);
     if (v >= 0) { p[outra][v] = n; p[lista][i] = 0; avisar("mudou"); }
   }
@@ -110,8 +109,9 @@ const Jogo = (function() {
       else if (visto[n] === undefined) visto[n] = i;
     }
     if (!melhor) return false;
-    g[melhor.a] = melhor.n + 1; g[melhor.b] = 0;
-    juntou({ lista: "grade", i: melhor.a }, melhor.n + 1);
+    const novo = nivelJunta(melhor.n);
+    g[melhor.a] = novo; g[melhor.b] = 0;
+    juntou({ lista: "grade", i: melhor.a }, novo, novo > melhor.n + 1);
     avisar("mudou");
     return true;
   }
