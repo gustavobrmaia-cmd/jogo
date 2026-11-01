@@ -99,7 +99,7 @@ const Surpresas = (function() {
   function venceuMonstro(x, y) {
     const m = monstro; sumir(m); monstro = null;
     save.stats.invasores = (save.stats.invasores || 0) + 1;
-    const v = Math.round(Math.max(Jogo.custoCriar() * 5, Jogo.prodTime() * 90 + Jogo.valorToque() * 50) * (1 + 0.6 * arv("invasor")));
+    const v = Math.round(Math.max(Jogo.custoCriar() * 5, Jogo.prodTime() * 90 + Jogo.valorToque() * 50) * (1 + 0.6 * arv("invasor")) * (1 + 0.4 * nivelUp("radar")));   // árvore + Radar
     save.p.moedas += v;
     Fx.moedas(x, y, 14); Fx.faiscas(x, y, "#ff5d73", 18);
     Fx.numero(x, y - 20, "+" + fmt(v), "#ffcc33", 40);
@@ -144,10 +144,10 @@ const Surpresas = (function() {
     else { proxOuro -= dt * (m === "ouro" ? 4 : 1) * (1 + 0.25 * nivelUp("ima")) * (1 + 0.15 * arv("ouro")); if (proxOuro <= 0) soltarOuro(); }   // Ímã: aparece mais
     const monstroLiberado = save.hordasVencidas >= 1 || m === "monstro";
     if (monstro) passoMonstro(dt);
-    else if (monstroLiberado) { proxMonstro -= dt * (m === "monstro" ? 6 : 1); if (proxMonstro <= 0) soltarMonstro(); }
+    else if (monstroLiberado) { proxMonstro -= dt * (m === "monstro" ? 6 : 1) * (1 + 0.2 * nivelUp("radar")); if (proxMonstro <= 0) soltarMonstro(); }
     // selo do turbo no topo
     const tr = Jogo.turboRestante(), box = el("boxTurbo");
-    if (tr > 0) { box.classList.remove("escondido"); el("txtTurbo").textContent = Math.ceil(tr) + "s"; }
+    if (tr > 0) { box.classList.remove("escondido"); el("txtTurbo").textContent = Math.ceil(tr) + "s"; box.querySelector("b").textContent = "x" + fmt(Jogo.multTurbo()); }
     else if (!box.classList.contains("escondido")) box.classList.add("escondido");
   }
 

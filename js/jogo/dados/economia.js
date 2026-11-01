@@ -37,11 +37,39 @@ const UPGRADES = [
   { id: "hidraulica", tier: 6, base: 4e10, cresce: 3, icone: "pistao" },                    // time +60%
   { id: "fabrica3",  tier: 7, principal: true, base: 3e14, cresce: 5, icone: "fabrica" },   // robôs nascem 1 nível acima
   { id: "fusao_inst", tier: 7, base: 1e14, cresce: 3.2, icone: "atomo" },                   // 6% de chance de juntar pular 1 nível
-  { id: "dedo3",     tier: 7, base: 8e13, cresce: 3, icone: "dedo" }                        // toque x3
+  { id: "dedo3",     tier: 7, base: 8e13, cresce: 3, icone: "dedo" },                       // toque x3
+  // v8: 3 upgrades a mais por tier (6 por tier), quase todos com mecânica nova
+  { id: "ritmo",      tier: 1, base: 120,  cresce: 2.4, icone: "nota" },        // combo: tocar rápido dá até +20%/nível
+  { id: "mira",       tier: 1, base: 400,  cresce: 2.5, icone: "mira" },        // +3% de chance de toque crítico
+  { id: "cofrinho",   tier: 1, base: 600,  cresce: 2.6, icone: "porco" },       // juros: 0,5% das moedas a cada 10 s
+  { id: "reciclagem", tier: 2, base: 3000, cresce: 2.6, icone: "reciclar" },    // juntar devolve 5% do preço de criar
+  { id: "bancada",    tier: 2, base: 3500, cresce: 2.8, icone: "bancada" },     // robôs da grade rendem 1% do valor
+  { id: "caixa_premiada", tier: 2, base: 5000, cresce: 3, icone: "presente" }, // 3% de nascer 2 níveis acima
+  { id: "furia",      tier: 3, base: 5e4,  cresce: 2.7, icone: "chama" },       // a cada 100 toques: toque x3 por 4+2n s
+  { id: "medico",     tier: 3, base: 4e4,  cresce: 2.5, icone: "conserto" },    // batalha: robozinhos curam 1%/s
+  { id: "esteira_dupla", tier: 3, base: 8e4, cresce: 2.8, icone: "esteira" },  // 8% de vir 2 robôs grátis
+  { id: "reforco",    tier: 4, base: 3e6,  cresce: 3, icone: "batalha" },       // +1 robozinho por robô na batalha
+  { id: "radar",      tier: 4, base: 2.5e6, cresce: 2.7, icone: "radar" },      // invasores +20% vezes e +40% prêmio
+  { id: "negociador", tier: 4, base: 4e6,  cresce: 3, icone: "etiqueta" },      // upgrades 6% mais baratos
+  { id: "plantao",    tier: 5, base: 1.5e8, cresce: 2.6, icone: "lua" },        // offline +40%
+  { id: "gerente",    tier: 5, base: 1.8e8, cresce: 2.6, icone: "prancheta" },  // missões +50%
+  { id: "capacitor",  tier: 5, base: 2e8,  cresce: 2.7, icone: "bateria" },     // habilidades recarregam 8% mais rápido
+  { id: "clonagem",   tier: 6, base: 5e10, cresce: 3.2, icone: "dna" },         // 3% de sobrar uma cópia ao juntar
+  { id: "turbo_forte", tier: 6, base: 3.5e10, cresce: 3, icone: "raio" },       // turbo do robô dourado x3 -> +0,5/nível
+  { id: "laboratorio", tier: 6, base: 4.5e10, cresce: 3, icone: "frasco" },     // descobertas +15% de pontos
+  { id: "critico_sup", tier: 7, base: 1.2e14, cresce: 3, icone: "mira" },       // críticos +5x
+  { id: "exercito",   tier: 7, base: 9e13, cresce: 3.2, icone: "escudo" },      // +1 vaga na batalha
+  { id: "producao",   tier: 7, base: 1.5e14, cresce: 3.2, icone: "grafico" }    // cada robô criado: +0,2% de renda (até +200%)
 ];
+// a ordem de exibição: principal primeiro, depois na ordem da lista
+UPGRADES.sort(function(a, b) { return a.tier - b.tier || (b.principal ? 1 : 0) - (a.principal ? 1 : 0); });
 const NIVEIS_UPGRADE = 5;
 const UPGRADE = {};
 UPGRADES.forEach(function(u) { UPGRADE[u.id] = u; });
 const N_TIERS = Math.max.apply(null, UPGRADES.map(function(u) { return u.tier; }));
 function principalDoTier(t) { return UPGRADES.filter(function(u) { return u.tier === t && u.principal; })[0]; }
-function custoUpgrade(id, nivel) { const u = UPGRADE[id]; return Math.ceil(u.base * Math.pow(u.cresce, nivel)); }
+// v8 (mais difícil): do tier 2 em diante tudo custa o dobro e cada nível sobe +0,3 a mais; Negociador desconta 6%/nível
+function custoUpgrade(id, nivel) {
+  const u = UPGRADE[id], dif = u.tier >= 2 ? 2 : 1, cresce = u.cresce + (u.tier >= 2 ? 0.3 : 0);
+  return Math.ceil(u.base * dif * Math.pow(cresce, nivel) * Math.pow(0.94, nivelUp("negociador")));
+}

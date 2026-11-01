@@ -25,9 +25,9 @@ const Batalha = (function() {
   const GRAV = 340, MAX_MINIS = 120;
 
   function multRobo() { return (1 + 0.25 * nivelUp("blindagem")) * (1 + 0.5 * nivelUp("canhoes")) * (1 + 0.3 * nivelNo("blindagem")) * (1 + 0.2 * arv("batalha")); }
-  function vagas() { return nivelNo("esquadrao") ? 12 : CONFIG.slotsBatalha; }
+  function vagas() { return (nivelNo("esquadrao") ? 12 : CONFIG.slotsBatalha) + nivelUp("exercito"); }   // + Exército Maior
   function hordaAberta(z) { return z < 3 || z <= save.hordasVencidas; }
-  function minisPorRobo(n) { return 4 + Math.floor(n / 4); }   // nível 1: 4 robozinhos; nível 12: 7; nível 24: 10
+  function minisPorRobo(n) { return 4 + Math.floor(n / 4) + nivelUp("reforco"); }   // + Reforços   // nível 1: 4 robozinhos; nível 12: 7; nível 24: 10
   function contarMinis(tiers) {
     const tot = tiers.reduce(function(s, n) { return s + minisPorRobo(n); }, 0);
     return Math.min(MAX_MINIS, tot);
@@ -158,6 +158,7 @@ const Batalha = (function() {
     b.robos.forEach(function(r) {
       if (r.morto) return;
       if (r.golpe > 0) r.golpe = Math.max(0, r.golpe - dt * 3.2);
+      if (nivelUp("medico") && r.vida > 0 && r.vida < r.max) r.vida = Math.min(r.max, r.vida + r.max * 0.01 * nivelUp("medico") * dt);   // Médicos de Campo
       if (fisica(r, dt)) return;
       if (r.vida <= 0) { morreuMini(r); return; }
       r.pensa -= dt;
@@ -265,7 +266,7 @@ const Batalha = (function() {
 
   // ---------- habilidades ----------
   function liberada(h) { return save.hordasVencidas >= h.libera; }
-  function cdDe(h) { return h.cd * Math.pow(0.8, nivelNo("hab_cd")); }
+  function cdDe(h) { return h.cd * Math.pow(0.8, nivelNo("hab_cd")) * Math.pow(0.92, nivelUp("capacitor")); }   // + Capacitores
   function poder() {
     const m = (1 + 0.5 * nivelUp("canhoes")) * (1 + 0.5 * nivelNo("hab_dano")) * (1 + 0.3 * arv("hab"));
     return (vivos(b.robos).reduce(function(s, r) { return s + r.ataque; }, 0) + b.fila.reduce(function(s, f) { return s + f.ataque; }, 0)) * m;

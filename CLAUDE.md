@@ -97,6 +97,14 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
   pontilhada no topo das peças, brilho maior; robôs com rebites, ventilação, reflexo, propulsores (13+), emblema
   (21-27); monstros com pintas, barriga clara e dentes. Folha de comparação: verif/sprites.js.
 
+## v8: 42 upgrades (6 por tier) e jogo mais difícil
+- Novos: Ritmo (combo de toques, medidor #combo), Mira Laser (crítico x5 sem a árvore), Cofrinho (juros a cada 10 s,
+  teto de 30 s de produção), Reciclagem, Bancada (grade rende), Caixa Premiada (+2 níveis), Fúria (a cada 100 toques,
+  x3), Médicos, Esteira Dupla, Reforços, Radar, Negociador, Turno da Noite, Gerente, Capacitores, Clonagem (sobra
+  cópia ao juntar), Turbo Turbinado, Laboratório, Crítico Supremo, Exército Maior, Produção em Massa (teto +200%).
+- Mais difícil: tier 2+ custa 2x e cada nível sobe +0,3 a mais (custoUpgrade); moedas de descoberta pela metade.
+  sim/eco6.js: começo igual (robô 8 ~7 min), meio/fim ~30% mais lento.
+
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.
 - 1ª partida: nível 6 ~40 s, 8 (libera renascer) ~5 min, 10 ~15 min, 12 ~28 min. Depois de renascer anda bem mais rápido.

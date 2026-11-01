@@ -473,6 +473,71 @@ const Pixel = (function() {
         f.circ(12, 12, 4.5, M(ROXO, true)); f.dC(11, 11, 1.4, "#ffffff");
         f.d(2, 3, "#ffe066"); f.d(21, 20, "#ffe066"); f.d(20, 2, "#ffffff"); void o; break;
       }
+      // ---- v8: ícones dos upgrades novos ----
+      case "nota": {   // nota musical dupla (ritmo/combo)
+        const n = M(ROXO, true); f.circ(7, 18, 4, n); f.circ(18, 15, 4, n); f.rect(9, 4, 2, 14, n); f.rect(20, 2, 2, 13, n);
+        f.poli([[9, 4], [22, 1], [22, 5], [9, 8]], M(ROXO)); f.d(3, 3, "#ffe066"); f.d(14, 21, "#ffe066"); break;
+      }
+      case "mira": {   // mira vermelha
+        f.circ(12, 12, 10, M(VERMELHO, true)); f.dC(12, 12, 7.5, null); f.circ(12, 12, 5, M(VERMELHO)); f.dC(12, 12, 2.6, null);
+        f.dR(11, 0, 2, 7, "#e8ecf8"); f.dR(11, 17, 2, 7, "#e8ecf8"); f.dR(0, 11, 7, 2, "#e8ecf8"); f.dR(17, 11, 7, 2, "#e8ecf8"); f.dR(11, 11, 2, 2, "#ffe066"); break;
+      }
+      case "porco": {   // cofrinho de porco com moeda entrando
+        const r = M(mat(340, 70, 72), true); f.elip(12, 14, 10, 7.5, r); f.rect(5, 19, 3, 4, r); f.rect(16, 19, 3, 4, r); f.poli([[6, 8], [9, 3], [11, 8]], r);
+        f.elip(21, 14, 2.6, 2.2, M(mat(340, 60, 60))); f.d(20, 13, "#5a2030"); f.d(22, 13, "#5a2030"); f.d(15, 11, "#2a1030");
+        f.dR(9, 7, 6, 1, "#5a2030"); f.circ(12, 3, 3, M(OURO, true)); break;
+      }
+      case "reciclar": {   // três setas em triângulo
+        const v = M(VERDE, true);
+        f.traco(12, 2, 4, 15, 3, v); f.traco(4, 18, 19, 18, 3, v); f.traco(20, 15, 13, 3, 3, v);
+        f.poli([[1, 13], [7, 13], [4, 18]], v); f.poli([[17, 15], [17, 21], [22, 18]], v); f.poli([[14, 1], [16, 7], [10, 5]], v); break;
+      }
+      case "bancada": {   // bancada com robôzinho em cima
+        f.rect(1, 13, 22, 4, M(MADEIRA, true)); f.rect(3, 17, 3, 6, M(MADEIRA)); f.rect(18, 17, 3, 6, M(MADEIRA));
+        f.rr(7, 3, 10, 7, 2, M(AZUL, true)); f.rect(9, 10, 6, 3, M(METAL)); f.dR(9, 5, 2, 2, "#7cf0ff"); f.dR(13, 5, 2, 2, "#7cf0ff"); break;
+      }
+      case "presente": {   // caixa de presente dourada
+        f.rect(2, 9, 20, 14, M(VERMELHO, true)); f.rect(1, 6, 22, 5, M(VERMELHO));
+        const o = M(OURO, true); f.rect(10, 6, 4, 17, o); f.poli([[12, 6], [5, 1], [6, 6]], o); f.poli([[12, 6], [19, 1], [18, 6]], o); break;
+      }
+      case "chama": {   // fogo da fúria
+        f.poli([[12, 0], [20, 11], [19, 19], [12, 23], [5, 19], [4, 11], [8, 13]], M(mat(16, 92, 54), true));
+        f.poli([[12, 8], [16, 15], [15, 20], [12, 22], [9, 20], [8, 15]], M(OURO, true)); f.dC(12, 18, 2, "#fff6c8"); break;
+      }
+      case "radar": {   // antena parabólica com ondas
+        f.poli([[2, 6], [16, 20], [4, 20]], M(METAL, true)); f.rect(8, 19, 3, 4, M(METAL_E)); f.rect(4, 22, 11, 2, M(METAL_E));
+        [[16, 8, 3], [18, 6, 6], [20, 4, 9]].forEach(function(q, i) { for (let k = 0; k < q[2]; k++) f.d(q[0] + k, q[1] - k + (i ? 0 : 0), "#3ccf6e"); });
+        f.dC(9, 13, 1.6, "#ff4d5e"); break;
+      }
+      case "etiqueta": {   // etiqueta de preço
+        f.poli([[2, 12], [12, 2], [22, 2], [22, 12], [12, 22]], M(OURO, true)); f.dC(17, 7, 2, null);
+        f.dR(9, 11, 6, 2, "#8a5a10"); f.dR(11, 9, 2, 6, "#8a5a10"); break;
+      }
+      case "lua": {   // lua com estrelinhas (turno da noite)
+        f.circ(11, 12, 9.5, M(mat(48, 80, 70), true)); f.dC(16, 8, 8, null);
+        f.d(18, 15, "#ffe066"); f.d(21, 4, "#ffffff"); f.d(3, 3, "#ffffff"); f.d(20, 20, "#ffe066"); break;
+      }
+      case "prancheta": {   // prancheta com lista
+        f.rr(3, 3, 18, 20, 2, M(MADEIRA, true)); f.rect(5, 6, 14, 15, M(mat(48, 30, 90))); f.rect(8, 1, 8, 4, M(METAL, true));
+        [9, 13, 17].forEach(function(y) { f.dR(7, y, 2, 2, "#3ccf6e"); f.dR(10, y, 7, 1, "#5d6380"); }); break;
+      }
+      case "bateria": {   // bateria carregando
+        f.rr(2, 6, 18, 13, 2, M(METAL_E, true)); f.rect(20, 9, 3, 7, M(METAL));
+        f.rect(4, 8, 14, 9, M(VERDE, true)); f.poli([[11, 8], [7, 13], [10, 13], [9, 17], [14, 11], [11, 11], [13, 8]], M(OURO, true)); break;
+      }
+      case "dna": {   // dupla hélice (clonagem)
+        for (let y = 1; y < 23; y++) { const k = Math.sin(y / 3.5) * 6; f.dR(Math.round(12 + k) - 1, y, 3, 1, "#7cf0ff"); f.dR(Math.round(12 - k) - 1, y, 3, 1, "#ff9df0"); if (y % 3 === 0) f.dR(Math.round(12 - Math.abs(k)), y, Math.round(Math.abs(k) * 2), 1, "#e8ecf8"); }
+        break;
+      }
+      case "frasco": {   // frasco de laboratório borbulhando
+        f.rect(9, 1, 6, 8, M(METAL, true)); f.poli([[9, 8], [15, 8], [22, 22], [2, 22]], M(mat(200, 30, 88)));
+        f.poli([[6, 15], [18, 15], [21, 21], [3, 21]], M(VERDE, true)); f.dC(10, 18, 1.2, "#b8ffcf"); f.dC(15, 17, 1, "#b8ffcf"); f.dC(13, 11, 1, "#b8ffcf"); break;
+      }
+      case "grafico": {   // gráfico subindo
+        f.rect(2, 2, 3, 20, M(METAL_E)); f.rect(2, 19, 20, 3, M(METAL_E));
+        const g = M(VERDE, true); f.rect(7, 13, 3, 6, g); f.rect(12, 9, 3, 10, g); f.rect(17, 4, 3, 15, g);
+        f.poli([[15, 2], [22, 2], [22, 9]], M(OURO, true)); break;
+      }
       case "engrenagem": {
         const m = M(mat(40, 70, 52), true); f.circ(12, 12, 7.5, m);
         for (let n = 0; n < 8; n++) { const an = n * Math.PI / 4 + 0.2; f.traco(12 + Math.cos(an) * 6, 12 + Math.sin(an) * 6, 12 + Math.cos(an) * 11, 12 + Math.sin(an) * 11, 4, m); }

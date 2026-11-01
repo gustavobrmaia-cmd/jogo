@@ -204,6 +204,7 @@ const Tela = (function() {
     Fx.faiscas(c.x, c.y, "#7cf0ff", 12);
     Som.som("juntar", 1 + Math.min(d.tier, 20) * 0.03);
     if (d.pulou) { Fx.numero(c.x, c.y - 20, "+2!", "#ff9df0", 40); Fx.faiscas(c.x, c.y, "#ff9df0", 20); }   // Fusão Instável
+    if (d.clone) { Fx.numero(c.x, c.y + 10, "x2", "#7cf0ff", 34); }   // Clonagem: sobrou uma cópia
     vibrar(15);
   });
   Jogo.ao("cheio", function() {
@@ -212,11 +213,28 @@ const Tela = (function() {
   });
   Jogo.ao("mudou", function() { atualizarVagas(); });
 
+  // Fúria e juros (v8)
+  Jogo.ao("furia", function() {
+    const r = cvB.getBoundingClientRect();
+    Fx.numero(r.left + r.width / 2, r.top + r.height * 0.15, t("furia"), "#ff5a2e", 46); Fx.faiscas(r.left + r.width / 2, r.top + r.height / 2, "#ff8a2e", 30);
+    Som.som("hab_sobrecarga"); vibrar(60);
+  });
+  Jogo.ao("juros", function(d) { const r = el("boxMoedas").getBoundingClientRect(); Fx.numero(r.left + r.width / 2, r.bottom + 14, "+" + fmt(d.valor), "#3ccf6e", 22); });
+  // medidor de combo / fúria em cima do botão
+  function atualizarCombo() {
+    const box = el("combo"), f = Jogo.emFuria(), c = Jogo.combo;
+    const mostra = f || (nivelUp("ritmo") > 0 && c > 0.02);
+    if (!mostra) { if (!box.classList.contains("escondido")) box.classList.add("escondido"); return; }
+    box.classList.remove("escondido"); box.classList.toggle("furia", f);
+    escrever("comboTxt", f ? t("furia") + " " + Math.ceil(Jogo.furiaRestante()) + "s" : t("combo") + " +" + Math.round(c * 20 * nivelUp("ritmo")) + "%");
+    box.querySelector("s").style.width = Math.round((f ? Jogo.furiaRestante() / (4 + 2 * nivelUp("furia")) : c) * 100) + "%";
+  }
   // ---------- contadores (todo quadro, só escreve quando muda) ----------
   const cache = {};
-  function escrever(id, txt) { if (cache[id] !== txt) { cache[id] = txt; el(id).textContent = txt; } }
+  function escrever(id, txt) { if (cache[id] !== txt) { cache[id] = txt; (id === "comboTxt" ? el("combo").firstChild : el(id)).textContent = txt; } }
   function atualizarTopo() {
     escrever("txtMoedas", fmt(save.p.moedas));
+    atualizarCombo();
     const prod = Jogo.prodTime() * Jogo.multTurbo();
     escrever("txtProd", prod > 0 ? "+" + fmt(prod) + "/s" : "");
     escrever("txtPh", fmt(save.ph));

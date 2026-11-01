@@ -78,7 +78,7 @@ const Missoes = (function() {
   function completa() { const m = atual(); return progresso(m) >= m.alvo; }
   function premio() {
     const base = Math.max(Jogo.custoCriar() * 3, Jogo.prodTime() * 30 + Jogo.valorToque() * 15);
-    return Math.round(base * (1 + 0.1 * Math.min(atual().n, 10)) * (1 + 0.25 * arv("missao")));   // árvore: missões pagam mais
+    return Math.round(base * (1 + 0.1 * Math.min(atual().n, 10)) * (1 + 0.25 * arv("missao")) * (1 + 0.5 * nivelUp("gerente")));   // + Gerente   // árvore: missões pagam mais
   }
   function texto(m) {
     switch (m.tipo) {

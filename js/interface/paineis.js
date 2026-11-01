@@ -68,6 +68,27 @@ const Paineis = (function() {
       case "fabrica3": return t("up_fabrica2_d", n, n + 1);
       case "fusao_inst": return t("up_fusao_inst_d", pct(0.06 * n), pct(0.06 * (n + 1)));
       case "dedo3": return t("up_dedo2_d", Math.pow(3, n), Math.pow(3, n + 1));
+      case "ritmo": return t("up_ritmo_d", 20 * n, 20 * (n + 1));
+      case "mira": return t("up_mira_d", 3 * n, 3 * (n + 1));
+      case "cofrinho": return t("up_cofrinho_d", (0.5 * n).toFixed(1), (0.5 * (n + 1)).toFixed(1));
+      case "reciclagem": return t("up_reciclagem_d", 5 * n, 5 * (n + 1));
+      case "bancada": return t("up_bancada_d", n, n + 1);
+      case "caixa_premiada": return t("up_caixa_premiada_d", 3 * n, 3 * (n + 1));
+      case "furia": return t("up_furia_d", n ? 4 + 2 * n : 0, 4 + 2 * (n + 1));
+      case "medico": return t("up_medico_d", n, n + 1);
+      case "esteira_dupla": return t("up_esteira_dupla_d", 8 * n, 8 * (n + 1));
+      case "reforco": return t("up_reforco_d", n, n + 1);
+      case "radar": return t("up_radar_d", 20 * n, 20 * (n + 1));
+      case "negociador": return t("up_negociador_d", pct(1 - Math.pow(0.94, n)), pct(1 - Math.pow(0.94, n + 1)));
+      case "plantao": return t("up_plantao_d", 40 * n, 40 * (n + 1));
+      case "gerente": return t("up_gerente_d", 50 * n, 50 * (n + 1));
+      case "capacitor": return t("up_capacitor_d", pct(1 - Math.pow(0.92, n)), pct(1 - Math.pow(0.92, n + 1)));
+      case "clonagem": return t("up_clonagem_d", 3 * n, 3 * (n + 1));
+      case "turbo_forte": return t("up_turbo_forte_d", fmt(3 + 0.5 * n), fmt(3 + 0.5 * (n + 1)));
+      case "laboratorio": return t("up_laboratorio_d", 15 * n, 15 * (n + 1));
+      case "critico_sup": { const b = (nivelNo("critico2") ? 25 : nivelNo("critico") ? 10 : 5); return t("up_critico_sup_d", b + 5 * n, b + 5 * (n + 1)); }
+      case "exercito": return t("up_exercito_d", n, n + 1);
+      case "producao": return t("up_producao_d", (0.2 * n).toFixed(1), (0.2 * (n + 1)).toFixed(1));
     }
     return "";
   }

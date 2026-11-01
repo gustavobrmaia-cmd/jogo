@@ -89,7 +89,7 @@ const NOS_TIPO = {};
 ARVORE.forEach(function(n) { if (n.tipo) (NOS_TIPO[n.tipo] || (NOS_TIPO[n.tipo] = [])).push(n.id); });
 function arv(tipo) { const l = NOS_TIPO[tipo]; if (!l) return 0; let s = 0; for (let i = 0; i < l.length; i++) s += save.arvore[l[i]] || 0; return s; }
 // pontos de habilidade das descobertas: +10% por nível de "ph" e +25% por nível do Bônus de Descoberta (antigo ph_bonus)
-function fatorPh() { return 1 + 0.1 * arv("ph") + 0.25 * (save.arvore.ph_bonus || 0); }
+function fatorPh() { return 1 + 0.1 * arv("ph") + 0.25 * (save.arvore.ph_bonus || 0) + 0.15 * nivelUp("laboratorio"); }   // + Laboratório (upgrade)
 // nome dos nós genéricos: nome do tipo + número romano (ordem no mapa)
 const ROMANO = ["I", "II", "III", "IV", "V", "VI"];
 function nomeNo(id) { const n = NO[id]; if (id === "ph_bonus") return t("ar_ph_bonus2"); if (!n.tipo) return t("ar_" + id); return t("art_" + n.tipo) + " " + ROMANO[NOS_TIPO[n.tipo].indexOf(id)]; }
