@@ -118,6 +118,16 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
 - Desafios ao renascer (escolhe na árvore): semesteira, caro, time3, furioso; descobertas +50% PH e +10 no robô 8.
 - Dificuldade: razão 2,05 (era 2,3), upgrades tier 2+ custam 4x e +0,6 no crescimento (sim/eco7.js).
 
+## PFT do Robot Button (v9, 2/nov, de dia): PASSOU de primeira — 3m10s, 26% engajados
+- 43% saíram no 1º minuto; 17% passaram de 5 min (quem passa do começo fica). Só ~1/3 pegou o prêmio da missão 1
+  (não percebiam que tinha que tocar no cartão). Horda Fácil perdia 57%, Média 74%, Difícil 70%.
+## v10 (corrige o PFT)
+- Missão se pega sozinha 1,1 s depois de completar (tocar ainda pega na hora). Missão 1: 10 toques.
+- Hordas 0-2 com vida/ataque x0,3 / x0,3 / x0,2 (sim/novato2.js com times fracos); Torre andares 1-3 x0,5.
+  poderHorda x3 (verde ~ dá para ganhar com time misturado).
+- 1º minuto: dica do botão em 6 toques; esteira só anda depois do 1º robô criado e o 1º grátis cai em ~4 s
+  (forma o 1º par para juntar). Teste: verif/v10.js simula um jogador novo.
+
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.
 - 1ª partida: nível 6 ~40 s, 8 (libera renascer) ~5 min, 10 ~15 min, 12 ~28 min. Depois de renascer anda bem mais rápido.

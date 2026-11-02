@@ -8,7 +8,7 @@
 // Tipos de estado (olham o jogo agora): time, tier, up, uptier, horda, renascer.
 // =========================
 const MISSOES = [
-  { tipo: "toques", alvo: 15 },
+  { tipo: "toques", alvo: 10 },
   { tipo: "criar", alvo: 3 },
   { tipo: "juntar", alvo: 1 },
   { tipo: "time", alvo: 1 },
@@ -103,16 +103,19 @@ const Missoes = (function() {
   function atualizar() {
     const m = atual(), p = progresso(m), ok = p >= m.alvo;
     const mostraNum = m.alvo > 1 && m.tipo !== "uptier" && m.tipo !== "horda" && m.tipo !== "renascer";
-    escrever("mTitulo", ok ? t("m_pegar") : t("missao") + " " + (m.n + 1));
+    escrever("mTitulo", ok ? t("m_feita") : t("missao") + " " + (m.n + 1));
     escrever("mTexto", texto(m) + (mostraNum && !ok ? "  " + fmt(p) + "/" + fmt(m.alvo) : ""));
     el("mBarra").style.width = Math.round(p / m.alvo * 100) + "%";
     escrever("mPremio", "+" + fmt(premio()) + (m.ph ? " <i class='ico' data-ico='ph'></i>+" + m.ph : ""), true);
     if (cache.ico !== m.ph) { cache.ico = m.ph; Paineis.preencherIcones(card); }
     if (cache.ok !== ok) {
       cache.ok = ok; card.classList.toggle("pronta", ok);
-      if (ok) { Som.som("compra"); vibrar(20); }
+      if (ok) { Som.som("compra"); vibrar(20); autoAte = performance.now() + 1100; }
     }
+    // v10: o prêmio se pega sozinho 1 s depois de completar (no PFT só 1/3 percebia que tinha que tocar no cartão)
+    if (ok && autoAte && performance.now() >= autoAte && !Paineis.janelaAberta() && !CenaBatalha.aberta) { autoAte = 0; pegar(); }
   }
+  let autoAte = 0;
   function pegar() {
     if (!completa()) { card.classList.remove("cutuca"); void card.offsetWidth; card.classList.add("cutuca"); return; }
     const m = atual(), v = premio();

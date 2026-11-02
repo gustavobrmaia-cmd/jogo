@@ -17,7 +17,7 @@ function partidaNova() {
     desafio: "",          // desafio escolhido ao renascer (v9)
     desafioFeito: false,
     sabotagem: 0,         // até quando a fábrica fica danificada pelo chefão (Date.now, v9)   // traço de cada vaga (tracos.js), mesmo tamanho de grade/time            // níveis de robô que já deram pontos nesta partida (renasceu: zera e dá de novo)
-    esteira: 0            // segundos até o próximo robô grátis
+    esteira: 11           // segundos acumulados da esteira (v10: começa perto, o 1º robô grátis cai em ~4 s)
   };
 }
 function saveNovo() {

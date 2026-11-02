@@ -40,7 +40,7 @@ const Batalha = (function() {
   function poderHorda(z) {
     let s = 0;
     for (let o = 0; o < hordaDe(z).ondas; o++) composicao(z, o).forEach(function(u) { s += Math.sqrt(u.vida * u.ataque / ATQ * 0.6) / 3.2; });
-    return s * 8;   // calibrado por simulação (sim/poder.js): time >= horda ~ vence (antes o número enganava)
+    return s * 3;   // v10: calibrado com times misturados (sim/novato2.js): verde ~ dá para ganhar
   }
 
   // ---------- quem entra em cada onda ----------
@@ -58,7 +58,9 @@ const Batalha = (function() {
   // Desafio "Monstros Furiosos" (renascer): monstros 2x vida e 1,5x ataque, prêmio 2x
   function furia() { return save.p.desafio === "furioso"; }
   function composicao(z, o) {
-    const h = hordaDe(z), l = [], ultima = o === h.ondas - 1, fv = furia() ? 2 : 1, fa = furia() ? 1.5 : 1;
+    // v10: as 3 primeiras hordas ficaram bem mais fáceis (no PFT a Fácil perdia 57% das vezes e desanimava)
+    const facil = z === "torre" ? (save.torre.andar <= 3 ? 0.5 : 1) : [0.3, 0.3, 0.2][z] || 1;   // torre: 3 primeiros andares mais leves
+    const h = hordaDe(z), l = [], ultima = o === h.ondas - 1, fv = (furia() ? 2 : 1) * facil, fa = (furia() ? 1.5 : 1) * facil;
     if (ultima && h.gigante === false) {   // torre sem gigante: um bando maior no fim
       for (let k = 0; k < 7; k++) { const tipo = k % 3, st = statsMonstro(h, tipo, o); l.push({ id: h.monstros[tipo].id, vida: st.vida * VIDA * fv, ataque: st.ataque * ATQ * fa }); }
       return l;

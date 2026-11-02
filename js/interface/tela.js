@@ -264,7 +264,7 @@ const Tela = (function() {
     const d = el("dica");
     if (save.tutorial >= 4) { d.classList.add("escondido"); el("btnCriar").classList.remove("destaque"); return; }
     const p = save.p, n = p.grade.filter(Boolean).length;
-    if (save.tutorial === 0 && toquesDica >= 10) save.tutorial = 1;
+    if (save.tutorial === 0 && toquesDica >= 6) save.tutorial = 1;   // v10: 6 toques (era 10)
     if (save.tutorial === 1 && n >= 1) save.tutorial = 2;
     if (save.tutorial === 2 && save.stats.juncoes > 0) save.tutorial = 3;
     if (save.tutorial === 3 && p.time.some(Boolean)) { save.tutorial = 4; Eventos.marco("tutorial-done"); }

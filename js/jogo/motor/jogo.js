@@ -202,7 +202,7 @@ const Jogo = (function() {
     if (nivelUp("cofrinho")) { relJuros += dt; if (relJuros >= 10) { relJuros = 0; const j = Math.min(p.moedas * 0.005 * nivelUp("cofrinho"), prodTime() * 30 + valorToque() * 20); if (j >= 1) { p.moedas += j; avisar("juros", { valor: j }); } } }
     if (combo > 0 && performance.now() - ultimoToque > 450) combo = Math.max(0, combo - dt * 0.4);
     // esteira: robô grátis (Esteira Dupla: às vezes vêm 2). Desafio "Sem Esteira": parada
-    if (p.desafio !== "semesteira") p.esteira += dt;
+    if (p.desafio !== "semesteira" && save.tutorial >= 2) p.esteira += dt;   // v10: só depois do 1º robô criado (aí o grátis forma o 1º par)
     if (p.esteira >= intervaloEsteira()) {
       if (vagaLivre("grade") >= 0) { p.esteira = 0; colocar(tierNasce()); if (Math.random() < 0.08 * nivelUp("esteira_dupla") && vagaLivre("grade") >= 0) colocar(tierNasce()); }
       else p.esteira = intervaloEsteira();
