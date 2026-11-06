@@ -128,6 +128,21 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
 - 1º minuto: dica do botão em 6 toques; esteira só anda depois do 1º robô criado e o 1º grátis cai em ~4 s
   (forma o 1º par para juntar). Teste: verif/v10.js simula um jogador novo.
 
+## v11: raids, visuais do botão e fábrica que evolui
+- RAID (interface/ataque.js no lugar do Ataque à Fábrica): sirene + aviso com contagem de 5 s, depois cena de batalha
+  z="raid" com 1-5 gigantes de uma vez (Batalha.prepararRaid: força = poder dos defensores x 0,75-1,1 x RAID_K[n],
+  calibrado em sim/raid.js: sem habilidades ~20-70%, usando bem ~100%). Vitória: moedas, 2 PH e 1 peça por chefão.
+  Derrota ou fugir: sabotagem 60 s. Mais chefões com hordas vencidas e renascimentos.
+- Visuais do botão (dados/skins.js, Pixel.botao(apertado, skin)): 11, por conquistas; Oficina > Botão.
+- Cenário (interface/cenario.js): estágio = principais no nível 5 (0-7), paletas e coisas novas; 13 upgrades normais
+  viram enfeites, espalhados nas zonas visíveis (fundo.js zonas: entre a grade e o time, em cima do botão e rodapé).
+  Cuidado: dentro do fundo.js "t" é o relógio; tradução lá é window.t.
+- v11.1 integração: viga (prateleira) em cima do botão e chão no rodapé; enfeites animam pelo nível do upgrade;
+  ao comprar, a máquina cai no lugar com poeira e o nome; engrenagens giram com Jogo.velocidadeTime; telas,
+  holograma e núcleo viram itens da prateleira; +10 enfeites (som, alvo, lixeira, tesla, clone, pilha, bandeira,
+  presentes na esteira, Esteira Turbo, faíscas do Overclock). Sem espaço, aparecem os de nível maior.
+  Celular: zona de cima entre a missão e o botão. Teste: verif/cenario.js.
+
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.
 - 1ª partida: nível 6 ~40 s, 8 (libera renascer) ~5 min, 10 ~15 min, 12 ~28 min. Depois de renascer anda bem mais rápido.

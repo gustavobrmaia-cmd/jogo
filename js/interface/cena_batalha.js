@@ -188,7 +188,7 @@ const CenaBatalha = (function() {
     g.restore();
     hud(b);
     const h = b.h;
-    escrever("cenaNome", h.id === "torre" ? t("torre_andar", h.andar) : t("z_" + h.id));
+    escrever("cenaNome", h.id === "raid" ? t("raid_nome", h.n) : h.id === "torre" ? t("torre_andar", h.andar) : t("z_" + h.id));
     escrever("cenaOnda", "  " + t("bat_onda", Math.min(b.onda + 1, h.ondas), h.ondas));
     atualizarBotoes();
     if (b.fim && !mostrouFim) { mostrouFim = true; resultado(b.fim); }
@@ -312,10 +312,15 @@ const CenaBatalha = (function() {
     Som.som(f.venceu ? "vitoria" : "derrota");
     r.classList.remove("escondido");
     r.innerHTML = "<b style='font-size:30px;color:" + (f.venceu ? "var(--ouro)" : "var(--vermelho)") + "'>" + Paineis.esc(t(f.venceu ? "bat_vitoria" : "bat_derrota")) + "</b>" +
-      (f.venceu ? "<span>+" + fmt(f.premio) + " " + Paineis.esc(t("moedas")) + "</span>" : "<span>" + Paineis.esc(t("bat_dica_derrota")) + "</span>");
+      (f.venceu ? "<span>+" + fmt(f.premio) + " " + Paineis.esc(t("moedas")) + "</span>" : "<span>" + Paineis.esc(t(f.raid ? "raid_perdeu" : "bat_dica_derrota")) + "</span>");
     if (f.novos.length) { const m = Paineis.elem("div", "mini"); f.novos.forEach(function(d) { m.appendChild(Pixel.img(Pixel.monstro(d.id))); }); r.appendChild(m); }
     if (f.venceu && f.torre) r.appendChild(Paineis.elem("span", "", Paineis.esc(t("torre_venceu", f.torre))));
-    if (f.peca) { const pc = Paineis.elem("div", "pecaGanha", "<b style='color:" + RARIDADE_COR[f.peca.r] + "'>" + Paineis.esc(Equip.nome(f.peca)) + "</b> <span>" + Paineis.esc(Equip.textoBonus(f.peca)) + "</span>"); pc.prepend(Paineis.icone(EQUIP_TIPOS[f.peca.t].ico)); r.appendChild(pc); }
+    if (f.venceu && f.raid) r.appendChild(Paineis.elem("span", "", "+" + f.ph + " " + Paineis.esc(t("ph_nome"))));
+    if (f.pecas && f.pecas.length > 1) {   // raid: uma peça por chefão
+      const lp = Paineis.elem("div", "mini");
+      f.pecas.forEach(function(p) { const c = Paineis.elem("div", "peca r" + p.r); c.appendChild(Paineis.icone(EQUIP_TIPOS[p.t].ico)); lp.appendChild(c); });
+      r.appendChild(lp);
+    } else if (f.peca) { const pc = Paineis.elem("div", "pecaGanha", "<b style='color:" + RARIDADE_COR[f.peca.r] + "'>" + Paineis.esc(Equip.nome(f.peca)) + "</b> <span>" + Paineis.esc(Equip.textoBonus(f.peca)) + "</span>"); pc.prepend(Paineis.icone(EQUIP_TIPOS[f.peca.t].ico)); r.appendChild(pc); }
     const l = Paineis.elem("div", "linhaBtns");
     const ok = Paineis.elem("button", "btn grande", Paineis.esc(t(f.venceu ? "pegar" : "voltar")));
     ok.addEventListener("click", function() { Som.som("clique"); fechar(true); });
@@ -329,6 +334,8 @@ const CenaBatalha = (function() {
   }
   // sair: no meio da luta é desistir (sem prêmio); no fim volta com intervalo comercial
   function fechar(intervalo) {
+    const b = Batalha.atual;
+    if (b && !b.fim && b.z === "raid") save.p.sabotagem = Date.now() + 60000;   // fugiu da raid: fábrica danificada
     aberta = false;
     cena.classList.add("escondido");
     Som.musica("jogo");

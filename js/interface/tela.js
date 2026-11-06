@@ -134,7 +134,8 @@ const Tela = (function() {
     if (!forcar && !brilho && ap === desenharBotao.ultimo && !desenharBotao.brilhava) return;
     desenharBotao.ultimo = ap; desenharBotao.brilhava = brilho;
     gB.clearRect(0, 0, cvB.width, cvB.height);
-    gB.drawImage(Pixel.botao(ap), 0, 0, cvB.width, cvB.height);
+    gB.drawImage(Pixel.botao(ap, save.skin), 0, 0, cvB.width, cvB.height);
+    cvB.classList.toggle("arcoiris", save.skin === "arcoiris");
     if (brilho && !ap) {
       const e = cvB.width / 64, x = Math.round((-16 + k * 96) ) * e;
       gB.save(); gB.globalCompositeOperation = "source-atop"; gB.globalAlpha = 0.35; gB.fillStyle = "#ffffff";

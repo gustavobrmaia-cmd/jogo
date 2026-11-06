@@ -173,6 +173,15 @@ const Paineis = (function() {
     const pode = UPGRADES.some(function(u) { const n = nivelUp(u.id); return n < NIVEIS_UPGRADE && Jogo.tierAberto(u.tier) && save.p.moedas >= custoUpgrade(u.id, n); });
     el("pontoUp").classList.toggle("on", (pode && save.tutorial >= 4) || (Jogo.podeRenascer() && save.ph >= 9));
     if (aba !== "oficina" && Encomendas.prontas()) el("pontoOfi").classList.add("on");
+    // v11: visual novo do botão desbloqueado
+    SKINS.forEach(function(k) {
+      if (save.skinsVistas.indexOf(k.id) >= 0 || !skinLiberada(k)) return;
+      save.skinsVistas.push(k.id);
+      faixa(Pixel.botao(false, k.id), t("sk_novo"), t("sk_" + k.id));
+      Som.som("descobrir");
+      if (aba !== "oficina") el("pontoOfi").classList.add("on");
+      Poki.medir("skin", k.id, "reached");
+    });
   }
   // v9: peça nova (faixa + bolinha na Oficina) e encomenda nova
   Jogo.ao("peca", function(it) {

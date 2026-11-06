@@ -282,19 +282,27 @@ const Pixel = (function() {
     return (cacheMonstro[id] = finalizar(f));
   }
 
-  // ---------- botão vermelho (64x64) ----------
+  // ---------- botão (64x64); v11: com visual (skins.js) ----------
   const cacheBotao = {};
-  function botao(apertado) {
-    const kc = apertado ? 1 : 0;
+  function botao(apertado, skin) {
+    const k = (typeof SKIN !== "undefined" && SKIN[skin]) || { h: 356, s: 82, l: 54 }, kc = (apertado ? 1 : 0) + ":" + (skin || "classico");
     if (cacheBotao[kc]) return cacheBotao[kc];
     const f = new Folha(64, 64), d = apertado ? 5 : 0;
-    const base = f.peca(mat(232, 18, 34)), anel = f.peca(METAL), fundo = f.peca(mat(232, 18, 40)), cil = f.peca(mat(356, 78, 34)), domo = f.peca(mat(356, 82, apertado ? 48 : 54), true);
+    const base = f.peca(mat(232, 18, 34)), anel = f.peca(k.enfeite === "neon" ? mat(184, 60, 40) : METAL), fundo = f.peca(mat(232, 18, 40));
+    const cil = f.peca(mat(k.h, k.s - 4, k.l - 20)), domo = f.peca(mat(k.h, k.s, apertado ? k.l - 6 : k.l), true);
     f.rr(5, 32, 54, 27, 4, base);
     f.elip(32, 40, 25, 13.5, anel); f.elip(32, 40, 21, 11, fundo);
     f.rr(13, 26 + d, 38, 15 - d, 2, cil); f.elip(32, 40, 19, 7.5, cil);
     f.elip(32, 27 + d, 19, 10, domo);
     [[9, 36], [53, 36], [9, 54], [53, 54]].forEach(function(q) { f.dR(q[0], q[1], 2, 2, "#cfd5e6"); f.d(q[0] + 1, q[1] + 1, "#5d6380"); });
-    f.dR(20, 21 + d, 7, 2, "#ffe3e6"); f.dR(18, 23 + d, 3, 1, "#ffc4ca");
+    const brilho = hsl(k.h, k.s - 30, Math.min(96, k.l + 38));
+    f.dR(20, 21 + d, 7, 2, brilho); f.dR(18, 23 + d, 3, 1, hsl(k.h, k.s - 20, Math.min(92, k.l + 28)));
+    const y = 27 + d;
+    if (k.enfeite === "estrela") { [[32, y - 5], [31, y - 4], [32, y - 4], [33, y - 4], [29, y - 3], [30, y - 3], [31, y - 3], [32, y - 3], [33, y - 3], [34, y - 3], [35, y - 3], [30, y - 2], [31, y - 2], [32, y - 2], [33, y - 2], [34, y - 2], [31, y - 1], [33, y - 1], [30, y], [34, y]].forEach(function(q) { f.d(q[0], q[1] + 2, "#fff6c2"); }); }
+    if (k.enfeite === "caveira") { f.dC(32, y, 5, "#e8e4da"); f.dR(29, y + 4, 7, 3, "#e8e4da"); f.dC(30, y, 1.4, "#1a1030"); f.dC(34, y, 1.4, "#1a1030"); f.d(32, y + 3, "#1a1030"); f.dR(30, y + 6, 1, 1, "#1a1030"); f.dR(32, y + 6, 1, 1, "#1a1030"); f.dR(34, y + 6, 1, 1, "#1a1030"); }
+    if (k.enfeite === "neon") { for (let a = 0; a < 48; a++) { const an = a / 48 * Math.PI * 2; f.d(Math.round(32 + Math.cos(an) * 23), Math.round(40 + Math.sin(an) * 12.5), a % 2 ? "#7cf0ff" : "#e6fdff"); } }
+    if (k.enfeite === "lava") { [[22, y + 1, 26, y + 3], [26, y + 3, 29, y + 2], [36, y - 2, 40, y + 1], [40, y + 1, 44, y + 2], [30, y + 5, 34, y + 7]].forEach(function(l) { for (let i = 0; i <= 4; i++) f.d(Math.round(l[0] + (l[2] - l[0]) * i / 4), Math.round(l[1] + (l[3] - l[1]) * i / 4), i % 2 ? "#ffe066" : "#ff8a2e"); }); }
+    if (k.enfeite === "diamante") { [[16, y, 32, y - 9], [32, y - 9, 48, y], [24, y + 6, 32, y - 9], [40, y + 6, 32, y - 9], [16, y, 48, y]].forEach(function(l) { for (let i = 0; i <= 12; i++) f.d(Math.round(l[0] + (l[2] - l[0]) * i / 12), Math.round(l[1] + (l[3] - l[1]) * i / 12), "#e6fdff"); }); }
     return (cacheBotao[kc] = finalizar(f));
   }
 

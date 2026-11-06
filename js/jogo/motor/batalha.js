@@ -54,13 +54,33 @@ const Batalha = (function() {
     return { id: "torre", andar: n, nivel: nivel, monstros: HORDAS[(n - 1) % HORDAS.length].monstros, z: z, ondas: 2, gigante: n % 5 === 0,
       premio: Math.round(150 * valorRobo(nivel)) };
   }
-  function hordaDe(z) { return z === "torre" ? andarTorre(save.torre.andar) : HORDAS[z]; }
+  // RAID (v11): chefões gigantes invadem a fábrica (1 a 5 de uma vez). A força total é sorteada perto da força dos
+  // robôs que vão defender (75% a 110%), então é sempre um desafio, mas dá para vencer. prepararRaid cria a horda.
+  let raid = null, RAID_K = [0, 0.3, 0.42, 0.48, 0.52, 0.56];   // RAID_K: ajuste por simulação (sim/raid.js)
+  function prepararRaid(n, tiers) {
+    const top = tiers.map(nv).sort(function(a, b) { return b - a; }), media = top.slice(0, 5).reduce(function(a, b) { return a + b; }, 0) / Math.min(5, top.length);
+    const z = Math.min(HORDAS.length - 1, Math.max(0, Math.floor((media - 2) / 2.5)));
+    raid = { id: "raid", n: n, nivel: Math.max(1, media - 1), monstros: HORDAS[z].monstros.concat(HORDAS[Math.min(HORDAS.length - 1, z + 1)].monstros), ondas: 1, mult: 1,
+      premio: Math.round(250 * n * valorRobo(Math.max(1, media - 1))) };
+    // ajusta a força pela dos defensores
+    const alvo = poderRobos(tiers) * (0.75 + Math.random() * 0.35) * RAID_K[n];
+    raid.mult = Math.pow(alvo / Math.max(1e-9, poderHorda("raid")), 2);   // poder ~ raiz(vida*ataque): o multiplicador entra ao quadrado
+    return raid;
+  }
+  function hordaDe(z) { return z === "raid" ? raid : z === "torre" ? andarTorre(save.torre.andar) : HORDAS[z]; }
   // Desafio "Monstros Furiosos" (renascer): monstros 2x vida e 1,5x ataque, prêmio 2x
   function furia() { return save.p.desafio === "furioso"; }
   function composicao(z, o) {
     // v10: as 3 primeiras hordas ficaram bem mais fáceis (no PFT a Fácil perdia 57% das vezes e desanimava)
     const facil = z === "torre" ? (save.torre.andar <= 3 ? 0.5 : 1) : [0.3, 0.3, 0.2][z] || 1;   // torre: 3 primeiros andares mais leves
     const h = hordaDe(z), l = [], ultima = o === h.ondas - 1, fv = (furia() ? 2 : 1) * facil, fa = (furia() ? 1.5 : 1) * facil;
+    if (z === "raid") {   // só chefões, todos de uma vez, cada um de um tipo
+      for (let k = 0; k < h.n; k++) {
+        const st = statsMonstro(h, 2, 0), m = h.mult / h.n, an = h.n === 1 ? 0.6 : 1;   // um chefão só: pancada mais fraca (senão destrói o bando)
+        l.push({ id: h.monstros[(k * 2 + 2) % h.monstros.length].id, vida: st.vida * VIDA * GIGANTE.vida * fv * m, ataque: st.ataque * GIGANTE.ataque * ATQ * fa * Math.sqrt(m) * an, gigante: true, k: k });
+      }
+      return l;
+    }
     if (ultima && h.gigante === false) {   // torre sem gigante: um bando maior no fim
       for (let k = 0; k < 7; k++) { const tipo = k % 3, st = statsMonstro(h, tipo, o); l.push({ id: h.monstros[tipo].id, vida: st.vida * VIDA * fv, ataque: st.ataque * ATQ * fa }); }
       return l;
@@ -81,7 +101,7 @@ const Batalha = (function() {
       const gig = !!c.gigante;
       b.monstros.push({
         lado: "m", id: c.id, gigante: gig, vida: c.vida, max: c.vida, ataque: c.ataque,
-        x: b.L + (gig ? 45 : 15 + Math.random() * 40 + k * 5), y: gig ? b.P * 0.5 : b.P * (0.1 + Math.random() * 0.8), z: 0, vz: 0, vx: 0, vy: 0,
+        x: b.L + (gig ? 45 + (c.k || 0) * 30 : 15 + Math.random() * 40 + k * 5), y: gig ? (c.k !== undefined ? b.P * (c.k + 0.5) / l.length : b.P * 0.5) : b.P * (0.1 + Math.random() * 0.8), z: 0, vz: 0, vx: 0, vy: 0,
         raio: gig ? b.raioGigante : 12, vel: gig ? 22 : 30 + Math.random() * 8, alcance: gig ? 16 : 5,
         cd: 1 + Math.random() * 0.8, golpe: 0, preparo: 0, atordoado: 0, alvo: null, pensa: 0, voando: false, acum: 0, acumT: 0
       });
@@ -322,14 +342,18 @@ const Batalha = (function() {
 
   function terminar(venceu) {
     const z = b.z, h = b.h;
-    b.fim = { venceu: venceu, premio: 0, novos: [], peca: null, torre: z === "torre" ? h.andar : 0 };
-    Poki.medir("battle", z === "torre" ? "tower-" + h.andar : "horde-" + z, venceu ? "complete" : "fail");
-    if (!venceu) return;
+    b.fim = { venceu: venceu, premio: 0, novos: [], peca: null, torre: z === "torre" ? h.andar : 0, raid: z === "raid" ? h.n : 0, pecas: [] };
+    Poki.medir("battle", z === "torre" ? "tower-" + h.andar : z === "raid" ? "raid-" + h.n : "horde-" + z, venceu ? "complete" : "fail");
+    if (!venceu) { if (z === "raid") save.p.sabotagem = Date.now() + 60000; return; }   // raid perdida: fábrica danificada 60 s
     save.stats.vitorias++;
     const premio = Math.round(h.premio * (1 + 0.5 * nivelNo("saque")) * Jogo.multMoedas() * (furia() ? 2 : 1));
     b.fim.premio = premio;
     save.p.moedas += premio;
-    if (z === "torre") {
+    if (z === "raid") {   // cada chefão solta uma peça e 2 pontos de habilidade
+      save.stats.raids = (save.stats.raids || 0) + 1; save.ph += 2 * h.n;
+      for (let k = 0; k < h.n; k++) b.fim.pecas.push(Equip.ganhar(0.3 + 0.1 * h.n));
+      b.fim.peca = b.fim.pecas[0]; b.fim.ph = 2 * h.n;
+    } else if (z === "torre") {
       save.torre.andar++; save.torre.recorde = Math.max(save.torre.recorde, save.torre.andar - 1);
       // peça: garantida a cada 5 andares, senão 35% de chance; melhor quanto mais alto
       if (h.andar % 5 === 0 || Math.random() < 0.35) b.fim.peca = Equip.ganhar(Math.min(1, h.andar / 60));
@@ -342,6 +366,6 @@ const Batalha = (function() {
   }
 
   return { iniciar: iniciar, passo: passo, vagas: vagas, hordaAberta: hordaAberta, poderRobos: poderRobos, poderHorda: poderHorda,
-    usar: usar, liberada: liberada, cdDe: cdDe, contarMinis: contarMinis, andarTorre: andarTorre,
+    usar: usar, liberada: liberada, cdDe: cdDe, contarMinis: contarMinis, andarTorre: andarTorre, prepararRaid: prepararRaid,
     get atual() { return b; }, sair: function() { b = null; } };
 })();

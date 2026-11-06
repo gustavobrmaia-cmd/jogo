@@ -13,13 +13,13 @@ const OficinaTela = (function() {
   function montar(c) {
     caixa = c; c.innerHTML = "";
     const ab = E("div", "abinhas");
-    [["encomendas", t("enc_titulo", Encomendas.lista().length)], ["equip", t("eq_titulo", save.equip.itens.length, Equip.MAX)]].forEach(function(o) {
+    [["encomendas", t("enc_titulo", Encomendas.lista().length)], ["equip", t("eq_titulo", save.equip.itens.length, Equip.MAX)], ["botao", t("sk_titulo")]].forEach(function(o) {
       const b = E("button", "btn" + (sub === o[0] ? "" : " sem"), esc(o[1]));
       b.addEventListener("click", function() { sub = o[0]; item = 0; Som.som("clique"); montar(caixa); });
       ab.appendChild(b);
     });
     c.appendChild(ab);
-    if (sub === "encomendas") encomendas(); else equipamentos();
+    if (sub === "encomendas") encomendas(); else if (sub === "botao") visuais(); else equipamentos();
     clearInterval(timer);
     timer = setInterval(function() { if (Paineis.aba !== "oficina" || !caixa || !caixa.isConnected) { clearInterval(timer); return; } if (sub === "encomendas") montar(caixa); }, 1000);
   }
@@ -49,6 +49,30 @@ const OficinaTela = (function() {
     Paineis.preencherIcones(caixa);
   }
 
+  // ---------- visuais do botão (v11) ----------
+  function visuais() {
+    caixa.appendChild(E("p", "titulo2", esc(t("sk_explica"))));
+    const g = E("div", "skins");
+    SKINS.forEach(function(k) {
+      const lib = skinLiberada(k), usando = save.skin === k.id, p = progressoSkin(k);
+      const c = E("div", "skin" + (usando ? " usando" : "") + (lib ? "" : " bloq") + (k.id === "arcoiris" ? " arcoiris" : ""));
+      c.appendChild(Pixel.img(Pixel.botao(false, k.id)));
+      c.appendChild(E("b", "", esc(t("sk_" + k.id))));
+      if (usando) c.appendChild(E("small", "", esc(t("sk_usando"))));
+      else if (lib) c.appendChild(E("small", "", esc(t("sk_usar"))));
+      else {
+        c.appendChild(E("small", "", esc(t("sk_c_" + k.cond[0], fmt(k.cond[1])))));
+        c.appendChild(E("div", "barraP", "<i style='width:" + Math.round(p.v / p.alvo * 100) + "%'></i>"));
+        c.appendChild(E("small", "", fmt(p.v) + "/" + fmt(p.alvo)));
+      }
+      c.addEventListener("click", function() {
+        if (!lib) { Som.som("erro"); return; }
+        save.skin = k.id; Som.som("compra"); Tela.desenharBotao(true); salvar(); montar(caixa);
+      });
+      g.appendChild(c);
+    });
+    caixa.appendChild(g);
+  }
   // ---------- equipamentos ----------
   function chip(it) {   // ícone da peça com moldura da cor da raridade
     const d = E("div", "peca r" + it.r);

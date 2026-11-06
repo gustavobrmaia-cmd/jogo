@@ -32,6 +32,7 @@ function saveNovo() {
     renascimentos: 0,
     stats: { toques: 0, batalhas: 0, vitorias: 0, juncoes: 0, tempo: 0, criados: 0, ouros: 0, invasores: 0 },
     missao: null,
+    skin: "classico", skinsVistas: ["classico"],   // visual do botão (v11, skins.js)
     torre: { andar: 1, recorde: 0 },   // Torre Infinita (v9): andar atual e maior andar vencido
     equip: { itens: [], vagas: [] },   // equipamentos (v9): inventário e o que está em cada vaga do time (índice do item)
     encomendasFeitas: 0,         // missão atual {n, tipo, alvo, id?, ph?, base} (missoes.js)
@@ -53,6 +54,7 @@ function carregarSave() {
       if (!s.p || !Array.isArray(s.p.pegos)) { base.p.pegos = []; for (let n = 1; n <= base.p.maxTier; n++) base.p.pegos.push(n); }
       base.stats = Object.assign(saveNovo().stats, base.stats);
       if (!base.torre || typeof base.torre.andar !== "number") base.torre = { andar: 1, recorde: 0 };
+      if (!Array.isArray(base.skinsVistas)) base.skinsVistas = ["classico"];
       if (!base.equip || !Array.isArray(base.equip.itens)) base.equip = { itens: [], vagas: [] };
       save = base;
     }

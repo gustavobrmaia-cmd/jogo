@@ -19,12 +19,13 @@ const Fundo = (function() {
     fixo = document.createElement("canvas"); fixo.width = W; fixo.height = H;
     const f = fixo.getContext("2d");
     const rt = function(x, y, w, h, c) { f.fillStyle = c; f.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); };
-    // parede: chapas de 48 com junta e rebites
-    rt(0, 0, W, H, "#171030");
+    // parede: chapas de 48 com junta e rebites (v11: as cores mudam com o estágio da fábrica, cenario.js)
+    const est = Cenario.estagio(), P = Cenario.paleta(est); montar.estagio = est;
+    rt(0, 0, W, H, P[0]);
     for (let x = 0; x < W; x += 48) for (let y = 0; y < H; y += 36) {
-      rt(x, y, 48, 36, (x / 48 + y / 36) % 2 ? "#1a1236" : "#181033");
-      rt(x, y, 48, 1, "#221a48"); rt(x, y, 1, 36, "#201844"); rt(x, y + 35, 48, 1, "#100a24");
-      rt(x + 2, y + 2, 1, 1, "#3a2f6e"); rt(x + 45, y + 2, 1, 1, "#3a2f6e"); rt(x + 2, y + 33, 1, 1, "#3a2f6e"); rt(x + 45, y + 33, 1, 1, "#3a2f6e");
+      rt(x, y, 48, 36, (x / 48 + y / 36) % 2 ? P[1] : P[2]);
+      rt(x, y, 48, 1, P[3]); rt(x, y, 1, 36, P[4]); rt(x, y + 35, 48, 1, P[5]);
+      rt(x + 2, y + 2, 1, 1, P[6]); rt(x + 45, y + 2, 1, 1, P[6]); rt(x + 2, y + 33, 1, 1, P[6]); rt(x + 45, y + 33, 1, 1, P[6]);
     }
     // canos: um em cima atravessando e um descendo na direita
     const cano = function(x, y, w, h, vert) {
@@ -45,6 +46,7 @@ const Fundo = (function() {
     rt(mx + 4, my + 6, 38, 4, "#1d1840"); for (let k = 0; k < 5; k++) rt(mx + 6 + k * 8, my + 13, 4, 7, "#3b3270");
     rt(mx + 38, my - 22, 6, 22, "#3d4a66"); rt(mx + 38, my - 22, 2, 22, "#5d6c8f"); rt(mx + 36, my - 24, 10, 3, "#53627f");
     montar.motor = { x: mx, y: my };
+    Cenario.fixo(f, W, H, est);
   }
   // LUZ (v6): camada pontilhada (matriz de Bayer 4x4, fica com cara de pixel art) com vinheta escura nos cantos,
   // luz quente vinda de cima e um brilho vermelho atrás do botão. Refeita quando a tela ou o botão mudam de lugar.
@@ -80,7 +82,10 @@ const Fundo = (function() {
   ];
   function passo(dt) {
     acum += dt; if (acum < 1 / 30) return;
-    t += acum; const d = acum; acum = 0; tg += d * pane.vel;
+    t += acum; const d = acum; acum = 0;
+    // v11.1: as engrenagens giram no ritmo do time (Motores, Turbina, Overclock... deixam a fábrica mais rápida)
+    const ritmo = typeof Jogo !== "undefined" && save && save.p ? Math.min(4, Math.sqrt(Math.max(1, Jogo.velocidadeTime()))) : 1;
+    tg += d * pane.vel * ritmo;
     if (!fixo) return;
     g.drawImage(fixo, 0, 0);
     // engrenagens (as pequenas encaixadas nas grandes)
@@ -108,6 +113,15 @@ const Fundo = (function() {
     g.globalAlpha = 1;
     // luz por cima (pontilhada) e poeira brilhando no ar
     const bt = el("cvBotao").getBoundingClientRect(), bx = Math.round((bt.left + bt.width / 2) / ESC), by = Math.round((bt.top + bt.height / 2) / ESC), br = Math.round(bt.width * 0.75 / ESC);
+    // v11: estágio da fábrica (confere 1x por segundo) e o cenário vivo (estágios + enfeites dos upgrades)
+    confere -= d;
+    if (confere <= 0) {
+      confere = 1;
+      const e = Cenario.estagio();
+      if (e !== montar.estagio) { const subiu = e > montar.estagio && jaConferiu; montar(); if (subiu) evoluiu(e); }
+      jaConferiu = true;
+    }
+    if (bt.width > 0) Cenario.vivo(g, W, H, t, { l: Math.round(bt.left / ESC), r: Math.round(bt.right / ESC), t: Math.round((bt.top + bt.height * 0.28) / ESC), b: Math.round(bt.bottom / ESC), cx: bx, cy: by, zona: zonas(bt) }, montar.estagio || 0);
     const chave = W + "x" + H + ":" + bx + "," + by + "," + br;
     if (chave !== luzChave && bt.width > 0) { luzChave = chave; montarLuz(bx, by, br); }
     if (luz) g.drawImage(luz, 0, 0);
@@ -119,6 +133,28 @@ const Fundo = (function() {
     g.globalAlpha = 1;
     // luzinhas no cano
     for (let k = 0; k < 6; k++) { const on = pane.luzes ? Math.random() < 0.5 : Math.sin(t * (1.3 + k * 0.4) + k) > 0.2; g.fillStyle = on ? (k % 2 ? "#3ccf6e" : "#ff4d5e") : "#2a2050"; g.fillRect(Math.round(W * (0.12 + k * 0.15)), Math.round(H * 0.08) + 2, 2, 2); }
+  }
+  let confere = 0, jaConferiu = false;
+  // áreas onde o fundo aparece (em baixa resolução): faixa de cima e rodapé, entre a grade e o time
+  let zonasCache = null, zonasEm = 0;
+  function zonas(bt) {
+    const agora = performance.now(); if (zonasCache && agora - zonasEm < 1000) return zonasCache;
+    zonasEm = agora;
+    const gr = el("grade").getBoundingClientRect(), tm = el("time").getBoundingClientRect(), mi = el("missao").getBoundingClientRect(), empe = document.body.classList.contains("empe");
+    const cano = Math.round(H * 0.08);
+    const esq = empe ? 4 : Math.round(gr.right / ESC) + 3, dir = Math.round(tm.left / ESC) - 3;
+    const topoBotao = Math.round((bt.top + bt.height * 0.28) / ESC);   // o desenho do botão começa ~28% abaixo do topo da imagem
+    const cima = { l: esq, r: dir, b: topoBotao - 5 };   // a viga fica um pouco acima do domo do botão
+    const topoMin = empe ? Math.round(mi.bottom / ESC) + 2 : cano + 22;
+    zonasCache = { cima: cima.b - topoMin >= 10 ? cima : null, baixo: empe ? null : { l: esq, r: dir, b: H - 17 } };
+    return zonasCache;
+  }
+  // a fábrica evoluiu: faixa, som e faíscas pela tela
+  function evoluiu(e) {
+    Paineis.faixa(Pixel.icone("fabrica"), window.t("fab_evoluiu"), window.t("fab_evoluiu_d", e, 7));   // window.t: aqui "t" é o relógio do fundo
+    Som.som("revela"); vibrar(60);
+    for (let k = 0; k < 6; k++) Fx.faiscas(window.innerWidth * (0.15 + k * 0.14), window.innerHeight * (0.2 + (k % 2) * 0.4), k % 2 ? "#7cf0ff" : "#ffcc33", 16);
+    Poki.medir("factory", "stage-" + e, "reached");
   }
   // pontos do fundo em pixels da tela (de onde sai a fumaça do motor e a linha do cano de cima)
   function pontos() {

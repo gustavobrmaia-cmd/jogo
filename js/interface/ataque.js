@@ -1,84 +1,70 @@
 "use strict";
 
 // =========================
-// ATAQUE À FÁBRICA (v9): de tempos em tempos (depois da 2ª horda vencida) um CHEFÃO gigante invade a tela principal.
-// Enquanto ele está lá a fábrica é sabotada (renda pela metade, fumaça no fundo). Você tem 40 s: cada toque nele tira
-// 1 de vida e o time atira sozinho (0,15/s por robô). Vencer: moedas, 2 pontos de habilidade e uma PEÇA garantida.
-// Perder: a fábrica fica danificada por 60 s (renda pela metade). Pausa com janela/batalha abertas.
+// RAID (v11; antes era o "Ataque à Fábrica" na tela principal). De tempos em tempos (depois da 2ª horda vencida)
+// toca a sirene: de 1 a 5 CHEFÕES GIGANTES estão invadindo a fábrica. Aparece o aviso com os chefões e uma contagem
+// de 5 s (ou o botão DEFENDER! para ir na hora) e a luta abre na cena de batalha com os seus melhores robôs.
+// A força dos chefões é ajustada à dos seus robôs (batalha.js prepararRaid). Vencer: moedas, 2 PH e 1 peça por
+// chefão. Perder (ou fugir): a fábrica fica danificada e rende a metade por 60 s.
+// Mais chefões aparecem quanto mais longe você está (hordas vencidas e renascimentos).
 // =========================
 const Ataque = (function() {
-  const camada = el("surpresas");
-  let prox = 240, chefe = null;
-  const VIDA = 60, TEMPO = 40;
+  const box = el("raidAviso");
+  let prox = 240, aviso = null;
 
   function liberado() { return save.tutorial >= 4 && save.hordasVencidas >= 2; }
   function livre() { return !Paineis.janelaAberta() && !CenaBatalha.aberta && !Curto.ativo && !Revela.aberta; }
-  function soltar() {
-    const z = Math.min(HORDAS.length - 1, Math.max(0, save.hordasVencidas - 1)), id = z * 3 + 2;
-    const bt = el("cvBotao").getBoundingClientRect(), tam = Math.round(Math.max(150, Math.min(300, bt.width * 1.05)));
-    const box = document.createElement("div"); box.className = "chefao";
-    const topo = document.createElement("div"); topo.className = "chefaoTopo";
-    topo.innerHTML = "<b></b><div class='vidaChefe'><i></i></div><span></span>";
-    const im = document.createElement("img"); im.className = "px"; im.src = Pixel.url(Pixel.monstro(id)); im.draggable = false; im.alt = "";
-    im.style.width = im.style.height = tam + "px";
-    box.appendChild(topo); box.appendChild(im); camada.appendChild(box);
-    topo.querySelector("b").textContent = NOMES_MONSTROS[id];
-    chefe = { el: box, im: im, id: id, z: z, vida: VIDA, t: 0, tiro: 1, x: bt.left + bt.width / 2, y: bt.top + bt.height / 2, tam: tam, barra: topo.querySelector("i"), relogio: topo.querySelector("span") };
-    box.style.left = Math.round(chefe.x - tam / 2) + "px"; box.style.top = Math.round(chefe.y - tam / 2 - 30) + "px";
-    box.addEventListener("pointerdown", function(e) { e.preventDefault(); e.stopPropagation(); bater(1, true, e.clientX, e.clientY); });
-    Paineis.faixa(Pixel.monstro(id), t("ataque_titulo"), t("ataque_d", TEMPO));
-    Som.som("alarme"); setTimeout(function() { Som.som("alarme"); }, 600);
-    vibrar(80);
-    Poki.medir("event", "factory-attack", "visible");
+  function defensores() {
+    const l = [];
+    ["time", "grade"].forEach(function(lista) { save.p[lista].forEach(function(n, i) { if (n) l.push({ n: n, f: dadosTraco(Jogo.trDe(lista, i)).bat || 1 }); }); });
+    return l.sort(function(a, b) { return b.n - a.n || b.f - a.f; }).slice(0, Batalha.vagas());
   }
-  function bater(d, toque, x, y) {
-    const c = chefe; if (!c) return;
-    c.vida -= d;
-    c.im.classList.remove("apanha"); void c.im.offsetWidth; c.im.classList.add("apanha");
-    if (toque) { Som.som("acerto"); vibrar(8); Fx.faiscas(x, y, "#ffcc33", 6); }
-    if (c.vida <= 0) fim(true);
+  function soltar(forcarN) {
+    if (!defensores().length) { prox = 120; return; }
+    const maxN = Math.min(5, 1 + Math.floor(save.hordasVencidas / 2) + Math.min(2, save.renascimentos || 0));
+    const n = forcarN || 1 + Math.floor(Math.pow(Math.random(), 1.4) * maxN);
+    const z = Math.min(HORDAS.length - 1, Math.max(0, save.hordasVencidas - 1));
+    aviso = { n: n, t: 5, sirene: 0 };
+    box.innerHTML = "";
+    box.appendChild(Paineis.elem("b", "raidTitulo", Paineis.esc(t("raid_titulo"))));
+    box.appendChild(Paineis.elem("span", "", Paineis.esc(t("raid_d", n))));
+    const fila = Paineis.elem("div", "raidChefes");
+    for (let k = 0; k < n; k++) fila.appendChild(Pixel.img(Pixel.monstro(HORDAS[Math.min(HORDAS.length - 1, z + (k % 2))].monstros[(k * 2 + 2) % 3].id)));
+    box.appendChild(fila);
+    const b = Paineis.elem("button", "btn vermelho grande", "");
+    b.addEventListener("click", function() { Som.som("clique"); comecar(); });
+    box.appendChild(b);
+    aviso.btn = b;
+    box.classList.remove("escondido");
+    Paineis.fechar();
+    Fundo.pane.luzes = 1; Fundo.pane.fumaca = 4;
+    vibrar(120);
+    Poki.medir("event", "raid-" + n, "visible");
   }
-  function fim(venceu) {
-    const c = chefe; chefe = null;
-    if (c.el.parentNode) c.el.parentNode.removeChild(c.el);
-    Fundo.pane.fumaca = 1; Fundo.pane.luzes = 0;
+  function comecar() {
+    if (!aviso) return;
+    const n = aviso.n; aviso = null;
+    box.classList.add("escondido");
+    Fundo.pane.luzes = 0; Fundo.pane.fumaca = 1;
+    const tiers = defensores();
+    if (!tiers.length) return;
+    Paineis.fechar();
+    Batalha.prepararRaid(n, tiers);
+    CenaBatalha.abrir("raid", tiers);
     prox = 360 + Math.random() * 180;
-    if (venceu) {
-      const v = Math.round(Math.max(Jogo.custoCriar() * 8, Jogo.prodTime() * 120 + Jogo.valorToque() * 60));
-      save.p.moedas += v; save.ph += 2;
-      const peca = Equip.ganhar(0.3 + c.z * 0.07);
-      Fx.moedas(c.x, c.y, 20); Fx.faiscas(c.x, c.y, "#ff5d73", 30); Fx.numero(c.x, c.y - 40, "+" + fmt(v), "#ffcc33", 44);
-      Paineis.faixa(Pixel.monstro(c.id), t("ataque_venceu"), t("ataque_premio", fmt(v), 2) + " · " + Equip.nome(peca));
-      Som.som("vitoria"); vibrar(60);
-      Poki.medir("event", "factory-attack", "complete");
-    } else {
-      save.p.sabotagem = Date.now() + 60000;
-      Paineis.faixa(Pixel.monstro(c.id), t("ataque_perdeu"), t("ataque_perdeu_d", 60));
-      Som.som("derrota");
-      Poki.medir("event", "factory-attack", "fail");
-    }
-    salvar();
   }
   function passo(dt) {
     if (!liberado()) return;
-    if (!chefe) {
-      if (!livre()) return;
-      prox -= dt; if (prox <= 0) soltar();
+    if (aviso) {
+      if (Paineis.janelaAberta() || CenaBatalha.aberta) return;
+      aviso.t -= dt; aviso.sirene -= dt;
+      if (aviso.sirene <= 0) { aviso.sirene = 0.7; Som.som("alarme"); }
+      aviso.btn.textContent = t("raid_defender") + " (" + Math.max(0, Math.ceil(aviso.t)) + ")";
+      if (aviso.t <= 0) comecar();
       return;
     }
-    if (!livre()) return;   // pausa
-    const c = chefe;
-    c.t += dt;
-    save.p.sabotagem = Math.max(save.p.sabotagem || 0, Date.now() + 500);   // renda pela metade enquanto ele está aqui
-    Fundo.pane.fumaca = 4; Fundo.pane.luzes = 1;
-    const nTime = save.p.time.filter(Boolean).length;
-    c.tiro -= dt;
-    if (c.tiro <= 0 && nTime) { c.tiro = 1; bater(0.15 * nTime, false); if (!chefe) return; Som.som("tiro", 1.3); }
-    const pula = Math.round(Math.abs(Math.sin(c.t * 3)) * 8);
-    c.im.style.transform = "translateY(" + (-pula) + "px)";
-    c.barra.style.width = Math.max(0, c.vida / VIDA * 100) + "%";
-    c.relogio.textContent = Math.max(0, Math.ceil(TEMPO - c.t)) + "s";
-    if (c.t >= TEMPO) fim(false);
+    if (!livre()) return;
+    prox -= dt; if (prox <= 0) soltar();
   }
-  return { passo: passo, soltar: soltar, get ativo() { return !!chefe; } };
+  return { passo: passo, soltar: soltar, get ativo() { return !!aviso; } };
 })();
