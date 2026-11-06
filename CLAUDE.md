@@ -143,6 +143,18 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
   presentes na esteira, Esteira Turbo, faíscas do Overclock). Sem espaço, aparecem os de nível maior.
   Celular: zona de cima entre a missão e o botão. Teste: verif/cenario.js.
 
+## v12: roleta, árvore mais visual e celular deitado
+- ROLETA (interface/roleta.js, save.roleta {gratis, anuncio, giros} em ms): botão no canto de cima à esquerda da
+  tela do botão (libera no tutorial 4). 1 giro grátis a cada 10 min (conta offline); anúncio premiado gira 3 rodas
+  de uma vez (espera 3 min entre anúncios; sem SDK o botão some). 8 gomos iguais, chance por peso (ROLETA_PREMIOS):
+  moedas 4 min de renda, turbo +45 s, robô maxTier-1 (grade cheia: moedas), +2 PH, peça, cofre 15 min, +6 PH,
+  jackpot 1 h + peça boa. Roda desenhada em 96 px e ampliada (pixel). Teste: verif/v12.js.
+- Árvore: cada nó tem forma e cor pelo tipo (arvore.js visualNo: octógono = núcleo, círculo = nó comum na cor
+  do efeito, hexágono = começo de galho, losango = especial), anel dourado no escolhido, quadradinhos de nível e
+  nomes grandes dos 5 galhos (GALHOS_MAPA) no fundo do mapa.
+- Celular deitado (altura < 540): body.baixo deixa tudo compacto (tela.js layout + bloco body.baixo no CSS);
+  colunas do #app com minmax(0, 1fr). Teste: verif/deitado.js (915x412, 844x390, 667x375).
+
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.
 - 1ª partida: nível 6 ~40 s, 8 (libera renascer) ~5 min, 10 ~15 min, 12 ~28 min. Depois de renascer anda bem mais rápido.

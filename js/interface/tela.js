@@ -13,13 +13,16 @@ const Tela = (function() {
   // ---------- layout ----------
   function layout() {
     const empe = window.innerHeight > window.innerWidth * 1.05;
+    // v12: celular deitado (tela baixa): modo compacto (body.baixo) para tudo caber na altura
+    const baixo = !empe && window.innerHeight < 540;
     document.body.classList.toggle("empe", empe);
+    document.body.classList.toggle("baixo", baixo);
     const esq = el("esq").getBoundingClientRect(), dir = el("dir").getBoundingClientRect();
-    const col = 6, lin = Math.ceil(vagasGrade() / col);
-    const alturaCriar = empe ? 70 : 84;
+    const col = 6, lin = Math.ceil(vagasGrade() / col), gap = baixo ? 4 : 6, pad = baixo ? 20 : 30;
+    const alturaCriar = baixo ? 66 : empe ? 70 : 84;
     // vaga: o maior quadrado que cabe (grade de 6 colunas + o botão criar embaixo)
-    let v = Math.floor(Math.min((esq.width - 30 - (col - 1) * 6) / col, (esq.height - alturaCriar - 30 - (lin - 1) * 6) / lin));
-    v = limitar(v, 34, 110);
+    let v = Math.floor(Math.min((esq.width - pad - (col - 1) * gap) / col, (esq.height - alturaCriar - pad - (lin - 1) * gap) / lin));
+    v = limitar(v, baixo ? 24 : 34, 110);
     document.documentElement.style.setProperty("--v", v + "px");
     // botão: o time ocupa uma coluna do lado
     const vt = limitar(Math.floor(Math.min(v, (dir.height - 60) / vagasTime() - 8)), 30, 100);

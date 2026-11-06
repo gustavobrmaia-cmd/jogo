@@ -46,6 +46,7 @@
     Revela.passo();
     Surpresas.passo(dt);
     Ataque.passo(dt);
+    Roleta.passo(dt);
     Paineis.passoFaixa();
     pontosEm -= dt;
     if (pontosEm <= 0) { pontosEm = 0.25; Paineis.pontos(); Paineis.atualizarUpgrades(); Missoes.atualizar(); }

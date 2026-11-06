@@ -388,5 +388,22 @@ TEXTOS.de = {
   sk_c_raids: "Gewinne {0} Raids",
   sk_c_tier: "Roboter Stufe {0}",
   fab_evoluiu: "Deine Fabrik hat sich weiterentwickelt!",
-  fab_evoluiu_d: "Techniklevel {0}/{1}"
+  fab_evoluiu_d: "Techniklevel {0}/{1}",
+  // v12: galhos novos da árvore e roleta
+  galho_3: "Gold",
+  galho_4: "Wissen",
+  rl_titulo: "Glücksrad",
+  rl_explica: "Alle 10 Minuten gratis. Schau eine Werbung und drehe 3 Räder auf einmal!",
+  rl_botao: "DREHEN!",
+  rl_gratis: "Gratis drehen",
+  rl_x3: "3x drehen",
+  rl_moedas: "Münzen",
+  rl_turbo: "Turbo x3 für {0} s",
+  rl_robo: "Roboter Stufe {0}",
+  rl_ph: "+{0} Fähigkeitspunkte",
+  rl_peca: "Teil",
+  rl_moedas2: "Tresor",
+  rl_ph2: "Viele FP",
+  rl_jackpot: "JACKPOT! +{0}",
+  rl_cheia: "Raster voll: +{0}"
 };

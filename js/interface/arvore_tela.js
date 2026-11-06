@@ -24,10 +24,13 @@ const ArvoreTela = (function() {
     U = document.body.classList.contains("empe") ? 46 : 56;
     mapa.style.width = MAPA_L * U + "px"; mapa.style.height = MAPA_A * U + "px";
     ARVORE.forEach(function(no) {
-      const b = document.createElement("button");
-      b.className = "no" + (no.tipo ? "" : " chave"); b.dataset.id = no.id;
-      b.style.left = no.x * U + "px"; b.style.top = no.y * U + "px";
+      const b = document.createElement("button"), vis = visualNo(no.id);
+      b.className = "no f-" + vis.forma; b.dataset.id = no.id; b.dataset.forma = vis.forma;
+      b.style.left = no.x * U + "px"; b.style.top = no.y * U + "px"; b.style.setProperty("--c", vis.cor);
+      const anel = document.createElement("span"); anel.className = "anel"; b.appendChild(anel);
+      const forma = document.createElement("span"); forma.className = "forma"; b.appendChild(forma);
       b.appendChild(Paineis.icone(no.ico));
+      const pips = document.createElement("span"); pips.className = "pipsNo"; b.appendChild(pips);
       const lv = document.createElement("span"); lv.className = "lv"; b.appendChild(lv);
       b.addEventListener("click", function() {
         if (arrastou) return;   // foi arrastar o mapa, não tocar no nó
@@ -36,6 +39,8 @@ const ArvoreTela = (function() {
       });
       mapa.appendChild(b);
     });
+    // nomes dos galhos, grandes e apagados, no mapa
+    GALHOS_MAPA.forEach(function(gm) { const d = document.createElement("div"); d.className = "galhoNome"; d.textContent = t(gm[0]); d.style.left = gm[1] * U + "px"; d.style.top = gm[2] * U + "px"; mapa.appendChild(d); });
     arrastar();
     if (compra) { desafio = ""; montarDesafios(); }
     requestAnimationFrame(function() { centrar(NO[sel] || NO.nucleo); });
@@ -63,8 +68,11 @@ const ArvoreTela = (function() {
     rede.querySelectorAll(".no").forEach(function(b) {
       const no = NO[b.dataset.id], n = nivelNo(no.id), est = estado(no);
       const podeMais = compra && n > 0 && n < no.max && save.ph >= custoNo(no.id, n);
-      b.className = "no" + (est ? " " + est : "") + (podeMais ? " pode" : "") + (sel === no.id ? " sel" : "");
-      b.lastChild.textContent = no.max > 1 ? n + "/" + no.max : "";
+      b.className = "no f-" + b.dataset.forma + (est ? " " + est : "") + (podeMais ? " pode" : "") + (sel === no.id ? " sel" : "");
+      // nível: bolinhas (até 5 níveis) ou número
+      const pips = b.querySelector(".pipsNo");
+      if (no.max > 1 && no.max <= 5) { if (pips.childElementCount !== no.max) { pips.innerHTML = ""; for (let k = 0; k < no.max; k++) pips.appendChild(document.createElement("i")); } [].forEach.call(pips.children, function(p, k) { p.className = k < n ? "on" : ""; }); b.lastChild.textContent = ""; }
+      else b.lastChild.textContent = no.max > 1 ? n + "/" + no.max : "";
     });
     // informação do nó escolhido
     const no = NO[sel], n = nivelNo(sel), max = n >= no.max, c = custoNo(sel, n), aberto = noAberto(sel);
@@ -94,7 +102,7 @@ const ArvoreTela = (function() {
     ARVORE.forEach(function(no) {
       no.liga.forEach(function(l) {
         const a = pos(NO[l]), b = pos(no), acesa = nivelNo(no.id) > 0 && nivelNo(l) > 0, aberta = nivelNo(l) > 0;
-        const cor = acesa ? "#ffcc33" : aberta ? "#b0742a" : "#3d5a40", sombra = acesa ? "#8a5a10" : "#0a1c18";
+        const cor = acesa ? visualNo(no.id).cor : aberta ? "#b0742a" : "#3d5a40", sombra = acesa ? "#1a1030" : "#0a1c18";   // trilha acesa na cor do galho
         const linha = function(dx, dy) {
           // em L: anda na horizontal até o x do destino e depois na vertical
           g.fillStyle = sombra; g.fillRect(Math.min(a.x, b.x) + dx, a.y + 1 + dy, Math.abs(b.x - a.x) + 2, 2); g.fillRect(b.x + 1 + dx, Math.min(a.y, b.y) + dy, 2, Math.abs(b.y - a.y) + 2);

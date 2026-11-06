@@ -388,5 +388,22 @@ TEXTOS.ro = {
   sk_c_raids: "Câștigă {0} raiduri",
   sk_c_tier: "Robot de nivelul {0}",
   fab_evoluiu: "Fabrica ta a evoluat!",
-  fab_evoluiu_d: "Nivel tehnologic {0}/{1}"
+  fab_evoluiu_d: "Nivel tehnologic {0}/{1}",
+  // v12: galhos novos da árvore e roleta
+  galho_3: "Aur",
+  galho_4: "Cunoaștere",
+  rl_titulo: "Roata Norocului",
+  rl_explica: "Gratis la fiecare 10 minute. Vezi o reclamă și învârte 3 roți deodată!",
+  rl_botao: "ÎNVÂRTE!",
+  rl_gratis: "Învârtire gratis",
+  rl_x3: "Învârte 3x",
+  rl_moedas: "Monede",
+  rl_turbo: "Turbo x3 timp de {0} s",
+  rl_robo: "Robot de nivelul {0}",
+  rl_ph: "+{0} puncte de abilitate",
+  rl_peca: "Piesă",
+  rl_moedas2: "Seif",
+  rl_ph2: "Multe PA",
+  rl_jackpot: "JACKPOT! +{0}",
+  rl_cheia: "Grilă plină: +{0}"
 };

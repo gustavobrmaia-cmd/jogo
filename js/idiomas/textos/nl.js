@@ -388,5 +388,22 @@ TEXTOS.nl = {
   sk_c_raids: "Win {0} raids",
   sk_c_tier: "Robot niveau {0}",
   fab_evoluiu: "Je fabriek is geëvolueerd!",
-  fab_evoluiu_d: "Techniekniveau {0}/{1}"
+  fab_evoluiu_d: "Techniekniveau {0}/{1}",
+  // v12: galhos novos da árvore e roleta
+  galho_3: "Goud",
+  galho_4: "Kennis",
+  rl_titulo: "Rad van Fortuin",
+  rl_explica: "Elke 10 minuten gratis. Kijk een advertentie en draai 3 raderen tegelijk!",
+  rl_botao: "DRAAIEN!",
+  rl_gratis: "Gratis draaien",
+  rl_x3: "3x draaien",
+  rl_moedas: "Munten",
+  rl_turbo: "Turbo x3 voor {0} s",
+  rl_robo: "Robot niveau {0}",
+  rl_ph: "+{0} vaardigheidspunten",
+  rl_peca: "Onderdeel",
+  rl_moedas2: "Kluis",
+  rl_ph2: "Veel VP",
+  rl_jackpot: "JACKPOT! +{0}",
+  rl_cheia: "Raster vol: +{0}"
 };

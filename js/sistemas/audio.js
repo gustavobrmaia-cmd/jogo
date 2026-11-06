@@ -75,6 +75,7 @@ const Som = (function() {
     },
     time: function(k) { osc("triangle", 900 * k, 760 * k, 0.05, 0.06); },
     clique: function() { osc("square", 1100, 1000, 0.03, 0.05); chiado(5000, 3000, 0.02, 0.05, 0, "highpass"); },
+    tic: function(k) { osc("square", 1500 * k, 1300 * k, 0.018, 0.035); },   // roleta passando por um gomo
     encaixe: function() { chiado(2400, 900, 0.05, 0.25, 0, "bandpass", 2); osc("sine", 320, 210, 0.07, 0.25); },
     criar: function() { osc("sawtooth", 180, 620, 0.16, 0.06, 0, 0.01, 8); osc("triangle", 1318, 1318, 0.3, 0.13, 0.13, 0.002, 6); osc("triangle", 1975, 1975, 0.25, 0.06, 0.16); },
     abrir: function() { osc("sine", 380, 950, 0.09, 0.28); chiado(3000, 1200, 0.08, 0.15, 0, "bandpass", 1.5); [1568, 2093, 2637].forEach(function(f, i) { osc("triangle", f, f, 0.12, 0.08, 0.06 + i * 0.045); }); },

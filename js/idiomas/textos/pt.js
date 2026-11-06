@@ -388,5 +388,22 @@ TEXTOS.pt = {
   sk_c_raids: "Vença {0} raids",
   sk_c_tier: "Robô nível {0}",
   fab_evoluiu: "A fábrica evoluiu!",
-  fab_evoluiu_d: "Nível de tecnologia {0}/{1}"
+  fab_evoluiu_d: "Nível de tecnologia {0}/{1}",
+  // v12: galhos novos da árvore e roleta
+  galho_3: "Ouro",
+  galho_4: "Conhecimento",
+  rl_titulo: "Roleta da Sorte",
+  rl_explica: "Grátis a cada 10 minutos. Assista um anúncio e gire 3 roletas de uma vez!",
+  rl_botao: "GIRAR!",
+  rl_gratis: "Girar grátis",
+  rl_x3: "Girar 3x",
+  rl_moedas: "Moedas",
+  rl_turbo: "Turbo x3 por {0} s",
+  rl_robo: "Robô nível {0}",
+  rl_ph: "+{0} pontos de habilidade",
+  rl_peca: "Peça",
+  rl_moedas2: "Cofre",
+  rl_ph2: "Muitos PH",
+  rl_jackpot: "JACKPOT! +{0}",
+  rl_cheia: "Grade cheia: +{0}"
 };

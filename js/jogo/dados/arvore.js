@@ -84,6 +84,23 @@ function noAberto(id) { const n = NO[id]; return !n.liga.length || n.liga.some(f
 // v7: renascer NÃO dá pontos (o dono: "você vai gastar o que conseguiu"); os pontos vêm das descobertas.
 // Renascer continua multiplicando a renda por 1,25 para sempre (jogo.js).
 function phRenascer() { return 0; }
+// v12: VISUAL de cada nó — formato pela importância e cor pelo galho/tipo
+//   oct: o núcleo · hex: os nós com nome dos 3 galhos antigos · circ: os nós genéricos · diam: os nós-chave (dourados)
+const COR_TIPO = { renda: "#ffcc33", time: "#4da3ff", toque: "#ff5d73", criar: "#ff8a2e", esteira: "#c98a4a", batalha: "#ff4d5e", hab: "#b06bff",
+  invasor: "#d8343c", ouro: "#ffe066", missao: "#3ccf6e", turboouro: "#ffd23f", ph: "#7cf0ff", offline: "#8a7cff" };
+const GALHO_NO = { botao: ["dedo_aco", "critico", "turbo", "critico2", "ganancia", "sexto", "dobro"], fabrica: ["rico", "fab_ini", "desconto", "grade", "sorte", "esteira_r", "fusao"],
+  batalha: ["blindagem", "saque", "hab_dano", "esquadrao", "hab_cd", "offline", "cacador"] };
+const COR_GALHO = { botao: "#ff5d73", fabrica: "#ffb02e", batalha: "#b06bff" };
+function visualNo(id) {
+  const n = NO[id];
+  if (id === "nucleo") return { forma: "oct", cor: "#7cf0ff" };
+  if (n.tipo) return { forma: "circ", cor: COR_TIPO[n.tipo] };
+  for (const g in GALHO_NO) if (GALHO_NO[g].indexOf(id) >= 0) return { forma: "hex", cor: COR_GALHO[g] };
+  if (id === "ph_bonus") return { forma: "hex", cor: "#7cf0ff" };
+  return { forma: "diam", cor: "#ffcc33" };   // nós-chave
+}
+// nomes dos galhos escritos no mapa [chave do texto, x, y]
+const GALHOS_MAPA = [["galho_0", 17.6, 0.9], ["galho_1", 2.6, 19.3], ["galho_2", 23.4, 19.3], ["galho_3", 2.4, 5.2], ["galho_4", 23.6, 5.0]];
 // soma dos níveis comprados nos nós genéricos de um tipo
 const NOS_TIPO = {};
 ARVORE.forEach(function(n) { if (n.tipo) (NOS_TIPO[n.tipo] || (NOS_TIPO[n.tipo] = [])).push(n.id); });

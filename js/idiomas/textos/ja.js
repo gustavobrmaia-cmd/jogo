@@ -388,5 +388,22 @@ TEXTOS.ja = {
   sk_c_raids: "レイドに{0}回勝つ",
   sk_c_tier: "ロボットLv{0}",
   fab_evoluiu: "工場が進化した！",
-  fab_evoluiu_d: "テクノロジーレベル {0}/{1}"
+  fab_evoluiu_d: "テクノロジーレベル {0}/{1}",
+  // v12: galhos novos da árvore e roleta
+  galho_3: "ゴールド",
+  galho_4: "知識",
+  rl_titulo: "ラッキールーレット",
+  rl_explica: "10分ごとに無料。広告を見ると3つのルーレットを同時に回せる！",
+  rl_botao: "回す！",
+  rl_gratis: "無料で回す",
+  rl_x3: "3回まわす",
+  rl_moedas: "コイン",
+  rl_turbo: "{0}秒間 ターボx3",
+  rl_robo: "ロボットLv{0}",
+  rl_ph: "スキルポイント+{0}",
+  rl_peca: "パーツ",
+  rl_moedas2: "金庫",
+  rl_ph2: "SPたくさん",
+  rl_jackpot: "ジャックポット！+{0}",
+  rl_cheia: "マスがいっぱい：+{0}"
 };

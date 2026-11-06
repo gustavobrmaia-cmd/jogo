@@ -388,5 +388,22 @@ TEXTOS.vi = {
   sk_c_raids: "Thắng {0} đột kích",
   sk_c_tier: "Robot cấp {0}",
   fab_evoluiu: "Nhà máy đã tiến hóa!",
-  fab_evoluiu_d: "Cấp công nghệ {0}/{1}"
+  fab_evoluiu_d: "Cấp công nghệ {0}/{1}",
+  // v12: galhos novos da árvore e roleta
+  galho_3: "Vàng",
+  galho_4: "Tri Thức",
+  rl_titulo: "Vòng Quay May Mắn",
+  rl_explica: "Miễn phí mỗi 10 phút. Xem quảng cáo để quay 3 vòng cùng lúc!",
+  rl_botao: "QUAY!",
+  rl_gratis: "Quay miễn phí",
+  rl_x3: "Quay 3x",
+  rl_moedas: "Xu",
+  rl_turbo: "Turbo x3 trong {0} giây",
+  rl_robo: "Robot cấp {0}",
+  rl_ph: "+{0} điểm kỹ năng",
+  rl_peca: "Linh kiện",
+  rl_moedas2: "Két sắt",
+  rl_ph2: "Nhiều ĐKN",
+  rl_jackpot: "JACKPOT! +{0}",
+  rl_cheia: "Lưới đầy: +{0}"
 };

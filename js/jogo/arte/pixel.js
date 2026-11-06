@@ -508,6 +508,16 @@ const Pixel = (function() {
         f.rect(2, 9, 20, 14, M(VERMELHO, true)); f.rect(1, 6, 22, 5, M(VERMELHO));
         const o = M(OURO, true); f.rect(10, 6, 4, 17, o); f.poli([[12, 6], [5, 1], [6, 6]], o); f.poli([[12, 6], [19, 1], [18, 6]], o); break;
       }
+      case "roleta": {   // roleta colorida com ponteiro
+        const cores = [OURO, AZUL, VERMELHO, VERDE, ROXO, CIANO, mat(26, 85, 58), mat(330, 70, 62)];
+        f.circ(12, 13, 10.5, M(METAL_E));
+        for (let y = 0; y < 24; y++) for (let x = 0; x < 24; x++) {
+          const dx = x + 0.5 - 12, dy = y + 0.5 - 13, r = Math.hypot(dx, dy); if (r > 8.6 || r < 2) continue;
+          const g = Math.floor(((Math.atan2(dy, dx) + Math.PI * 2.125) % (Math.PI * 2)) / (Math.PI / 4)) % 8;
+          f.d(x, y, cores[g].tons[r > 7 ? 3 : r < 4 ? 1 : 2]);
+        }
+        f.dC(12, 13, 2, "#ffe066"); f.poli([[8, 0], [16, 0], [12, 6]], M(VERMELHO, true)); break;
+      }
       case "chama": {   // fogo da fúria
         f.poli([[12, 0], [20, 11], [19, 19], [12, 23], [5, 19], [4, 11], [8, 13]], M(mat(16, 92, 54), true));
         f.poli([[12, 8], [16, 15], [15, 20], [12, 22], [9, 20], [8, 15]], M(OURO, true)); f.dC(12, 18, 2, "#fff6c8"); break;

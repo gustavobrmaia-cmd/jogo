@@ -388,5 +388,22 @@ TEXTOS.it = {
   sk_c_raids: "Vinci {0} raid",
   sk_c_tier: "Robot livello {0}",
   fab_evoluiu: "La tua fabbrica si è evoluta!",
-  fab_evoluiu_d: "Livello tecnologico {0}/{1}"
+  fab_evoluiu_d: "Livello tecnologico {0}/{1}",
+  // v12: galhos novos da árvore e roleta
+  galho_3: "Oro",
+  galho_4: "Conoscenza",
+  rl_titulo: "Ruota della Fortuna",
+  rl_explica: "Gratis ogni 10 minuti. Guarda una pubblicità e gira 3 ruote insieme!",
+  rl_botao: "GIRA!",
+  rl_gratis: "Giro gratis",
+  rl_x3: "Gira 3x",
+  rl_moedas: "Monete",
+  rl_turbo: "Turbo x3 per {0} s",
+  rl_robo: "Robot livello {0}",
+  rl_ph: "+{0} punti abilità",
+  rl_peca: "Pezzo",
+  rl_moedas2: "Cassaforte",
+  rl_ph2: "Tanti PA",
+  rl_jackpot: "JACKPOT! +{0}",
+  rl_cheia: "Griglia piena: +{0}"
 };

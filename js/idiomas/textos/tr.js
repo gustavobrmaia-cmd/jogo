@@ -388,5 +388,22 @@ TEXTOS.tr = {
   sk_c_raids: "{0} baskın kazan",
   sk_c_tier: "{0}. seviye robot",
   fab_evoluiu: "Fabrikan gelişti!",
-  fab_evoluiu_d: "Teknoloji seviyesi {0}/{1}"
+  fab_evoluiu_d: "Teknoloji seviyesi {0}/{1}",
+  // v12: galhos novos da árvore e roleta
+  galho_3: "Altın",
+  galho_4: "Bilgi",
+  rl_titulo: "Şans Çarkı",
+  rl_explica: "Her 10 dakikada bir bedava. Reklam izle, 3 çarkı birden çevir!",
+  rl_botao: "ÇEVİR!",
+  rl_gratis: "Bedava çevir",
+  rl_x3: "3x çevir",
+  rl_moedas: "Para",
+  rl_turbo: "{0} sn boyunca Turbo x3",
+  rl_robo: "{0}. seviye robot",
+  rl_ph: "+{0} yetenek puanı",
+  rl_peca: "Parça",
+  rl_moedas2: "Kasa",
+  rl_ph2: "Bol YP",
+  rl_jackpot: "JACKPOT! +{0}",
+  rl_cheia: "Izgara dolu: +{0}"
 };

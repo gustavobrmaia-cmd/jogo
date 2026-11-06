@@ -22,7 +22,7 @@ img.px, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 #fundo { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; }
 
 /* ---------- layout deitado ---------- */
-#app { position: fixed; inset: 0; z-index: 1; display: grid; grid-template-columns: 92px 1fr 1fr; grid-template-rows: 64px 1fr;
+#app { position: fixed; inset: 0; z-index: 1; display: grid; grid-template-columns: 92px minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: 64px 1fr;
   grid-template-areas: "topo topo missao" "abas esq dir"; gap: 0 12px; padding: 10px 12px 12px 0; }
 #topo { grid-area: topo; display: flex; align-items: center; justify-content: center; gap: 18px; }
 #abas { grid-area: abas; position: relative; z-index: 15; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
@@ -367,3 +367,98 @@ body.empe .raidTitulo { font-size: 46px; } body.empe .raidChefes img { width: 72
 .skin.bloq img.px { filter: grayscale(1) brightness(.35); }
 .skin .barraP { width: 90%; }
 .skin.arcoiris img.px { animation: arcoiris 3s linear infinite; }
+
+/* ===== v12: celular deitado (tela baixa) — tudo compacto para caber na altura ===== */
+#esq, #dir, #missao { min-width: 0; } #esq, #dir { min-height: 0; }
+body.baixo #app { grid-template-columns: 70px minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: 46px minmax(0, 1fr); gap: 0 8px; padding: 4px 8px 6px 0; }
+body.baixo #topo { gap: 8px; }
+body.baixo .contador { padding: 3px; gap: 5px; } body.baixo .contador .ico { width: 22px; height: 22px; }
+body.baixo .contador .tela { min-width: 80px; padding: 2px 8px; } body.baixo .contador b { font-size: 17px; } body.baixo .contador small { font-size: 11px; }
+body.baixo #missao { padding: 3px 8px; gap: 6px; } body.baixo #missao > .ico { width: 22px; height: 22px; }
+body.baixo #missao small { font-size: 10px; } body.baixo #missao b { font-size: 12px; } body.baixo .mpremio b { font-size: 11px !important; } body.baixo .mbarra { height: 5px; }
+body.baixo #abas { gap: 4px; }
+body.baixo .aba { width: 64px; margin-left: 3px; padding: 5px 2px 3px; gap: 1px; } body.baixo .aba .ico { width: 24px; height: 24px; } body.baixo .aba span { font-size: 9px; }
+body.baixo .aba::before { height: 4px; }
+body.baixo #esq { gap: 6px; justify-content: flex-start; padding-top: 10px; }
+body.baixo #grade { gap: 4px; padding: 8px; } body.baixo #grade::before, body.baixo #time::before { top: -10px; height: 6px; }
+body.baixo #btnCriar { font-size: 15px; padding: 6px 8px 5px; gap: 6px; } body.baixo #btnCriar .ico { width: 22px; height: 22px; }
+body.baixo #esteira { height: 8px; }
+body.baixo #time { gap: 5px; padding: 6px; }
+body.baixo #painel { inset: 0; } body.baixo .painelTopo { padding: 8px 10px 5px; } body.baixo .painelTopo h2 { font-size: 18px; } body.baixo .fechar { width: 32px; height: 32px; font-size: 16px; }
+body.baixo #painelCorpo { padding: 8px; gap: 8px; }
+body.baixo .card { padding: 6px; gap: 8px; } body.baixo .card .ico, body.baixo .card img.px { width: 34px; height: 34px; } body.baixo .card .info b { font-size: 14px; } body.baixo .card .info span { font-size: 11px; }
+body.baixo .btn { font-size: 14px; padding: 6px 9px; } body.baixo .btn.grande { font-size: 16px; padding: 8px 12px; }
+body.baixo #faixa { top: 50px; padding: 6px 12px; } body.baixo #faixa img.px { width: 40px; height: 40px; } body.baixo #faixa b { font-size: 15px; } body.baixo #faixa span { font-size: 12px; }
+body.baixo #modal { padding: 6px; } body.baixo #modal .caixa { max-height: 98vh; padding: 14px 12px 10px; gap: 6px; }
+body.baixo #modal .caixa h2 { font-size: 20px; margin: 0; } body.baixo #modal .caixa p { margin: 0; font-size: 13px; }
+body.baixo .rede { height: max(150px, calc(100vh - 190px)); }
+body.baixo .infoNo { min-height: 0; padding: 6px; } body.baixo .infoNo b { font-size: 14px; } body.baixo .infoNo span { font-size: 11px; }
+body.baixo .desafios .btn { font-size: 11px; padding: 4px 6px; }
+body.baixo .hab { width: 60px; height: 58px; font-size: 9px; } body.baixo .hab .ico { width: 28px; height: 28px; } body.baixo .hab .seg { font-size: 20px; }
+body.baixo #cenaHab { bottom: 6px; gap: 8px; } body.baixo #cenaTopo { top: 4px; }
+body.baixo #revela img { width: 120px; height: 120px; } body.baixo #revela small { font-size: 22px; } body.baixo #revela b { font-size: 20px; } body.baixo #revela .rcaixa { padding: 10px 20px 8px; }
+body.baixo .raidTitulo { font-size: 40px; } body.baixo .raidChefes img { width: 70px; height: 70px; } body.baixo #raidAviso > span { font-size: 15px; }
+body.baixo #dica { font-size: 14px; padding: 4px 8px; }
+body.baixo #combo b { font-size: 14px; } body.baixo #combo i { width: 90px; }
+
+/* ===== v12: árvore mais visual — formatos e cores por galho/tipo ===== */
+.no, .no.chave, .no.tem, .no.chave.tem { background: none; box-shadow: none; border-radius: 0; --c: #9aa3c0; filter: drop-shadow(0 3px 0 rgba(0,0,0,.55)); }
+.no.f-circ { width: 40px; height: 40px; } .no.f-hex { width: 50px; height: 46px; } .no.f-diam { width: 60px; height: 60px; } .no.f-oct { width: 64px; height: 64px; }
+.no .forma, .no .anel { position: absolute; inset: 0; pointer-events: none; }
+.no .forma { background: #0e0820; }
+.no .forma::after { content: ""; position: absolute; inset: 3px; background: color-mix(in srgb, var(--c) 22%, #161026); clip-path: inherit; }
+.no.f-circ .forma, .no.f-circ .forma::after, .no.f-circ .anel { clip-path: circle(50%); }
+.no.f-hex .forma, .no.f-hex .forma::after, .no.f-hex .anel { clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
+.no.f-diam .forma, .no.f-diam .forma::after, .no.f-diam .anel { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.no.f-oct .forma, .no.f-oct .forma::after, .no.f-oct .anel { clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); }
+.no .ico { position: relative; z-index: 1; width: 26px; height: 26px; }
+.no.f-hex .ico { width: 30px; height: 30px; } .no.f-diam .ico { width: 32px; height: 32px; } .no.f-oct .ico { width: 38px; height: 38px; }
+.no.tem .forma::after { background: color-mix(in srgb, var(--c) 70%, #161026); }
+.no.tem { filter: drop-shadow(0 3px 0 rgba(0,0,0,.55)) drop-shadow(0 0 7px var(--c)); }
+.no.pode { animation: pulsoNo .9s steps(2) infinite; }
+.no.pode .forma { background: var(--c); }
+@keyframes pulsoNo { 50% { transform: translate(-50%, -50%) scale(1.1); } }
+.no.bloq { filter: grayscale(.9) brightness(.45); }
+.no .anel { inset: -6px; background: transparent; }
+.no.sel .anel { background: var(--ouro); animation: brilho .6s steps(2) infinite; }
+.no.sel { outline: none; }
+.no .pipsNo { position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%); display: flex; gap: 2px; z-index: 2; }
+.no .pipsNo i { width: 6px; height: 6px; background: #0e0820; box-shadow: 0 0 0 1px var(--borda); }
+.no .pipsNo i.on { background: var(--c); }
+.no .lv { z-index: 2; }
+.galhoNome { position: absolute; transform: translate(-50%, -50%); font-size: 22px; letter-spacing: 3px; color: rgba(255,255,255,.14); text-transform: uppercase; pointer-events: none; white-space: nowrap; text-shadow: 2px 2px 0 rgba(0,0,0,.3); }
+body.empe .no.f-circ { width: 34px; height: 34px; } body.empe .no.f-hex { width: 42px; height: 38px; } body.empe .no.f-diam { width: 50px; height: 50px; } body.empe .no.f-oct { width: 54px; height: 54px; }
+body.empe .no .ico { width: 22px; height: 22px; } body.empe .galhoNome { font-size: 16px; }
+
+/* ---------- roleta (v12) ---------- */
+#btnRoleta { position: absolute; right: 6px; top: 6px; z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 8px 5px; border: 0; cursor: pointer;
+  background: #2a1f48; box-shadow: 0 0 0 3px var(--borda), inset 0 -4px 0 0 rgba(0,0,0,.35); color: #fff; font: inherit; }
+#btnRoleta .ico { width: 44px; height: 44px; }
+#btnRoleta b { font-size: 13px; line-height: 1; white-space: nowrap; }
+#btnRoleta.pronto { background: #3a1f66; animation: rlPronto 1.2s ease-in-out infinite; }
+#btnRoleta.pronto .ico { animation: rlGira 3s linear infinite; }
+#btnRoleta.pronto b { color: var(--ouro); }
+#btnRoleta.pronto::after { content: ""; position: absolute; right: -5px; top: -5px; width: 12px; height: 12px; background: #ff4d5e; box-shadow: 0 0 0 2px var(--borda); }
+@keyframes rlPronto { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+@keyframes rlGira { to { transform: rotate(360deg); } }
+body.empe #btnRoleta .ico { width: 34px; height: 34px; } body.empe #btnRoleta b { font-size: 11px; }
+body.baixo #btnRoleta { padding: 3px 5px; } body.baixo #btnRoleta .ico { width: 28px; height: 28px; } body.baixo #btnRoleta b { font-size: 10px; }
+.rodas { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; }
+.rodas .roda { width: 132px; height: 132px; image-rendering: pixelated; filter: drop-shadow(4px 4px 0 rgba(0,0,0,.45)); }
+.rodas .roda.grande { width: min(300px, 62vw, 46vh); height: min(300px, 62vw, 46vh); }
+.rodas.tres .roda { width: min(180px, 27vw, 36vh); height: min(180px, 27vw, 36vh); }
+.rlRes { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 460px; }
+.rlRes:empty { display: none; }
+.rlItem { display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: rgba(0,0,0,.32); box-shadow: 0 0 0 2px var(--borda); text-align: left; animation: rlEntra .35s ease-out both; }
+.rlItem .ico { width: 30px; height: 30px; flex: none; }
+.rlItem b { font-size: 16px; min-width: 90px; } .rlItem span { font-size: 14px; color: #e8e2ff; }
+.rlItem:nth-child(2) { animation-delay: .12s; } .rlItem:nth-child(3) { animation-delay: .24s; }
+@keyframes rlEntra { from { opacity: 0; transform: translateY(8px) scale(.9); } }
+body.baixo .rodas .roda.grande { width: min(200px, 44vh); height: min(200px, 44vh); }
+body.baixo .rodas.tres .roda { width: min(130px, 34vh); height: min(130px, 34vh); }
+body.baixo .rlItem { padding: 3px 8px; } body.baixo .rlItem b { font-size: 13px; } body.baixo .rlItem span { font-size: 12px; }
+.rlItem.jackpot { background: linear-gradient(90deg, rgba(255,77,94,.45), rgba(255,204,51,.35)); } .rlItem.jackpot span { color: #fff6c2; font-weight: bold; }
+/* roleta no canto esquerdo de cima (não cobre o time); o selo do turbo vai para o lado dela */
+#btnRoleta { left: 6px; right: auto; } #boxTurbo { left: 80px; } body.empe #boxTurbo { left: 66px; } body.baixo #boxTurbo { left: 54px; }
+body.baixo .rlRes { flex-direction: row; max-width: none; } body.baixo .rlItem { flex: 1; min-width: 0; flex-direction: column; gap: 2px; text-align: center; }
+body.baixo .rlItem .ico { width: 22px; height: 22px; } body.baixo .rlItem b { min-width: 0; }

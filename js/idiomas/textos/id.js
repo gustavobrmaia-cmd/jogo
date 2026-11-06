@@ -388,5 +388,22 @@ TEXTOS.id = {
   sk_c_raids: "Menangkan {0} raid",
   sk_c_tier: "Robot level {0}",
   fab_evoluiu: "Pabrikmu berevolusi!",
-  fab_evoluiu_d: "Level teknologi {0}/{1}"
+  fab_evoluiu_d: "Level teknologi {0}/{1}",
+  // v12: galhos novos da árvore e roleta
+  galho_3: "Emas",
+  galho_4: "Pengetahuan",
+  rl_titulo: "Roda Keberuntungan",
+  rl_explica: "Gratis tiap 10 menit. Tonton iklan dan putar 3 roda sekaligus!",
+  rl_botao: "PUTAR!",
+  rl_gratis: "Putar gratis",
+  rl_x3: "Putar 3x",
+  rl_moedas: "Koin",
+  rl_turbo: "Turbo x3 selama {0} dtk",
+  rl_robo: "Robot level {0}",
+  rl_ph: "+{0} poin keahlian",
+  rl_peca: "Komponen",
+  rl_moedas2: "Brankas",
+  rl_ph2: "Banyak PK",
+  rl_jackpot: "JACKPOT! +{0}",
+  rl_cheia: "Grid penuh: +{0}"
 };

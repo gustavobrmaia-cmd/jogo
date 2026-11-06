@@ -388,5 +388,22 @@ TEXTOS.en = {
   sk_c_raids: "Win {0} raids",
   sk_c_tier: "Level {0} robot",
   fab_evoluiu: "Your factory evolved!",
-  fab_evoluiu_d: "Tech level {0}/{1}"
+  fab_evoluiu_d: "Tech level {0}/{1}",
+  // v12: galhos novos da árvore e roleta
+  galho_3: "Gold",
+  galho_4: "Knowledge",
+  rl_titulo: "Lucky Wheel",
+  rl_explica: "Free every 10 minutes. Watch an ad and spin 3 wheels at once!",
+  rl_botao: "SPIN!",
+  rl_gratis: "Free spin",
+  rl_x3: "Spin 3x",
+  rl_moedas: "Coins",
+  rl_turbo: "Turbo x3 for {0} s",
+  rl_robo: "Level {0} robot",
+  rl_ph: "+{0} skill points",
+  rl_peca: "Gear",
+  rl_moedas2: "Vault",
+  rl_ph2: "Lots of SP",
+  rl_jackpot: "JACKPOT! +{0}",
+  rl_cheia: "Grid full: +{0}"
 };

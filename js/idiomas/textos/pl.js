@@ -388,5 +388,22 @@ TEXTOS.pl = {
   sk_c_raids: "Wygraj {0} rajdów",
   sk_c_tier: "Robot poziomu {0}",
   fab_evoluiu: "Twoja fabryka ewoluowała!",
-  fab_evoluiu_d: "Poziom technologii {0}/{1}"
+  fab_evoluiu_d: "Poziom technologii {0}/{1}",
+  // v12: galhos novos da árvore e roleta
+  galho_3: "Złoto",
+  galho_4: "Wiedza",
+  rl_titulo: "Koło Fortuny",
+  rl_explica: "Za darmo co 10 minut. Obejrzyj reklamę i zakręć 3 kołami naraz!",
+  rl_botao: "KRĘĆ!",
+  rl_gratis: "Darmowy obrót",
+  rl_x3: "Kręć 3x",
+  rl_moedas: "Monety",
+  rl_turbo: "Turbo x3 przez {0} s",
+  rl_robo: "Robot poziomu {0}",
+  rl_ph: "+{0} punktów umiejętności",
+  rl_peca: "Część",
+  rl_moedas2: "Sejf",
+  rl_ph2: "Dużo PU",
+  rl_jackpot: "JACKPOT! +{0}",
+  rl_cheia: "Siatka pełna: +{0}"
 };
