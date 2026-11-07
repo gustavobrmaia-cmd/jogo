@@ -508,6 +508,15 @@ const Pixel = (function() {
         f.rect(2, 9, 20, 14, M(VERMELHO, true)); f.rect(1, 6, 22, 5, M(VERMELHO));
         const o = M(OURO, true); f.rect(10, 6, 4, 17, o); f.poli([[12, 6], [5, 1], [6, 6]], o); f.poli([[12, 6], [19, 1], [18, 6]], o); break;
       }
+      case "mao": {   // mãozinha apontando (guia das missões): ponta do dedo em (7, 1)
+        const p = M(PELE, true);
+        f.rr(5, 0, 5, 14, 2, p);                       // indicador
+        f.rr(5, 9, 15, 12, 3, p);                      // palma com os outros dedos dobrados
+        f.rr(1, 11, 6, 5, 2, p);                       // polegar
+        f.rr(7, 20, 12, 4, 1, M(mat(212, 76, 56)));    // manga
+        [11, 14, 17].forEach(function(x) { f.dR(x, 10, 1, 4, "#c98a6a"); });   // dobras dos dedos
+        f.dR(6, 1, 3, 2, "#fff1e6"); break;
+      }
       case "roleta": {   // roleta colorida com ponteiro
         const cores = [OURO, AZUL, VERMELHO, VERDE, ROXO, CIANO, mat(26, 85, 58), mat(330, 70, 62)];
         f.circ(12, 13, 10.5, M(METAL_E));

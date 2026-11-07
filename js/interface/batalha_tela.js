@@ -30,7 +30,7 @@ const BatalhaTela = (function() {
     }
     HORDAS.forEach(function(h) {
       const aberta = Batalha.hordaAberta(h.id), vencida = h.id < save.hordasVencidas;
-      const c = E("div", "card horda" + (aberta ? "" : " fechada"));
+      const c = E("div", "card horda" + (aberta ? "" : " fechada")); c.dataset.h = h.id;
       const mini = E("div", "mini");
       h.monstros.forEach(function(m) { const vis = save.monstrosVistos.indexOf(m.id) >= 0; mini.appendChild(Pixel.img(vis ? Pixel.monstro(m.id) : Pixel.sombra(Pixel.monstro(m.id)))); });
       c.appendChild(mini);
@@ -65,7 +65,7 @@ const BatalhaTela = (function() {
     const bts = E("div", "linhaBtns");
     const bm = E("button", "btn sem", esc(t("bat_melhores")));
     bm.addEventListener("click", function() { marcados = melhores(); Som.som("clique"); remontar(); });
-    const bl = E("button", "btn grande" + (marcados.length ? "" : " sem"), esc(t("bat_lutar")));
+    const bl = E("button", "btn grande" + (marcados.length ? "" : " sem"), esc(t("bat_lutar"))); bl.id = "btnLutar";
     bl.addEventListener("click", function() { if (!marcados.length) return; lutar(sel); });
     const bv = E("button", "btn sem", esc(t("voltar")));
     bv.addEventListener("click", function() { modo = "lista"; Som.som("clique"); remontar(); });

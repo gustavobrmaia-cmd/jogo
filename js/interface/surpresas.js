@@ -25,7 +25,8 @@ const Surpresas = (function() {
     im.className = "px ouro"; im.src = Pixel.url(Pixel.robo(22)); im.draggable = false; im.alt = "";
     im.style.width = im.style.height = tam + "px";
     camada.appendChild(im);
-    ouro = { el: im, t: 0, dur: 8, tam: tam, x0: daEsq ? -tam : W + tam, x1: daEsq ? W + tam : -tam, y: H * (0.22 + Math.random() * 0.45), fase: Math.random() * 6, rastro: 0 };
+    const missaoOuro = Missoes.atual().tipo === "ouro";
+    ouro = { el: im, t: 0, dur: missaoOuro ? 12 : 8, tam: tam, x0: daEsq ? -tam : W + tam, x1: daEsq ? W + tam : -tam, y: H * (0.22 + Math.random() * 0.45), fase: Math.random() * 6, rastro: 0 };
     if (!daEsq) im.style.setProperty("--vira", "-1");
     im.addEventListener("pointerdown", function(e) { e.preventDefault(); e.stopPropagation(); pegarOuro(); });
     Som.som("ouro_aparece");
@@ -61,7 +62,7 @@ const Surpresas = (function() {
   }
   function passoOuro(dt) {
     const o = ouro; o.t += dt;
-    if (o.t >= o.dur) { sumir(o); ouro = null; proxOuro = 45 + Math.random() * 45; return; }
+    if (o.t >= o.dur) { sumir(o); ouro = null; proxOuro = Missoes.atual().tipo === "ouro" ? 6 : 45 + Math.random() * 45; return; }   // v13: na missão do dourado, volta logo
     const k = o.t / o.dur, x = o.x0 + (o.x1 - o.x0) * k, y = o.y + Math.sin(o.t * 2.6 + o.fase) * 40;
     o.el.style.transform = "translate(" + Math.round(x - o.tam / 2) + "px," + Math.round(y - o.tam / 2) + "px) scaleX(var(--vira, 1))";
     o.rastro -= dt;
@@ -140,6 +141,7 @@ const Surpresas = (function() {
     }
     if (save.tutorial < 2) return;   // primeiro aprende o básico
     const m = Missoes.atual().tipo;
+    if (m === "ouro" && !ouro && proxOuro > 5) proxOuro = 5;   // v13: missão do dourado -> ele aparece em poucos segundos
     if (ouro) passoOuro(dt);
     else { proxOuro -= dt * (m === "ouro" ? 4 : 1) * (1 + 0.25 * nivelUp("ima")) * (1 + 0.15 * arv("ouro")); if (proxOuro <= 0) soltarOuro(); }   // Ímã: aparece mais
     const monstroLiberado = save.hordasVencidas >= 1 || m === "monstro";
@@ -151,5 +153,5 @@ const Surpresas = (function() {
     else if (!box.classList.contains("escondido")) box.classList.add("escondido");
   }
 
-  return { passo: passo, soltarOuro: soltarOuro, soltarMonstro: soltarMonstro };
+  return { passo: passo, soltarOuro: soltarOuro, soltarMonstro: soltarMonstro, get ouroEl() { return ouro ? ouro.el : null; } };
 })();

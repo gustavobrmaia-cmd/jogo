@@ -155,6 +155,21 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
 - Celular deitado (altura < 540): body.baixo deixa tudo compacto (tela.js layout + bloco body.baixo no CSS);
   colunas do #app com minmax(0, 1fr). Teste: verif/deitado.js (915x412, 844x390, 667x375).
 
+## PFT v12 (7/nov, 11:08): PASSOU — 3m36s, 26% engajados, 60 FPS (melhor de todos os jogos; v10: 3m03/3m04 e ~23-24%)
+- Histograma v12 (v10): 0-1m 208 (246), 1-2m 103 (91), 2-3m 57 (43), 3-4m 36 (18), 4-5m 12 (22), 5m+ 84 (79).
+- Missões completadas (mission/m-N): 1 431, 2 287 (-33%), 3 264, 4 191 (-28%), 5 181, 6 106 (-41%), 7 78, 8 75,
+  9 40 (-47%), 10 19 (-52%). Batalha: só ~10% começam; horda-2 perdia 48%, horda-3 82%. Renascer 3%.
+- Aparelho: 51% em pé, 27% deitado, 21% PC. Idiomas: en 34%, es 19%, pt 16%, tr 7,5%.
+- Roleta e robô dourado ficam na aba "Interaction Events" do Poki (não na de Progress).
+
+## v13 (corrige o funil do PFT v12)
+- Missão 2: criar 2 robôs (era 3).
+- GUIA (interface/guia.js): mãozinha (Pixel.icone("mao")) depois de 2,5-3,5 s parado, some ao tocar: arrasta
+  grade -> time e par para juntar; toca Criar, aba Upgrades/Batalha (a aba brilha: .aba.chama), card do upgrade
+  (rola até ele), card da horda (data-h), Lutar (#btnLutar) e o robô dourado (na hora).
+- Robô dourado: na missão dele aparece em ~5 s, voa 12 s (era 8) e se escapar volta em 6 s.
+- Hordas 1-4 mais leves: facil [0,3; 0,25; 0,13; 0,05; 0,03] (era [0,3; 0,3; 0,2] e 1 depois) — sim/novato4.js.
+
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.
 - 1ª partida: nível 6 ~40 s, 8 (libera renascer) ~5 min, 10 ~15 min, 12 ~28 min. Depois de renascer anda bem mais rápido.

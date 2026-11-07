@@ -72,7 +72,7 @@ const Batalha = (function() {
   function furia() { return save.p.desafio === "furioso"; }
   function composicao(z, o) {
     // v10: as 3 primeiras hordas ficaram bem mais fáceis (no PFT a Fácil perdia 57% das vezes e desanimava)
-    const facil = z === "torre" ? (save.torre.andar <= 3 ? 0.5 : 1) : [0.3, 0.3, 0.2][z] || 1;   // torre: 3 primeiros andares mais leves
+    const facil = z === "torre" ? (save.torre.andar <= 3 ? 0.5 : 1) : [0.3, 0.25, 0.13, 0.05, 0.03][z] || 1;   // torre: 3 primeiros andares mais leves; v13: hordas 1-4 bem mais leves (PFT v12: horda 2 perdia 48%, horda 3 82%)
     const h = hordaDe(z), l = [], ultima = o === h.ondas - 1, fv = (furia() ? 2 : 1) * facil, fa = (furia() ? 1.5 : 1) * facil;
     if (z === "raid") {   // só chefões, todos de uma vez, cada um de um tipo
       for (let k = 0; k < h.n; k++) {

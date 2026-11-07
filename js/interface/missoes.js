@@ -9,7 +9,7 @@
 // =========================
 const MISSOES = [
   { tipo: "toques", alvo: 10 },
-  { tipo: "criar", alvo: 3 },
+  { tipo: "criar", alvo: 2 },   // v13: era 3 (PFT v12: perdia 33% aqui)
   { tipo: "juntar", alvo: 1 },
   { tipo: "time", alvo: 1 },
   { tipo: "tier", alvo: 4 },

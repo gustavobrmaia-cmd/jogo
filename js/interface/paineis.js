@@ -322,5 +322,6 @@ const Paineis = (function() {
 
   return { abrir: abrir, fechar: fechar, atualizarUpgrades: atualizarUpgrades, pontos: pontos, janela: janela, fecharJanela: fecharJanela, aoFecharJanela: aoFecharJanela,
     janelaAberta: janelaAberta, faixa: faixa, passoFaixa: passoFaixa, mostrarOffline: mostrarOffline, preencherIcones: preencherIcones,
-    icone: icone, elem: elem, esc: esc, escolhendo: escolhendo, get aba() { return aba; } };
+    icone: icone, elem: elem, esc: esc, escolhendo: escolhendo, get aba() { return aba; },
+    cardUp: function(id) { return linhasUp[id] ? linhasUp[id].card : null; } };
 })();
