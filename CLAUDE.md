@@ -170,6 +170,13 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
 - Robô dourado: na missão dele aparece em ~5 s, voa 12 s (era 8) e se escapar volta em 6 s.
 - Hordas 1-4 mais leves: facil [0,3; 0,25; 0,13; 0,05; 0,03] (era [0,3; 0,3; 0,2] e 1 depois) — sim/novato4.js.
 
+## PFT v13: manhã (8/nov 08:32) 3m25s / 29%; NOITE (8/nov 17:00) **5m21s / 35%** — os dois passaram (recorde)
+- Histograma manhã -> noite: 0-1m 213->167, 1-2m 84->101, 2-3m 59->57, 3-4m 35->27, 4-5m 21->26, 5m+ 88->120.
+- Funil (2 testes somados, 1003 visitas): m-1 870, m-2 648, m-3 611, m-4 488, m-5 429, m-6 285, m-9 183, m-10 128,
+  m-15 102, m-16 80, m-17 57, m-18 48, m-19 22; renascer 37. Hordas (tentativas/derrotas): h0 267/20, h1 121/18,
+  **h2 117/48 (41%)**, h3 46/14, h4 50/15, **h5 36/25**. Dourado: 576 viram, 240 pegaram. Roleta aberta por 256.
+- Poki só grava ações conhecidas: "free"/"ad" da roleta NÃO aparecem (usar "interact" e o nome no 2º campo).
+
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.
 - 1ª partida: nível 6 ~40 s, 8 (libera renascer) ~5 min, 10 ~15 min, 12 ~28 min. Depois de renascer anda bem mais rápido.
