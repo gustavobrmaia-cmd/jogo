@@ -180,6 +180,17 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
 ## WEB FIT do Robot Clicker (resultado 11/nov): média **5m12s**, a meta do gênero (idle) é **6m42s**; o resto passou.
 - Falta ~1m30 (+29%). O que importa agora é segurar depois dos 5 min (meio do jogo, renascer, metas longas).
 
+## v14 (meio do jogo + metas longas, depois do Web Fit 5m12s / meta 6m42s)
+- Hordas: facil [0,3; 0,25; 0,09; 0,05; 0,03; 0,015] (z0-z5; 6+ = 1, para quem já renasceu) — sim/novato4.js.
+- Aviso de renascer: janela 1x por partida (save.p.avisouRenascer) quando libera, só com painel fechado (Paineis.pontos);
+  mãozinha na missão "renascer" aponta Upgrades > botão Renascer.
+- CONQUISTAS (dados/conquistas.js + interface/conquistas.js): 12 x 5 medalhas, PH [1,2,3,5,8]; Compêndio > Conquistas;
+  save.conquistas; faixa "Conquista!" e bolinha no Compêndio. Evento Poki achievement/<id>-<n>.
+- Bônus da coleção: multMoedas x (1 + 3%/robô + 2%/monstro descobertos) — bonusColecao(); mostrado no Compêndio.
+- Robô LENDA (traço "lenda", chance 0): só da roleta (35% do prêmio robô) e de raid vencida (maxTier-2);
+  continua lenda ao juntar (mover/tocarRobo -> juntou(..., lenda)); vaga brilha rosa (.vaga.lenda).
+- Roleta medida como event/roleta-gratis|roleta-ad "interact". Teste: verif/v14.js.
+
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.
 - 1ª partida: nível 6 ~40 s, 8 (libera renascer) ~5 min, 10 ~15 min, 12 ~28 min. Depois de renascer anda bem mais rápido.

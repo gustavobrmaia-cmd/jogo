@@ -405,5 +405,22 @@ TEXTOS.en = {
   rl_moedas2: "Vault",
   rl_ph2: "Lots of SP",
   rl_jackpot: "JACKPOT! +{0}",
-  rl_cheia: "Grid full: +{0}"
+  rl_cheia: "Grid full: +{0}",
+  // v14: aviso de renascer, conquistas, coleção e robô lenda
+  rn_titulo: "You can REBIRTH!",
+  rn_d: "Start over stronger: spend your points in the skill tree. Discovered robots, achievements and gear stay with you.",
+  rn_ph: "You have {0} skill points to spend",
+  rn_ver: "See the tree",
+  rn_depois: "Not now",
+  cq_titulo: "Achievements {0}/{1}",
+  cq_explica: "Every medal gives skill points. Tap to claim!",
+  cq_nova: "Achievement!",
+  cq_completa: "Complete!",
+  cq_c_juntar: "Merge {0} times",
+  cq_c_encomendas: "Deliver {0} orders",
+  cq_c_roleta: "Spin the wheel {0} times",
+  comp_bonus: "Collection bonus: +{0}% to everything",
+  tr_lenda: "Legend",
+  tr_lenda_d: "earns 4x, presses faster and fights 3x (stays legend when merged!)",
+  lenda_ganhou: "LEGEND robot level {0}!"
 };

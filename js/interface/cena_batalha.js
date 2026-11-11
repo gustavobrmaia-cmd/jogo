@@ -316,6 +316,7 @@ const CenaBatalha = (function() {
     if (f.novos.length) { const m = Paineis.elem("div", "mini"); f.novos.forEach(function(d) { m.appendChild(Pixel.img(Pixel.monstro(d.id))); }); r.appendChild(m); }
     if (f.venceu && f.torre) r.appendChild(Paineis.elem("span", "", Paineis.esc(t("torre_venceu", f.torre))));
     if (f.venceu && f.raid) r.appendChild(Paineis.elem("span", "", "+" + f.ph + " " + Paineis.esc(t("ph_nome"))));
+    if (f.lenda) { const lg = Paineis.elem("div", "lendaGanha", "<b>" + Paineis.esc(t("lenda_ganhou", f.lenda)) + "</b>"); lg.prepend(Pixel.img(Pixel.robo(f.lenda))); r.appendChild(lg); }
     if (f.pecas && f.pecas.length > 1) {   // raid: uma peça por chefão
       const lp = Paineis.elem("div", "mini");
       f.pecas.forEach(function(p) { const c = Paineis.elem("div", "peca r" + p.r); c.appendChild(Paineis.icone(EQUIP_TIPOS[p.t].ico)); lp.appendChild(c); });

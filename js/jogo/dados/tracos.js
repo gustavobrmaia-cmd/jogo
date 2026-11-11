@@ -12,7 +12,9 @@ const TRACOS = {
   sortudo:    { chance: 5,   sorte: 0.08, ico: "trevo", cor: "#3ccf6e" },
   guerreiro:  { chance: 5,   bat: 2, valor: 0.8, ico: "batalha", cor: "#ff5d73" },
   preguicoso: { chance: 6,   vel: 0.6,  ico: "lua",     cor: "#8a8aa8" },
-  dourado:    { chance: 1.5, valor: 3,  ico: "moeda",   cor: "#ffcc33" }
+  dourado:    { chance: 1.5, valor: 3,  ico: "moeda",   cor: "#ffcc33" },
+  // v14: LENDA nunca nasce sozinho: só vem da roleta e das raids, e continua lenda ao juntar
+  lenda:      { chance: 0,   vel: 1.6, valor: 4, sorte: 0.05, bat: 3, ico: "estrela", cor: "#ff6bd0" }
 };
 function rolarTraco() {
   let r = Math.random() * 100;

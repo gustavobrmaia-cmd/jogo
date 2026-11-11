@@ -405,5 +405,22 @@ TEXTOS.vi = {
   rl_moedas2: "Két sắt",
   rl_ph2: "Nhiều ĐKN",
   rl_jackpot: "JACKPOT! +{0}",
-  rl_cheia: "Lưới đầy: +{0}"
+  rl_cheia: "Lưới đầy: +{0}",
+  // v14: aviso de renascer, conquistas, coleção e robô lenda
+  rn_titulo: "Bạn có thể TÁI SINH!",
+  rn_d: "Bắt đầu lại mạnh hơn: dùng điểm trong cây kỹ năng. Robot đã khám phá, thành tích và linh kiện vẫn được giữ.",
+  rn_ph: "Bạn có {0} điểm kỹ năng để dùng",
+  rn_ver: "Xem cây kỹ năng",
+  rn_depois: "Để sau",
+  cq_titulo: "Thành tích {0}/{1}",
+  cq_explica: "Mỗi huy chương cho điểm kỹ năng. Chạm để nhận!",
+  cq_nova: "Thành tích!",
+  cq_completa: "Hoàn thành!",
+  cq_c_juntar: "Ghép {0} lần",
+  cq_c_encomendas: "Giao {0} đơn hàng",
+  cq_c_roleta: "Quay vòng quay {0} lần",
+  comp_bonus: "Thưởng bộ sưu tập: +{0}% mọi thứ",
+  tr_lenda: "Huyền Thoại",
+  tr_lenda_d: "kiếm x4, nhấn nhanh hơn và đánh x3 (vẫn là huyền thoại khi ghép!)",
+  lenda_ganhou: "Robot HUYỀN THOẠI cấp {0}!"
 };

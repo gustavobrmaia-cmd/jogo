@@ -405,5 +405,22 @@ TEXTOS.es = {
   rl_moedas2: "Cofre",
   rl_ph2: "Muchos PH",
   rl_jackpot: "¡JACKPOT! +{0}",
-  rl_cheia: "Rejilla llena: +{0}"
+  rl_cheia: "Rejilla llena: +{0}",
+  // v14: aviso de renascer, conquistas, coleção e robô lenda
+  rn_titulo: "¡Puedes RENACER!",
+  rn_d: "Empieza de nuevo más fuerte: gasta tus puntos en el árbol de habilidades. Los robots descubiertos, logros y piezas se quedan contigo.",
+  rn_ph: "Tienes {0} puntos de habilidad para gastar",
+  rn_ver: "Ver el árbol",
+  rn_depois: "Ahora no",
+  cq_titulo: "Logros {0}/{1}",
+  cq_explica: "Cada medalla da puntos de habilidad. ¡Toca para recoger!",
+  cq_nova: "¡Logro!",
+  cq_completa: "¡Completo!",
+  cq_c_juntar: "Haz {0} fusiones",
+  cq_c_encomendas: "Entrega {0} pedidos",
+  cq_c_roleta: "Gira la ruleta {0} veces",
+  comp_bonus: "Bono de colección: +{0}% en todo",
+  tr_lenda: "Leyenda",
+  tr_lenda_d: "rinde 4x, pulsa más rápido y lucha 3x (¡sigue siendo leyenda al fusionar!)",
+  lenda_ganhou: "¡Robot LEYENDA nivel {0}!"
 };

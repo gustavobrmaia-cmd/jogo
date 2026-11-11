@@ -32,7 +32,8 @@ function saveNovo() {
     renascimentos: 0,
     stats: { toques: 0, batalhas: 0, vitorias: 0, juncoes: 0, tempo: 0, criados: 0, ouros: 0, invasores: 0 },
     missao: null,
-    roleta: { gratis: 0, anuncio: 0, giros: 0 },   // roleta (v12): quando volta o giro grátis e o do anúncio (ms)
+    roleta: { gratis: 0, anuncio: 0, giros: 0 },
+    conquistas: {},   // v14: medalhas já pegas por conquista (dados/conquistas.js)   // roleta (v12): quando volta o giro grátis e o do anúncio (ms)
     skin: "classico", skinsVistas: ["classico"],   // visual do botão (v11, skins.js)
     torre: { andar: 1, recorde: 0 },   // Torre Infinita (v9): andar atual e maior andar vencido
     equip: { itens: [], vagas: [] },   // equipamentos (v9): inventário e o que está em cada vaga do time (índice do item)

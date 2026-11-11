@@ -405,5 +405,22 @@ TEXTOS.it = {
   rl_moedas2: "Cassaforte",
   rl_ph2: "Tanti PA",
   rl_jackpot: "JACKPOT! +{0}",
-  rl_cheia: "Griglia piena: +{0}"
+  rl_cheia: "Griglia piena: +{0}",
+  // v14: aviso de renascer, conquistas, coleção e robô lenda
+  rn_titulo: "Puoi RINASCERE!",
+  rn_d: "Ricomincia più forte: spendi i tuoi punti nell'albero delle abilità. Robot scoperti, obiettivi e pezzi restano con te.",
+  rn_ph: "Hai {0} punti abilità da spendere",
+  rn_ver: "Vedi l'albero",
+  rn_depois: "Non ora",
+  cq_titulo: "Obiettivi {0}/{1}",
+  cq_explica: "Ogni medaglia dà punti abilità. Tocca per riscattare!",
+  cq_nova: "Obiettivo!",
+  cq_completa: "Completato!",
+  cq_c_juntar: "Fai {0} fusioni",
+  cq_c_encomendas: "Consegna {0} ordini",
+  cq_c_roleta: "Gira la ruota {0} volte",
+  comp_bonus: "Bonus collezione: +{0}% su tutto",
+  tr_lenda: "Leggenda",
+  tr_lenda_d: "rende 4x, preme più veloce e combatte 3x (resta leggenda quando fondi!)",
+  lenda_ganhou: "Robot LEGGENDA livello {0}!"
 };

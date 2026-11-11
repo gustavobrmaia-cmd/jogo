@@ -59,6 +59,7 @@ const Guia = (function() {
       case "criar": return !Paineis.aba && p.moedas >= Jogo.custoCriar() ? { tipo: "toca", e: el("btnCriar") } : null;
       case "up": case "uptier": return upgradeAlvo(m);
       case "horda": return hordaAlvo(m);
+      case "renascer": return Jogo.podeRenascer() ? upgradeAlvo({ tipo: "up", id: "_renascer" }) : null;   // v14
     }
     return null;
   }

@@ -405,5 +405,22 @@ TEXTOS.ro = {
   rl_moedas2: "Seif",
   rl_ph2: "Multe PA",
   rl_jackpot: "JACKPOT! +{0}",
-  rl_cheia: "Grilă plină: +{0}"
+  rl_cheia: "Grilă plină: +{0}",
+  // v14: aviso de renascer, conquistas, coleção e robô lenda
+  rn_titulo: "Poți să RENAȘTI!",
+  rn_d: "Începe din nou mai puternic: cheltuie punctele în arborele de abilități. Roboții descoperiți, realizările și piesele rămân cu tine.",
+  rn_ph: "Ai {0} puncte de abilitate de cheltuit",
+  rn_ver: "Vezi arborele",
+  rn_depois: "Nu acum",
+  cq_titulo: "Realizări {0}/{1}",
+  cq_explica: "Fiecare medalie dă puncte de abilitate. Atinge ca să iei!",
+  cq_nova: "Realizare!",
+  cq_completa: "Complet!",
+  cq_c_juntar: "Fă {0} fuziuni",
+  cq_c_encomendas: "Livrează {0} comenzi",
+  cq_c_roleta: "Învârte roata de {0} ori",
+  comp_bonus: "Bonus de colecție: +{0}% la tot",
+  tr_lenda: "Legendă",
+  tr_lenda_d: "produce de 4x, apasă mai repede și luptă de 3x (rămâne legendă la fuziune!)",
+  lenda_ganhou: "Robot LEGENDĂ de nivelul {0}!"
 };

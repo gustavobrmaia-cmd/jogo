@@ -405,5 +405,22 @@ TEXTOS.pt = {
   rl_moedas2: "Cofre",
   rl_ph2: "Muitos PH",
   rl_jackpot: "JACKPOT! +{0}",
-  rl_cheia: "Grade cheia: +{0}"
+  rl_cheia: "Grade cheia: +{0}",
+  // v14: aviso de renascer, conquistas, coleção e robô lenda
+  rn_titulo: "Você pode RENASCER!",
+  rn_d: "Comece de novo mais forte: gaste seus pontos na árvore de habilidades. Os robôs descobertos, conquistas e peças continuam com você.",
+  rn_ph: "Você tem {0} pontos de habilidade para gastar",
+  rn_ver: "Ver a árvore",
+  rn_depois: "Agora não",
+  cq_titulo: "Conquistas {0}/{1}",
+  cq_explica: "Cada medalha dá pontos de habilidade. Toque para pegar!",
+  cq_nova: "Conquista!",
+  cq_completa: "Completa!",
+  cq_c_juntar: "Faça {0} junções",
+  cq_c_encomendas: "Entregue {0} encomendas",
+  cq_c_roleta: "Gire a roleta {0} vezes",
+  comp_bonus: "Bônus da coleção: +{0}% em tudo",
+  tr_lenda: "Lenda",
+  tr_lenda_d: "rende 4x, aperta mais rápido e luta 3x (continua lenda ao juntar!)",
+  lenda_ganhou: "Robô LENDA nível {0}!"
 };

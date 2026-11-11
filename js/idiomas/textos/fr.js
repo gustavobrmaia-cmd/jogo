@@ -405,5 +405,22 @@ TEXTOS.fr = {
   rl_moedas2: "Coffre",
   rl_ph2: "Plein de PC",
   rl_jackpot: "JACKPOT ! +{0}",
-  rl_cheia: "Grille pleine : +{0}"
+  rl_cheia: "Grille pleine : +{0}",
+  // v14: aviso de renascer, conquistas, coleção e robô lenda
+  rn_titulo: "Tu peux RENAÎTRE !",
+  rn_d: "Recommence plus fort : dépense tes points dans l'arbre de compétences. Les robots découverts, les succès et les pièces restent avec toi.",
+  rn_ph: "Tu as {0} points de compétence à dépenser",
+  rn_ver: "Voir l'arbre",
+  rn_depois: "Pas maintenant",
+  cq_titulo: "Succès {0}/{1}",
+  cq_explica: "Chaque médaille donne des points de compétence. Touche pour récupérer !",
+  cq_nova: "Succès !",
+  cq_completa: "Terminé !",
+  cq_c_juntar: "Fais {0} fusions",
+  cq_c_encomendas: "Livre {0} commandes",
+  cq_c_roleta: "Fais tourner la roue {0} fois",
+  comp_bonus: "Bonus de collection : +{0}% sur tout",
+  tr_lenda: "Légende",
+  tr_lenda_d: "rapporte x4, appuie plus vite et combat x3 (reste légende en fusionnant !)",
+  lenda_ganhou: "Robot LÉGENDE niveau {0} !"
 };

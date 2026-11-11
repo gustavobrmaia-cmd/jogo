@@ -67,6 +67,7 @@ const Tela = (function() {
           d._trId = trId;
           if (trId) { d._tr.style.display = ""; d._tr.style.backgroundImage = "url(" + Pixel.url(Pixel.icone(TRACOS[trId].ico)) + ")"; d._tr.style.setProperty("--trc", TRACOS[trId].cor); d._tr.title = t("tr_" + trId); }
           else d._tr.style.display = "none";
+          d.classList.toggle("lenda", trId === "lenda");   // v14: robô lenda brilha
         }
         if (d._tier === n) return;
         d._tier = n;

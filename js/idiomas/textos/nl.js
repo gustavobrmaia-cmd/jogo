@@ -405,5 +405,22 @@ TEXTOS.nl = {
   rl_moedas2: "Kluis",
   rl_ph2: "Veel VP",
   rl_jackpot: "JACKPOT! +{0}",
-  rl_cheia: "Raster vol: +{0}"
+  rl_cheia: "Raster vol: +{0}",
+  // v14: aviso de renascer, conquistas, coleção e robô lenda
+  rn_titulo: "Je kunt HERBOREN worden!",
+  rn_d: "Begin sterker opnieuw: besteed je punten in de vaardigheidsboom. Ontdekte robots, prestaties en onderdelen blijven bij je.",
+  rn_ph: "Je hebt {0} vaardigheidspunten om te besteden",
+  rn_ver: "Bekijk de boom",
+  rn_depois: "Niet nu",
+  cq_titulo: "Prestaties {0}/{1}",
+  cq_explica: "Elke medaille geeft vaardigheidspunten. Tik om op te halen!",
+  cq_nova: "Prestatie!",
+  cq_completa: "Voltooid!",
+  cq_c_juntar: "Voeg {0} keer samen",
+  cq_c_encomendas: "Lever {0} bestellingen",
+  cq_c_roleta: "Draai {0} keer aan het rad",
+  comp_bonus: "Collectiebonus: +{0}% op alles",
+  tr_lenda: "Legende",
+  tr_lenda_d: "levert 4x op, drukt sneller en vecht 3x (blijft legende bij samenvoegen!)",
+  lenda_ganhou: "LEGENDE-robot niveau {0}!"
 };

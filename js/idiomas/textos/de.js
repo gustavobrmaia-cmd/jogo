@@ -405,5 +405,22 @@ TEXTOS.de = {
   rl_moedas2: "Tresor",
   rl_ph2: "Viele FP",
   rl_jackpot: "JACKPOT! +{0}",
-  rl_cheia: "Raster voll: +{0}"
+  rl_cheia: "Raster voll: +{0}",
+  // v14: aviso de renascer, conquistas, coleção e robô lenda
+  rn_titulo: "Du kannst WIEDERGEBOREN werden!",
+  rn_d: "Starte stärker neu: Gib deine Punkte im Fähigkeitenbaum aus. Entdeckte Roboter, Erfolge und Teile bleiben dir.",
+  rn_ph: "Du hast {0} Fähigkeitspunkte zum Ausgeben",
+  rn_ver: "Baum ansehen",
+  rn_depois: "Jetzt nicht",
+  cq_titulo: "Erfolge {0}/{1}",
+  cq_explica: "Jede Medaille gibt Fähigkeitspunkte. Tippe zum Abholen!",
+  cq_nova: "Erfolg!",
+  cq_completa: "Fertig!",
+  cq_c_juntar: "Verschmelze {0}-mal",
+  cq_c_encomendas: "Liefere {0} Aufträge",
+  cq_c_roleta: "Drehe das Rad {0}-mal",
+  comp_bonus: "Sammlungsbonus: +{0}% auf alles",
+  tr_lenda: "Legende",
+  tr_lenda_d: "bringt 4x, drückt schneller und kämpft 3x (bleibt Legende beim Verschmelzen!)",
+  lenda_ganhou: "LEGENDEN-Roboter Stufe {0}!"
 };

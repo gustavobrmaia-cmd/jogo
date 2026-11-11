@@ -405,5 +405,22 @@ TEXTOS.pl = {
   rl_moedas2: "Sejf",
   rl_ph2: "Dużo PU",
   rl_jackpot: "JACKPOT! +{0}",
-  rl_cheia: "Siatka pełna: +{0}"
+  rl_cheia: "Siatka pełna: +{0}",
+  // v14: aviso de renascer, conquistas, coleção e robô lenda
+  rn_titulo: "Możesz się ODRODZIĆ!",
+  rn_d: "Zacznij od nowa silniejszy: wydaj punkty w drzewku umiejętności. Odkryte roboty, osiągnięcia i części zostają z tobą.",
+  rn_ph: "Masz {0} punktów umiejętności do wydania",
+  rn_ver: "Zobacz drzewko",
+  rn_depois: "Nie teraz",
+  cq_titulo: "Osiągnięcia {0}/{1}",
+  cq_explica: "Każdy medal daje punkty umiejętności. Dotknij, by odebrać!",
+  cq_nova: "Osiągnięcie!",
+  cq_completa: "Ukończone!",
+  cq_c_juntar: "Połącz {0} razy",
+  cq_c_encomendas: "Dostarcz {0} zamówień",
+  cq_c_roleta: "Zakręć kołem {0} razy",
+  comp_bonus: "Bonus kolekcji: +{0}% do wszystkiego",
+  tr_lenda: "Legenda",
+  tr_lenda_d: "daje 4x, klika szybciej i walczy 3x (zostaje legendą po połączeniu!)",
+  lenda_ganhou: "Robot LEGENDA poziomu {0}!"
 };

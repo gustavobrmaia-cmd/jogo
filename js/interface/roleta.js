@@ -48,8 +48,8 @@ const Roleta = (function() {
       }
       case "turbo": { const s = 45; Jogo.ligarTurbo(Jogo.turboRestante() + s); return t("rl_turbo", s); }
       case "robo": {
-        const tier = Math.max(1, save.p.maxTier - 1);
-        if (Jogo.presente(tier)) return t("rl_robo", tier);
+        const tier = Math.max(1, save.p.maxTier - 1), lenda = Math.random() < 0.35;   // v14: 35% vem LENDA
+        if (Jogo.presente(tier, lenda ? "lenda" : "")) return t(lenda ? "lenda_ganhou" : "rl_robo", tier);
         const v = renda(300, 4); save.p.moedas += v; return t("rl_cheia", fmt(v));   // grade cheia: vira moedas
       }
       case "ph": case "ph2": { const n = p.id === "ph" ? 2 : 6; save.ph += n; Fx.numero(x, y - 20, "+" + n + " PH", "#7cf0ff", 30); return t("rl_ph", n); }
@@ -175,7 +175,7 @@ const Roleta = (function() {
     area.classList.toggle("tres", n === 3);
     bts.querySelectorAll("button").forEach(function(b) { b.classList.add("sem"); });
     dados().giros++;
-    Poki.medir("event", "roleta", n === 3 ? "ad" : "free");
+    Poki.medir("event", n === 3 ? "roleta-ad" : "roleta-gratis", "interact");   // v14: o Poki só grava ações conhecidas
     girar(rodas, function() {
       rodas.forEach(function(r) {
         const b = r.cv.getBoundingClientRect(), p = ROLETA_PREMIOS[r.k];

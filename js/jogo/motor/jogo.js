@@ -15,7 +15,8 @@ const Jogo = (function() {
   function multMoedas() {
     return Math.pow(1.5, nivelUp("cofre")) * Math.pow(2, nivelUp("reator")) * Math.pow(3, nivelUp("estelar")) * Math.pow(2, nivelNo("dobro")) *
       (1 + 0.1 * nivelNo("nucleo")) * (1 + 0.5 * nivelNo("ganancia")) * (1 + 0.2 * arv("renda")) * Math.pow(BONUS_RENASCER, save.renascimentos) *
-      (1 + Math.min(2, 0.002 * nivelUp("producao") * save.p.criados));   // Produção em Massa: +0,2%/nível por robô criado
+      (1 + Math.min(2, 0.002 * nivelUp("producao") * save.p.criados)) *   // Produção em Massa: +0,2%/nível por robô criado
+      (1 + bonusColecao());   // v14: coleção do compêndio (permanente)
   }
   // turbo (robô dourado): toques e time rendem x3 por alguns segundos (fora do multMoedas: não mexe em prêmios nem offline)
   let turboAte = 0;
@@ -105,10 +106,10 @@ const Jogo = (function() {
     const p = save.p, a = p[de.lista][de.i], b = p[para.lista][para.i], ta = trDe(de.lista, de.i), tb = trDe(para.lista, para.i);
     if (!a) return;
     if (b === a && a < MAX_TIER) {
-      const novo = nivelJunta(a), clone = clonou();
+      const novo = nivelJunta(a), clone = clonou(), lenda = ta === "lenda" || tb === "lenda";
       p[para.lista][para.i] = novo; p[de.lista][de.i] = clone ? a : 0;
       if (!clone) poeTr(de.lista, de.i, "");
-      juntou(para, novo, novo > a + 1, clone);
+      juntou(para, novo, novo > a + 1, clone, lenda);
     } else { p[para.lista][para.i] = a; p[de.lista][de.i] = b; poeTr(para.lista, para.i, ta); poeTr(de.lista, de.i, tb); }
     avisar("mudou");
   }
@@ -116,9 +117,9 @@ const Jogo = (function() {
   // Clonagem (tier 6): 3%/nível de o robô de baixo não ser gasto ao juntar
   function clonou() { return Math.random() < 0.03 * nivelUp("clonagem"); }
   function nivelJunta(n) { return Math.min(MAX_TIER, n + 1 + (n + 1 < MAX_TIER && Math.random() < 0.06 * nivelUp("fusao_inst") ? 1 : 0)); }
-  function juntou(onde, tier, pulou, clone) {
+  function juntou(onde, tier, pulou, clone, lenda) {
     save.stats.juncoes++;
-    const tr = rolarTraco(); poeTr(onde.lista, onde.i, tr); if (tr) avisar("traco", { lista: onde.lista, i: onde.i, tr: tr });
+    const tr = lenda ? "lenda" : rolarTraco(); poeTr(onde.lista, onde.i, tr); if (tr) avisar("traco", { lista: onde.lista, i: onde.i, tr: tr });
     if (nivelUp("reciclagem")) save.p.moedas += custoCriar() * 0.05 * nivelUp("reciclagem");   // Reciclagem
     if (pulou) descobrir(tier - 1);
     descobrir(tier);
@@ -129,7 +130,7 @@ const Jogo = (function() {
     const p = save.p, n = p[lista][i];
     if (!n) return;
     const par = p.grade.findIndex(function(m, k) { return m === n && !(lista === "grade" && k === i); });
-    if (par >= 0 && n < MAX_TIER) { const novo = nivelJunta(n), clone = clonou(); p.grade[par] = clone ? n : 0; if (!clone) poeTr("grade", par, ""); p[lista][i] = novo; juntou({ lista: lista, i: i }, novo, novo > n + 1, clone); avisar("mudou"); return; }
+    if (par >= 0 && n < MAX_TIER) { const novo = nivelJunta(n), clone = clonou(), lenda = trDe(lista, i) === "lenda" || trDe("grade", par) === "lenda"; p.grade[par] = clone ? n : 0; if (!clone) poeTr("grade", par, ""); p[lista][i] = novo; juntou({ lista: lista, i: i }, novo, novo > n + 1, clone, lenda); avisar("mudou"); return; }
     const outra = lista === "grade" ? "time" : "grade", v = vagaLivre(outra);
     if (v >= 0) { p[outra][v] = n; p[lista][i] = 0; poeTr(outra, v, trDe(lista, i)); poeTr(lista, i, ""); avisar("mudou"); }
   }
@@ -280,6 +281,10 @@ const Jogo = (function() {
     podeRenascer: podeRenascer, renascer: renascer, novaPartida: novaPartida, comprarNo: comprarNo,
     multTurbo: multTurbo, turboRestante: turboRestante, ligarTurbo: ligarTurbo,
     get combo() { return combo; }, multSabotagem: multSabotagem, trDe: trDe, poeTr: poeTr, fatorVaga: fatorVaga, vagaLivre: vagaLivre, emFuria: emFuria, furiaRestante: function() { return Math.max(0, (furiaAte - performance.now()) / 1000); },
-    presente: function(tier) { return colocar(Math.max(1, Math.min(MAX_TIER, tier))) >= 0; }   // robô de graça na grade (robô dourado)
+    presente: function(tier, tr) {   // robô de graça na grade (robô dourado, roleta; tr = "lenda" na roleta/raid)
+      const i = colocar(Math.max(1, Math.min(MAX_TIER, tier))); if (i < 0) return false;
+      if (tr) { poeTr("grade", i, tr); avisar("traco", { lista: "grade", i: i, tr: tr }); avisar("mudou"); }
+      return true;
+    }
   };
 })();

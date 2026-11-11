@@ -405,5 +405,22 @@ TEXTOS.ja = {
   rl_moedas2: "金庫",
   rl_ph2: "SPたくさん",
   rl_jackpot: "ジャックポット！+{0}",
-  rl_cheia: "マスがいっぱい：+{0}"
+  rl_cheia: "マスがいっぱい：+{0}",
+  // v14: aviso de renascer, conquistas, coleção e robô lenda
+  rn_titulo: "転生できる！",
+  rn_d: "もっと強くなって最初から：スキルツリーにポイントを使おう。見つけたロボット、実績、パーツはそのまま。",
+  rn_ph: "使えるスキルポイント：{0}",
+  rn_ver: "ツリーを見る",
+  rn_depois: "あとで",
+  cq_titulo: "実績 {0}/{1}",
+  cq_explica: "メダルごとにスキルポイント。タップで受け取ろう！",
+  cq_nova: "実績達成！",
+  cq_completa: "コンプリート！",
+  cq_c_juntar: "{0}回合体する",
+  cq_c_encomendas: "注文を{0}回届ける",
+  cq_c_roleta: "ルーレットを{0}回まわす",
+  comp_bonus: "コレクションボーナス：すべて+{0}%",
+  tr_lenda: "レジェンド",
+  tr_lenda_d: "収入4倍、押すのが速く、戦闘3倍（合体してもレジェンドのまま！）",
+  lenda_ganhou: "レジェンドロボットLv{0}！"
 };

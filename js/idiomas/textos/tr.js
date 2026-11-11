@@ -405,5 +405,22 @@ TEXTOS.tr = {
   rl_moedas2: "Kasa",
   rl_ph2: "Bol YP",
   rl_jackpot: "JACKPOT! +{0}",
-  rl_cheia: "Izgara dolu: +{0}"
+  rl_cheia: "Izgara dolu: +{0}",
+  // v14: aviso de renascer, conquistas, coleção e robô lenda
+  rn_titulo: "YENİDEN DOĞABİLİRSİN!",
+  rn_d: "Daha güçlü baştan başla: puanlarını yetenek ağacında harca. Keşfedilen robotlar, başarılar ve parçalar sende kalır.",
+  rn_ph: "Harcayacak {0} yetenek puanın var",
+  rn_ver: "Ağacı gör",
+  rn_depois: "Şimdi değil",
+  cq_titulo: "Başarılar {0}/{1}",
+  cq_explica: "Her madalya yetenek puanı verir. Almak için dokun!",
+  cq_nova: "Başarı!",
+  cq_completa: "Tamamlandı!",
+  cq_c_juntar: "{0} kez birleştir",
+  cq_c_encomendas: "{0} sipariş teslim et",
+  cq_c_roleta: "Çarkı {0} kez çevir",
+  comp_bonus: "Koleksiyon bonusu: her şeye +%{0}",
+  tr_lenda: "Efsane",
+  tr_lenda_d: "4x kazandırır, daha hızlı basar ve 3x savaşır (birleşince efsane kalır!)",
+  lenda_ganhou: "EFSANE robot, {0}. seviye!"
 };

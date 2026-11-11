@@ -72,7 +72,7 @@ const Batalha = (function() {
   function furia() { return save.p.desafio === "furioso"; }
   function composicao(z, o) {
     // v10: as 3 primeiras hordas ficaram bem mais fáceis (no PFT a Fácil perdia 57% das vezes e desanimava)
-    const facil = z === "torre" ? (save.torre.andar <= 3 ? 0.5 : 1) : [0.3, 0.25, 0.13, 0.05, 0.03][z] || 1;   // torre: 3 primeiros andares mais leves; v13: hordas 1-4 bem mais leves (PFT v12: horda 2 perdia 48%, horda 3 82%)
+    const facil = z === "torre" ? (save.torre.andar <= 3 ? 0.5 : 1) : [0.3, 0.25, 0.09, 0.05, 0.03, 0.015][z] || 1;   // torre: 3 primeiros andares mais leves; v13/v14: hordas 1-5 bem mais leves (PFT v13: horda 2 perdia 41%, horda 5 69%); 6+ é para quem já renasceu
     const h = hordaDe(z), l = [], ultima = o === h.ondas - 1, fv = (furia() ? 2 : 1) * facil, fa = (furia() ? 1.5 : 1) * facil;
     if (z === "raid") {   // só chefões, todos de uma vez, cada um de um tipo
       for (let k = 0; k < h.n; k++) {
@@ -353,6 +353,8 @@ const Batalha = (function() {
       save.stats.raids = (save.stats.raids || 0) + 1; save.ph += 2 * h.n;
       for (let k = 0; k < h.n; k++) b.fim.pecas.push(Equip.ganhar(0.3 + 0.1 * h.n));
       b.fim.peca = b.fim.pecas[0]; b.fim.ph = 2 * h.n;
+      const tl = Math.max(1, save.p.maxTier - 2);   // v14: raid vencida dá um robô LENDA (se tiver vaga)
+      if (Jogo.presente(tl, "lenda")) b.fim.lenda = tl;
     } else if (z === "torre") {
       save.torre.andar++; save.torre.recorde = Math.max(save.torre.recorde, save.torre.andar - 1);
       // peça: garantida a cada 5 andares, senão 35% de chance; melhor quanto mais alto

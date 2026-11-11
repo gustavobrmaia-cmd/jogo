@@ -182,6 +182,21 @@ const Paineis = (function() {
       if (aba !== "oficina") el("pontoOfi").classList.add("on");
       Poki.medir("skin", k.id, "reached");
     });
+    // v14: chegou no robô que libera o renascimento -> avisa uma vez por partida (só ~2% renasciam no PFT v13)
+    if (Jogo.podeRenascer() && !save.p.avisouRenascer && !aba && !janelaAberta() && !CenaBatalha.aberta && !Curto.ativo && !Revela.aberta && !Ataque.ativo) {
+      save.p.avisouRenascer = true;
+      avisoRenascer();
+    }
+    Conquistas.checar();
+  }
+  function avisoRenascer() {
+    janela("<h2>" + esc(t("rn_titulo")) + "</h2><img class='px rnIco' src='" + Pixel.url(Pixel.icone("renascer")) + "' alt=''><p>" + esc(t("rn_d")) + "</p><p class='titulo2'>" +
+      esc(t("rn_ph", fmt(save.ph))) + "</p>", [
+      { texto: t("rn_ver"), icone: "ph", classe: "", acao: function() { fecharJanela(); ArvoreTela.abrir(false); } },
+      { texto: t("renascer"), icone: "renascer", classe: "roxo grande", acao: function() { fecharJanela(); confirmarRenascer(); } },
+      { texto: t("rn_depois"), classe: "sem", acao: fecharJanela }]);
+    Som.som("revela");
+    Poki.medir("rebirth", "aviso", "visible");
   }
   // v9: peça nova (faixa + bolinha na Oficina) e encomenda nova
   Jogo.ao("peca", function(it) {
@@ -204,12 +219,16 @@ const Paineis = (function() {
   // ---------- compêndio ----------
   function montarCompendio() {
     const ab = elem("div", "abinhas");
-    [["robos", t("comp_robos", save.robosVistos.length, MAX_TIER)], ["monstros", t("comp_monstros", save.monstrosVistos.length, N_MONSTROS)]].forEach(function(o) {
-      const b = elem("button", "btn" + (sub === o[0] ? "" : " sem"), esc(o[1]));
+    const nCq = CONQUISTAS.length * CQ_PH.length;
+    [["robos", t("comp_robos", save.robosVistos.length, MAX_TIER)], ["monstros", t("comp_monstros", save.monstrosVistos.length, N_MONSTROS)], ["conquistas", t("cq_titulo", Conquistas.total(), nCq)]].forEach(function(o) {
+      const b = elem("button", "btn" + (sub === o[0] ? "" : " sem") + (o[0] === "conquistas" && Conquistas.prontas() ? " temNovo" : ""), esc(o[1]));
       b.addEventListener("click", function() { sub = o[0]; Som.som("clique"); montar(); });
       ab.appendChild(b);
     });
     corpo.appendChild(ab);
+    if (sub === "conquistas") { Conquistas.montar(corpo); if (!Conquistas.prontas()) el("pontoComp").classList.remove("on"); return; }
+    corpo.appendChild(elem("p", "bonusColecao", "<i class='ico' data-ico='estrela'></i> " + esc(t("comp_bonus", Math.round(bonusColecao() * 100)))));
+    preencherIcones(corpo);
     corpo.appendChild(elem("p", "titulo2", esc(t("comp_explica"))));
     const gal = elem("div", "galeria");
     if (sub === "robos") for (let n = 1; n <= MAX_TIER; n++) {
@@ -321,7 +340,8 @@ const Paineis = (function() {
   function escolhendo() { return aba === "batalha" && BatalhaTela.escolhendo(); }
 
   return { abrir: abrir, fechar: fechar, atualizarUpgrades: atualizarUpgrades, pontos: pontos, janela: janela, fecharJanela: fecharJanela, aoFecharJanela: aoFecharJanela,
+    remontar: function() { if (!aba) return; const s = corpo.scrollTop; montar(); corpo.scrollTop = s; },
     janelaAberta: janelaAberta, faixa: faixa, passoFaixa: passoFaixa, mostrarOffline: mostrarOffline, preencherIcones: preencherIcones,
     icone: icone, elem: elem, esc: esc, escolhendo: escolhendo, get aba() { return aba; },
-    cardUp: function(id) { return linhasUp[id] ? linhasUp[id].card : null; } };
+    cardUp: function(id) { return linhasUp[id] ? linhasUp[id].card || linhasUp[id].btn : null; } };
 })();

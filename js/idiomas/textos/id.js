@@ -405,5 +405,22 @@ TEXTOS.id = {
   rl_moedas2: "Brankas",
   rl_ph2: "Banyak PK",
   rl_jackpot: "JACKPOT! +{0}",
-  rl_cheia: "Grid penuh: +{0}"
+  rl_cheia: "Grid penuh: +{0}",
+  // v14: aviso de renascer, conquistas, coleção e robô lenda
+  rn_titulo: "Kamu bisa TERLAHIR KEMBALI!",
+  rn_d: "Mulai lagi lebih kuat: habiskan poinmu di pohon keahlian. Robot yang ditemukan, pencapaian, dan komponen tetap milikmu.",
+  rn_ph: "Kamu punya {0} poin keahlian",
+  rn_ver: "Lihat pohon",
+  rn_depois: "Nanti saja",
+  cq_titulo: "Pencapaian {0}/{1}",
+  cq_explica: "Setiap medali memberi poin keahlian. Ketuk untuk ambil!",
+  cq_nova: "Pencapaian!",
+  cq_completa: "Selesai!",
+  cq_c_juntar: "Gabungkan {0} kali",
+  cq_c_encomendas: "Kirim {0} pesanan",
+  cq_c_roleta: "Putar roda {0} kali",
+  comp_bonus: "Bonus koleksi: +{0}% untuk semua",
+  tr_lenda: "Legenda",
+  tr_lenda_d: "hasil 4x, menekan lebih cepat dan bertarung 3x (tetap legenda saat digabung!)",
+  lenda_ganhou: "Robot LEGENDA level {0}!"
 };
