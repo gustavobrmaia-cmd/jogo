@@ -177,6 +177,9 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
   **h2 117/48 (41%)**, h3 46/14, h4 50/15, **h5 36/25**. Dourado: 576 viram, 240 pegaram. Roleta aberta por 256.
 - Poki só grava ações conhecidas: "free"/"ad" da roleta NÃO aparecem (usar "interact" e o nome no 2º campo).
 
+## WEB FIT do Robot Clicker (resultado 11/nov): média **5m12s**, a meta do gênero (idle) é **6m42s**; o resto passou.
+- Falta ~1m30 (+29%). O que importa agora é segurar depois dos 5 min (meio do jogo, renascer, metas longas).
+
 ## Economia (scratchpad/sim/eco.js e eco2.js simulam um jogador médio)
 - Robô nível n rende 2,3^(n-1) por apertada; criar custa 10·1,085^criados·0,88^linha.
 - 1ª partida: nível 6 ~40 s, 8 (libera renascer) ~5 min, 10 ~15 min, 12 ~28 min. Depois de renascer anda bem mais rápido.
