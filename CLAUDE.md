@@ -179,6 +179,8 @@ sem framework. O jogo anterior (Crazy Balls Duel, duelo) está na branch `backup
 
 ## WEB FIT do Robot Clicker (resultado 11/nov): média **5m12s**, a meta do gênero (idle) é **6m42s**; o resto passou.
 - Falta ~1m30 (+29%). O que importa agora é segurar depois dos 5 min (meio do jogo, renascer, metas longas).
+- O Web Fit rodou quase todo com a **v10** (PFT 3m03/3m04, ~23% engajados); só no último dia trocou para a v13.
+  Conversão 81,6% (mín. ~71,8%), CTR 0,77% (Crazy Balls 0,37%). Para idle, o Web Fit deu bem mais que o PFT (5:12 x ~3:04).
 
 ## v14 (meio do jogo + metas longas, depois do Web Fit 5m12s / meta 6m42s)
 - Hordas: facil [0,3; 0,25; 0,09; 0,05; 0,03; 0,015] (z0-z5; 6+ = 1, para quem já renasceu) — sim/novato4.js.
